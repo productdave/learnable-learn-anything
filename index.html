@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Product Management | Interactive Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css?v=2">
+  <link rel="stylesheet" href="styles/themes.css">
+</head>
+<body>
+  <div id="icons" style="display:none"></div>
+  <div id="app" class="app">
+    <header class="app-header">
+      <div class="header-left">
+        <button class="header-btn mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle menu">
+          <svg width="20" height="20"><use href="#icon-menu"/></svg>
+        </button>
+        <a href="#/" class="header-logo">
+          <div class="header-logo-icon">AI</div>
+          <span>AI PM Learning</span>
+        </a>
+      </div>
+      <div class="header-right">
+        <button class="header-search" id="search-trigger" aria-label="Search">
+          <svg width="16" height="16"><use href="#icon-search"/></svg>
+          <span>Search...</span>
+          <kbd>/</kbd>
+        </button>
+        <button class="header-btn" id="flashcard-trigger" aria-label="Flashcards" title="Flashcard Review">
+          <svg width="20" height="20"><use href="#icon-cards"/></svg>
+        </button>
+        <button class="header-btn" id="chat-trigger" aria-label="AI Tutor" title="AI Learning Assistant">
+          <svg width="20" height="20"><use href="#icon-sparkle"/></svg>
+        </button>
+        <button class="header-btn" id="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" class="theme-icon-light"><use href="#icon-moon"/></svg>
+          <svg width="20" height="20" class="theme-icon-dark" style="display:none"><use href="#icon-sun"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <aside class="app-sidebar" id="sidebar"></aside>
+      <main class="app-main">
+        <div class="app-main-inner" id="content"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Search overlay -->
+  <div class="search-overlay" id="search-overlay" style="display:none">
+    <div class="search-modal">
+      <div class="search-input-wrap">
+        <svg width="20" height="20"><use href="#icon-search"/></svg>
+        <input type="text" id="search-input" placeholder="Search topics, concepts, tools..." autocomplete="off">
+        <kbd>ESC</kbd>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+  </div>
+
+  <!-- Flashcard overlay -->
+  <div class="flashcard-overlay" id="flashcard-overlay" style="display:none"></div>
+
+  <!-- Selection popup -->
+  <div id="selection-popup">
+    <svg width="13" height="13"><use href="#icon-sparkle"/></svg>
+    Ask AI
+  </div>
+
+  <!-- Chat panel -->
+  <div id="chat-panel">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <svg width="16" height="16"><use href="#icon-sparkle"/></svg>
+        AI Learning Assistant
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-header-btn chat-new-btn" title="New conversation">
+          <svg width="15" height="15"><use href="#icon-rotate"/></svg>
+        </button>
+        <button class="chat-header-btn chat-settings-btn" title="Set API key">
+          <svg width="15" height="15"><use href="#icon-save"/></svg>
+        </button>
+        <button class="chat-header-btn chat-close-btn" title="Close">
+          <svg width="15" height="15"><use href="#icon-x"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-footer">
+      <div class="chat-input-row">
+        <textarea class="chat-input" placeholder="Ask a follow-up question… (Enter to send)" rows="2"></textarea>
+        <button class="chat-send-btn" title="Send">
+          <svg width="15" height="15"><use href="#icon-send"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js?v=2"></script>
+</body>
+</html>
