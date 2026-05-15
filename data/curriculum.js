@@ -1,5 +1,5 @@
 export const curriculum = {
-  title: "AI Product Management",
+  title: "AI Foundations for PM",
   subtitle: "From ML foundations to shipping agentic AI products",
   lastUpdated: "2026-05-11",
   modules: [
