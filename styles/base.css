@@ -116,6 +116,8 @@ img {
   padding: var(--space-10) var(--space-8);
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 .app-main-inner {

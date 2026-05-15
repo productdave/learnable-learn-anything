@@ -1934,6 +1934,228 @@
   background: var(--teal);
 }
 
+/* ============================================
+   MOBILE OPTIMISATION (max-width: 768px)
+   ============================================ */
+@media (max-width: 768px) {
+
+  /* --- Dashboard --- */
+  .dashboard {
+    padding: var(--space-6) 0 var(--space-8);
+    text-align: center;
+  }
+
+  .dashboard-hero {
+    padding: var(--space-6) 0 var(--space-6);
+  }
+
+  .dashboard-title {
+    font-size: var(--text-3xl);
+  }
+
+  .dashboard-subtitle {
+    font-size: var(--text-base);
+    margin-bottom: var(--space-6);
+  }
+
+  .dashboard-stats {
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dashboard-stat-value {
+    font-size: var(--text-2xl);
+  }
+
+  .module-cards {
+    gap: var(--space-3);
+  }
+
+  .module-card {
+    padding: var(--space-5);
+    border-radius: var(--r-lg);
+  }
+
+  /* --- Topic view --- */
+  .topic-title {
+    font-size: var(--text-2xl);
+  }
+
+  .topic-breadcrumb {
+    overflow: hidden;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .topic-breadcrumb > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .concept-section.expandable .concept-header {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .concept-section:not(.expandable) {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .concept-body {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .concept-content ul,
+  .concept-content ol {
+    padding-left: var(--space-4);
+  }
+
+  /* --- Callouts --- */
+  .callout {
+    padding: var(--space-3) var(--space-4);
+    flex-direction: row;
+  }
+
+  /* --- Key takeaways --- */
+  .takeaway-section {
+    padding: var(--space-4);
+  }
+
+  /* --- Diagrams: wrap in horizontal scroll --- */
+  .diagram-flow,
+  .diagram-stack,
+  .diagram-comparison,
+  .diagram-timeline {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .flow-nodes {
+    min-width: max-content;
+  }
+
+  /* --- Quiz --- */
+  .quiz-block {
+    padding: var(--space-4);
+  }
+
+  .quiz-options {
+    gap: var(--space-2);
+  }
+
+  .quiz-option {
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .quiz-actions {
+    flex-direction: column;
+  }
+
+  .quiz-check-btn,
+  .quiz-retry-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .drag-match-container {
+    grid-template-columns: 1fr;
+  }
+
+  /* --- Exercise --- */
+  .exercise-block {
+    padding: var(--space-4);
+  }
+
+  .exercise-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .exercise-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .exercise-textarea {
+    min-height: 140px;
+    font-size: var(--text-sm);
+  }
+
+  /* --- Topic nav buttons --- */
+  .topic-nav {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .topic-nav-btn {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* --- Complete button --- */
+  .topic-complete-wrap {
+    padding: var(--space-6) 0;
+  }
+
+  .topic-complete-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* --- Flashcard overlay --- */
+  .flashcard-overlay {
+    padding: var(--space-4);
+  }
+
+  .flashcard-modal {
+    max-width: 100%;
+    width: 100%;
+    border-radius: var(--r-lg);
+  }
+
+  .flashcard-card {
+    height: 220px;
+  }
+
+  .flashcard-actions {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .flashcard-rate-btn {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  /* --- Search modal --- */
+  .search-modal {
+    max-width: calc(100vw - var(--space-8));
+    border-radius: var(--r-lg);
+  }
+
+  /* --- Header search: already hidden via base.css --- */
+
+  /* --- Sidebar overlay backdrop on mobile --- */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 49;
+  }
+
+  .sidebar-overlay.visible {
+    display: block;
+  }
+}
+
 [data-theme="dark"] .chat-msg--user {
   background: #1a3080;
 }

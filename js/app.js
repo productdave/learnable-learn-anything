@@ -176,22 +176,30 @@ function updateThemeIcons(theme) {
 function initMobileMenu() {
   const toggle = document.getElementById('mobile-menu-toggle');
   const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.querySelector('use').setAttribute('href', '#icon-x');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.querySelector('use').setAttribute('href', '#icon-menu');
+    document.body.style.overflow = '';
+  }
 
   toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    const icon = toggle.querySelector('use');
-    if (sidebar.classList.contains('open')) {
-      icon.setAttribute('href', '#icon-x');
-    } else {
-      icon.setAttribute('href', '#icon-menu');
-    }
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
   });
 
+  overlay.addEventListener('click', closeSidebar);
+
   sidebar.addEventListener('click', (e) => {
-    if (e.target.closest('.sidebar-topic')) {
-      sidebar.classList.remove('open');
-      toggle.querySelector('use').setAttribute('href', '#icon-menu');
-    }
+    if (e.target.closest('.sidebar-topic')) closeSidebar();
   });
 }
 
