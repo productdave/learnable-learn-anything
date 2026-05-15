@@ -212,6 +212,50 @@ ___`,
       },
       {
         type: "concept",
+        title: "The Input-Output Loop",
+        content: `<p>A transformer doesn't "read" your prompt the way a human does. It converts text into <strong>tokens</strong> (roughly 1 token ≈ ¾ of a word) and predicts the most probable next token given all previous context. Repeat that one token at a time and you get a complete response.</p>
+<p>This is why prompt wording matters more than most PMs expect. "List the risks" and "What could go wrong?" activate different probability distributions and produce different outputs — even though they're semantically identical to a human. The model follows statistical patterns from training data, not semantic reasoning.</p>
+<p><strong>PM mental model:</strong> every prompt is a query against a probability map. Clear, specific instructions constrain the output space toward what you want. Vague prompts give the model too much latitude — inconsistent outputs create support tickets, not value.</p>`,
+        expandable: true,
+        diagram: null
+      },
+      {
+        type: "concept",
+        title: "Deterministic vs Probabilistic Logic",
+        content: `<p>Traditional software is <strong>deterministic</strong>: the same input always produces the same output. That predictability is what makes software testable — if checkout breaks, it breaks consistently and you can reproduce it.</p>
+<p>LLMs are <strong>probabilistic</strong>. The same prompt can produce different outputs on every call. This is controlled by <strong>temperature</strong>. Temperature 0 always picks the highest-probability next token — focused and consistent. Higher values introduce sampling randomness — more creative, more varied, occasionally surprising.</p>
+<p>The PM implication is significant: you can't test AI features like traditional software. A single test run tells you almost nothing. You need statistical evaluations — run the same prompt 50+ times, measure pass rates, and define acceptable variance thresholds. Your QA process needs to change, not just your code.</p>`,
+        expandable: true,
+        diagram: null
+      },
+      {
+        type: "concept",
+        title: "Operationalizing Model Behavior",
+        content: `<p>These are the controls PMs and engineers use to shape model behavior — no model retraining required.</p>
+<p><strong>System prompt:</strong> Instructions sent before every user message. Sets the model's persona, rules, and context. This is your most powerful lever. "Never invent data you haven't been given" is a guardrail baked into the system prompt — not hardcoded logic.</p>
+<p><strong>Temperature:</strong> 0 = focused and consistent. 0.7 = balanced. 1.0+ = creative and unpredictable. Use low temperature for classification and structured extraction; higher for brainstorming.</p>
+<p><strong>Top-p</strong> (nucleus sampling): Controls vocabulary diversity. Usually leave at default unless outputs feel too repetitive or too random.</p>
+<p><strong>Stop sequences:</strong> Tell the model when to stop generating — useful for structured outputs like JSON.</p>
+<p><strong>Max tokens:</strong> Hard output length cap. Every token costs money — set a reasonable ceiling.</p>`,
+        expandable: true,
+        diagram: null
+      },
+      {
+        type: "quiz",
+        id: "ml-concepts-quiz-2",
+        variant: "multiple-choice",
+        question: "Your team runs an automated test suite for an LLM classification feature. The same test inputs fail about 20% of the time — but not consistently. What's the most likely explanation?",
+        options: [
+          { id: "a", text: "There's a bug in the test runner causing flaky failures" },
+          { id: "b", text: "Temperature > 0 means outputs are probabilistic — identical inputs can produce different classifications across runs" },
+          { id: "c", text: "The model needs to be retrained with more examples" },
+          { id: "d", text: "The system prompt is too long and the model ignores parts of it" }
+        ],
+        correct: "b",
+        explanation: "LLMs with temperature > 0 are non-deterministic by design — the same input can produce different outputs across runs. This breaks traditional binary pass/fail test suites. The fix: either set temperature=0 for tests needing consistency, or switch to statistical evaluations (run each test case 50+ times and measure pass rate, not binary pass/fail). This is one of the most common surprises teams hit when shipping their first LLM feature."
+      },
+      {
+        type: "concept",
         title: "Where Agents Fit: Goal-Directed Behavior",
         content: `<p>Agentic AI draws on RL concepts even when the underlying model is a supervised-learning LLM. The connection is the <strong>agent loop</strong>: perceive the environment, decide on an action, execute, observe the result, repeat. This is fundamentally the same structure as an RL agent, just with a language model as the "brain" instead of a trained policy network.</p>
 <p>In practice, modern AI agents use LLMs for reasoning and planning, but the execution pattern is RL-inspired. The agent has a <strong>goal</strong> (resolve this customer ticket, write this report, deploy this code change). It <strong>observes</strong> its environment (reads documents, checks APIs, looks at tool outputs). It <strong>plans</strong> a sequence of actions. It <strong>acts</strong> (calls tools, writes text, makes API requests). It <strong>evaluates</strong> the result and adjusts. This loop continues until the goal is met or the agent decides to escalate.</p>
@@ -329,6 +373,18 @@ ___`,
       {
         front: "How does agentic AI relate to reinforcement learning?",
         back: "Agentic AI uses an RL-inspired loop: perceive environment, plan actions, execute, observe results, repeat. Even though the core model (an LLM) was trained with supervised learning, the agent's runtime behavior follows the RL pattern of goal-directed interaction with an environment."
+      },
+      {
+        front: "What is the input-output loop in a language model?",
+        back: "A transformer converts text to tokens and predicts the most probable next token given all previous context — one token at a time. It doesn't reason semantically; it follows statistical patterns from training. Prompt wording directly shapes which probability distributions are activated, which is why precise prompts produce more consistent outputs."
+      },
+      {
+        front: "What is temperature in an LLM and what's the PM implication?",
+        back: "Temperature controls output randomness. 0 = always picks the highest-probability token (deterministic, consistent). Higher values introduce sampling randomness (creative, varied, unpredictable). PM implication: AI features can't be tested with traditional binary pass/fail logic — you need statistical evaluations across many runs because the same input may produce different outputs."
+      },
+      {
+        front: "What are the five model behavior levers PMs control?",
+        back: "1) System prompt — sets persona, rules, context; your most powerful lever. 2) Temperature — controls output randomness (0=consistent, 1+=creative). 3) Top-p — controls vocabulary diversity. 4) Stop sequences — tell the model when to stop. 5) Max tokens — hard output length cap that controls cost. All configured without retraining the model."
       }
     ]
   },

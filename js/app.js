@@ -20,7 +20,8 @@ function getModuleData(moduleId) {
     'business-translation': () => import('../data/modules/module-2.js'),
     'evaluation-deployment': () => import('../data/modules/module-3.js'),
     'portfolio-building': () => import('../data/modules/module-4.js'),
-    'pitch-preparation': () => import('../data/modules/module-5.js')
+    'pitch-preparation': () => import('../data/modules/module-5.js'),
+    'hands-on-labs': () => import('../data/modules/module-6.js')
   };
   return map[moduleId]?.();
 }

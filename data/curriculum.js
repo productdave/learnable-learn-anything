@@ -72,6 +72,20 @@ export const curriculum = {
         { id: "rehearsal-dashboards", title: "Rehearsal & Dashboards" },
         { id: "presenting-feedback", title: "Presenting & Customer Feedback" }
       ]
+    },
+    {
+      id: "hands-on-labs",
+      number: 6,
+      title: "Hands-On Labs",
+      description: "Build real AI workflows with n8n, v0.dev, Claude Code, and more.",
+      icon: "code",
+      color: "#F97316",
+      topics: [
+        { id: "first-agent-n8n", title: "Build Your First Agent in n8n" },
+        { id: "prototype-v0-claude", title: "Prototype with v0.dev + Claude Code" },
+        { id: "connect-your-stack", title: "Connect Your Agent to Your Prototype" },
+        { id: "inference-data-strategy", title: "Inference Economics & Data Strategy" }
+      ]
     }
   ]
 };
