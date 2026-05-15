@@ -22,13 +22,13 @@ body {
 }
 
 a {
-  color: var(--color-navy);
+  color: var(--body);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-navy-light);
+  color: var(--ink);
 }
 
 [data-theme="dark"] a {
@@ -80,7 +80,7 @@ img {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: var(--bg-elevated);
+  background: rgba(255,255,255,0.95);
   border-bottom: 1px solid var(--border-primary);
   display: flex;
   align-items: center;
@@ -131,25 +131,40 @@ img {
 }
 
 .header-logo {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
   color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  text-decoration: none;
 }
 
-.header-logo-icon {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, var(--color-navy), var(--color-teal));
-  border-radius: var(--radius-md);
+.header-logo:hover {
+  color: var(--text-primary);
+}
+
+.header-pa-mark {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
+}
+
+.header-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.header-logo-brand {
   font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-extrabold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.header-logo-sub {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--weight-medium);
 }
 
 .header-right {

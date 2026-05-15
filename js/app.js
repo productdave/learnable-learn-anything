@@ -37,6 +37,7 @@ function renderDashboard(container) {
   let html = `
     <div class="dashboard">
       <div class="dashboard-hero">
+        <div class="dashboard-eyebrow">Free Course · Product Academy</div>
         <h1 class="dashboard-title">${curriculum.title}</h1>
         <p class="dashboard-subtitle">${curriculum.subtitle}</p>
         <div class="dashboard-stats">
