@@ -161,12 +161,22 @@ img {
   font-weight: var(--weight-extrabold);
   color: var(--text-primary);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .header-logo-sub {
   font-size: var(--text-xs);
   color: var(--text-tertiary);
   font-weight: var(--weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 480px) {
+  .header-logo-sub {
+    display: none;
+  }
 }
 
 .header-right {
