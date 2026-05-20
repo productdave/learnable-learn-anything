@@ -1,0 +1,17 @@
+{
+  "name": "learnable",
+  "version": "0.1.0",
+  "description": "Generate interactive learning courses from a topic.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "generate": "node generator/index.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
