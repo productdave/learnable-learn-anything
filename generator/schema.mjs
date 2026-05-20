@@ -56,7 +56,10 @@ const CalloutSectionSchema = z.object({
   content: z.string().min(20)
 });
 
-const QuizSectionSchema = z.object({
+// --- Quiz variants ---
+// The renderer dispatches on `variant`. Each variant has its own required fields.
+
+const QuizMultipleChoiceSchema = z.object({
   type: z.literal('quiz'),
   variant: z.literal('multiple-choice'),
   id: z.string().min(3),
@@ -65,6 +68,54 @@ const QuizSectionSchema = z.object({
   correct: z.string().min(1),
   explanation: z.string().min(20)
 });
+
+const QuizTrueFalseSchema = z.object({
+  type: z.literal('quiz'),
+  variant: z.literal('true-false'),
+  id: z.string().min(3),
+  statement: z.string().min(10),
+  correct: z.boolean(),
+  explanation: z.string().min(20)
+});
+
+const QuizDragMatchSchema = z.object({
+  type: z.literal('quiz'),
+  variant: z.literal('drag-match'),
+  id: z.string().min(3),
+  question: z.string().min(10),
+  pairs: z.array(z.object({
+    left: z.string().min(1),
+    right: z.string().min(1)
+  })).min(3).max(6),
+  explanation: z.string().min(20)
+});
+
+const QuizFillInBlankSchema = z.object({
+  type: z.literal('quiz'),
+  variant: z.literal('fill-in-blank'),
+  id: z.string().min(3),
+  sentence: z.string().min(10).refine(s => s.includes('___'), 'sentence must contain ___ as the blank marker'),
+  acceptable_answers: z.array(z.string().min(1)).min(1).max(6),
+  explanation: z.string().min(20)
+});
+
+const QuizShortAnswerSchema = z.object({
+  type: z.literal('quiz'),
+  variant: z.literal('short-answer'),
+  id: z.string().min(3),
+  question: z.string().min(10),
+  sample_answer: z.string().min(40),
+  key_points: z.array(z.string()).min(2).max(5),
+  explanation: z.string().min(20)
+});
+
+const QuizSectionSchema = z.discriminatedUnion('variant', [
+  QuizMultipleChoiceSchema,
+  QuizTrueFalseSchema,
+  QuizDragMatchSchema,
+  QuizFillInBlankSchema,
+  QuizShortAnswerSchema
+]);
 
 const ExerciseSectionSchema = z.object({
   type: z.literal('exercise'),
@@ -79,7 +130,9 @@ const TakeawaySectionSchema = z.object({
   points: z.array(z.string()).min(3).max(6)
 });
 
-export const SectionSchema = z.discriminatedUnion('type', [
+// Outer schema must be z.union (not discriminatedUnion) because QuizSectionSchema
+// is itself a discriminated union on `variant` — Zod can't nest those.
+export const SectionSchema = z.union([
   ConceptSectionSchema,
   CalloutSectionSchema,
   QuizSectionSchema,
