@@ -1,0 +1,533 @@
+{
+  "negotiation-strategy": {
+    "id": "negotiation-strategy",
+    "moduleId": "workplace-playbook",
+    "title": "Negotiation as Strategy",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Two Ways to Negotiate: Dividing vs. Expanding the Pie",
+        "content": "\n          <p>Here's the thing — most people walk into a negotiation thinking it's a tug-of-war. One side wins more, the other gets less. That mental model is called <strong>distributive bargaining</strong>, and it treats every negotiation like a <strong>fixed pie</strong>. Salary talks where every extra dollar you earn is a dollar the company doesn't keep? That's textbook distributive. The playbook here is aggressive: <strong>anchor high</strong>, <strong>concede slowly</strong>, and reveal as little as possible.</p>\n          <p>But here's where it gets interesting. The most skilled negotiators I've observed know that many deals <em>aren't</em> fixed pies at all. <strong>Integrative bargaining</strong> is the art of <strong>expanding the pie before you divide it</strong>. Instead of fighting over one dimension (price), you bring in other dimensions — timeline, scope, perks, flexibility — and trade across them. Maybe you care about <strong>remote work days</strong> more than salary, and your employer values <strong>retention</strong> more than saving a few thousand dollars. Now you've got room to create value for both sides.</p>\n          <p>From my perspective, this is the single most important strategic question to ask yourself before any negotiation: <strong>am I in a fixed-pie or an expandable-pie situation?</strong> If it's expandable, the biggest mistake is fighting like it's fixed. You'll leave value on the table that <strong>both sides</strong> could have captured. Don't be the person who turns a collaborative opportunity into a zero-sum fight.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "BATNA: Your Secret Weapon",
+        "content": "\n          <p>Let's get real — your <strong>BATNA</strong> (Best Alternative To a Negotiated Agreement) is the single most important concept in negotiation. It's what you'll do if this deal falls through. Have a strong job offer in hand while negotiating salary? Your BATNA is excellent. Desperately need this one deal to close? Your BATNA is weak — and any experienced counterpart will <strong>sense it</strong>.</p>\n          <p>Here's the game-theoretic insight: your BATNA determines your <strong>reservation price</strong> — the worst deal you'd still accept. If your alternative job pays $90K, you shouldn't accept less than $90K from anyone else (all else being equal). That's your floor. That's the number where you can walk away with a straight face.</p>\n          <p>But here's the truth most people miss — the strategic move isn't just <em>knowing</em> your BATNA. It's <strong>improving it before you sit down</strong>. Apply to more jobs before your review. Get competing bids before accepting a contractor's quote. The negotiation is often won or lost <strong>before it begins</strong>, based on the alternatives you've built. (Think of it like poker — you want to stack your hand before the cards are dealt.)</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "ZOPA and Anchoring: Framing the Deal",
+        "content": "\n          <p>The <strong>ZOPA</strong> — Zone of Possible Agreement — is the overlap between what you'll accept and what they'll accept. If your reservation price is $85K and the employer's max budget is $110K, the ZOPA is <strong>$85K–$110K</strong>. Any deal in that range makes both sides better off than walking away. No overlap? <strong>No ZOPA. No deal is possible.</strong> Simple as that.</p>\n          <p>But where you land <em>inside</em> the ZOPA depends heavily on something called the <strong>anchoring effect</strong>. The first number thrown on the table <strong>disproportionately influences</strong> the final outcome. Behavioural research shows that even arbitrary anchors pull people's estimates toward them. This is why experienced negotiators often prefer to <strong>make the first offer</strong> — a well-researched, aggressive-but-defensible anchor can drag the entire negotiation toward their preferred end of the ZOPA.</p>\n          <p>The counter-strategy? <strong>Know the market range cold.</strong> If someone anchors at $70K for a role that typically pays $90–$110K, you can name the anchor for what it is and <strong>re-anchor with data</strong>. Don't worry — anchoring only works on the unprepared. And now you're prepared.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Scenario: The Salary Negotiation",
+        "content": "You've been offered $95K. Your BATNA is a competing offer at $92K, so your reservation price is roughly $92K. You've researched the market: comparable roles pay $95–$115K. The ZOPA likely runs from your $92K to whatever the employer's ceiling is (maybe $112K). <strong>Your move:</strong> anchor at $115K with data, signal flexibility on start date or title, and watch how integrative you can make this \"fixed pie\" feel."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "negotiation-hard-soft",
+        "title": "Hard vs. Soft Bargaining",
+        "description": "Two negotiators each choose a Hard or Soft approach. Hard bargaining captures more from a soft opponent but risks deadlock when both go hard. Mutual soft bargaining produces a fair, durable deal.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "You",
+          "colPlayer": "Counterpart",
+          "rowStrategies": [
+            "Hard",
+            "Soft"
+          ],
+          "colStrategies": [
+            "Hard",
+            "Soft"
+          ],
+          "payoffs": [
+            [
+              [
+                2,
+                2
+              ],
+              [
+                8,
+                3
+              ]
+            ],
+            [
+              [
+                3,
+                8
+              ],
+              [
+                6,
+                6
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-batna",
+        "question": "You're negotiating a freelance contract. You have one other client who would pay $5,000 for similar work. What is your BATNA?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The $5,000 alternative contract"
+          },
+          {
+            "id": "b",
+            "text": "The amount you want from this negotiation"
+          },
+          {
+            "id": "c",
+            "text": "The midpoint between both parties' positions"
+          },
+          {
+            "id": "d",
+            "text": "The lowest amount you'd accept from any client"
+          }
+        ],
+        "correct": "a",
+        "explanation": "Your BATNA is your best alternative if this negotiation fails — the $5,000 contract with the other client. It's not what you want or what you'd settle for; it's the concrete option you'd fall back on. Your reservation price (the minimum you'd accept) is derived from your BATNA, but it isn't the BATNA itself."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-negotiation-prep",
+        "title": "Negotiation Prep Sheet",
+        "prompt": "Think of an upcoming negotiation — a salary review, a contract, a vendor deal, or even a household decision. Map it out strategically: What is your BATNA? What is your reservation price? Where do you estimate the ZOPA lies? What anchor will you set, and what data supports it? Are there integrative dimensions you can introduce?",
+        "hints": [
+          "Start by identifying your walkaway alternative — what specifically will you do if no deal is reached?",
+          "Research comparable deals or market rates to estimate their reservation price and the ZOPA.",
+          "Think about what the other side values that costs you relatively little to give.",
+          "Consider whether anchoring first or letting them anchor first serves you better in this specific case."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Distributive bargaining divides a fixed pie; integrative bargaining expands it by trading across dimensions.",
+          "Your BATNA (best alternative) determines your true power — improve it before you negotiate.",
+          "The ZOPA only exists when reservation prices overlap; no overlap means no deal is possible.",
+          "Anchoring works because the first number on the table pulls final outcomes toward it — come prepared with data.",
+          "The best negotiators diagnose the game first: is this really fixed-pie, or can we create value together?"
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is BATNA and why does it matter?",
+        "back": "Best Alternative To a Negotiated Agreement — it's your walkaway option if the deal fails. A strong BATNA gives you leverage because you can credibly walk away."
+      },
+      {
+        "front": "What is the ZOPA?",
+        "back": "Zone of Possible Agreement — the range between each party's reservation price where a deal makes both sides better off than their alternatives."
+      },
+      {
+        "front": "Distributive vs. integrative bargaining?",
+        "back": "Distributive treats the negotiation as a fixed pie (win-lose). Integrative expands the pie by trading across multiple dimensions (win-win potential)."
+      },
+      {
+        "front": "How does anchoring work in negotiation?",
+        "back": "The first number proposed disproportionately influences the final outcome. An aggressive but defensible anchor pulls the deal toward your preferred end of the ZOPA."
+      },
+      {
+        "front": "What is a reservation price?",
+        "back": "The worst deal you'd still accept — your walkaway threshold. It's derived from your BATNA: you shouldn't accept less than what your best alternative would give you."
+      }
+    ]
+  },
+  "team-dynamics": {
+    "id": "team-dynamics",
+    "moduleId": "workplace-playbook",
+    "title": "Team Dynamics and Free Riders",
+    "estimatedMinutes": 16,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The Public Goods Problem in Teams",
+        "content": "\n          <p>Let's get real about something uncomfortable. A team project is a <strong>public good</strong> — everyone benefits from the output whether or not they actually contributed. When the product ships, every team member's name is on it. When the quarterly numbers look great, the whole department gets credit. This creates a <strong>fundamental tension</strong> at the heart of teamwork: <em>individually rational behaviour can be collectively destructive.</em></p>\n          <p>Think about it. If your effort is costly (time, energy, stress) and the reward is <strong>shared equally</strong>, the \"rational\" move is to contribute less and let others carry the load. Of course, if <em>everyone</em> thinks this way, the project falls apart. This is the <strong>free rider problem</strong> — and it's the same logic that plagues public broadcasting, open-source software, and neighbourhood clean-ups. It also infects <strong>every workplace team</strong> you've ever been on.</p>\n          <p>Here's the truth that makes this tricky — free riding isn't always malicious. Sometimes it's a <strong>rational response to poorly designed incentives</strong>. If your individual contribution isn't visible, isn't measured, and isn't rewarded differently from anyone else's, the system is practically <strong>inviting people to coast</strong>. (I've seen this pattern over and over — the problem usually isn't the people, it's the structure.)</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "The Volunteer's Dilemma",
+        "content": "\n          <p>Here's a related puzzle you've definitely experienced. Your team is in a meeting, and a <strong>difficult, thankless task</strong> needs doing — writing the post-mortem, organizing the offsite, cleaning up the legacy codebase. Everyone would benefit if <em>someone</em> volunteered, but nobody wants to be that someone. This is the <strong>Volunteer's Dilemma</strong>.</p>\n          <p>The game works like this: if at least one person steps up, <strong>everyone benefits</strong>. But the volunteer bears a personal cost — their time, their weekend, their political capital. If nobody volunteers, <strong>everyone suffers</strong> from the undone task. The Nash equilibrium here is messy — in theory, each player \"should\" volunteer with some probability, creating a very real risk that <strong>nobody does</strong>.</p>\n          <p>You've probably watched this play out in real time. That <strong>awkward silence</strong> after \"Who wants to take this on?\" — that's the Volunteer's Dilemma in its purest form. The longer the silence, the higher the collective cost. And paradoxically, the <strong>more people</strong> in the room, the <em>less</em> likely anyone steps up. (It's called <strong>diffusion of responsibility</strong>, and it's painfully real.)</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "How Free Riding Erodes Trust",
+        "content": "Free riding doesn't just reduce output — it <strong>poisons team culture</strong>. When high performers notice that slackers receive the same rewards, they either reduce their own effort (a race to the bottom) or leave the team entirely. Research shows that perceived unfairness in contribution is one of the top predictors of team conflict and turnover. The damage compounds over time: once a team develops a \"why bother?\" culture, reversing it is extremely hard."
+      },
+      {
+        "type": "concept",
+        "title": "Designing Solutions: Monitoring, Incentives, and Contracts",
+        "content": "\n          <p>Don't worry — game theory doesn't just diagnose the problem. It prescribes solutions. The key is to <strong>change the payoff structure</strong> so that contributing becomes the individually rational choice. Here are the primary mechanisms:</p>\n          <p><strong>Monitoring and visibility:</strong> Make individual contributions <strong>observable</strong>. Stand-ups, peer reviews, shared dashboards, and pull request logs all serve this purpose. When people know their effort (or lack thereof) is visible, the incentive to free ride <strong>drops dramatically</strong>. Transparency is your best friend here.</p>\n          <p><strong>Incentive alignment:</strong> Tie individual rewards to <strong>individual contributions</strong>, not just team outcomes. This doesn't have to mean cutthroat competition — even informal recognition (\"Alex really drove the analytics on this\") shifts the payoff structure. Bonus structures, promotion criteria, and performance reviews that account for <strong>specific contributions</strong> all help.</p>\n          <p><strong>Team contracts:</strong> Explicit agreements about <strong>who does what, by when, with what quality</strong>. This sounds formal, but even a lightweight \"working agreement\" — documented in a shared doc — creates accountability. It transforms a vague expectation into a <strong>concrete commitment</strong>, which is much harder to free ride on. (From what I've observed, teams that skip this step almost always regret it later.)</p>\n        "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "team-contribute-slack",
+        "title": "Team Contribution Game",
+        "description": "Two team members each decide whether to Contribute fully or Slack off. The project succeeds best when both contribute, but slacking while the other works hard gives a free rider the best individual outcome.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Team Member A",
+          "colPlayer": "Team Member B",
+          "rowStrategies": [
+            "Contribute",
+            "Slack"
+          ],
+          "colStrategies": [
+            "Contribute",
+            "Slack"
+          ],
+          "payoffs": [
+            [
+              [
+                7,
+                7
+              ],
+              [
+                3,
+                8
+              ]
+            ],
+            [
+              [
+                8,
+                3
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-volunteers-dilemma",
+        "question": "In the Volunteer's Dilemma, what happens at the Nash equilibrium when there are many potential volunteers?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Everyone volunteers because the task is important"
+          },
+          {
+            "id": "b",
+            "text": "Exactly one person always volunteers"
+          },
+          {
+            "id": "c",
+            "text": "Each person volunteers with some probability, creating a real risk nobody does"
+          },
+          {
+            "id": "d",
+            "text": "The group always splits the task evenly"
+          }
+        ],
+        "correct": "c",
+        "explanation": "In the mixed-strategy Nash equilibrium of the Volunteer's Dilemma, each player volunteers with some probability less than 100%. Paradoxically, adding more people can make it <em>less</em> likely that anyone volunteers (diffusion of responsibility). This is why the awkward silence grows longer in bigger groups."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-team-free-riding",
+        "title": "Diagnosing Your Team",
+        "prompt": "Think of a team you've been part of — at work, school, or in a community group. Did free riding occur? How visible were individual contributions? What mechanisms (if any) were in place to encourage contribution? If you could redesign the team's incentive structure, what would you change?",
+        "hints": [
+          "Consider how work was assigned — was it specific to individuals or vaguely shared?",
+          "Think about what happened to people who contributed more (or less) than average. Were there consequences?",
+          "Look at whether the team had any explicit agreements, or if everything was informal and assumed.",
+          "Consider whether the issue was truly free riding or a coordination problem (people willing but unsure what to do)."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Team output is a public good — everyone benefits whether they contributed or not, creating free rider incentives.",
+          "The Volunteer's Dilemma explains why thankless tasks go undone: everyone waits for someone else to step up.",
+          "Free riding isn't always malicious — it's often a rational response to invisible effort and shared rewards.",
+          "Solutions focus on changing the game: make contributions visible, align incentives to individual effort, and use explicit team agreements.",
+          "Unaddressed free riding erodes trust, drives away top performers, and creates a race-to-the-bottom culture."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "Why is a team project a \"public good\" problem?",
+        "back": "Everyone benefits from the team's output regardless of individual contribution, creating an incentive to free ride while others do the work."
+      },
+      {
+        "front": "What is the Volunteer's Dilemma?",
+        "back": "A situation where everyone benefits if someone steps up for a costly task, but each individual prefers someone else to do it. The risk is that nobody volunteers."
+      },
+      {
+        "front": "How does adding more people affect the Volunteer's Dilemma?",
+        "back": "Paradoxically, more potential volunteers can mean less likelihood of anyone volunteering — each person assumes someone else will do it (diffusion of responsibility)."
+      },
+      {
+        "front": "Name three mechanisms to reduce free riding in teams.",
+        "back": "1) Monitoring/visibility — make individual effort observable. 2) Incentive alignment — reward individual contributions. 3) Team contracts — explicit agreements on responsibilities."
+      },
+      {
+        "front": "Why does free riding erode trust over time?",
+        "back": "High performers see slackers getting equal rewards, so they either reduce their own effort (race to the bottom) or leave the team. Perceived unfairness is a top predictor of team conflict."
+      }
+    ]
+  },
+  "office-politics": {
+    "id": "office-politics",
+    "moduleId": "workplace-playbook",
+    "title": "Office Politics and Signaling",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Signaling Theory: Why Actions Speak Louder Than Words",
+        "content": "\n          <p>Here's something that took me a while to fully appreciate. In most workplaces, the people who decide your fate — managers, executives, promotion committees — <strong>don't see the full picture</strong> of what you do every day. They observe <strong>signals</strong>: visible behaviours, outputs, and cues from which they <em>infer</em> your ability, commitment, and value. <strong>Signaling theory</strong>, originally developed by economist <strong>Michael Spence</strong>, explains how people communicate their hidden qualities through observable actions.</p>\n          <p>Here's an example. A university degree doesn't just teach you skills — it <strong>signals</strong> to employers that you're capable, persistent, and willing to invest in yourself. The signal works precisely <em>because</em> it's hard to fake. Someone who can't handle rigorous coursework won't get the degree, so the degree <strong>separates high-ability candidates from low-ability ones</strong>.</p>\n          <p>In the office, signals are <strong>everywhere</strong>. The projects you take on, the emails you send, the meetings you attend, the hours you're seen working — all of these are interpreted (rightly or wrongly) as signals of your <strong>competence and dedication</strong>. And whether you're sending them intentionally or not, people are reading them.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Costly Signals vs. Cheap Talk",
+        "content": "\n          <p>Not all signals are created equal — and this is where it gets really interesting. Game theory draws a sharp line between <strong>costly signals</strong> and <strong>cheap talk</strong>. A costly signal requires <strong>real sacrifice</strong> — time, money, effort, risk — that makes it difficult to fake. A cheap signal costs nothing, which means <strong>anyone can send it</strong> regardless of whether the underlying quality is real.</p>\n          <p>Let me give you a concrete example. Saying \"I'm a team player\" in an interview is <strong>cheap talk</strong> — it costs nothing and every candidate says it. Volunteering to lead a <strong>cross-functional project with a tight deadline</strong>? That's a costly signal. It requires real effort, carries real risk if it fails, and demonstrates the teamwork you claim to have.</p>\n          <p>Here's the strategic lesson: <strong>decision-makers who are paying attention discount cheap talk and weight costly signals.</strong> If you want to communicate something about yourself — competence, loyalty, leadership potential — find the <strong>costly signal that proves it</strong>. The cost is the point. It's what makes the signal credible. (Think of it like this — if everyone can say it, it doesn't mean anything. If only you can <em>do</em> it, now you've got their attention.)</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Working Late: Signal or Substance?",
+        "content": "Consider two employees. One stays late every night, visible at their desk when the boss walks by — but spends half that time on social media. The other leaves at 5pm sharp but consistently delivers high-impact work. The late-stayer is sending a costly signal (sacrificing personal time) but the signal is partially decoupled from the actual quality it's supposed to represent. In workplaces that mistake presence for productivity, this signal \"works\" — which is exactly why understanding signaling theory helps you see through office politics."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "The Logic of Costly Signaling",
+        "content": "A signal is only credible when it's too expensive for a low-quality sender to fake. This is why putting your own money into a startup signals confidence to investors (cheap for a founder who truly believes, ruinous for one who doesn't), and why a money-back guarantee signals product quality (cheap for a great product, expensive for a bad one). In your career, the best signals are actions that are easy for a strong performer and costly for a weak one."
+      },
+      {
+        "type": "concept",
+        "title": "Reputation as Strategic Capital",
+        "content": "\n          <p>Your reputation is the accumulation of all the signals you've sent over time — a <strong>rolling track record</strong> that people reference when deciding whether to trust you, promote you, or work with you. Game theory treats reputation as a <strong>strategic asset</strong> that takes time to build and moments to destroy. (As the saying goes — \"Trust takes years to build, seconds to break, and forever to repair.\")</p>\n          <p>From what I've observed, a strong reputation creates a <strong>self-reinforcing cycle</strong>. Once people believe you're reliable, they give you <strong>better projects</strong>. Better projects create more opportunities to <strong>send strong signals</strong>. And those signals further <strong>cement your reputation</strong>. The reverse cycle is equally powerful: a reputation for unreliability means fewer chances to prove yourself, which makes it <strong>even harder to rebuild</strong>.</p>\n          <p><strong>Managing up</strong> — the art of strategically communicating your value to decision-makers — isn't manipulation. It's recognizing that in any organisation with <strong>information asymmetry</strong> (which is all of them), the signals you send matter as much as the work you do. If your boss doesn't know about your contributions, those contributions have <strong>less impact on your career</strong>, no matter how excellent they are. Don't be the best-kept secret in your company.</p>\n        "
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-costly-vs-cheap",
+        "question": "Which of the following is the best example of a costly signal in a professional context?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Telling your manager you're passionate about your work"
+          },
+          {
+            "id": "b",
+            "text": "Updating your LinkedIn headline to say \"Results-driven leader\""
+          },
+          {
+            "id": "c",
+            "text": "Turning down a higher-paying job offer to stay at your current company"
+          },
+          {
+            "id": "d",
+            "text": "Agreeing enthusiastically in meetings"
+          }
+        ],
+        "correct": "c",
+        "explanation": "Turning down a higher-paying offer is a costly signal of loyalty and commitment — it requires real financial sacrifice that would be too expensive for someone who doesn't genuinely value the current role. The other options are forms of cheap talk: they cost nothing and are easy for anyone to do regardless of actual commitment."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-signal-audit",
+        "title": "Your Signal Audit",
+        "prompt": "List 3 signals you regularly send at work — intentionally or unintentionally. For each one, assess: Is it a costly signal or cheap talk? What does it actually communicate to observers? Is the signal aligned with what you want people to believe about you? If not, what costly signal could you substitute?",
+        "hints": [
+          "Think about how you spend your visible time — meetings attended, emails sent, hours logged.",
+          "Consider what your project choices signal (playing it safe vs. taking on risky high-impact work).",
+          "Don't forget unintentional signals: response time to messages, body language in meetings, who you eat lunch with.",
+          "Ask yourself: if someone only saw my signals (not my actual work), what would they conclude about me?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Signaling theory explains how people communicate hidden qualities through observable actions.",
+          "Costly signals (requiring real sacrifice) are credible; cheap talk (costing nothing) is easily discounted.",
+          "A signal is only effective when it's too expensive for someone without the underlying quality to fake.",
+          "Reputation is accumulated signals — a strategic asset that compounds over time but can shatter quickly.",
+          "Managing up isn't politics — it's ensuring the signals you send match the value you actually deliver."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is signaling theory?",
+        "back": "A framework explaining how people communicate hidden qualities (ability, commitment) through observable actions, especially when direct verification isn't possible."
+      },
+      {
+        "front": "What makes a signal \"costly\" vs. \"cheap\"?",
+        "back": "Costly signals require real sacrifice (time, money, risk) that's hard to fake. Cheap talk costs nothing, so anyone can send it regardless of underlying quality."
+      },
+      {
+        "front": "Why does the cost of a signal matter?",
+        "back": "Cost creates credibility — a signal is only reliable when it's too expensive for someone without the genuine quality to fake. The cost separates real from fake."
+      },
+      {
+        "front": "How does reputation function as a strategic asset?",
+        "back": "Reputation is accumulated signals over time. It creates self-reinforcing cycles: good reputation → better opportunities → more signals → stronger reputation (and vice versa)."
+      },
+      {
+        "front": "What is \"managing up\" in game theory terms?",
+        "back": "Strategically sending signals to decision-makers to reduce information asymmetry — ensuring they know about your contributions so those contributions impact your career outcomes."
+      }
+    ]
+  },
+  "career-games": {
+    "id": "career-games",
+    "moduleId": "workplace-playbook",
+    "title": "Promotions, Raises, and Career Games",
+    "estimatedMinutes": 17,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Tournament Theory: The Promotion Ladder as a Competition",
+        "content": "\n          <p>Here's something that might reframe how you see your entire career. Economists <strong>Edward Lazear</strong> and <strong>Sherwin Rosen</strong> proposed <strong>tournament theory</strong> — the idea that workplaces are structured like tournaments. Employees don't just get paid for their output; they <strong>compete against each other</strong> for a limited number of promotions, and the \"prize\" (higher salary, better title, more authority) goes to the <strong>relative winners</strong>.</p>\n          <p>This explains some puzzling features of corporate pay structures. Why does a VP earn <em>so much more</em> than a senior director, even if their day-to-day work looks similar? Because the <strong>massive pay jump motivates everyone below</strong> to compete harder. The prize has to be large enough to justify the effort of the tournament. The promotion isn't just a reward — it's a <strong>carefully designed incentive</strong> that drives performance across the entire tier below.</p>\n          <p>But here's the dark side of tournaments — they can encourage <strong>sabotage</strong> (undermining competitors instead of improving your own work), <strong>excessive risk-taking</strong>, and <strong>political behaviour</strong>. When relative performance matters more than absolute performance, tearing others down becomes strategically equivalent to building yourself up. (I've seen this play out more times than I'd like to admit.)</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "The Principal-Agent Problem at Work",
+        "content": "\n          <p>The <strong>principal-agent problem</strong> is one of the most pervasive games in any organisation — and once you see it, you can't unsee it. The principal (your employer, your manager, the board) wants you to act in <em>their</em> interest. You — the agent — have <strong>your own interests</strong>, which may not perfectly align. Your boss wants maximum effort on high-priority projects. You might prefer interesting side projects, a manageable pace, or resume-building activities that help <em>your</em> next career move, not the company's bottom line.</p>\n          <p>The core challenge is <strong>information asymmetry</strong>: the principal can't perfectly observe the agent's effort or intentions. Your manager sees your outputs but not the <strong>choices you made along the way</strong> — whether you cut corners, prioritized learning over delivery, or spent two hours on a task that could've taken one because you were also job-searching. (Don't worry — we've all been there.)</p>\n          <p>Organisations try to solve this through <strong>monitoring</strong> (check-ins, tracking tools), <strong>incentive alignment</strong> (bonuses, equity, profit-sharing), and <strong>screening</strong> (hiring processes designed to select agents whose interests naturally align with the principal's). None of these solutions is perfect — each has costs and can be gamed. That's what makes this a <strong>persistent problem</strong> rather than a solved one.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The Annual Review as a Tournament",
+        "content": "Most companies run a performance review cycle that looks exactly like a tournament: managers rank employees, calibrate across teams, and allocate a fixed pool of promotions, raises, and bonuses. Your \"score\" often depends not on absolute achievement but on how you compare to peers. This is why a great year can still feel unrewarded if everyone around you also had a great year — in a tournament, only relative standing matters. Understanding this helps you focus not just on doing good work, but on doing <em>visibly differentiated</em> work."
+      },
+      {
+        "type": "concept",
+        "title": "Information Asymmetry: What They Don't Know Can Hurt You",
+        "content": "\n          <p><strong>Information asymmetry</strong> runs in both directions in career games, and understanding this is crucial for navigating them well. Your employer knows things you don't — the <strong>real promotion timeline</strong>, budget constraints, whether your role is secure, what other candidates are being considered. You know things they don't — your <strong>true engagement level</strong>, your outside options, your career ambitions, whether you're already interviewing elsewhere.</p>\n          <p>This two-way information gap creates <strong>strategic opportunities and traps</strong>. If your employer doesn't know you have an outside offer, they have no reason to pre-empt your departure with a raise. If you don't know the promotion budget is frozen, you might waste months performing for a <strong>reward that isn't available</strong>.</p>\n          <p>From my perspective, the strategic response is to <strong>carefully manage information flow</strong>. Selectively revealing your outside options (without bluffing — bluffs get called) can shift your employer's calculus. Seeking <strong>inside information through mentors and allies</strong> helps you understand the real game being played, not the one described in the employee handbook. The people who navigate career games well aren't just hard workers — they're <strong>well-informed</strong> hard workers.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "When to Stay vs. When to Leave: Career as a Repeated Game",
+        "expandable": true,
+        "content": "\n          <p>Your career isn't a single game — it's a <strong>repeated game</strong> played across roles, companies, and decades. This changes the calculus fundamentally. In a one-shot game, you might tolerate a bad deal because switching costs are high. In a repeated game, you need to think about <strong>trajectory, learning rate, and option value</strong>.</p>\n          <p><strong>Stay when</strong> you're still accumulating valuable skills or reputation <strong>faster than you could elsewhere</strong>, when the tournament is one you can realistically win, or when the relationship dynamics are improving. <strong>Leave when</strong> the information asymmetry is being exploited against you, when the tournament is rigged (promotions based on politics rather than performance), or when your BATNA has improved to the point where staying is the worse option.</p>\n          <p>The repeated-game perspective also means that <strong>how you leave matters</strong>. Burning bridges destroys reputation capital you've built over years. The professional world is smaller than it seems, and your reputation in one game <strong>carries into the next</strong>. A graceful exit is itself a costly signal of professionalism. (Here's the truth — every job you leave is also an audition for the next one.)</p>\n        "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "career-invest-coast",
+        "title": "Invest vs. Coast",
+        "description": "An employee chooses to Invest in Skills (costly but builds long-term value) or Coast (easy but stagnates). The employer chooses to Promote (reward investment) or Pass (maintain status quo). The outcome depends on both players' choices.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Employee",
+          "colPlayer": "Employer",
+          "rowStrategies": [
+            "Invest in Skills",
+            "Coast"
+          ],
+          "colStrategies": [
+            "Promote",
+            "Pass"
+          ],
+          "payoffs": [
+            [
+              [
+                9,
+                8
+              ],
+              [
+                4,
+                6
+              ]
+            ],
+            [
+              [
+                6,
+                3
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-principal-agent",
+        "question": "A company ties 30% of a manager's bonus to team performance and 70% to individual KPIs. Which problem is this primarily designed to address?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The Volunteer's Dilemma — ensuring someone takes on difficult tasks"
+          },
+          {
+            "id": "b",
+            "text": "The Principal-Agent Problem — aligning the manager's incentives with company goals"
+          },
+          {
+            "id": "c",
+            "text": "The Prisoner's Dilemma — preventing defection in teams"
+          },
+          {
+            "id": "d",
+            "text": "Tournament Theory — creating competition among managers"
+          }
+        ],
+        "correct": "b",
+        "explanation": "This bonus structure is a classic principal-agent solution: it aligns the manager's financial incentives with the company's goals. The individual KPIs address the agent's personal effort, while the team component prevents the manager from succeeding at the expense of the team. It's mechanism design aimed directly at reducing the incentive gap between what the principal wants and what the agent naturally maximises."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-career-game-map",
+        "title": "Map Your Career Game",
+        "prompt": "Map your current career situation as a strategic game. Who are the key players (you, your manager, peers competing for similar roles, the organisation)? What information asymmetries exist — what do you know that they don't, and vice versa? Is your workplace more like a tournament or a collaborative game? What is your BATNA if you leave, and how does that shape your current strategy?",
+        "hints": [
+          "Start by listing the 3-4 people whose decisions most affect your career trajectory.",
+          "For each player, think about what they want (their payoff) and what they can observe about you.",
+          "Identify the biggest information gap — the thing that, if revealed or discovered, would most change the game.",
+          "Consider whether you're playing a one-shot game (contract ending soon) or a repeated game (long tenure expected)."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Tournament theory explains why promotion prizes are large — they incentivise the entire tier below to compete harder.",
+          "The principal-agent problem arises whenever your employer can't perfectly observe your effort or intentions.",
+          "Information asymmetry runs both ways — managing what you reveal (and discover) is a core career strategy.",
+          "Your career is a repeated game: how you play each round (including how you exit) shapes future opportunities.",
+          "The best career strategists diagnose the actual game being played, not the one described in the company handbook."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is tournament theory?",
+        "back": "The idea that workplaces are structured like tournaments — employees compete for limited promotions, and the large pay jump at each level motivates effort across the tier below."
+      },
+      {
+        "front": "What is the principal-agent problem?",
+        "back": "When an employer (principal) can't perfectly observe an employee's (agent's) effort or intentions, creating misaligned incentives. The agent may pursue their own interests instead of the principal's."
+      },
+      {
+        "front": "How does information asymmetry affect career strategy?",
+        "back": "Both sides have private information. Strategically revealing your outside options can increase leverage, while seeking inside information (mentors, allies) helps you understand the real game being played."
+      },
+      {
+        "front": "When should you stay vs. leave a job, game-theoretically?",
+        "back": "Stay when you're accumulating skills/reputation faster than alternatives offer. Leave when your BATNA improves, the tournament is rigged, or information asymmetry is being exploited against you."
+      },
+      {
+        "front": "Why does how you leave a job matter strategically?",
+        "back": "Your career is a repeated game — burning bridges destroys reputation capital. A graceful exit is a costly signal of professionalism that carries into future games."
+      }
+    ]
+  }
+}

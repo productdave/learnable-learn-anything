@@ -1,0 +1,32 @@
+{
+  "courses": [
+    {
+      "id": "pour-over-coffee",
+      "title": "Pour-Over Coffee Mastery",
+      "subtitle": "Brew café-quality pour-over coffee at home using your V60 and gooseneck kettle.",
+      "modules": 1,
+      "topics": 5,
+      "accentColor": "#D97706",
+      "icon": "target"
+    },
+    {
+      "id": "game-theory",
+      "title": "Strategic Edge",
+      "subtitle": "Game theory for the decisions that actually matter.",
+      "modules": 6,
+      "topics": 24,
+      "accentColor": "#4338CA",
+      "icon": "scale"
+    },
+    {
+      "id": "quiz-demo",
+      "title": "Quiz Variants Demo",
+      "subtitle": "All 5 question formats the generator can produce, side by side.",
+      "modules": 1,
+      "topics": 1,
+      "accentColor": "#8B5CF6",
+      "icon": "settings",
+      "internal": true
+    }
+  ]
+}

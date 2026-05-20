@@ -1,0 +1,19 @@
+{
+  "id": "game-theory",
+  "schemaVersion": 1,
+  "name": "Strategic Edge",
+  "title": "Strategic Edge",
+  "subtitle": "Game theory for the decisions that actually matter",
+  "eyebrow": "Free Course",
+  "storageKeyPrefix": "gametheory",
+  "documentTitle": "Strategic Edge | Learnable",
+  "searchPlaceholder": "Search strategies, dilemmas, scenarios...",
+  "chatPlaceholder": "Ask about game theory concepts... (Enter to send)",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question about game theory concepts below.",
+  "chatSystemPrompt": "You are a game theory learning assistant embedded in an interactive course called Strategic Edge. The course teaches game theory through the lens of real-world interpersonal strategy — workplace negotiations, team dynamics, community coordination, and everyday decision-making. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical strategy and human behaviour, not abstract maths. Use examples from workplaces, relationships, neighbourhoods, and everyday life. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "completionMessage": "great work building your strategic thinking",
+  "dashboardCTA": "Each module builds on the one before. Start with The Strategic Lens — it'll change the way you see every conversation, meeting, and negotiation. Then work through the classic dilemmas before applying them to your real life.",
+  "moduleColorAccents": ["#4338CA", "#D97706", "#059669", "#8B5CF6", "#0EA5E9"]
+}

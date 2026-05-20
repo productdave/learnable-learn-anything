@@ -1,0 +1,61 @@
+{
+  "title": "Pour-Over Coffee at Home",
+  "subtitle": "Brew café-quality pour-over coffee for yourself and guests using your V60.",
+  "modules": [
+    {
+      "id": "pour-over-fundamentals",
+      "number": 1,
+      "title": "Pour-Over Fundamentals",
+      "description": "Learn the essential mechanics of V60 brewing: how water temperature, grind size, and pour technique work together to extract great coffee. Covers the brew cycle, timing, and why each step matters.",
+      "icon": "target",
+      "color": "#4338CA",
+      "topics": [
+        {
+          "id": "water-temp-grind",
+          "title": "Water Temperature & Grind Size: The 1:2 Foundation",
+          "quiz_plan": [
+            "fill-in-blank",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "the-pour-technique",
+          "title": "Mastering the Pour: Bloom, Body, Finish",
+          "quiz_plan": [
+            "drag-match",
+            "short-answer",
+            "multiple-choice"
+          ]
+        },
+        {
+          "id": "brewing-timing",
+          "title": "Timing & Total Brew Window",
+          "quiz_plan": [
+            "multiple-choice",
+            "fill-in-blank",
+            "true-false"
+          ]
+        },
+        {
+          "id": "coffee-selection",
+          "title": "Choosing & Storing Beans for Freshness",
+          "quiz_plan": [
+            "true-false",
+            "multiple-choice",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "common-mistakes",
+          "title": "Common Pour-Over Mistakes & How to Fix Them",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        }
+      ]
+    }
+  ]
+}

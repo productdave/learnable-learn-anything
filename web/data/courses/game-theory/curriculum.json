@@ -1,0 +1,162 @@
+{
+  "title": "Strategic Edge",
+  "subtitle": "Game theory for the decisions that actually matter",
+  "modules": [
+    {
+      "id": "strategic-lens",
+      "number": 1,
+      "title": "The Strategic Lens",
+      "description": "You're already playing strategic games every day — you just don't see them yet. This module gives you the lens.",
+      "icon": "target",
+      "color": "#4338CA",
+      "topics": [
+        {
+          "id": "already-playing",
+          "title": "You're Already Playing"
+        },
+        {
+          "id": "payoffs-beyond-money",
+          "title": "Payoffs Aren't Always Money"
+        },
+        {
+          "id": "simultaneous-sequential",
+          "title": "Simultaneous vs. Sequential"
+        },
+        {
+          "id": "zero-sum-win-win",
+          "title": "Zero-Sum vs. Win-Win"
+        }
+      ]
+    },
+    {
+      "id": "classic-dilemmas",
+      "number": 2,
+      "title": "The Classic Dilemmas",
+      "description": "The Prisoner's Dilemma, Nash Equilibrium, Chicken — these aren't just textbook puzzles. They're the hidden scripts running your relationships and teams.",
+      "icon": "scale",
+      "color": "#D97706",
+      "topics": [
+        {
+          "id": "prisoners-dilemma",
+          "title": "The Prisoner's Dilemma"
+        },
+        {
+          "id": "nash-equilibrium",
+          "title": "Nash Equilibrium in Daily Life"
+        },
+        {
+          "id": "coordination-chicken",
+          "title": "Coordination and Chicken"
+        },
+        {
+          "id": "trust-ultimatums",
+          "title": "Trust Games and Ultimatums"
+        }
+      ]
+    },
+    {
+      "id": "workplace-playbook",
+      "number": 3,
+      "title": "The Workplace Playbook",
+      "description": "Negotiations, free riders, office politics — let's break down the strategic games you're already playing at work (and how to play them better).",
+      "icon": "briefcase",
+      "color": "#059669",
+      "topics": [
+        {
+          "id": "negotiation-strategy",
+          "title": "Negotiation as Strategy"
+        },
+        {
+          "id": "team-dynamics",
+          "title": "Team Dynamics and Free Riders"
+        },
+        {
+          "id": "office-politics",
+          "title": "Office Politics and Signaling"
+        },
+        {
+          "id": "career-games",
+          "title": "Promotions, Raises, and Career Games"
+        }
+      ]
+    },
+    {
+      "id": "community-strategy",
+      "number": 4,
+      "title": "Community and Social Strategy",
+      "description": "From shared resources to social norms — the strategic dynamics that shape neighbourhoods, communities, and collective action.",
+      "icon": "users",
+      "color": "#0EA5E9",
+      "topics": [
+        {
+          "id": "tragedy-commons",
+          "title": "The Tragedy of the Commons"
+        },
+        {
+          "id": "social-norms",
+          "title": "Social Norms as Equilibria"
+        },
+        {
+          "id": "collective-action",
+          "title": "Collective Action and Organizing"
+        },
+        {
+          "id": "conflict-resolution",
+          "title": "Conflict Resolution and Mediation"
+        }
+      ]
+    },
+    {
+      "id": "repeated-games",
+      "number": 5,
+      "title": "Repeated Games and Relationships",
+      "description": "One-off encounters are simple. But most of life is repeated games — where trust, reputation, and forgiveness become your best strategies.",
+      "icon": "repeat",
+      "color": "#E11D48",
+      "topics": [
+        {
+          "id": "shadow-future",
+          "title": "The Shadow of the Future"
+        },
+        {
+          "id": "tit-for-tat",
+          "title": "Tit for Tat and Other Strategies"
+        },
+        {
+          "id": "reputation-building",
+          "title": "Building and Spending Reputation"
+        },
+        {
+          "id": "forgiveness-escalation",
+          "title": "Forgiveness and Escalation"
+        }
+      ]
+    },
+    {
+      "id": "designing-games",
+      "number": 6,
+      "title": "Designing Better Games",
+      "description": "Stop just playing the game. Learn to redesign the rules so cooperation becomes the natural choice — for teams, communities, and systems.",
+      "icon": "settings",
+      "color": "#8B5CF6",
+      "topics": [
+        {
+          "id": "incentive-design",
+          "title": "Incentive Design"
+        },
+        {
+          "id": "auction-allocation",
+          "title": "Auction and Allocation Mechanisms"
+        },
+        {
+          "id": "information-design",
+          "title": "Information Design and Transparency"
+        },
+        {
+          "id": "cooperative-systems",
+          "title": "Building Cooperative Systems"
+        }
+      ]
+    }
+  ]
+}

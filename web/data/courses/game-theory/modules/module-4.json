@@ -1,0 +1,508 @@
+{
+  "tragedy-commons": {
+    "id": "tragedy-commons",
+    "moduleId": "community-strategy",
+    "title": "The Tragedy of the Commons",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "When Shared Resources Disappear",
+        "content": "\n          <p>Here's a thought experiment that will ruin the way you see shared resources forever. Imagine a pasture shared by a handful of herders. Each herder thinks, \"If I add one more cow, I get all the milk -- and the cost of overgrazing? That's spread across everyone.\" Totally rational. So every herder adds another cow. And another. Until the pasture is <em>destroyed</em> and nobody can graze at all. That's the <strong>Tragedy of the Commons</strong>, first described by ecologist Garrett Hardin back in 1968.</p>\n          <p>Here's the thing -- this isn't about greed or bad people. It's a <strong>structural problem</strong>. When individuals acting in their own rational self-interest deplete a shared resource, the group as a whole suffers. Each person's incentive points toward overuse, even though <strong>restraint would leave everyone better off</strong>. The \"commons\" is any resource that's <strong>rivalrous</strong> (one person's use diminishes what's left) and <strong>non-excludable</strong> (you can't easily prevent access).</p>\n          <p>Once you see this pattern, you'll notice it everywhere -- not just in pastures. <strong>Overfishing</strong> in the ocean. <strong>Traffic congestion</strong> on highways. <strong>Depleted aquifers</strong>. But it also shows up in smaller, everyday settings that you probably don't immediately recognize as commons problems.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The Shared Office Refrigerator",
+        "content": "The office fridge is a classic micro-commons. (I'd bet money you've experienced this one.) Everyone has access, but nobody \"owns\" it. People leave food until it rots, take up more than their fair share of space, and assume someone else will clean. The fridge deteriorates into total chaos because <strong>individual incentives</strong> (store my food, ignore the mess) conflict with the <strong>collective good</strong> (a clean, organized fridge for all). Sound familiar?"
+      },
+      {
+        "type": "concept",
+        "title": "Everyday Tragedies: More Common Than You Think",
+        "content": "\n          <p>Once you understand the pattern, you'll start spotting commons problems in every direction. <strong>Overfishing</strong> is perhaps the most famous large-scale example -- each fishing fleet has an incentive to catch as much as possible before competitors do, leading to <strong>collapsed fish stocks</strong> that hurt everyone. But the same logic applies to your neighborhood, your workplace, and your household.</p>\n          <p>Think about <strong>shared bandwidth</strong> on an office Wi-Fi network. When one person streams video during a meeting, it slightly degrades the connection for everyone. If several people do it, the network crawls. Or think about a <strong>shared conference room</strong> that nobody bothers to tidy after their meeting -- over time, the room becomes unusable because maintaining it is \"someone else's job.\" Even the <strong>office coffee pot</strong> follows this pattern. (Who makes a fresh pot when they take the last cup? Almost nobody, and we all know it.)</p>\n          <p>The common thread is a <strong>gap between private benefit and shared cost</strong>. Your individual overuse barely affects you, but when multiplied by all users, it devastates the resource. This is why commons problems are so stubborn -- no single person's restraint fixes the problem, so <strong>restraint feels pointless</strong>.</p>\n        "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "commons-matrix",
+        "title": "Conserve vs. Overuse",
+        "description": "Two users share a common resource. If both conserve, the resource stays healthy and each gets a moderate, sustainable benefit. If one overuses while the other conserves, the overuser gets a windfall. If both overuse, the resource collapses. Play with the values and notice what happens -- the dominant strategy pulls toward overuse, even though mutual conservation is better for everyone.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "You",
+          "colPlayer": "Other User",
+          "rowStrategies": [
+            "Conserve",
+            "Overuse"
+          ],
+          "colStrategies": [
+            "Conserve",
+            "Overuse"
+          ],
+          "payoffs": [
+            [
+              [
+                3,
+                3
+              ],
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              [
+                4,
+                1
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "Elinor Ostrom: The Woman Who Proved Hardin Wrong",
+        "content": "\n          <p>For decades after Hardin's paper, the standard prescription was either <strong>privatization</strong> (divide the resource into private property) or <strong>government regulation</strong> (impose top-down rules). But here's where it gets interesting. Political scientist <strong>Elinor Ostrom</strong> spent her career studying communities around the world that had successfully managed commons for <em>centuries</em> -- without either solution. Her work earned her the Nobel Prize in Economics in 2009.</p>\n          <p>Ostrom found that communities can and do solve commons problems through <strong>self-governance</strong>. From Swiss alpine meadows to Japanese fishing villages to Philippine irrigation systems, she documented groups that created their own rules, enforced them, and <strong>sustained their shared resources for generations</strong>. The key wasn't privatization or government -- it was <em>institutional design</em>: the specific rules and norms that communities built from the ground up.</p>\n          <p>Her research yielded <strong>eight design principles</strong> that characterize successful commons governance. And here's the thing -- these principles don't just apply to pastures and fisheries. They apply to <strong>any shared resource</strong> your community, team, or organization manages together.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Ostrom's Eight Design Principles",
+        "expandable": true,
+        "content": "\n          <p><strong>1. Clearly defined boundaries.</strong> You need to know who has access and what the resource covers. If anyone can wander in and take from the commons, management becomes impossible.</p>\n          <p><strong>2. Rules match local conditions.</strong> What works for Swiss meadows won't work for Maine lobster fisheries. Effective rules are <strong>adapted to the specific resource</strong> and community.</p>\n          <p><strong>3. Collective-choice arrangements.</strong> The people affected by the rules should participate in creating and modifying them. Top-down rules imposed by outsiders tend to be resented and ignored. (This one is huge.)</p>\n          <p><strong>4. Monitoring.</strong> Someone needs to watch whether rules are being followed. Crucially, Ostrom found that monitors should be <strong>accountable to the community</strong>, or be community members themselves.</p>\n          <p><strong>5. Graduated sanctions.</strong> Punishments for rule violations should start small -- a warning, a minor fine -- and escalate for repeat offenders. <strong>Draconian first-offense penalties destroy trust</strong> rather than build it.</p>\n          <p><strong>6. Conflict-resolution mechanisms.</strong> Disputes are inevitable. Successful commons have accessible, <strong>low-cost ways to resolve disagreements</strong> before they escalate.</p>\n          <p><strong>7. Minimal recognition of rights to organize.</strong> External authorities (governments, corporations) should not undermine the community's ability to create and enforce its own rules.</p>\n          <p><strong>8. Nested enterprises (for larger systems).</strong> For resources that span multiple communities, governance should be layered -- <strong>local rules for local issues</strong>, regional coordination for broader ones.</p>\n        "
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "ostrom-principles-quiz",
+        "question": "According to Ostrom's principles, what is the most effective approach to punishing rule violations in a commons?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Severe punishment for the first offense to deter future violations"
+          },
+          {
+            "id": "b",
+            "text": "Graduated sanctions that start small and escalate for repeat offenders"
+          },
+          {
+            "id": "c",
+            "text": "No punishment at all, relying on social pressure instead"
+          },
+          {
+            "id": "d",
+            "text": "Immediately expelling violators from the commons"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Ostrom found that graduated sanctions work best. A small first penalty -- a warning, a conversation -- preserves relationships and trust, while escalating consequences deter repeated abuse. Harsh first-offense punishments can actually destroy the cooperative spirit that makes commons governance work in the first place. Start small, escalate as needed."
+      },
+      {
+        "type": "exercise",
+        "id": "commons-in-your-life",
+        "title": "Your Personal Commons Audit",
+        "prompt": "Identify a \"commons\" in your life -- a workplace resource, neighborhood amenity, shared household item, or community space. Describe it briefly, then evaluate it against Ostrom's eight principles. Which principles are present? Which are missing? What one change would most improve how this resource is managed?",
+        "hints": [
+          "Think about resources you share: kitchen at work, parking lot, neighborhood park, shared tools, a family streaming account.",
+          "For each of Ostrom's principles, ask: does this apply to our situation? If not, what goes wrong because it's absent?",
+          "Consider: who sets the rules? Who monitors compliance? What happens when someone breaks a rule?",
+          "The most impactful missing principle often involves either monitoring (nobody notices cheating) or collective choice (rules feel imposed, not agreed upon)."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "The Tragedy of the Commons arises from a structural mismatch: individual incentives favor overuse while the group needs restraint.",
+          "Commons problems appear everywhere -- from global fisheries to the office refrigerator.",
+          "Elinor Ostrom proved that communities can self-govern shared resources without privatization or top-down regulation.",
+          "Ostrom's eight design principles offer a practical framework for managing any shared resource.",
+          "The key ingredients are clear boundaries, local rule-making, monitoring, graduated sanctions, and conflict resolution."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the Tragedy of the Commons?",
+        "back": "A situation where individuals acting in their own rational self-interest deplete a shared resource, making everyone worse off. Each person's overuse is individually rational but collectively destructive."
+      },
+      {
+        "front": "What two properties make a resource a \"commons\"?",
+        "back": "Rivalrous (one person's use diminishes what's available to others) and non-excludable (you can't easily prevent people from accessing it)."
+      },
+      {
+        "front": "Who was Elinor Ostrom and why was she important?",
+        "back": "A political scientist who won the 2009 Nobel Prize in Economics for demonstrating that communities can successfully self-govern shared resources, challenging the assumption that only privatization or government regulation can solve commons problems."
+      },
+      {
+        "front": "Name three of Ostrom's eight design principles for governing commons.",
+        "back": "Any three of: (1) Clearly defined boundaries, (2) Rules match local conditions, (3) Collective-choice arrangements, (4) Monitoring, (5) Graduated sanctions, (6) Conflict-resolution mechanisms, (7) Minimal recognition of rights to organize, (8) Nested enterprises for larger systems."
+      },
+      {
+        "front": "Why do graduated sanctions work better than harsh first-offense punishments in commons governance?",
+        "back": "Graduated sanctions preserve trust and relationships. A small first penalty signals that the community is watching without destroying goodwill, while escalation deters repeat offenders. Harsh punishments create resentment and can undermine the cooperative spirit needed for self-governance."
+      }
+    ]
+  },
+  "social-norms": {
+    "id": "social-norms",
+    "moduleId": "community-strategy",
+    "title": "Social Norms as Equilibria",
+    "estimatedMinutes": 16,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Norms Are Games in Disguise",
+        "content": "\n          <p>Let me ask you something. Why do you shake hands when you meet someone? Why do you keep your voice down in a library? Not because there's a law requiring it -- but because <em>everyone else does it</em>, and deviating would be awkward, confusing, or costly. Social norms are patterns of behavior sustained by <strong>mutual expectations</strong>. And in game theory terms, a social norm is actually a <strong>Nash equilibrium</strong> -- given that everyone else follows the norm, your best response is to follow it too.</p>\n          <p>This framing is powerful because it explains both the <strong>stability and the fragility</strong> of norms. A norm persists not because people love it, but because <strong>unilateral deviation is costly</strong>. If you're the only person who shows up to a formal dinner in shorts, you bear the full social cost while gaining nothing. But if <em>enough</em> people deviate simultaneously, the old equilibrium collapses and a new one can take hold.</p>\n          <p>Here's an example that makes this click. Think of <strong>driving on the right side of the road</strong>. It doesn't matter which side everyone drives on, as long as everyone agrees. Once established, the convention is self-enforcing -- switching individually would be suicidal. But an entire country can switch (as Sweden did in 1967) if everyone coordinates to change at once. That's the nature of an equilibrium.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Tipping Points: When Norms Suddenly Shift",
+        "content": "\n          <p>Most of the time, social norms feel permanent and immovable. Then, seemingly overnight, they flip. <strong>Smoking</strong> went from glamorous to stigmatized within a generation. Attitudes toward <strong>marriage equality</strong> shifted dramatically in under two decades. How does this happen?</p>\n          <p>The answer lies in <strong>tipping points</strong>. Sociologist <strong>Mark Granovetter</strong> modeled this with his threshold theory -- each person has a threshold, the number of other people who need to act before they'll join in. Some people have a <strong>low threshold</strong> (they'll deviate from the norm even if few others do). Others have a <strong>high threshold</strong> (they'll only switch once it's clearly becoming the new norm). A norm shift cascades when enough low-threshold individuals act, pushing past the thresholds of the next group, who push past the thresholds of the group after them.</p>\n          <p>This is why norm change often looks like <strong>nothing, nothing, nothing</strong> -- then <em>everything at once</em>. The underground dissent was building for years, but it only became visible once it crossed the tipping point. For anyone trying to change a norm, the strategic lesson is clear: you don't need to convince everyone. You need to reach the <strong>tipping point</strong>.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Pluralistic Ignorance: The Norm Nobody Actually Believes In",
+        "content": "Here's one that might blow your mind a little. <strong>Pluralistic ignorance</strong> occurs when most people privately disagree with a norm but publicly conform because they assume everyone else supports it. The result is a fragile equilibrium maintained by <strong>mutual misperception</strong>. Classic example: a college campus where most students privately dislike heavy drinking culture, but each student conforms because they believe they're the only one who feels that way. Once someone reveals the true private beliefs, the norm can collapse rapidly. If you've ever been in a <strong>meeting where everyone silently agreed to a bad plan</strong>, only to learn afterward that everyone privately thought it was terrible -- you've experienced pluralistic ignorance. (It's way more common than you'd think.)"
+      },
+      {
+        "type": "concept",
+        "title": "Norm Entrepreneurs: Agents of Change",
+        "content": "\n          <p>If norms are equilibria, then <strong>norm entrepreneurs</strong> are the people who deliberately try to shift society from one equilibrium to another. They do this by making <strong>private dissent public</strong>, by demonstrating that deviation is possible and survivable, and by creating <strong>focal points</strong> around which new norms can crystallize.</p>\n          <p>From my perspective, norm entrepreneurs are some of the most underappreciated agents of change. They often face <strong>steep personal costs</strong>. They're the first to speak up in a meeting, the first to challenge an unwritten rule, the first to break a taboo. If the tipping point isn't reached, they bear the stigma alone. But if it is reached, they're catalysts of change. Rosa Parks, early environmental activists, and the first companies to adopt remote work policies were all norm entrepreneurs -- <strong>absorbing risk to make a new equilibrium possible</strong>.</p>\n          <p>In everyday life, norm entrepreneurship might look like a team lead who <strong>starts leaving the office at 5pm</strong> to signal that overwork isn't expected, or a parent who volunteers first at a school event to break the bystander effect. The key strategic insight is that norms are <em>constructed</em>, not given. Someone built every norm you follow -- and <strong>someone can rebuild it</strong>.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Meeting Culture: A Norm in Action",
+        "content": "Consider the norm that meetings start 5 minutes late. Nobody decided this. It evolved because arriving on time means sitting awkwardly while others trickle in. Once enough people adopt the \"fashionably late\" strategy, on-time arrivals feel foolish. <strong>The norm is self-reinforcing.</strong> Now imagine a manager who consistently starts meetings at the scheduled time, locking the door and beginning regardless of who's present. Initially, latecomers are annoyed. But within a few weeks, the tipping point passes and a <strong>new norm of punctuality</strong> takes hold. One person changed the game. (I've actually seen this work in real teams -- it's surprisingly effective.)"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "tipping-points-quiz",
+        "question": "In Granovetter's threshold model, what causes a social norm to suddenly \"tip\" and change?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A charismatic leader persuades the majority to change their minds simultaneously"
+          },
+          {
+            "id": "b",
+            "text": "Low-threshold individuals act first, triggering a cascade as each group pushes past the next group's threshold"
+          },
+          {
+            "id": "c",
+            "text": "A law or formal rule is enacted that forces behavioral change"
+          },
+          {
+            "id": "d",
+            "text": "Everyone independently reaches the same conclusion at roughly the same time"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Granovetter's model shows that norm change cascades. People with low thresholds (willing to deviate when few others do) act first. Their visible deviation pushes the count past the thresholds of slightly more cautious people, who then act, triggering the next group, and so on. The \"tipping point\" is the moment this cascade becomes self-sustaining. It's not about one charismatic leader -- it's about the chain reaction."
+      },
+      {
+        "type": "exercise",
+        "id": "norm-shift-exercise",
+        "title": "Mapping a Norm You'd Like to Change",
+        "prompt": "Identify a norm in your workplace or community that most people privately disagree with but publicly follow. Describe the norm, explain why individuals conform despite disagreeing (what are the costs of deviation?), and sketch a strategy for shifting it. Who are the potential \"norm entrepreneurs\"? What would a tipping point look like?",
+        "hints": [
+          "Common examples: unnecessary meetings, reply-all email culture, presenteeism, how feedback is given, social media expectations.",
+          "Think about what makes deviation costly: embarrassment, career risk, social exclusion, or simply uncertainty about whether others agree.",
+          "A good norm-shift strategy often starts with making private beliefs public: surveys, anonymous feedback, or one brave person speaking up.",
+          "Consider how to lower the cost of being an early deviant: build a small coalition first, or get a high-status person to model the new behavior."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Social norms are Nash equilibria: self-enforcing patterns sustained by mutual expectations, not by universal agreement.",
+          "Norms can be stable for decades, then shift suddenly once a tipping point is reached through cascading thresholds.",
+          "Pluralistic ignorance -- where everyone privately disagrees but publicly conforms -- makes norms appear far more stable than they actually are.",
+          "Norm entrepreneurs create change by making private dissent visible and absorbing the costs of early deviation.",
+          "You don't need to convince everyone to change a norm. You need to reach the tipping point."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "How are social norms related to Nash equilibrium?",
+        "back": "A social norm is a Nash equilibrium: given that everyone else follows the norm, each individual's best response is to follow it too. Unilateral deviation is costly, which makes the norm self-enforcing."
+      },
+      {
+        "front": "What is pluralistic ignorance?",
+        "back": "A situation where most people privately disagree with a norm but publicly conform because they mistakenly believe everyone else supports it. The norm is maintained by mutual misperception rather than genuine agreement."
+      },
+      {
+        "front": "What is a \"tipping point\" in norm change?",
+        "back": "The critical moment when enough people have deviated from the old norm that the cascade becomes self-sustaining. Low-threshold individuals act first, pushing past the thresholds of progressively more cautious people until the new behavior becomes the norm."
+      },
+      {
+        "front": "What is a norm entrepreneur?",
+        "back": "A person who deliberately works to shift a social norm by making private dissent public, demonstrating that deviation is survivable, and creating focal points for a new equilibrium. They bear personal risk to catalyze collective change."
+      },
+      {
+        "front": "Why does norm change often appear sudden even though it was building for years?",
+        "back": "Because dissent accumulates privately (due to pluralistic ignorance) until the tipping point is reached. The underlying shift in private beliefs was gradual, but the visible behavioral change cascades rapidly once the threshold is crossed."
+      }
+    ]
+  },
+  "collective-action": {
+    "id": "collective-action",
+    "moduleId": "community-strategy",
+    "title": "Collective Action and Organizing",
+    "estimatedMinutes": 17,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why Groups Fail to Act in Their Own Interest",
+        "content": "\n          <p>Here's a puzzle that used to genuinely confuse me. If 100 people would each benefit from a clean park, why doesn't anyone pick up litter? If every employee wants better working conditions, why doesn't anyone organize? The answer is the <strong>collective action problem</strong> -- situations where a group would benefit from coordinated action, but <strong>individual incentives discourage anyone from contributing</strong>.</p>\n          <p>The core issue is <strong>free riding</strong>. If the park gets cleaned, you benefit whether or not you helped. So why volunteer your Saturday? Rationally, you should let others do the work and enjoy the result. But if everyone reasons this way, <strong>nothing happens</strong>. The benefit is <em>collective</em> (everyone shares it), but the cost is <em>individual</em> (only the contributors bear it). This asymmetry is the heart of every collective action failure.</p>\n          <p>Collective action problems are everywhere -- <strong>voter turnout</strong>, open-source software, <strong>climate action</strong>, neighborhood watch programs, even splitting a restaurant bill. Any time a group needs voluntary contributions to produce a <strong>shared benefit</strong>, you're in collective action territory.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Olson's Logic: Why Big Groups Have It Worse",
+        "content": "\n          <p>In 1965, economist <strong>Mancur Olson</strong> published <em>The Logic of Collective Action</em>, one of the most influential books in political science. His central argument was counterintuitive and, honestly, kind of depressing: <strong>large groups are worse at collective action than small ones</strong>, even when the stakes are higher.</p>\n          <p>Why? In a small group, your <strong>individual contribution is noticeable</strong>. If there are five people on a committee, your absence is obvious and your effort is visible. Social pressure and personal accountability keep people engaged. But in a group of 10,000, your individual contribution is a drop in the ocean. Nobody notices if you skip the meeting, don't donate, or don't vote. The <strong>incentive to free ride intensifies</strong> as the group grows.</p>\n          <p>Olson also observed something that I think explains a lot about how the world actually works: <strong>concentrated interests beat diffuse ones</strong>. A small group of firms that would each lose millions from a regulation will organize fiercely to oppose it. A large group of consumers who would each save a few dollars will barely notice, let alone organize. This asymmetry explains why <strong>industry lobbies are so effective</strong> while consumer interests are chronically underrepresented. It's not apathy -- it's structural.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "The Paradox of Collective Action",
+        "content": "Here's the cruelest irony of collective action problems. The groups who need collective action <em>most</em> are often the ones <strong>least able to achieve it</strong>. Large, dispersed groups with small per-person stakes (taxpayers, consumers, renters) face enormous organizational barriers, while small, concentrated groups with large per-person stakes (industry groups, special interests) organize easily. This structural asymmetry means that collective action doesn't just fail randomly -- it fails <strong>systematically in favor of concentrated power</strong>. Once you see this, you can't unsee it."
+      },
+      {
+        "type": "concept",
+        "title": "Selective Incentives: The Organizer's Secret Weapon",
+        "content": "\n          <p>Don't worry -- it's not all doom and gloom. If people won't contribute to a public good out of altruism alone, how <em>do</em> successful organizations motivate participation? Olson's answer was <strong>selective incentives</strong> -- private benefits that are available only to those who contribute. These come in two flavors.</p>\n          <p><strong>Positive selective incentives</strong> reward contributors: member-only discounts, exclusive events, professional networking, insurance programs, or simply the <strong>social status</strong> of being a participant. Think of how professional associations bundle lobbying (a public good) with career resources and credentials (private goods). You join for the private benefits, and the collective action comes along for the ride.</p>\n          <p><strong>Negative selective incentives</strong> punish non-contributors: social ostracism, reputation damage, fines, or exclusion from future benefits. Unions historically used <strong>social pressure</strong> and sometimes formal penalties against non-members who benefited from negotiated wages without paying dues. Neighborhood associations may enforce participation through social expectations and <strong>visible non-compliance costs</strong>.</p>\n          <p>Here's the strategic lesson: if you want collective action, <strong>don't just appeal to the shared goal</strong>. Bundle private benefits that make participation individually rational, regardless of whether the collective goal is achieved. That's how you actually get people to show up.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Critical Mass: You Don't Need Everyone",
+        "content": "\n          <p><strong>Critical mass theory</strong> offers a more optimistic view -- and honestly, this is the part I find most practically useful. Not every collective effort requires universal participation. Many only require a <strong>critical mass</strong> -- a sufficient number of early participants to make the effort self-sustaining. Once critical mass is reached, the dynamic shifts from \"why should I bother?\" to \"I'd better join in.\"</p>\n          <p>This insight transforms the organizer's task. Instead of convincing everyone, you need to identify and mobilize the <strong>early adopters</strong> -- the people with the lowest thresholds for participation. These might be the most affected individuals, the most connected community members, or people with the <strong>lowest opportunity cost</strong>. Once a visible core group is active, social proof and momentum do the rest.</p>\n          <p>Technology has dramatically lowered the cost of reaching critical mass. Social media, messaging groups, and platforms like GoFundMe or Change.org make it possible to <strong>coordinate action across large, dispersed groups</strong> at near-zero cost. This doesn't eliminate the collective action problem, but it shifts the threshold. Actions that were once impossible to organize are now merely difficult. (And that's actually a huge difference.)</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Organizing a Neighborhood Cleanup",
+        "content": "Let's get practical. Say you want to organize a park cleanup in your neighborhood. The collective action challenges are textbook: everyone wants a clean park, but nobody wants to spend their Saturday morning picking up trash. Here's how <strong>selective incentives</strong> and <strong>critical mass theory</strong> help. First, recruit 3-5 enthusiastic neighbors personally (your critical mass). Then bundle the cleanup with private benefits: <strong>free coffee and pastries</strong>, a social barbecue afterward, a kids' play area. Publicize who's attending (<strong>social proof</strong>). Create visible T-shirts or signs (<strong>group identity</strong>). Post before-and-after photos on the neighborhood group (<strong>recognition</strong>). You've transformed a thankless chore into a community event that people actually want to join. That's the playbook."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "selective-incentives-quiz",
+        "question": "What are \"selective incentives\" in the context of collective action?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The emotional satisfaction of contributing to a public good"
+          },
+          {
+            "id": "b",
+            "text": "Private benefits available only to those who contribute, making participation individually rational"
+          },
+          {
+            "id": "c",
+            "text": "Government subsidies that fund collective action organizations"
+          },
+          {
+            "id": "d",
+            "text": "The natural incentive people have to help their community"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Selective incentives are private rewards (or punishments) that apply specifically to contributors (or non-contributors). They solve the free-rider problem by making participation individually rational -- you join not just for the public good, but for the private benefits like networking, insurance, discounts, or social standing that only members receive. It's the secret sauce behind every successful collective effort."
+      },
+      {
+        "type": "exercise",
+        "id": "collective-action-strategy",
+        "title": "Design a Collective Action Strategy",
+        "prompt": "Think of a collective action challenge in your community or organization -- something that would benefit everyone but that nobody is organizing. Design a strategy to make it happen. Who would you recruit first (critical mass)? What selective incentives would you offer? How would you handle free riders? Be specific and practical.",
+        "hints": [
+          "Start by identifying why this collective action hasn't happened yet: is it a coordination problem, a free-rider problem, or both?",
+          "Think about positive selective incentives (exclusive benefits for participants) and negative ones (social costs for non-participants).",
+          "Your critical mass might be as small as 3-5 motivated people. Who in your community has the lowest threshold for action?",
+          "Consider how to make participation visible: people are more likely to contribute when their contribution (or absence) is noticed."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Collective action problems occur when groups fail to coordinate because individual incentives favor free riding over contributing.",
+          "Olson showed that larger groups face worse collective action problems because individual contributions become invisible.",
+          "Concentrated interests systematically outorganize diffuse ones -- this explains many political and organizational outcomes.",
+          "Selective incentives -- private benefits bundled with participation -- are the most reliable solution to free-rider problems.",
+          "Critical mass theory shows you don't need everyone: mobilize enough early adopters and momentum takes over."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the collective action problem?",
+        "back": "A situation where a group would benefit from coordinated action, but individual incentives encourage free riding (enjoying the benefit without contributing), leading to inaction even when everyone wants the outcome."
+      },
+      {
+        "front": "What is Olson's key insight about group size and collective action?",
+        "back": "Larger groups are worse at collective action than smaller ones. In large groups, individual contributions are less noticeable, social pressure is weaker, and the incentive to free ride is stronger. This is why concentrated interests consistently outorganize diffuse ones."
+      },
+      {
+        "front": "What are selective incentives? Give an example.",
+        "back": "Private benefits available only to contributors. Example: a professional association bundles lobbying (public good) with career resources, networking events, and credentials (private goods). Members join for the private benefits; the collective action comes along for the ride."
+      },
+      {
+        "front": "What is critical mass in collective action?",
+        "back": "The minimum number of early participants needed to make a collective effort self-sustaining. Once critical mass is reached, social proof and momentum attract additional participants, shifting the dynamic from \"why bother?\" to \"I should join.\""
+      },
+      {
+        "front": "Why do concentrated interests tend to beat diffuse interests in political organizing?",
+        "back": "A small group with large per-person stakes (e.g., firms facing regulation) can easily coordinate and each member has strong incentive to contribute. A large group with small per-person stakes (e.g., consumers) faces severe free-rider problems because no individual has enough at stake to justify the effort of organizing."
+      }
+    ]
+  },
+  "conflict-resolution": {
+    "id": "conflict-resolution",
+    "moduleId": "community-strategy",
+    "title": "Conflict Resolution and Mediation",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Conflict as a Game: The Bargaining Problem",
+        "content": "\n          <p>Let's get real for a second. Every conflict -- whether it's a team disagreement, a neighbor dispute, or a family argument -- is, at its core, a <strong>bargaining problem</strong>. Two or more parties have competing interests but also a shared interest in reaching some kind of agreement, because the alternative (prolonged conflict, litigation, severed relationships) is <strong>costly for everyone</strong>. Game theory helps us understand why rational people sometimes fail to reach agreements that would make both sides better off.</p>\n          <p><strong>Bargaining theory</strong>, pioneered by John Nash and later refined by Ariel Rubinstein, models conflict as a negotiation over how to divide a surplus. Here's the key insight: the outcome depends not just on what each party wants, but on their <strong>outside options</strong> (what they get if no deal is reached) and their <strong>patience</strong> (how much delay costs each side). The party with the better outside option and more patience has the <strong>stronger bargaining position</strong> -- regardless of who is \"right.\"</p>\n          <p>This framework explains why so many disputes fester. If both sides <strong>overestimate their outside options</strong> or underestimate the costs of continued conflict, they'll hold out longer than is rational. Add in emotions, ego, and incomplete information about the other side's true position, and you have a recipe for <strong>prolonged, destructive conflict</strong> that nobody actually wants.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "The Coase Theorem: Why Some Conflicts Solve Themselves",
+        "content": "\n          <p>In 1960, economist <strong>Ronald Coase</strong> proposed a remarkable idea: if people can negotiate freely and transaction costs are low, they will reach an <strong>efficient outcome regardless of how rights are initially assigned</strong>. This is the <strong>Coase theorem</strong>, and it basically suggests that many conflicts would resolve themselves if people could just... talk.</p>\n          <p>Here's an example. A factory pollutes a river that a fishery depends on. Coase argued that whether the factory has the \"right\" to pollute or the fishery has the \"right\" to clean water, the two parties can <strong>negotiate a payment that leaves both better off</strong>. If the fishery values clean water more than the factory values cheap disposal, money will change hands and the pollution stops -- no regulation needed.</p>\n          <p>The catch is the phrase <strong>\"if transaction costs are low.\"</strong> In practice, negotiation is expensive. There are legal fees, information asymmetries, emotional barriers, strategic posturing, and the sheer difficulty of getting all affected parties to the table. The Coase theorem tells us what <em>would</em> happen in an ideal world -- and understanding the gap between that ideal and reality reveals exactly where conflict resolution efforts should focus: <strong>reducing transaction costs</strong>. That's the practical takeaway.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Face-Saving: The Hidden Barrier to Resolution",
+        "content": "\n          <p>From my perspective, this is the most underrated concept in conflict resolution. Many conflicts persist not because a good solution doesn't exist, but because accepting it would mean <strong>losing face</strong>. Face -- the social image of competence, integrity, and standing -- is a <strong>powerful force</strong> in human interaction. People will endure terrible outcomes rather than appear to have \"backed down\" or \"given in.\"</p>\n          <p>This is why <strong>public disputes are so much harder to resolve</strong> than private ones. When an argument happens in front of colleagues, neighbors, or social media, each party's audience becomes a constraint. Conceding feels like public humiliation. The more witnesses, the <strong>higher the face-saving stakes</strong>, and the less room there is for compromise.</p>\n          <p>Skilled conflict resolvers understand that <strong>providing face-saving exits</strong> is often more important than finding the \"right\" answer. Reframing a concession as a principled choice (\"I've decided to prioritize the team's needs\"), creating new information that justifies a change of position (\"given this new data...\"), or simply <strong>moving negotiations to a private setting</strong> -- these are all techniques for reducing the face-saving cost of agreement. I've seen deadlocks break not because someone found a better deal, but because someone found a way for <strong>both sides to say yes without feeling like they lost</strong>.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The Neighbor Fence Dispute",
+        "content": "Two neighbors disagree about a property boundary. Neighbor A wants to build a fence; Neighbor B insists the proposed line encroaches on their land. Both have spent weeks arguing. A mediator steps in and discovers that Neighbor A really wants <strong>privacy</strong> (not the specific fence location) and Neighbor B wants to <strong>protect a garden bed</strong> (not the precise boundary). The mediator proposes moving the fence two feet, adding a privacy trellis, and preserving the garden. Both neighbors agree -- but only after the mediator frames it as \"a creative solution that respects both properties\" rather than asking either side to admit they were wrong. The underlying interests were compatible all along. The conflict was sustained by <strong>positional bargaining</strong> and <strong>face-saving concerns</strong>. (This kind of thing happens way more often than you'd think.)"
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "conflict-matrix",
+        "title": "Compromise vs. Escalate",
+        "description": "Two parties in a dispute each choose whether to compromise or escalate. Mutual compromise produces a fair outcome for both. One-sided escalation gives an advantage to the aggressor. Mutual escalation is destructive and costly for everyone. Notice how the structure pulls toward escalation even though compromise is collectively better -- that's the trap.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Party A",
+          "colPlayer": "Party B",
+          "rowStrategies": [
+            "Compromise",
+            "Escalate"
+          ],
+          "colStrategies": [
+            "Compromise",
+            "Escalate"
+          ],
+          "payoffs": [
+            [
+              [
+                3,
+                3
+              ],
+              [
+                1,
+                4
+              ]
+            ],
+            [
+              [
+                4,
+                1
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "The Mediator as Game Designer",
+        "content": "\n          <p>Here's the thing -- a great mediator doesn't just facilitate conversation. They <strong>redesign the game</strong>. By changing the rules, the information structure, or the available options, a mediator can transform a <strong>zero-sum battle into a positive-sum negotiation</strong>.</p>\n          <p>Mediators use several game-design techniques. <strong>Information revelation</strong>: helping each side understand the other's true interests (not just their stated positions). <strong>Option generation</strong>: expanding the set of possible outcomes beyond the two positions the parties arrived with. <strong>Process design</strong>: structuring when and how offers are made to prevent escalatory spirals. <strong>Commitment devices</strong>: creating binding mechanisms that make agreements stick.</p>\n          <p>But the most powerful mediator technique is often the simplest: <strong>separating interests from positions</strong>. A position is what someone says they want (\"I want the corner office\"). An interest is <em>why</em> they want it (\"I need a quiet space for client calls\"). Two incompatible positions can often be resolved when the <strong>underlying interests are compatible</strong>. The mediator's job is to uncover those interests, reframe the conflict around them, and design a resolution that satisfies the <strong>real needs -- not the stated demands</strong>.</p>\n        "
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "bargaining-theory-quiz",
+        "question": "According to bargaining theory, what primarily determines each party's power in a negotiation?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Who is morally right in the dispute"
+          },
+          {
+            "id": "b",
+            "text": "Who speaks more confidently and assertively"
+          },
+          {
+            "id": "c",
+            "text": "Each party's outside options and patience (cost of delay)"
+          },
+          {
+            "id": "d",
+            "text": "Who initiated the negotiation"
+          }
+        ],
+        "correct": "c",
+        "explanation": "Bargaining theory shows that negotiation power comes from two structural factors: your outside option (what you get if no deal is reached -- also called your BATNA) and your patience (how costly delay is for you). The party who can walk away more easily and wait longer has the stronger position, regardless of the moral merits of their case. It's not about who's right -- it's about who has better alternatives."
+      },
+      {
+        "type": "exercise",
+        "id": "mediator-redesign",
+        "title": "Redesign the Game",
+        "prompt": "Recall a conflict you witnessed or participated in -- at work, in your neighborhood, or in your personal life. Describe the conflict briefly, then explain how a mediator could have \"redesigned the game\" to reach a better outcome. Consider: What were the stated positions vs. underlying interests? What information was missing? How could face-saving exits have been created? What expanded options might have existed?",
+        "hints": [
+          "Start by identifying the stated positions of each party. Then ask: what did each side really need? Often the underlying interests are more flexible than the positions suggest.",
+          "Think about what each side didn't know about the other. Would revealing true interests or constraints have changed the dynamic?",
+          "Consider the role of audience and face-saving. Was the conflict harder to resolve because it was public? How could privacy have helped?",
+          "A mediator expands the \"pie\" by finding options neither side considered. What creative solutions might have satisfied both sides' core interests?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Every conflict is a bargaining problem, and bargaining power comes from outside options and patience -- not from being \"right.\"",
+          "The Coase theorem shows that efficient resolutions are possible when transaction costs are low; reducing those costs is the key to conflict resolution.",
+          "Face-saving is often the biggest hidden barrier to agreement. Providing dignified exits for both sides can break deadlocks.",
+          "Skilled mediators act as game designers: separating interests from positions, generating new options, and restructuring the interaction.",
+          "The most powerful resolution technique is uncovering underlying interests that are compatible even when stated positions seem irreconcilable."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What two factors primarily determine bargaining power?",
+        "back": "Outside options (what you get if no deal is reached, your BATNA) and patience (how much delay costs you). The party that can walk away more easily and wait longer has the structural advantage."
+      },
+      {
+        "front": "What does the Coase theorem state?",
+        "back": "If parties can negotiate freely and transaction costs are low, they will reach an efficient outcome regardless of how rights or entitlements are initially assigned. In practice, high transaction costs prevent this, which is where mediators and institutional design come in."
+      },
+      {
+        "front": "Why is \"face-saving\" so important in conflict resolution?",
+        "back": "People will endure bad outcomes rather than appear to have backed down publicly. Providing dignified exits, reframing concessions as principled choices, and moving negotiations to private settings can break deadlocks that have nothing to do with the substance of the dispute."
+      },
+      {
+        "front": "What does it mean to \"separate interests from positions\" in mediation?",
+        "back": "A position is what someone says they want; an interest is why they want it. Two incompatible positions (\"I want the corner office\" vs. \"No, I need it\") can often be resolved when the underlying interests (quiet space, client visibility) are compatible and can be met in other ways."
+      },
+      {
+        "front": "How does a mediator act as a \"game designer\"?",
+        "back": "By changing the structure of the interaction: revealing hidden information, expanding the set of possible outcomes, designing the negotiation process to prevent escalation, and creating commitment devices. They transform the game from zero-sum to positive-sum."
+      }
+    ]
+  }
+}

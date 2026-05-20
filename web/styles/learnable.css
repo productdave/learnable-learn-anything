@@ -1,0 +1,187 @@
+/* Learnable brand-specific styles (override defaults from base.css/components.css) */
+
+/* === Header brand mark ==================================================== */
+
+.header-learnable-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* === Library landing page ================================================ */
+
+.library {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-10);
+}
+
+.library-hero {
+  text-align: left;
+  margin-bottom: var(--space-10);
+}
+
+.library-eyebrow {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-indigo-light, #EEF2FF);
+  color: var(--color-indigo, #4338CA);
+  border-radius: var(--radius-full, 999px);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.library-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.library-subtitle {
+  font-size: var(--font-lg);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-6);
+  max-width: 640px;
+}
+
+.library-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.library-cta-btn {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-indigo, #4338CA);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--font-base);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.library-cta-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.library-cta-note {
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+}
+
+/* === Library section + grid =============================================== */
+
+.library-section {
+  margin-top: var(--space-8);
+}
+
+.library-section-title {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 var(--space-4);
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.library-card {
+  --accent: #4338CA;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.library-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+.library-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent);
+}
+
+.library-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  margin-top: var(--space-2);
+}
+
+.library-card-title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.library-card-subtitle {
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+.library-card-meta {
+  font-size: var(--font-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+}
+
+.library-card-tag {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  background: var(--color-amber-light, #FEF3C7);
+  color: var(--color-amber, #D97706);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .library { padding: var(--space-6) var(--space-4); }
+  .library-grid { grid-template-columns: 1fr; }
+}

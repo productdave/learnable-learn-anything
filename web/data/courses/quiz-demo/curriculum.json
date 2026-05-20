@@ -1,0 +1,17 @@
+{
+  "title": "Quiz Variants Demo",
+  "subtitle": "All 5 question formats the generator can produce, side by side.",
+  "modules": [
+    {
+      "id": "all-variants",
+      "number": 1,
+      "title": "All Five Quiz Formats",
+      "description": "One topic, five quizzes — one of each variant. Confirm each renders, handles input, and shows the right feedback after checking the answer.",
+      "icon": "target",
+      "color": "#4338CA",
+      "topics": [
+        { "id": "variant-tour", "title": "Tour of Every Quiz Variant" }
+      ]
+    }
+  ]
+}

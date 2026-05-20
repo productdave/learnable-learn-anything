@@ -1,0 +1,652 @@
+{
+  "already-playing": {
+    "id": "already-playing",
+    "moduleId": "strategic-lens",
+    "title": "You're Already Playing",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What Is a Strategic Game?",
+        "content": "<p>Here's the thing — when most people hear \"game,\" they think chess, poker, maybe Settlers of Catan on a Friday night. But in game theory, a <strong>game</strong> is something way broader — and way more relevant to your actual life. A strategic game is any situation where <em>your outcome depends not just on what you do, but on what someone else does too</em>.</p>\n<p>Think about it. When you decide what to say in a meeting, you're not making that choice in a vacuum. You're thinking about <strong>who else is in the room</strong>, what they might say, and how your words will land depending on their reactions. That's a game. When you pick a lane in traffic, choose a restaurant for a date, or decide whether to <strong>speak up about a problem at work</strong> — you're playing a strategic game, whether you realise it or not.</p>\n<p>The key word here is <strong>interdependence</strong>. If your outcome depends only on your own actions (like solving a crossword puzzle), that's just a decision — not a game. But the moment another <strong>thinking, choosing human</strong> enters the picture — someone whose decisions affect your results and vice versa — you've entered game territory. As John von Neumann, the father of game theory, put it: real life is about <strong>bluffing, strategy, and asking \"what does the other person think I'm going to do?\"</strong></p>"
+      },
+      {
+        "type": "concept",
+        "title": "The Three Elements Every Game Shares",
+        "content": "<p>Every strategic game — from a <strong>billion-dollar merger negotiation</strong> to deciding who picks up the lunch tab — boils down to exactly <strong>three elements</strong>:</p>\n<p><strong>1. Players</strong> — the decision-makers involved. This could be two people, ten companies, or an entire market. The crucial thing is that each player has <strong>their own interests</strong> and the ability to make choices. In a salary negotiation, the players are you and your manager. In a product launch, they might be your company and three competitors.</p>\n<p><strong>2. Strategies</strong> — the set of <strong>possible actions</strong> available to each player. Your strategies in a negotiation might include \"ask for 20% more,\" \"ask for 10% more,\" or \"accept the initial offer.\" Don't overthink this — <strong>\"stay silent\" and \"do nothing\"</strong> are perfectly valid strategies, and often surprisingly powerful ones.</p>\n<p><strong>3. Payoffs</strong> — what each player gets for <strong>every possible combination</strong> of strategies. This is where it gets interesting. Your payoff from asking for a 20% raise depends entirely on whether your manager says yes, counters, or shows you the door. Payoffs capture the fact that <em>your result is entangled with everyone else's choices</em>.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Why Your Everyday Interactions Qualify",
+        "content": "<p>You might be thinking, \"Okay, negotiations and business deals are games — but my <strong>regular Tuesday</strong>?\" Yes. Your regular Tuesday. From my perspective, once you start looking for strategic interactions, you'll find them everywhere.</p>\n<p>Deciding <strong>when to send that Slack message</strong> (will they think it's urgent if I send it now?). Choosing whether to <strong>eat lunch at your desk or join colleagues</strong> (what signals does each send?). Even something as simple as <strong>holding a door</strong> — there's a micro-calculation about social norms, reciprocity, and the other person's pace.</p>\n<p>Here's the truth: the beauty of seeing these as games isn't to make life feel transactional. It's the opposite. Once you recognise the <strong>strategic structure underneath everyday moments</strong>, you can make better choices. You stop reacting on autopilot and start seeing the <strong>full landscape of options, incentives, and likely responses</strong>. That awareness — the <em>strategic lens</em> — is the single most valuable takeaway from game theory. It turns <strong>reactive behaviour into deliberate choice</strong>.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Example: Choosing a Meeting Time",
+        "content": "You and a colleague need to meet this week. You prefer mornings (you're sharpest then), but they prefer afternoons (they have school drop-off). If you both insist on your preferred time, the meeting doesn't happen and the project stalls. If one of you compromises, the meeting happens but one person is less effective. If you find a creative option — say, a working lunch — both might be satisfied. Players: you and your colleague. Strategies: morning, afternoon, or creative alternative. Payoffs: productivity, convenience, and relationship goodwill."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "meeting-time-matrix",
+        "title": "The Meeting Time Game",
+        "description": "You prefer mornings and your colleague prefers afternoons. Payoffs represent overall satisfaction (10 = ideal, 1 = worst). The first number is your payoff, the second is your colleague's.",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "You",
+          "colPlayer": "Colleague",
+          "rowStrategies": [
+            "Propose Morning",
+            "Propose Afternoon"
+          ],
+          "colStrategies": [
+            "Agree to Morning",
+            "Insist on Afternoon"
+          ],
+          "payoffs": [
+            [
+              [
+                8,
+                4
+              ],
+              [
+                2,
+                2
+              ]
+            ],
+            [
+              [
+                5,
+                5
+              ],
+              [
+                4,
+                8
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-strategic-game",
+        "question": "Which of the following is a strategic game?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Solving a Sudoku puzzle alone at your desk"
+          },
+          {
+            "id": "b",
+            "text": "Deciding whether to undercut a competitor's price before a product launch"
+          },
+          {
+            "id": "c",
+            "text": "Choosing what to have for breakfast when you live alone"
+          },
+          {
+            "id": "d",
+            "text": "Running a solo marathon with no other runners nearby"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Undercutting a competitor's price is a strategic game because your outcome (sales, profit, market share) depends on what the competitor does in response. The other options are individual decisions — your outcome depends only on your own actions, with no interdependence on another decision-maker."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-map-interactions",
+        "title": "Map Your Week as Games",
+        "prompt": "Think back over the past week. Identify 3 interactions that qualify as strategic games. For each one, write down: (1) Who were the players? (2) What strategies were available to each player? (3) What did each person stand to gain or lose? Try to pick interactions from different areas of your life — work, social, family, or even a brief encounter with a stranger.",
+        "hints": [
+          "A conversation where you chose your words carefully based on how you expected the other person to react is almost certainly a game.",
+          "Think about any situation where you waited to see what someone else did before making your move.",
+          "Even small moments count: who pays for coffee, who texts first, who volunteers for the unpleasant task."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "A strategic game exists whenever your outcome depends on someone else's choices — not just your own.",
+          "Every game has three elements: players, strategies, and payoffs.",
+          "You play dozens of strategic games every day without realising it — in meetings, negotiations, social interactions, and even casual conversations.",
+          "Recognising the game is the first step to playing it well. The \"strategic lens\" turns reactive behaviour into deliberate choice."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What three elements define every strategic game?",
+        "back": "Players (the decision-makers), Strategies (their available actions), and Payoffs (the outcomes for each combination of strategies)."
+      },
+      {
+        "front": "What distinguishes a \"game\" from a simple decision?",
+        "back": "Interdependence. In a game, your outcome depends on what other players choose — not just on your own actions."
+      },
+      {
+        "front": "Is choosing what to eat for lunch alone a strategic game?",
+        "back": "No — there's no other player whose choices affect your outcome. It becomes a game if you're choosing a restaurant with a friend who has different preferences."
+      },
+      {
+        "front": "What is the \"strategic lens\"?",
+        "back": "The habit of recognising the strategic structure (players, strategies, payoffs) in everyday interactions, allowing you to make more deliberate and effective choices."
+      },
+      {
+        "front": "Can \"doing nothing\" be a strategy in a game?",
+        "back": "Absolutely. Inaction is a valid and often powerful strategy. Choosing not to respond, not to compete, or not to negotiate is itself a strategic choice with real payoffs."
+      }
+    ]
+  },
+  "payoffs-beyond-money": {
+    "id": "payoffs-beyond-money",
+    "moduleId": "strategic-lens",
+    "title": "Payoffs Aren't Always Money",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What Economists Mean by \"Utility\"",
+        "content": "<p>Let's get real about something. In game theory, we measure payoffs in terms of <strong>utility</strong> — a word that sounds academic but captures something deeply practical. Utility is simply a measure of <em>how much you value an outcome</em>, taking everything into account. It's not just about dollars. It's about the <strong>total package</strong> of what matters to you.</p>\n<p>When an economist says someone is \"maximising their utility,\" they don't mean that person is a <strong>cold, calculating robot</strong> chasing money. They mean that person is trying to get the best overall outcome <em>as they define it</em>. For one person, that might mean <strong>maximising salary</strong>. For another, it might mean <strong>minimising stress</strong>. For a third, it might mean <strong>maintaining a reputation</strong> or preserving a relationship.</p>\n<p>Here's the thing that took me a while to appreciate: two people can look at the exact same situation, make <strong>opposite choices</strong>, and both be acting completely rationally. They're optimising for <strong>different utility functions</strong> — different definitions of what \"winning\" looks like. Understanding this is the key to understanding why people do what they do in strategic situations.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "The Hidden Currencies You Trade Every Day",
+        "content": "<p>Money is the payoff we notice most easily because it's <strong>concrete and measurable</strong>. But think about how many other currencies flow through your daily interactions:</p>\n<p><strong>Time</strong> — arguably your most finite resource. Every meeting you attend, every favour you do, every task you take on has a <strong>time cost</strong> that competes with everything else you could be doing. <strong>Status and reputation</strong> — how others perceive your competence, reliability, and importance. A single <strong>visible win at work</strong> might be worth more to your career than a thousand quiet successes. <strong>Relationships</strong> — trust, goodwill, and <strong>social capital</strong> that you build (or burn) with every interaction. <strong>Emotional energy</strong> — the psychological cost of conflict, stress, uncertainty, or social performance.</p>\n<p>From my perspective, the most common strategic mistake people make is <strong>treating a multi-dimensional game as if it were one-dimensional</strong>. They focus on the money and ignore the <strong>relationship damage</strong>. They optimise for status and overlook the <strong>time cost</strong>. They avoid short-term conflict and miss the <strong>long-term cost of not speaking up</strong>. Great strategists see the full payoff landscape.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Building Multi-Dimensional Payoff Matrices",
+        "content": "<p>Don't worry — this is simpler than it sounds. When you map out a game, resist the urge to reduce payoffs to a <strong>single number</strong> right away. Instead, start by listing <em>all</em> the dimensions that matter. A decision about whether to take on an extra project at work might involve: <strong>compensation, career advancement, learning opportunity, work-life balance, team relationships</strong>, and personal energy.</p>\n<p>Once you see the full picture, you can weigh these dimensions against each other. Maybe the <strong>learning opportunity</strong> is worth the time cost. Maybe the <strong>relationship benefit</strong> of helping a colleague outweighs the small hit to your own productivity. The point isn't to obsessively quantify everything — it's to <strong>make your hidden calculations visible</strong> so you can evaluate them honestly.</p>\n<p>Here's an example of where this really shines: <strong>negotiations</strong>. When you understand that the other party cares about dimensions you don't (and vice versa), suddenly there's room for <strong>trades that make both sides better off</strong>. You give on something cheap to you but valuable to them, and receive something valuable to you but cheap to them. These trades are completely invisible if you only think in dollars. As negotiation researcher William Ury put it: <strong>\"Getting to yes\"</strong> often means finding those hidden dimensions where interests don't actually conflict.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Example: Volunteering for the Tough Project",
+        "content": "Your manager asks for a volunteer to lead a cross-functional initiative. It'll cost you 10 extra hours a week for two months. In pure time terms, the payoff is negative. But factor in: visibility with senior leadership (+status), a chance to work with the product team (+learning, +relationships), a stronger case for promotion (+career), and the signal that you're a team player (+reputation). The person who only sees the time cost says no. The person who sees the full payoff matrix often says yes — and comes out ahead."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "help-colleague-matrix",
+        "title": "The \"Help a Colleague\" Game",
+        "description": "A colleague asks for substantial help on their project. Payoffs include reputation, time, and relationship value combined into a single score. First number is your payoff, second is your colleague's. (Try editing the values — what changes if helping costs you more time? What if reciprocation is more likely?)",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "You",
+          "colPlayer": "Colleague",
+          "rowStrategies": [
+            "Help Generously",
+            "Decline Politely"
+          ],
+          "colStrategies": [
+            "Reciprocates Later",
+            "Takes Without Giving Back"
+          ],
+          "payoffs": [
+            [
+              [
+                7,
+                8
+              ],
+              [
+                2,
+                9
+              ]
+            ],
+            [
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-hidden-payoffs",
+        "question": "A senior engineer stays late to mentor a junior colleague, even though it earns no overtime pay and delays their own work. What hidden payoff are they most likely optimising for?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They must not understand their own interests"
+          },
+          {
+            "id": "b",
+            "text": "Reputation as a leader and long-term relationship capital"
+          },
+          {
+            "id": "c",
+            "text": "They are being irrational since there's no monetary gain"
+          },
+          {
+            "id": "d",
+            "text": "They are only doing it because their manager is watching"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Mentoring builds reputation, trust, and social capital — all valuable non-monetary payoffs. The engineer is acting rationally by optimising for a utility function that includes more than just money and time. This is a core insight of game theory: behaviour that looks irrational often makes perfect sense once you see the full payoff structure."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-full-payoffs",
+        "title": "Uncover Your Full Payoff Structure",
+        "prompt": "Pick a decision you made recently — it could be work-related (taking on a task, speaking up in a meeting) or personal (helping a friend, skipping an event). List ALL the payoffs you considered, even the ones you didn't consciously think about. Categorise them: monetary, time, status/reputation, relationships, emotional energy, learning/growth, and anything else. Which dimension had the most influence on your final choice? Were there any payoffs you only see now in hindsight?",
+        "hints": [
+          "Don't just list the obvious payoffs. Ask yourself: \"What would I have lost if I'd chosen differently?\" Those avoided losses are payoffs too.",
+          "Consider payoffs that unfold over different time horizons — short-term pain vs. long-term gain is a classic tension.",
+          "Think about \"audience effects\" — did the presence of other people change what you valued?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Utility is the total value you assign to an outcome — it includes far more than money.",
+          "The hidden currencies of strategic life include time, status, relationships, emotional energy, reputation, and learning opportunity.",
+          "Two people making opposite choices can both be rational — they're optimising for different utility functions.",
+          "Seeing the full payoff landscape reveals trades and opportunities that are invisible when you only think in one dimension.",
+          "In negotiations, understanding what the other party truly values (not just what they say they want) is your biggest strategic advantage."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is \"utility\" in game theory?",
+        "back": "A measure of how much a player values a particular outcome, encompassing all dimensions they care about — not just money, but also time, status, relationships, and emotional well-being."
+      },
+      {
+        "front": "Name four non-monetary payoffs that frequently drive strategic decisions.",
+        "back": "Status/reputation, relationships and social capital, time and energy, and learning/growth opportunities."
+      },
+      {
+        "front": "Why might two rational people make opposite choices in the same situation?",
+        "back": "They have different utility functions — they weight the various payoff dimensions differently based on their values, circumstances, and goals."
+      },
+      {
+        "front": "What is the most common strategic mistake related to payoffs?",
+        "back": "Treating a multi-dimensional game as one-dimensional — e.g., focusing only on money while ignoring relationship damage, time costs, or reputation effects."
+      },
+      {
+        "front": "How does understanding non-monetary payoffs help in negotiations?",
+        "back": "It reveals opportunities for mutually beneficial trades: you can give on dimensions cheap to you but valuable to the other party, and receive value on dimensions that matter more to you."
+      }
+    ]
+  },
+  "simultaneous-sequential": {
+    "id": "simultaneous-sequential",
+    "moduleId": "strategic-lens",
+    "title": "Simultaneous vs. Sequential",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Two Fundamentally Different Structures",
+        "content": "<p>Not all games are created equal, and here's one of the most important distinctions in game theory: <strong>simultaneous</strong> vs. <strong>sequential</strong> games. The difference isn't really about timing in a literal sense — it's about <em>information</em>. When you choose, do you know what the other player has already done?</p>\n<p>In a <strong>simultaneous game</strong>, players choose their strategies <strong>without knowing</strong> what the other players are choosing. Think of rock-paper-scissors: you both throw at the same time. Neither player can react to the other's choice. Even if decisions happen at slightly different clock times, a game is \"simultaneous\" if <strong>neither player observes the other's move</strong> before committing to their own.</p>\n<p>In a <strong>sequential game</strong>, players take turns, and later players can observe (at least some of) what earlier players did. Chess is the classic example — you see your opponent's move before deciding yours. But so is a <strong>salary negotiation</strong> where one side makes the first offer, or a market where one company launches a product before competitors decide how to respond.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Simultaneous Games and the Payoff Matrix",
+        "content": "<p>Simultaneous games are typically represented in <strong>normal form</strong> — the grid-style payoff matrices you've already seen. Each player's strategies form the rows and columns, and the cells show the payoffs for every possible combination. This format works well because it captures the core challenge: <em>you have to commit to a strategy without seeing your opponent's hand</em>.</p>\n<p>The strategic challenge in simultaneous games is fundamentally about <strong>prediction</strong>. Since you can't react to what the other player does, you have to anticipate it. What do you think they'll choose? What do they think <strong>you'll</strong> choose? What do they think you think they'll choose? (I know — it's like the poison scene in <em>The Princess Bride</em>.) This <strong>layered reasoning</strong> is what makes simultaneous games both fascinating and tricky.</p>\n<p>Here's an example that might surprise you: many real-world situations are simultaneous even when they don't look like it. When two companies <strong>set prices for the next quarter</strong>, they typically commit to pricing strategies without seeing the competitor's final decision. When you and a colleague <strong>independently prepare recommendations</strong> for a meeting, you're playing a simultaneous game — you can't adjust your recommendation based on theirs because you don't see it until the meeting starts.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Sequential Games and the Game Tree",
+        "content": "<p>Sequential games open up an entirely different strategic landscape. When you can observe what happened before your turn, you can <strong>condition your strategy on the other player's actions</strong>. This is represented using <strong>extensive form</strong> — a game tree that maps out every possible sequence of moves and their consequences.</p>\n<p>Game trees are powerful because they let you <strong>think backwards</strong>. A technique called <strong>backward induction</strong> starts at the end of the tree (the final payoffs) and works back to the beginning, asking at each decision point: \"Given what comes next, what would a rational player choose here?\" This unravels the entire game and often reveals a <strong>clear optimal strategy</strong>. For me, this was one of those \"aha\" moments — you don't solve sequential games by thinking forwards. You solve them by starting at the end.</p>\n<p>Sequential structure fundamentally changes <strong>who has power</strong>. The concept of <strong>first-mover advantage</strong> describes situations where going first lets you shape the game — you set the terms and force the other player to respond to your frame. But first-mover advantage isn't universal. In some games, there's a <strong>second-mover advantage</strong>: the ability to observe and react is more valuable than the ability to set the agenda. Knowing which type of game you're in is critical.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Example: Salary Negotiation — Who Names the First Number?",
+        "content": "In a salary negotiation, who moves first? If you name your number first, you set an \"anchor\" — research shows the final number tends to stay close to the first number mentioned. That's a first-mover advantage through anchoring. But if you name a number that's too high, you might signal that you're unrealistic and lose credibility. If you let the employer go first, you gain information about their range but risk being anchored to a lower number. The structure of the game — who moves first — fundamentally shapes the outcome."
+      },
+      {
+        "type": "concept",
+        "title": "Information: The Hidden Variable",
+        "content": "<p>Here's the truth: the real distinction between simultaneous and sequential games is about <strong>information</strong>. In a sequential game with <em>perfect information</em>, every player can see every previous move (like chess). But many real-world sequential games have <strong>imperfect information</strong> — you see some of what happened, but not all of it.</p>\n<p>Consider applying for a job. You submit your application (your move), then the company decides whether to interview you (their move). It's sequential — they see your application before deciding. But you have <strong>imperfect information</strong>: you don't know what other applicants submitted, what the hiring manager's priorities really are, or how your resume was scored. You're playing a sequential game, but <strong>significant uncertainty</strong> remains.</p>\n<p><strong>Information asymmetry</strong> — where one player knows something the other doesn't — is one of the most powerful dynamics in strategic interactions. The player with <strong>more information</strong> often has a massive advantage. That's why transparency, research, and intelligence-gathering aren't just nice-to-haves in negotiations — they're <strong>strategic necessities</strong>. From what I've observed, the people who win negotiations aren't necessarily the toughest — they're the <strong>best-informed</strong>.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "A Simple Game Tree: Asking for a Raise",
+        "diagram": {
+          "type": "flow",
+          "data": {
+            "nodes": [
+              {
+                "id": "start",
+                "label": "You: Ask or Don't Ask?",
+                "type": "decision"
+              },
+              {
+                "id": "dont-ask",
+                "label": "Don't Ask",
+                "type": "action"
+              },
+              {
+                "id": "ask",
+                "label": "Ask for Raise",
+                "type": "action"
+              },
+              {
+                "id": "mgr-response",
+                "label": "Manager: Yes, Counter, or No?",
+                "type": "decision"
+              },
+              {
+                "id": "status-quo",
+                "label": "Status quo: (5, 7)",
+                "type": "outcome"
+              },
+              {
+                "id": "yes",
+                "label": "Full raise: (9, 5)",
+                "type": "outcome"
+              },
+              {
+                "id": "counter",
+                "label": "Partial raise: (7, 6)",
+                "type": "outcome"
+              },
+              {
+                "id": "no",
+                "label": "Denied: (3, 7)",
+                "type": "outcome"
+              }
+            ],
+            "edges": [
+              {
+                "from": "start",
+                "to": "dont-ask",
+                "label": "Don't Ask"
+              },
+              {
+                "from": "start",
+                "to": "ask",
+                "label": "Ask"
+              },
+              {
+                "from": "dont-ask",
+                "to": "status-quo"
+              },
+              {
+                "from": "ask",
+                "to": "mgr-response"
+              },
+              {
+                "from": "mgr-response",
+                "to": "yes",
+                "label": "Yes"
+              },
+              {
+                "from": "mgr-response",
+                "to": "counter",
+                "label": "Counter"
+              },
+              {
+                "from": "mgr-response",
+                "to": "no",
+                "label": "No"
+              }
+            ]
+          }
+        },
+        "content": "<p>This game tree captures the sequential structure of asking for a raise. You move first: ask or don't ask. If you ask, your manager moves second with full knowledge of your request. The payoffs at each ending (yours listed first, manager's second) reflect satisfaction levels on a 1–10 scale.</p>\n<p>Notice how <strong>backward induction</strong> works here: if you ask, your manager will choose whichever response maximises their payoff. If they'd choose \"Counter\" (giving you a 7), then your decision at the start is between 5 (don't ask) and 7 (ask and get a counter-offer). The answer is clear: ask. Game trees make these calculations <strong>visible and systematic</strong>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-simultaneous-sequential",
+        "question": "Two ride-sharing companies simultaneously announce their pricing for the holiday weekend, without knowing each other's prices in advance. What type of game is this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Sequential game — one company is bigger and implicitly \"goes first\""
+          },
+          {
+            "id": "b",
+            "text": "Simultaneous game — neither player observes the other's choice before committing"
+          },
+          {
+            "id": "c",
+            "text": "It's not a game because pricing is an internal decision"
+          },
+          {
+            "id": "d",
+            "text": "Sequential game — they could have chosen to announce at different times"
+          }
+        ],
+        "correct": "b",
+        "explanation": "This is a simultaneous game because neither company observes the other's pricing decision before committing to their own. The key question is always about information at the moment of decision, not about company size or hypothetical timing. Each company must predict the other's strategy rather than react to it."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-negotiation-order",
+        "title": "First Mover or Second Mover?",
+        "prompt": "Think of a negotiation or strategic interaction you've been involved in. Describe the situation, then analyse: Was it simultaneous or sequential? If sequential, who moved first? Would you have been better off moving first (setting the anchor, shaping the frame) or second (observing, reacting, gaining information)? Explain your reasoning by considering what information was available and how the order of moves affected the outcome.",
+        "hints": [
+          "Consider the anchoring effect: in many negotiations, the first number named heavily influences the final outcome.",
+          "Think about whether you had enough information to make a strong first move, or whether you were operating with significant uncertainty.",
+          "Sometimes the best \"first move\" isn't a number — it's framing the conversation, defining what's being negotiated, or setting the criteria for a good outcome."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Simultaneous games require prediction — you commit without seeing the other player's choice.",
+          "Sequential games allow reaction — later players can condition their strategy on earlier moves.",
+          "First-mover advantage lets you set anchors and shape the frame. Second-mover advantage lets you observe and adapt.",
+          "The real distinction is about information: what do you know when you decide?",
+          "Information asymmetry is one of the most powerful dynamics in strategic interactions — the better-informed player often holds the advantage."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What makes a game \"simultaneous\" vs. \"sequential\"?",
+        "back": "It's about information, not clock time. In a simultaneous game, players choose without observing each other's moves. In a sequential game, later players can see earlier players' choices before deciding."
+      },
+      {
+        "front": "What is backward induction?",
+        "back": "A technique for solving sequential games by starting at the final payoffs and working backward, asking at each decision point what a rational player would choose. It unravels the entire game tree from the end to the beginning."
+      },
+      {
+        "front": "When does first-mover advantage arise?",
+        "back": "When going first lets you set anchors, shape the frame, or commit to a strategy that forces the other player into a less favourable response. Common in negotiations and market entry."
+      },
+      {
+        "front": "What is information asymmetry?",
+        "back": "When one player knows something the other doesn't. The better-informed player often has a significant strategic advantage, which is why research and intelligence-gathering are strategic necessities."
+      }
+    ]
+  },
+  "zero-sum-win-win": {
+    "id": "zero-sum-win-win",
+    "moduleId": "strategic-lens",
+    "title": "Zero-Sum vs. Win-Win",
+    "estimatedMinutes": 16,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Zero-Sum: The Fixed Pie",
+        "content": "<p>Let's start with the simplest kind of game. A <strong>zero-sum game</strong> is one where the total payoff is fixed — whatever one player gains, the other player loses by <strong>exactly the same amount</strong>. The gains and losses always sum to zero. Think of it as dividing a pie: if I get a bigger slice, yours necessarily gets smaller. There is <strong>no way to make the pie bigger</strong>.</p>\n<p>Pure zero-sum games are the <strong>most competitive situations</strong> you'll encounter. There's no room for collaboration because there's nothing to create together — you're only dividing what already exists. Poker is a classic zero-sum game: every dollar you win comes <strong>directly from another player's stack</strong>. Competitive sports are zero-sum: one team's win is the other team's loss.</p>\n<p>In professional life, truly zero-sum situations are <strong>rarer than people think</strong>, but they do exist. Competing for a <strong>single promotion</strong> against a colleague is close to zero-sum — only one person gets the job. Bidding wars for a fixed contract often have a zero-sum structure. Here's why recognising a genuine zero-sum game matters: <em>in this situation, being \"nice\" doesn't create value — it just transfers your share to the other player</em>. Sometimes, you need to compete.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Positive-Sum: Expanding the Pie",
+        "content": "<p>A <strong>positive-sum game</strong> (sometimes called a \"win-win\" game) is one where the players can, through cooperation or creative strategy, <em>increase the total value available</em>. Both sides can walk away <strong>better off than when they started</strong>. The gains don't have to come at anyone's expense because the pie itself grows.</p>\n<p>Here's the thing — most meaningful interactions in business and life are positive-sum. <strong>Trade</strong> is the classic example: if I have apples and you have oranges, and we each prefer variety, we can trade and both end up happier. No one loses. A well-structured <strong>business partnership</strong> creates value neither party could create alone. Even a salary negotiation — often perceived as zero-sum — can be <strong>positive-sum</strong> if you expand the negotiation beyond base pay to include flexibility, title, learning opportunities, and equity.</p>\n<p>The strategic challenge in positive-sum games is different from zero-sum. Instead of \"how do I claim the most?\", the question becomes <strong>\"how do we create the most, and then how do we divide it fairly?\"</strong> From what I've observed, the best strategists do both: they <strong>expand the pie AND</strong> make sure they get a good slice. People who only focus on claiming end up fighting over small pies. People who only focus on creating end up <strong>giving away their share</strong>.</p>"
+      },
+      {
+        "type": "concept",
+        "title": "Negative-Sum and How to Spot the Type",
+        "content": "<p>There's a third category people often overlook: <strong>negative-sum games</strong>, where the interaction <strong>destroys value</strong> for both sides. Think of a bitter lawsuit where both parties spend more on legal fees than the dispute is worth. Or a <strong>price war</strong> where two companies keep undercutting each other until neither is profitable. Or an escalating argument where both people say things they regret, <strong>damaging a relationship</strong> neither wanted to damage.</p>\n<p>Recognising a negative-sum game early is one of the <strong>most valuable strategic skills</strong> you can develop. When you see that continued competition is destroying total value, the smart move is often to find a way out — <strong>negotiate a truce</strong>, change the game, or simply walk away.</p>\n<p>To identify which type of game you're in, ask these questions: <strong>Is the total value fixed?</strong> If yes, it's zero-sum. <strong>Can we create additional value through cooperation?</strong> If yes, it's positive-sum. <strong>Is the interaction destroying value for both sides?</strong> If yes, it's negative-sum and you should look for the exit. But here's the most important question of all: <strong>Am I treating this as zero-sum out of habit, when it could actually be positive-sum?</strong> For me, this single reframing question has transformed more strategic outcomes than any other tool in the toolkit.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Example: Pizza Night",
+        "content": "Splitting a pizza is zero-sum: if there are 8 slices and you take 5, your friend gets 3. The total is fixed. But choosing toppings together is positive-sum. If you like pepperoni and they like mushrooms, you could fight for your favourite (zero-sum thinking) or get half-and-half (both get what they want — positive-sum). If you discover you both love a third option — say, margherita — you've created even more value. The physical pizza is the same size, but the total satisfaction is higher because you expanded the \"pie\" of happiness through creative cooperation."
+      },
+      {
+        "type": "concept",
+        "title": "Reframing: The Master Skill",
+        "content": "<p>Perhaps the single most powerful technique in game theory is <strong>reframing</strong> — taking a situation that appears zero-sum and finding the <strong>positive-sum potential</strong> hiding inside it. This isn't wishful thinking. It's rigorous strategic analysis that looks for <strong>dimensions of value</strong> that aren't immediately visible.</p>\n<p>The reframing process works in three steps. <strong>First</strong>, identify the assumed constraint: \"We're fighting over X.\" <strong>Second</strong>, question the constraint: \"Is X really fixed? Are there other things we value that <strong>aren't on the table</strong>?\" <strong>Third</strong>, expand the game: bring in <strong>new dimensions, new options, or new time horizons</strong> that create value for both sides.</p>\n<p>Here's an example. Two departments fighting over a <strong>limited budget</strong> (zero-sum) could reframe by jointly proposing a project to leadership that <strong>brings in new revenue</strong> (positive-sum). Two job candidates competing for one role (zero-sum) might discover the company could <strong>create a second position</strong> if the business case is strong enough (positive-sum). The constraint you assumed was fixed often isn't — and the person who sees this first has an <strong>enormous strategic advantage</strong>. As the saying goes: don't fight over the pie — <strong>bake a bigger one</strong>.</p>"
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "zero-sum-market-share",
+        "title": "Zero-Sum: Market Share Battle",
+        "description": "Two companies competing for a fixed market. Every percentage point one gains, the other loses. Payoffs represent market share change. Notice the values always sum to zero — this is a pure zero-sum game.",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "Company A",
+          "colPlayer": "Company B",
+          "rowStrategies": [
+            "Aggressive Pricing",
+            "Hold Price"
+          ],
+          "colStrategies": [
+            "Aggressive Pricing",
+            "Hold Price"
+          ],
+          "payoffs": [
+            [
+              [
+                0,
+                0
+              ],
+              [
+                5,
+                -5
+              ]
+            ],
+            [
+              [
+                -5,
+                5
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "positive-sum-partnership",
+        "title": "Positive-Sum: Same Companies, Reframed",
+        "description": "Instead of fighting over existing market share, the companies explore a partnership (joint product, bundling, shared distribution). Payoffs represent total profit change. Notice both can gain simultaneously — that's the power of reframing.",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "Company A",
+          "colPlayer": "Company B",
+          "rowStrategies": [
+            "Compete Aggressively",
+            "Propose Partnership"
+          ],
+          "colStrategies": [
+            "Compete Aggressively",
+            "Open to Collaboration"
+          ],
+          "payoffs": [
+            [
+              [
+                -2,
+                -2
+              ],
+              [
+                3,
+                -1
+              ]
+            ],
+            [
+              [
+                -1,
+                3
+              ],
+              [
+                6,
+                6
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "quiz-classify-games",
+        "question": "Two co-workers are both up for the same single promotion. However, they discover they could pitch a joint proposal to restructure the team, creating a senior role for each of them. What has happened?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The game was always positive-sum; they just didn't see it"
+          },
+          {
+            "id": "b",
+            "text": "They reframed a zero-sum game into a positive-sum game by expanding the options"
+          },
+          {
+            "id": "c",
+            "text": "This is still zero-sum because the company budget is fixed"
+          },
+          {
+            "id": "d",
+            "text": "There are no real strategic games in office environments"
+          }
+        ],
+        "correct": "b",
+        "explanation": "The original game — two people competing for one promotion — was zero-sum. But by creatively expanding the set of possible outcomes (proposing a restructure that creates two roles), they reframed it into a positive-sum game where both can win. The constraint of \"only one promotion\" turned out to be a self-imposed limitation, not a true fixed constraint. This is reframing in action."
+      },
+      {
+        "type": "exercise",
+        "id": "exercise-reframe-zero-sum",
+        "title": "Reframe Your Zero-Sum Situation",
+        "prompt": "Think of a situation in your life — at work, in a relationship, or in a community — that you initially saw (or currently see) as zero-sum: one person gains and the other loses. Describe the situation, then work through the reframing process: (1) What is the assumed fixed constraint? (2) Is it truly fixed, or are there hidden dimensions of value? (3) How could you expand the game so that both sides gain? Be specific about what new options, dimensions, or time horizons you could introduce.",
+        "hints": [
+          "Look for differences in what each party values most — these differences are the raw material for mutually beneficial trades.",
+          "Consider the time dimension: something costly now might be valuable later, or vice versa.",
+          "Ask whether you could bring in a third party, combine resources, or change the scope of what's being discussed.",
+          "Sometimes the reframe is simple: instead of \"who gets the credit?\" ask \"how do we get the result AND both get recognised?\""
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Zero-sum games have a fixed total — one player's gain is another's loss. They require competitive thinking.",
+          "Positive-sum games allow value creation — both sides can benefit through cooperation and creative strategy.",
+          "Negative-sum games destroy value for everyone. Recognise them early and find the exit.",
+          "Most real-world situations have more positive-sum potential than people assume. The constraint you think is fixed often isn't.",
+          "Reframing — finding the positive-sum potential in an apparently zero-sum situation — is one of the most valuable strategic skills you can develop.",
+          "The best strategists do both: expand the pie (create value) AND claim a fair slice (capture value)."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What defines a zero-sum game?",
+        "back": "The total payoff is fixed. Whatever one player gains, the other loses by the same amount. Gains and losses always sum to zero — like dividing a pie of fixed size."
+      },
+      {
+        "front": "What is a positive-sum (win-win) game?",
+        "back": "A game where players can increase the total value through cooperation or creative strategy. Both sides can end up better off than when they started — the pie itself grows."
+      },
+      {
+        "front": "What is a negative-sum game, and why is it important to recognise one?",
+        "back": "A game where the interaction destroys value for both sides (e.g., a price war or bitter lawsuit). Recognising one early lets you find a way out before both parties suffer unnecessary losses."
+      },
+      {
+        "front": "What are the three steps of \"reframing\" a game?",
+        "back": "1. Identify the assumed fixed constraint (\"We're fighting over X\"). 2. Question the constraint (\"Is X really fixed?\"). 3. Expand the game by introducing new dimensions, options, or time horizons that create value for both sides."
+      },
+      {
+        "front": "Why is the question \"Am I treating this as zero-sum out of habit?\" so valuable?",
+        "back": "Because most real-world interactions have more positive-sum potential than people assume. This single question can reveal hidden opportunities for mutual gain that competitive thinking would miss."
+      }
+    ]
+  }
+}

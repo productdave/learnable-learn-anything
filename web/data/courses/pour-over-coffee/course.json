@@ -1,0 +1,25 @@
+{
+  "id": "pour-over-coffee",
+  "schemaVersion": 1,
+  "name": "Pour-Over Coffee at Home",
+  "title": "Pour-Over Coffee at Home",
+  "subtitle": "Brew café-quality pour-over coffee for yourself and guests using your V60.",
+  "eyebrow": "Free Course",
+  "storageKeyPrefix": "pour-over-coffee",
+  "documentTitle": "Pour-Over Coffee at Home | Learnable",
+  "searchPlaceholder": "Search topics in Pour-Over Coffee at Home…",
+  "chatPlaceholder": "Ask about pour-over coffee at home… (Enter to send)",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question below.",
+  "chatSystemPrompt": "You are a learning assistant embedded in an interactive course called \"Pour-Over Coffee at Home\". The course is for: Beginner who just bought a V60 and gooseneck kettle, wanting to brew café-quality coffee at home for themselves and guests. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "completionMessage": "great work building your knowledge",
+  "dashboardCTA": "Work through the topics in order. Each one builds on the last.",
+  "moduleColorAccents": [
+    "#4338CA",
+    "#D97706",
+    "#059669",
+    "#8B5CF6",
+    "#0EA5E9"
+  ]
+}

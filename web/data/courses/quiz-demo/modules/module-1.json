@@ -1,0 +1,94 @@
+{
+  "variant-tour": {
+    "id": "variant-tour",
+    "moduleId": "all-variants",
+    "title": "Tour of Every Quiz Variant",
+    "estimatedMinutes": 8,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Five formats, one renderer",
+        "content": "<p>This topic exists to verify that the renderer handles every quiz variant the generator can produce. Below you'll find <strong>one quiz of each type</strong> — answer them in order to confirm input, feedback, and persistence work.</p><p>If anything renders broken, that's the bug to fix before we generate any more courses.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "demo-mc",
+        "question": "Which quiz format is best when you have 4 plausible distractors and want to test applied judgement?",
+        "options": [
+          { "id": "a", "text": "True/False" },
+          { "id": "b", "text": "Multiple Choice" },
+          { "id": "c", "text": "Fill-in-the-Blank" },
+          { "id": "d", "text": "Open-Ended" }
+        ],
+        "correct": "b",
+        "explanation": "Multiple choice shines when you have several similar-looking options and want to force the learner to pick the right reasoning. The others all serve narrower purposes — T/F for sharp claims, fill-in for specific values, open-ended for synthesis."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "demo-tf",
+        "statement": "Multiple choice is always the best quiz format because it gives the most options.",
+        "correct": false,
+        "explanation": "More options isn't automatically better. Fill-in-the-blank tests recall sharper. Matching tests pattern recognition. Open-ended tests synthesis. The right format depends on what you're trying to teach."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "demo-match",
+        "question": "Match each quiz variant to the situation it fits best.",
+        "pairs": [
+          { "left": "True/False", "right": "Surface a sharp common misconception" },
+          { "left": "Matching", "right": "Vocabulary or taxonomy learning" },
+          { "left": "Fill-in-Blank", "right": "Pinpoint a specific value or term" },
+          { "left": "Open-Ended", "right": "Force synthesis across multiple ideas" }
+        ],
+        "explanation": "Each format has a sweet spot. Picking the right one for each topic is the whole point of having a library to choose from."
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "demo-fib",
+        "sentence": "The standard coffee-to-water ratio for a balanced pour-over brew is ___.",
+        "acceptable_answers": ["1:16", "1 to 16", "1:16.7", "one to sixteen"],
+        "explanation": "1:16 (one gram of coffee per sixteen grams of water) is the widely accepted starting point. From there you adjust based on taste — stronger or weaker. Fill-in-the-blank is perfect when a single specific value is the whole point."
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "demo-sa",
+        "question": "If a teammate asked you to recommend which quiz format to use for a topic on giving feedback, what would you say and why?",
+        "sample_answer": "I'd lean toward open-ended (short-answer) because feedback is a synthesis skill — there's no single right wording. The learner needs to compose a response that balances clarity, care, and specificity. A multiple-choice quiz might test whether they recognise good feedback when they see it, but it doesn't force them to generate it.",
+        "key_points": [
+          "Mention that feedback is a synthesis skill",
+          "Note that open-ended forces generation, not just recognition",
+          "Acknowledge that MC tests recognition (a different skill)",
+          "Connect format choice to the cognitive demand of the topic"
+        ],
+        "explanation": "Strong answers connect the quiz format to the cognitive load of the topic, not just to surface features. Recognising vs. generating is the key distinction here."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Why variety matters",
+        "content": "A 20-topic course where every quiz is multiple choice gets monotonous fast — and it under-tests skills like recall, pattern recognition, and synthesis. The generator now distributes variants across topics deliberately so the learner gets a mix."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Multiple choice is best when distractors carry real judgement weight.",
+          "True/false is best for sharp claims and common misconceptions.",
+          "Matching is best for pairing terms with definitions or scenarios with strategies.",
+          "Fill-in-the-blank is best when one specific value, name, or phrase is the lesson.",
+          "Open-ended is best when synthesis matters more than the exact wording of the answer."
+        ]
+      }
+    ],
+    "flashcards": [
+      { "front": "When is multiple choice the right quiz format?", "back": "When you have 3-4 plausible distractors and want to test applied judgement — picking the best reasoning out of several similar-looking options." },
+      { "front": "When is fill-in-the-blank the right quiz format?", "back": "When a single specific value, name, ratio, or short phrase is the actual lesson — and you want the learner to retrieve it from memory, not just recognise it." },
+      { "front": "When is open-ended the right quiz format?", "back": "When the concept requires synthesis no fixed answer captures — the learner writes free text, then self-assesses against a sample answer and key points." },
+      { "front": "Why distribute quiz variants across topics?", "back": "A course of 20 multiple-choice quizzes gets monotonous and under-tests recall, pattern recognition, and synthesis. Variety keeps engagement up and tests more dimensions of understanding." }
+    ]
+  }
+}

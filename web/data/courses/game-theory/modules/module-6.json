@@ -1,0 +1,545 @@
+{
+  "incentive-design": {
+    "id": "incentive-design",
+    "moduleId": "designing-games",
+    "title": "Incentive Design",
+    "estimatedMinutes": 20,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Mechanism Design: Reverse Game Theory",
+        "content": "\n          <p>So here's the thing — throughout this course, we've been <em>analyzing</em> games. Given rules, players, and payoffs, we've been asking: what happens? But <strong>mechanism design</strong> flips the whole question on its head. Instead of \"given this game, what's the outcome?\" we ask <strong>\"given the outcome I want, what game should I design?\"</strong> Economists call this <em>reverse game theory</em>, and honestly, it's one of the most powerful ideas you'll ever come across.</p>\n          <p>Think of it this way. A <strong>traditional game theorist</strong> is like a physicist watching a ball roll down a hill. A <strong>mechanism designer</strong> is like an engineer who shapes the hill so the ball rolls exactly where they want it. You're not a passive observer of strategic interactions anymore — you're the <strong>architect</strong>.</p>\n          <p>From my perspective, mechanism design shows up <em>everywhere</em> once you start looking — <strong>tax systems</strong>, <strong>employee compensation</strong>, <strong>school admissions</strong>, <strong>organ donation registries</strong>, even the rules of a household chore chart. Whenever someone sets up the rules that other people play by, they're doing mechanism design — whether they realize it or not. The question is whether they're doing it <em>well</em>.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Incentive Compatibility",
+        "content": "\n          <p>Here's the central idea in mechanism design, and it's a beautiful one: <strong>incentive compatibility</strong>. A system is incentive-compatible when each participant's best strategy is to behave the way the designer intended. In other words, <strong>doing the right thing and doing the selfish thing are the same thing</strong>. People don't need to be saints — the system channels self-interest toward good outcomes.</p>\n          <p>Here's an example. Say you want employees to share <strong>honest project status updates</strong>. You need a system where honesty is rewarded (or at least not punished). If the messenger gets blamed for bad news, <strong>rational employees will hide problems</strong> until they explode. An incentive-compatible reporting system might <strong>reward early problem identification</strong>, making honesty the dominant strategy.</p>\n          <p>The elegance of incentive compatibility is that it <strong>respects human nature</strong> rather than fighting it. You're not asking people to act against their interests — you're designing the environment so their interests <strong>naturally align with the collective good</strong>. This echoes what we learned about Nash equilibrium in Module 2: the goal is to make the <em>desired</em> behavior the equilibrium of the game.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Perverse Incentives and the Cobra Effect",
+        "content": "\n          <p>When incentive design goes wrong, it goes <em>spectacularly</em> wrong. A <strong>perverse incentive</strong> is one that produces the opposite of the intended outcome. And the most famous example? The <strong>Cobra Effect</strong>.</p>\n          <p>During British rule in India, the government offered a <strong>bounty for dead cobras</strong> to reduce the cobra population. Sounds reasonable, right? Except enterprising citizens began <em>breeding</em> cobras to collect the bounty. When the government caught on and scrapped the program, breeders released their now-worthless snakes — making the <strong>cobra problem worse than before</strong>.</p>\n          <p>Don't worry, perverse incentives aren't ancient history. They're everywhere. When <strong>hospitals are penalized for patient deaths</strong>, some avoid admitting the sickest patients. When <strong>schools are judged solely by test scores</strong>, teachers \"teach to the test\" at the expense of deeper learning. When <strong>customer support teams are measured by call resolution time</strong>, agents rush callers off the phone without solving their problems.</p>\n          <p>The pattern is always the same: the designer measures a <em>proxy</em> for what they actually care about, and participants <strong>optimize the proxy at the expense of the real goal</strong>. Recognizing this pattern is the first step toward avoiding it.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Goodhart's Law",
+        "content": "\"When a measure becomes a target, it ceases to be a good measure.\" Once people know they're being evaluated on a specific metric, they will <strong>optimize for that metric</strong> — often at the expense of the underlying goal it was meant to capture. This is why every KPI eventually gets gamed, and why good mechanism designers use <strong>multiple, hard-to-manipulate measures</strong> rather than a single headline number."
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Sales Commission Structures",
+        "content": "A company pays salespeople a flat 10% commission on revenue. The intended outcome is more sales. The actual outcome? Reps offer <strong>massive discounts</strong> to close deals quickly (high revenue, low profit), focus only on <strong>easy-to-close accounts</strong>, and neglect customer retention entirely. A better design might blend <strong>commission on profit margin</strong>, a <strong>retention bonus</strong> for renewals, and a <strong>team-based component</strong> to discourage hoarding leads. Each layer closes a loophole that pure revenue commission creates."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "incentive-design-matrix",
+        "title": "Bad vs. Good Incentive Design",
+        "description": "This matrix shows how a poorly designed incentive system creates perverse outcomes. The manager wants employees to report problems early, but the current system punishes bad news. Try editing the payoffs to design an incentive-compatible system where honest reporting becomes the dominant strategy.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Employee",
+          "colPlayer": "Manager",
+          "rowStrategies": [
+            "Report Problem Early",
+            "Hide Problem"
+          ],
+          "colStrategies": [
+            "Reward Honesty",
+            "Punish Bad News"
+          ],
+          "payoffs": [
+            [
+              [
+                5,
+                5
+              ],
+              [
+                -3,
+                2
+              ]
+            ],
+            [
+              [
+                1,
+                -4
+              ],
+              [
+                2,
+                -1
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "incentive-design-quiz-1",
+        "question": "A city wants to reduce traffic congestion, so it starts measuring and publicizing average commute times on major highways. After a year, the reported average commute time drops — but residents say traffic feels worse. What most likely happened?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Traffic genuinely improved but residents have recency bias"
+          },
+          {
+            "id": "b",
+            "text": "Commuters shifted to side streets, reducing highway congestion but increasing overall travel time and neighborhood traffic"
+          },
+          {
+            "id": "c",
+            "text": "The city built new roads that solved the problem"
+          },
+          {
+            "id": "d",
+            "text": "Commuters started carpooling in response to the data"
+          }
+        ],
+        "correct": "b",
+        "explanation": "This is Goodhart's Law in action. The city measured <em>highway</em> commute times, so the system optimized for that specific metric. Commuters (and potentially the city itself) shifted traffic to unmeasured side streets. The proxy metric improved, but the actual goal — reducing overall congestion — was not achieved. A better design would measure total network travel time, not just highway speeds."
+      },
+      {
+        "type": "exercise",
+        "id": "incentive-design-exercise",
+        "title": "Audit an Incentive System",
+        "prompt": "Think of an incentive system in your organization, community, or daily life (performance reviews, grading systems, loyalty programs, household chore assignments). Describe the system, then analyze it: Is it incentive-compatible? What proxy metric does it use? What perverse behaviors might it create? Finally, sketch a redesign that better aligns individual incentives with the collective goal.",
+        "hints": [
+          "Start by identifying what the designer actually wants to happen vs. what they are measuring.",
+          "Ask: \"If I were a perfectly rational, slightly lazy person in this system, what would I do?\"",
+          "Look for gaps between the metric and the real goal — that is where gaming happens.",
+          "Consider whether adding a second metric or changing the reward structure would close the loophole."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Mechanism design is \"reverse game theory\" — designing rules to produce desired outcomes rather than predicting outcomes from given rules.",
+          "An incentive-compatible system makes the selfish choice and the socially optimal choice the same thing.",
+          "Perverse incentives arise when people optimize a proxy metric at the expense of the real goal.",
+          "Goodhart's Law warns that any metric used as a target will eventually be gamed.",
+          "Good incentive design uses multiple measures, rewards outcomes over outputs, and anticipates strategic behavior."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is mechanism design?",
+        "back": "Reverse game theory — instead of predicting outcomes from given rules, you design rules to produce desired outcomes."
+      },
+      {
+        "front": "What does \"incentive compatible\" mean?",
+        "back": "A system where each participant's best strategy is to behave as the designer intended — doing the right thing and the selfish thing are the same."
+      },
+      {
+        "front": "What is the Cobra Effect?",
+        "back": "A perverse incentive where the solution makes the problem worse. Named after a bounty on cobras in colonial India that led people to breed cobras for the reward."
+      },
+      {
+        "front": "State Goodhart's Law.",
+        "back": "When a measure becomes a target, it ceases to be a good measure. People optimize the metric at the expense of the underlying goal."
+      },
+      {
+        "front": "Why do perverse incentives occur?",
+        "back": "Because the designer measures a proxy for what they actually care about, and participants optimize the proxy instead of the real goal."
+      }
+    ]
+  },
+  "auction-allocation": {
+    "id": "auction-allocation",
+    "moduleId": "designing-games",
+    "title": "Auction and Allocation Mechanisms",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The Allocation Problem: Who Gets What?",
+        "content": "\n          <p>Let's get real — every organization faces <strong>allocation problems</strong>: who gets the budget, the office, the promotion, the prime vacation slot? These aren't just logistical puzzles — they're <strong>strategic games</strong>. The mechanism you use to allocate scarce resources shapes who gets them, how people feel about the process, and whether the outcome is actually efficient.</p>\n          <p>Here's an example. Consider three ways to allocate conference rooms: <strong>first-come-first-served</strong>, <strong>manager authority</strong>, or an <strong>internal booking auction</strong>. Each creates radically different incentives. First-come-first-served rewards early risers (and encourages people to camp out at 6 AM to book). Manager authority creates political jockeying. An auction allocates rooms to whoever values them most — but might feel unfair if some teams have bigger budgets.</p>\n          <p>The field of mechanism design gives us a <strong>toolkit for thinking about these tradeoffs</strong> rigorously. A well-designed allocation mechanism should be <strong>efficient</strong> (resources go where they create the most value), <strong>fair</strong> (participants perceive the process as legitimate), and <strong>incentive-compatible</strong> (people reveal their true preferences rather than gaming the system).</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Auction Types: A Tour of the Classics",
+        "content": "\n          <p>Auctions are among the <strong>most studied allocation mechanisms</strong>, and each type has distinct strategic properties. In an <strong>English auction</strong> (ascending price), bidders openly raise the price until only one remains. It's intuitive and transparent, but can lead to <strong>bidding wars driven by emotion</strong> — think of those house auctions where people get carried away in the moment.</p>\n          <p>In a <strong>Dutch auction</strong> (descending price), the auctioneer starts high and lowers the price until someone claims the item — rewarding <strong>decisive bidders who know their own valuation</strong>. It's a game of nerve.</p>\n          <p>Then there's the <strong>sealed-bid first-price auction</strong>. Everyone submits one secret bid, and the highest bidder wins and pays their bid. Sounds simple, right? But it creates a painful dilemma: <strong>bid your true value</strong> and you win but make zero profit. <strong>Bid low</strong> for a bargain and you risk losing. Rational bidders end up \"shading\" their bids below their true value, which means the item may not go to whoever values it most.</p>\n          <p>And here's where it gets really interesting — the <strong>Vickrey auction</strong> (sealed-bid second-price). Everyone submits a secret bid, the highest bidder wins, but pays the <em>second-highest</em> bid. This seemingly odd rule has a <strong>beautiful property</strong> — it makes bidding your true value the dominant strategy, regardless of what anyone else does. You never regret being honest.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "The Magic of the Vickrey Auction",
+        "content": "In a Vickrey (second-price sealed-bid) auction, <strong>bidding your true value is always optimal</strong>. If you bid higher than your value, you might win but overpay. If you bid lower, you might lose an item you would have profitably won. Since you pay the second-highest bid (not your own), <strong>honesty costs you nothing</strong> and protects you from both mistakes. This is incentive compatibility at its finest — and it's the principle behind how Google and Facebook sell <strong>billions of dollars in ad space</strong> every day."
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Bidding for Meeting Room Slots",
+        "content": "Imagine your company gives each team <strong>100 \"priority tokens\"</strong> per month to bid on meeting room slots. Teams submit sealed bids, the highest bid wins the slot, and the winning team is charged the <strong>second-highest bid</strong> (Vickrey style). The result: teams bid their true need (no reason to exaggerate), rarely-used rooms go cheaply to whoever needs them, and <strong>high-demand rooms go to the team that values them most</strong>. Tokens spent on rooms are redistributed equally at month-end, creating a self-balancing system."
+      },
+      {
+        "type": "concept",
+        "title": "The Winner's Curse and Fair Division",
+        "content": "\n          <p>Here's a pattern that trips up even experienced bidders. The <strong>winner's curse</strong> is a phenomenon where the winner of an auction tends to overpay. Why? Because the winner is, by definition, the person who <strong>estimated the value most optimistically</strong>. If ten people bid on a contract and there's genuine uncertainty about its value, the person who wins is the one who overestimated it the most. In competitive bidding for <strong>oil leases</strong>, <strong>construction contracts</strong>, and <strong>corporate acquisitions</strong>, the winner's curse is a well-documented and expensive reality.</p>\n          <p>Beyond auctions, <strong>fair division mechanisms</strong> address situations where we need to split resources among multiple parties — dividing an inheritance, allocating budget across departments, or splitting a shared apartment's rent. The classic <strong>\"I cut, you choose\"</strong> protocol for dividing cake is a simple but elegant mechanism: the cutter has an incentive to divide as fairly as possible, because the chooser will take the better piece.</p>\n          <p>Modern fair division includes algorithms like the <strong>Adjusted Winner procedure</strong>, which guarantees both efficiency and envy-freeness (neither party would prefer the other's share). These mechanisms show that with careful design, even <strong>contentious allocation problems</strong> can have solutions that everyone perceives as fair.</p>\n        "
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "auction-quiz-1",
+        "question": "In a Vickrey (second-price sealed-bid) auction, your true value for an item is $500. What is your optimal bid?",
+        "options": [
+          {
+            "id": "a",
+            "text": "$450 — shade your bid to ensure some profit if you win"
+          },
+          {
+            "id": "b",
+            "text": "$500 — bid your true value"
+          },
+          {
+            "id": "c",
+            "text": "$550 — bid above your value to guarantee winning"
+          },
+          {
+            "id": "d",
+            "text": "It depends on what others bid"
+          }
+        ],
+        "correct": "b",
+        "explanation": "In a Vickrey auction, bidding your true value ($500) is always the dominant strategy. Since you pay the second-highest bid rather than your own, bidding higher risks winning at a price above your value, and bidding lower risks losing an item you could have profitably won. Your bid determines only <em>whether</em> you win, not <em>what</em> you pay — so honesty is always optimal."
+      },
+      {
+        "type": "exercise",
+        "id": "auction-exercise",
+        "title": "Design a Fair Allocation Mechanism",
+        "prompt": "Think of a resource in your workplace or community that is currently allocated poorly (conference rooms, parking spots, project assignments, budget, prime vacation weeks). Describe the current allocation method, explain why it fails, and then design a better mechanism. Consider: Should you use an auction? A lottery? A rotation? A point-based bidding system? What are the tradeoffs between efficiency and fairness?",
+        "hints": [
+          "Consider who values the resource most and whether the current system identifies them.",
+          "Think about whether a market-like mechanism (bidding, trading) or a rule-based mechanism (rotation, seniority) fits better.",
+          "Ask: does the current method encourage gaming, hoarding, or waste?",
+          "A good test: would participants agree to your mechanism behind a \"veil of ignorance\" (before knowing their own position)?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Allocation mechanisms shape not just who gets resources, but how people behave and whether outcomes are efficient.",
+          "The four classic auction types — English, Dutch, first-price sealed-bid, and Vickrey — each create different strategic incentives.",
+          "Vickrey (second-price) auctions make truthful bidding a dominant strategy, achieving incentive compatibility.",
+          "The winner's curse means auction winners tend to overpay, especially under uncertainty.",
+          "Fair division mechanisms like \"I cut, you choose\" use strategic structure to guarantee perceived fairness."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What are the four classic auction types?",
+        "back": "English (ascending price), Dutch (descending price), first-price sealed-bid, and Vickrey (second-price sealed-bid)."
+      },
+      {
+        "front": "Why is the Vickrey auction special?",
+        "back": "It makes bidding your true value the dominant strategy. The highest bidder wins but pays the second-highest bid, so there is no incentive to shade or inflate your bid."
+      },
+      {
+        "front": "What is the winner's curse?",
+        "back": "The tendency for auction winners to overpay, because the winner is the bidder who most overestimated the item's value."
+      },
+      {
+        "front": "What three properties should a good allocation mechanism have?",
+        "back": "Efficiency (resources go where they create the most value), fairness (the process feels legitimate), and incentive compatibility (participants reveal true preferences)."
+      },
+      {
+        "front": "How does \"I cut, you choose\" achieve fairness?",
+        "back": "The cutter is incentivized to divide as evenly as possible because the chooser will take the better piece. Self-interest produces a fair outcome."
+      }
+    ]
+  },
+  "information-design": {
+    "id": "information-design",
+    "moduleId": "designing-games",
+    "title": "Information Design and Transparency",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Information as a Strategic Variable",
+        "content": "\n          <p>In every game we've studied so far, we took the <strong>information structure</strong> as given — who knows what was a fixed part of the setup. But here's where it gets interesting. Mechanism designers get to <em>choose</em> the information structure. How much do participants know? What's revealed, to whom, and when? These choices <strong>fundamentally reshape the game's equilibrium</strong>. <strong>Information design</strong> is the art of structuring what people know to produce better outcomes.</p>\n          <p>Here's an example. Consider a manager deciding whether to <strong>share quarterly financial results</strong> with the full team or only with senior leadership. Sharing creates alignment and trust but might cause panic if numbers are bad. Withholding preserves calm but <strong>breeds suspicion and rumor</strong>. Neither extreme is always right — the optimal information policy depends on the strategic context.</p>\n          <p>This connects directly to the <strong>signaling and information asymmetry</strong> concepts we explored in Module 3. There, we analyzed how individuals strategically reveal or conceal information. Here, we zoom out and ask: as the <em>designer</em> of the system, what <strong>information environment</strong> should you create?</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Strategic Disclosure and Bayesian Persuasion",
+        "content": "\n          <p><strong>Strategic disclosure</strong> means choosing which information to reveal and how to frame it. Every organization does this — <strong>quarterly earnings calls</strong> emphasize certain metrics, <strong>resumes</strong> highlight particular accomplishments, and <strong>product pages</strong> feature flattering photos. The question isn't whether information is curated — it always is. The question is whether the curation <strong>serves the system's goals</strong> or undermines them.</p>\n          <p>There's a concept called <strong>Bayesian persuasion</strong>, formalized by economists Kamenica and Gentzkow, that studies how a \"sender\" can design an information signal to influence a \"receiver's\" decisions. Here's the key insight: even when the sender <strong>cannot lie</strong>, they can still shape beliefs by choosing <em>what to test for</em> or <em>what to make visible</em>. A food inspector who only checks for two out of twenty possible contaminants isn't lying when they issue a clean report — but they're designing an <strong>information environment that is strategically incomplete</strong>.</p>\n          <p>In organizations, Bayesian persuasion appears in how <strong>metrics dashboards are designed</strong>, which data gets reported to the board, and what feedback employees receive. From my perspective, the information architecture is <strong>never neutral</strong> — it always shapes decisions, even when everyone is acting in good faith.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Transparency vs. Secrecy: When to Share, When to Withhold",
+        "content": "\n          <p>The instinct in modern management is that <strong>more transparency is always better</strong>. But game theory reveals a more nuanced picture.</p>\n          <p>Transparency is powerful when it <strong>builds trust</strong>, <strong>reduces wasteful verification</strong>, and <strong>aligns incentives</strong>. Salary transparency, for example, can reduce discrimination, curb unreasonable pay disparities, and make employees feel respected. When everyone can see the rules, <strong>gaming becomes harder</strong>.</p>\n          <p>But transparency can also <em>destroy value</em>. In negotiations, <strong>revealing your reservation price</strong> (the worst deal you'd accept) gives the other side all the leverage. In competitive bidding, sharing your strategy lets rivals undercut you. In performance reviews, <strong>publicly ranking employees</strong> can create toxic competition and discourage collaboration — recall the free-rider and team dynamics problems from Module 3.</p>\n          <p>The mechanism designer's job is to find the <strong>right information architecture</strong> for each context. Sometimes that means radical transparency (open-source codebases, public company financials). Sometimes it means structured opacity (sealed-bid auctions, anonymous peer review). The best systems are often <strong>selectively transparent</strong>: open about rules and processes, private about individual strategic positions.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Open vs. Closed Salary Policies",
+        "content": "When Buffer made all employee salaries public, it found that <strong>pay equity improved</strong>, salary negotiations became simpler, and trust increased. However, some companies that tried full transparency saw <strong>increased envy</strong>, reduced willingness to take on unglamorous roles, and talented people leaving when they realized peers earned more. The lesson: transparency works best when combined with <strong>clear, defensible rules</strong> for how pay is determined. Without those rules, visibility alone can create more conflict than it resolves."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "info-design-matrix",
+        "title": "Transparency and Trust",
+        "description": "A Manager chooses between Transparent and Opaque policies. An Employee chooses between Trust (acting on management's word) and Verify (spending time and effort to independently check claims). Edit the payoffs to explore: when does transparency create a trust equilibrium? When does opacity force costly verification?",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Manager",
+          "colPlayer": "Employee",
+          "rowStrategies": [
+            "Transparent",
+            "Opaque"
+          ],
+          "colStrategies": [
+            "Trust",
+            "Verify"
+          ],
+          "payoffs": [
+            [
+              [
+                4,
+                4
+              ],
+              [
+                3,
+                2
+              ]
+            ],
+            [
+              [
+                5,
+                -2
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "info-design-quiz-1",
+        "question": "A company designs its internal dashboard to show only metrics where the team is performing well, while omitting struggling areas. This is an example of:",
+        "options": [
+          {
+            "id": "a",
+            "text": "Incentive compatibility"
+          },
+          {
+            "id": "b",
+            "text": "Bayesian persuasion — shaping beliefs by choosing what to make visible"
+          },
+          {
+            "id": "c",
+            "text": "The winner's curse"
+          },
+          {
+            "id": "d",
+            "text": "A dominant strategy equilibrium"
+          }
+        ],
+        "correct": "b",
+        "explanation": "This is Bayesian persuasion: the dashboard designer isn't lying — the metrics shown are real — but by choosing <em>which</em> information to display, they shape how the audience perceives overall performance. The receiver updates their beliefs based on the available signal, never seeing the omitted data. Effective information design means being intentional about these choices rather than making them by default."
+      },
+      {
+        "type": "exercise",
+        "id": "info-design-exercise",
+        "title": "Redesign an Information Environment",
+        "prompt": "Identify an area in your organization or community where information is asymmetric — one side knows significantly more than the other (management vs. employees, seller vs. buyer, experienced members vs. newcomers). Analyze: Who benefits from the asymmetry? What does it cost? Would more transparency help or hurt overall outcomes? Design a specific information-sharing policy and explain your reasoning.",
+        "hints": [
+          "Consider the costs of both information asymmetry (mistrust, bad decisions) and transparency (strategic vulnerability, overload).",
+          "Think about whether you can be selectively transparent — open about some things, private about others.",
+          "Ask: if you revealed this information, would it change behavior for the better or create new gaming opportunities?",
+          "Remember that information architecture includes not just what is shared, but when, how, and to whom."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Information design is about choosing what to reveal, to whom, and when — these choices reshape strategic outcomes.",
+          "Bayesian persuasion shows that you can influence decisions by choosing what information to make visible, even without lying.",
+          "Full transparency is not always optimal — it can destroy negotiating positions and create destructive comparison.",
+          "The best information systems are selectively transparent: open about rules and processes, strategic about individual positions.",
+          "Every dashboard, report, and feedback system is an information design choice with strategic consequences."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is information design in mechanism design?",
+        "back": "The practice of choosing what information to reveal, to whom, and when — structuring the information environment to produce better strategic outcomes."
+      },
+      {
+        "front": "What is Bayesian persuasion?",
+        "back": "A framework for how a sender can influence a receiver's decisions by choosing what information signals to create — shaping beliefs without lying."
+      },
+      {
+        "front": "When does transparency help?",
+        "back": "When it builds trust, reduces wasteful verification costs, aligns incentives, and makes gaming harder. Works best when combined with clear, defensible rules."
+      },
+      {
+        "front": "When can transparency hurt?",
+        "back": "When it reveals strategic positions (negotiation reservation prices), creates destructive social comparison (public rankings), or causes information overload."
+      },
+      {
+        "front": "What is \"selective transparency\"?",
+        "back": "Being open about rules, processes, and criteria while keeping individual strategic positions private. Often the best balance between trust and strategic effectiveness."
+      }
+    ]
+  },
+  "cooperative-systems": {
+    "id": "cooperative-systems",
+    "moduleId": "designing-games",
+    "title": "Building Cooperative Systems",
+    "estimatedMinutes": 22,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "From Playing Games to Designing Them",
+        "content": "\n          <p>This is where everything we've learned comes together. In Module 1, you learned to see the world through a <strong>strategic lens</strong> — identifying players, strategies, and payoffs. In Module 2, you studied the <strong>classic dilemmas</strong> that make cooperation hard. Modules 3 and 4 applied these ideas to <strong>workplaces and communities</strong>. Module 5 showed how <strong>repeated interaction</strong> can sustain cooperation over time.</p>\n          <p>Now, in this final topic, we ask the ultimate question: <strong>how do you design a system where cooperation isn't just possible, but the rational, self-sustaining default?</strong></p>\n          <p>Building cooperative systems means combining every tool in your toolkit: <strong>incentive design</strong> (Topic 1), <strong>allocation mechanisms</strong> (Topic 2), <strong>information architecture</strong> (Topic 3), plus the insights from earlier modules on enforcement, reputation, and the shadow of the future. The goal is to create what we call a <em>self-enforcing cooperative system</em> — one that doesn't rely on goodwill, surveillance, or punishment alone, but on a <strong>structure that makes cooperation each person's best response</strong>.</p>\n          <p>Here's the truth — this is the most practical and powerful idea in game theory. Whether you're leading a team, organizing a community group, building a platform, or raising a family, <strong>you are designing the game that others play</strong>. The principles in this topic will help you design it well.</p>\n        "
+      },
+      {
+        "type": "concept",
+        "title": "Constitutional Design: Rules for Making Rules",
+        "content": "\n          <p><strong>Constitutional design</strong> is the process of creating the foundational rules that govern how a group operates — not just the specific policies, but the <strong>meta-rules</strong> about how policies are made, changed, and enforced. This is mechanism design at the highest level: designing the game that determines all other games.</p>\n          <p>Nobel laureate <strong>Elinor Ostrom</strong> studied communities around the world that successfully managed shared resources — fisheries, forests, irrigation systems — for <em>centuries</em> without central authority. She found that successful systems shared key <strong>design principles</strong>: clearly defined boundaries (who's in the group), rules adapted to local conditions, collective decision-making, monitoring by participants themselves, graduated sanctions for violations, accessible conflict resolution, and recognition of the group's right to self-organize.</p>\n          <p>From my perspective, these principles work because they address <strong>every dimension of the cooperation problem simultaneously</strong>. Clear boundaries prevent free-riding (Module 4). Collective decision-making creates buy-in. Monitoring solves the information problem. Graduated sanctions balance forgiveness and enforcement (Module 5). Together, they create a system where cooperation is <strong>stable, adaptive, and perceived as legitimate</strong>.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Self-Enforcing Systems",
+        "content": "The gold standard of mechanism design is a <strong>self-enforcing system</strong> — one where no external authority is needed to maintain cooperation. The rules themselves create incentives that make cooperation each individual's best response. Think of a highway merge where alternating is both efficient and individually rational, or an open-source project where contributing code earns reputation that opens career doors. The system works not because people are generous, but because the <strong>structure makes generosity rational</strong>."
+      },
+      {
+        "type": "concept",
+        "title": "Graduated Sanctions and Adaptive Enforcement",
+        "content": "\n          <p>One of Ostrom's most important insights is that successful cooperative systems use <strong>graduated sanctions</strong> — punishments that start small and escalate with repeated violations. This connects directly to the <strong>forgiveness and escalation dynamics</strong> we studied in Module 5.</p>\n          <p>Here's the thing — a system that <strong>punishes every infraction harshly</strong> discourages participation and offers no path back for people who make mistakes. A system with <strong>no enforcement</strong> invites exploitation. Graduated sanctions hit the sweet spot.</p>\n          <p>A first violation earns a <strong>warning</strong>. A second earns a <strong>small penalty</strong>. Repeated violations lead to <strong>escalating consequences</strong>, up to exclusion. This gives honest people room to err without catastrophe, while making it clear that systematic cheating won't be tolerated. The <em>certainty</em> of detection matters more than the <em>severity</em> of punishment — a key insight from criminology that aligns perfectly with game theory.</p>\n          <p>In practical terms, this means designing your team norms with <strong>explicit escalation paths</strong>. Missing a deadline once is a conversation. Missing it repeatedly triggers a structured intervention. The <strong>clarity of the escalation path itself is a deterrent</strong> — when everyone knows the consequences are real and proportional, fewer people test the boundaries.</p>\n        "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "How Successful Open-Source Communities Are Designed",
+        "content": "Linux, Wikipedia, and Apache aren't accidents of collective goodwill — they're <strong>carefully designed cooperative systems</strong>. They feature clear governance structures (who makes decisions and how), reputation systems (contribution history is public and valued), graduated responses to bad behavior (warning, temporary ban, permanent ban), low barriers to participation with high standards for core roles, and transparent processes that let anyone audit decisions. These communities solve the free-rider problem not by forcing contribution, but by making contribution <strong>visible and rewarding</strong> while keeping the cost of small contributions very low."
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "cooperative-system-matrix",
+        "title": "Designing Cooperation",
+        "description": "Your challenge: edit the payoffs in this matrix to create a game where Cooperate-Cooperate is the only Nash equilibrium. Think about what combination of incentives, sanctions, and rewards would make cooperation the dominant strategy for both players. This is the essence of mechanism design — shaping payoffs to produce the outcome you want.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Player 1",
+          "colPlayer": "Player 2",
+          "rowStrategies": [
+            "Cooperate",
+            "Defect"
+          ],
+          "colStrategies": [
+            "Cooperate",
+            "Defect"
+          ],
+          "payoffs": [
+            [
+              [
+                3,
+                3
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            [
+              [
+                5,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "cooperative-quiz-1",
+        "question": "According to Elinor Ostrom's research, which element is NOT one of the design principles found in successful self-governing communities?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Graduated sanctions that escalate with repeated violations"
+          },
+          {
+            "id": "b",
+            "text": "Strong centralized enforcement by an external authority"
+          },
+          {
+            "id": "c",
+            "text": "Collective decision-making by those affected by the rules"
+          },
+          {
+            "id": "d",
+            "text": "Monitoring carried out by the participants themselves"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Ostrom's research showed that the most successful self-governing communities relied on <em>internal</em> governance, not external authority. Participants themselves monitored compliance, made collective decisions, and enforced graduated sanctions. The whole point of her work was that communities can solve cooperation problems without top-down control — but they need well-designed institutional structures to do so."
+      },
+      {
+        "type": "exercise",
+        "id": "cooperative-exercise",
+        "title": "Design a Constitution",
+        "prompt": "Choose a group you belong to (a team, club, volunteer organization, online community, or even your household). Design a simple \"constitution\" that addresses: (1) Who is a member and what are the expectations? (2) How are shared resources and decisions allocated? (3) How is contribution tracked and recognized? (4) What happens when someone violates the norms? (5) How can the rules themselves be changed? Draw on everything you have learned — incentive compatibility, information design, graduated sanctions, and self-enforcing mechanisms.",
+        "hints": [
+          "Start with Ostrom's design principles: clear boundaries, adapted rules, collective choice, monitoring, graduated sanctions, conflict resolution, self-organization.",
+          "Make sure the rules are self-enforcing: cooperation should be the rational choice, not just the nice one.",
+          "Think about information design: what should be visible to everyone, and what should be private?",
+          "Include a mechanism for changing the rules — a constitution that cannot adapt will eventually fail.",
+          "Test your design by asking: would a rational, self-interested person cooperate under these rules?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Building cooperative systems means combining incentive design, allocation mechanisms, information architecture, and enforcement into a coherent whole.",
+          "Constitutional design creates the meta-rules — the rules about how rules are made, changed, and enforced.",
+          "Ostrom's design principles (clear boundaries, collective choice, monitoring, graduated sanctions, conflict resolution) are a proven blueprint for self-governance.",
+          "Self-enforcing systems are the gold standard: cooperation is sustained by the structure itself, not by external authority or goodwill alone.",
+          "Graduated sanctions balance forgiveness and enforcement — certainty of detection matters more than severity of punishment.",
+          "The ultimate goal of game theory is not just to understand strategic situations, but to design better ones."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a self-enforcing cooperative system?",
+        "back": "A system where the rules and incentives themselves make cooperation each individual's best response, without needing external enforcement or relying solely on goodwill."
+      },
+      {
+        "front": "What is constitutional design?",
+        "back": "Creating the foundational meta-rules that govern how a group operates — how policies are made, changed, and enforced."
+      },
+      {
+        "front": "Name three of Ostrom's design principles for successful commons governance.",
+        "back": "Clearly defined boundaries, collective decision-making, monitoring by participants, graduated sanctions, accessible conflict resolution, rules adapted to local conditions, and right to self-organize."
+      },
+      {
+        "front": "Why are graduated sanctions more effective than harsh, uniform punishment?",
+        "back": "They give honest people room to make mistakes, provide a path back from violations, and deter systematic cheating through escalation. Certainty of detection matters more than severity."
+      },
+      {
+        "front": "How do successful open-source communities sustain cooperation?",
+        "back": "Through visible reputation systems, clear governance, graduated responses to bad behavior, low barriers with high standards for core roles, and transparent auditable processes."
+      },
+      {
+        "front": "What is the ultimate goal of mechanism design?",
+        "back": "To design rules, incentives, and information structures so that the socially desirable outcome emerges as the equilibrium — making cooperation rational, not just virtuous."
+      }
+    ]
+  }
+}

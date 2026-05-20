@@ -1,0 +1,610 @@
+{
+  "water-temp-grind": {
+    "id": "water-temp-grind",
+    "moduleId": "pour-over-fundamentals",
+    "title": "Water Temperature & Grind Size: The 1:2 Foundation",
+    "estimatedMinutes": 12,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why these two variables run the show",
+        "content": "<p>Here's the thing — when you're standing in front of your V60 at 6:30 AM, you have about a dozen variables you could obsess over. From what I've seen, <strong>water temperature and grind size</strong> do 80% of the work. They control how much flavor you pull out of the coffee and how fast it happens.</p><p>Think of it this way: <strong>temperature is the accelerator, grind size is the brake.</strong> Hotter water extracts faster and grabs more (including bitter compounds if you're not careful). Finer grounds slow the water down, giving it more contact time. Coarser grounds let it rush through. Get these two in balance and you're 90% of the way to a great cup.</p><p>The magic zone for most light-to-medium roasts? <strong>Water between 195–205°F (90–96°C)</strong> and a grind that looks like coarse sea salt. We'll dig into why that range works and how to adjust when it doesn't.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q1-temp-range",
+        "sentence": "For most light-to-medium roasts, the ideal water temperature range is ___ to 205°F.",
+        "acceptable_answers": [
+          "195",
+          "195°F",
+          "195 degrees",
+          "195F",
+          "ninety-five"
+        ],
+        "explanation": "195–205°F (90–96°C) is the sweet spot where you extract the bright, fruity, and complex flavors without pulling harsh bitterness. Water below 195°F often tastes weak and sour; above 205°F risks over-extraction and astringency."
+      },
+      {
+        "type": "concept",
+        "title": "How temperature changes what you taste",
+        "content": "<p>Let's get real — a 10-degree shift in water temperature can be the difference between 'wow' and 'meh.' <strong>Hotter water (200–205°F) extracts more aggressively:</strong> you get fuller body, more sweetness, but also more bitterness if you push too far. This works beautifully for lighter roasts that need coaxing.</p><p>Cooler water (195–200°F) pulls more selectively. You lose a bit of body, but you keep clarity and brightness. I've seen people fix sour, underextracted coffee just by bumping the temp up 5 degrees — and vice versa, taming harsh bitterness by dropping it a few degrees.</p><p><strong>Dark roasts are the exception.</strong> They're already more soluble (the roasting did a lot of the extraction work for you), so you often want to stay on the cooler end — 185–195°F — to avoid bitterness. If your coffee tastes ashy or burnt, try cooler water before you blame the beans.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "No thermometer? No problem",
+        "content": "Bring your kettle to a boil, then let it sit off-heat for 30–45 seconds. That puts you right around 200–205°F. For darker roasts, wait a full minute. It's not exact, but it's consistent — and consistency is what matters most when you're learning."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q2-temp-adjustment",
+        "question": "Your light-roast Ethiopian coffee tastes thin and sour, even though your grind looks right and your timing is on target. What's the most likely fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Increase water temperature by 5–10 degrees"
+          },
+          {
+            "id": "b",
+            "text": "Decrease water temperature by 5–10 degrees"
+          },
+          {
+            "id": "c",
+            "text": "Grind much finer to slow down the brew"
+          },
+          {
+            "id": "d",
+            "text": "Use less coffee in your ratio"
+          }
+        ],
+        "correct": "a",
+        "explanation": "Sourness and thinness are classic signs of underextraction — the water isn't pulling enough flavor out of the grounds. Raising the temperature 5–10 degrees helps extract more sweetness and body. Grinding finer could help too, but temperature is often the faster, cleaner fix when everything else is dialed in."
+      },
+      {
+        "type": "concept",
+        "title": "Grind size: your dial for contact time",
+        "content": "<p>Grind size controls <strong>how long water stays in contact with the coffee</strong> before it drips through. Finer grounds = more surface area, slower flow, longer extraction. Coarser grounds = less surface area, faster flow, shorter extraction.</p><p>For the V60, you want something around <strong>medium-coarse — like coarse sea salt or raw sugar.</strong> Too fine and the bed clogs up, your brew time stretches past four minutes, and you end up with bitter, over-extracted sludge. Too coarse and water races through in under two minutes, leaving you with sour, weak coffee that tastes like it's missing something (because it is).</p><p>The trick is to <strong>use grind size and temperature together.</strong> If your coffee is bitter, you can either grind coarser or drop the temp. If it's sour, grind finer or raise the temp. Most of the time, I start with temperature because it's easier to tweak on the fly — but grind size is the variable you'll return to as you get more confident.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-grind-flow",
+        "statement": "If your V60 brew finishes in under two minutes, you should grind finer to slow the flow and increase extraction.",
+        "correct": true,
+        "explanation": "Exactly right. A brew that finishes in under two minutes usually means the water rushed through too fast, leaving a lot of flavor behind (underextraction). Grinding finer increases surface area and slows the flow, giving the water more time to pull out sweetness and complexity."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "The 1:2 shorthand",
+        "content": "Temperature and grind size work in tandem — they're a 1:2 lever. If you adjust one without thinking about the other, you'll chase your tail. When you taste something off, ask: is this about how much I extracted (temperature + grind) or how I poured (technique)? Nine times out of ten, it's the former."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Water temperature (195–205°F for light/medium roasts) and grind size (medium-coarse, like sea salt) control 80% of your extraction.",
+          "Hotter water extracts more aggressively; cooler water keeps things bright and clean — dark roasts often need cooler temps.",
+          "Finer grinds slow the flow and boost extraction; coarser grinds speed it up and reduce contact time.",
+          "Sour, weak coffee? Grind finer or raise the temp. Bitter, harsh coffee? Grind coarser or drop the temp.",
+          "Temperature and grind size are a tandem pair — adjust them together, not in isolation."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the ideal water temperature range for brewing light-to-medium roast coffee in a V60?",
+        "back": "195–205°F (90–96°C). This range extracts bright, complex flavors without harsh bitterness. Hotter water extracts more aggressively; cooler water keeps clarity."
+      },
+      {
+        "front": "How does grind size affect extraction in pour-over brewing?",
+        "back": "Finer grounds increase surface area and slow water flow, boosting extraction. Coarser grounds reduce contact time and speed up flow. For V60, aim for medium-coarse (like sea salt)."
+      },
+      {
+        "front": "Your coffee tastes sour and weak. What should you adjust?",
+        "back": "This signals underextraction. Either grind finer (to slow flow and increase contact time) or raise water temperature by 5–10°F to extract more flavor and sweetness."
+      },
+      {
+        "front": "Your coffee tastes bitter and harsh. What's the likely fix?",
+        "back": "This signals overextraction. Either grind coarser (to speed up flow and reduce contact time) or lower water temperature by 5–10°F to extract less aggressively."
+      },
+      {
+        "front": "Why do dark roasts often need cooler brewing temperatures?",
+        "back": "Dark roasts are more soluble — roasting has already done a lot of extraction work. Brewing at 185–195°F avoids pulling harsh, ashy bitterness while keeping the coffee balanced."
+      },
+      {
+        "front": "What does the 1:2 foundation refer to in V60 brewing?",
+        "back": "Water temperature and grind size work as a tandem pair to control extraction. Adjusting one without considering the other makes it hard to diagnose problems or improve your brew."
+      }
+    ]
+  },
+  "the-pour-technique": {
+    "id": "the-pour-technique",
+    "moduleId": "pour-over-fundamentals",
+    "title": "Mastering the Pour: Bloom, Body, Finish",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why the pour matters more than you think",
+        "content": "<p>Here's the thing — most beginner V60 recipes tell you to pour in stages, but they don't explain <em>why</em>. From what I've seen, understanding the purpose of each phase transforms your brewing from following a script to actually making adjustments when things go wrong. <strong>The bloom, body, and finish each do different extraction work</strong>, and once you see that, you'll pour with intention instead of anxiety.</p><p>Think of it this way: coffee grounds are like a sponge full of flavors waiting to dissolve. <strong>The bloom wakes them up, the body pulls the good stuff out, and the finish controls what you leave behind.</strong> If you rush the bloom, you get uneven extraction. If you pour the body too fast, you bypass flavor. If you let the finish drag on, bitterness creeps in. (You don't need to be precious about it — just know what each stage is trying to accomplish.)</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q1-pour-stages",
+        "question": "Match each pour stage to its primary purpose in the brew cycle.",
+        "pairs": [
+          {
+            "left": "Bloom",
+            "right": "Releases CO₂ and preps grounds for even extraction"
+          },
+          {
+            "left": "Body",
+            "right": "Extracts the majority of flavor compounds"
+          },
+          {
+            "left": "Finish",
+            "right": "Controls final strength and prevents over-extraction"
+          }
+        ],
+        "explanation": "Each stage has a distinct job. The bloom degasses, the body does the heavy lifting of extraction, and the finish lets you dial in strength while avoiding bitterness. Skipping or rushing any of these throws off the whole cup."
+      },
+      {
+        "type": "concept",
+        "title": "The bloom: degassing and setting the stage",
+        "content": "<p>Start with about <strong>twice the weight of water as coffee</strong> — so if you're brewing 20g of coffee, pour roughly 40g of water in the first 10–15 seconds. You'll see the grounds puff up and bubble. That's CO₂ escaping, and it's especially pronounced with fresh-roasted coffee. <strong>If you skip or rush the bloom, that gas creates channels</strong> — little pathways where water zips through without extracting evenly.</p><p>Let the bloom sit for 30 to 45 seconds total (including the pour time). Some people swirl gently or stir to make sure all the grounds are wet. I've found a <strong>gentle circular pour starting in the center</strong> works well — you're not trying to agitate heavily, just saturate everything. If your coffee is more than three weeks past roast, you'll see less bubbling, and that's fine. The bloom still helps.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Fresh coffee blooms like crazy",
+        "content": "If your coffee was roasted in the last week, expect a dramatic bloom — it might even threaten to overflow. Just pour slowly and give it the full 45 seconds. As coffee ages, the bloom calms down, but the principle stays the same: wet everything, let the gas escape, then proceed."
+      },
+      {
+        "type": "concept",
+        "title": "The body: steady extraction in concentric circles",
+        "content": "<p>After the bloom, you're doing the real work. <strong>Pour in a slow, steady spiral from the center outward</strong>, keeping the water level consistent — not so high it floods the sides, not so low the bed dries out. Your goal is to hit your target brew weight (usually around 300g for a 20g dose) by the 2:00 to 2:30 mark.</p><p>From what I've observed, the most common mistake here is <strong>pouring in big glugs instead of a continuous stream</strong>. When you pause, the slurry temperature drops and extraction stalls. A gooseneck kettle helps because you can control the flow rate — aim for a pencil-thin stream. (If you're pouring so fast the water pools on top, slow down. If the bed starts to peek through, speed up a little.)</p><p>Some people do this in one continuous pour; others break it into two or three pulses. Both work. The key is <strong>keeping agitation even</strong> — you want all the grounds spending roughly the same amount of time in contact with water, not some over-extracted and some bone-dry.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "q2-body-pour",
+        "question": "You notice water pooling on top of the coffee bed during your body pour, and the drawdown is taking much longer than expected. What's likely happening, and what would you adjust next time?",
+        "sample_answer": "Water pooling usually means I'm pouring too fast or my grind is too fine, so the water can't pass through quickly enough. Next time I'd either slow my pour rate to give the bed time to drain, or grind slightly coarser to increase flow. If the grind is right, I might also check that I'm not pouring directly onto the filter, which can cause channeling.",
+        "key_points": [
+          "Pooling suggests the water is arriving faster than it can drain — either pour rate or grind is off.",
+          "Slowing the pour or coarsening the grind are the two main adjustments.",
+          "Avoid pouring onto the filter edges, which can cause bypass or uneven flow."
+        ],
+        "explanation": "This question tests whether you can diagnose a common brewing problem in real time. Pooling means flow is restricted — either you're overwhelming the bed with water, or the grind is choking it. Both are fixable, and recognizing the symptom is half the battle."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Consistent pour rate beats perfect spirals",
+        "content": "Don't stress about making magazine-perfect concentric circles. What matters more is keeping your pour rate steady and your kettle height low (a few inches above the dripper). The spiral just helps you cover the bed evenly — if you wobble a bit, your coffee will still turn out fine."
+      },
+      {
+        "type": "concept",
+        "title": "The finish: when to stop and let it drain",
+        "content": "<p>Once you've poured your target water weight (say, 300g), <strong>step back and let gravity do the rest</strong>. The drawdown — the time it takes for the last water to drip through — usually lands between 3:00 and 3:30 total brew time for a standard recipe. If it finishes much faster, you might be grinding too coarse or pouring too aggressively. If it drags past 4:00, you're likely too fine or the bed has compacted.</p><p>Here's the nuance: <strong>you don't want to over-extract at the tail end</strong>. As the water level drops, the remaining liquid gets more concentrated and pulls out bitter compounds. That's why most recipes aim for a total time in the 3:00–3:30 range — it's the sweet spot where you've extracted the good flavors but left the harsh stuff behind. (If your coffee tastes thin and sour, you under-extracted; if it's bitter and astringent, you over-extracted.)</p><p>One small trick: <strong>give the dripper a gentle swirl</strong> after your last pour to flatten the bed. This helps the drawdown stay even and prevents channeling from a lopsided slurry. You'll see the grounds settle into a flat disc — that's what you want.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q3-drawdown-diagnosis",
+        "question": "Your total brew time is consistently finishing around 4:15, and the coffee tastes bitter and a bit chalky. What's the most likely culprit?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Your grind is too coarse, allowing water to pass through too quickly."
+          },
+          {
+            "id": "b",
+            "text": "Your grind is too fine, causing over-extraction and a slow drawdown."
+          },
+          {
+            "id": "c",
+            "text": "Your water temperature is too low, stalling extraction."
+          },
+          {
+            "id": "d",
+            "text": "You're not pouring fast enough during the body phase."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A 4:15 brew time with bitterness points to over-extraction from a grind that's too fine. The slow drawdown means water is spending too long in contact with the grounds, pulling out harsh compounds. Grinding coarser will speed up the flow and bring the brew time back into the 3:00–3:30 window, reducing bitterness. Option A would give you a fast, under-extracted (sour) cup, not a slow bitter one."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "The bloom degasses the grounds and sets you up for even extraction — don't rush it.",
+          "Pour the body in a slow, steady stream to keep contact time and agitation consistent across the bed.",
+          "Let the finish drain naturally, aiming for a total brew time around 3:00–3:30 to avoid bitterness.",
+          "If water pools or the drawdown drags, adjust your grind or pour rate, not your recipe.",
+          "A gentle swirl after the last pour flattens the bed and helps the drawdown stay even."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the primary purpose of the bloom stage in pour-over brewing?",
+        "back": "The bloom releases trapped CO₂ from the coffee grounds and saturates them evenly, preventing channeling and setting up uniform extraction. You typically use twice the weight of water as coffee and let it sit for 30–45 seconds."
+      },
+      {
+        "front": "How much water should you use for the bloom, and how long should it last?",
+        "back": "Use about twice the coffee weight in water (e.g., 40g water for 20g coffee). Let it sit for 30–45 seconds total, including pour time, to allow CO₂ to escape and grounds to saturate evenly."
+      },
+      {
+        "front": "What's the ideal total brew time for a standard V60 pour-over, and why does it matter?",
+        "back": "Around 3:00 to 3:30 minutes. This window extracts desirable flavors while leaving behind bitter compounds. Shorter times risk under-extraction (sour, thin), while longer times risk over-extraction (bitter, astringent)."
+      },
+      {
+        "front": "You see water pooling on top of the coffee bed during the body pour. What are two likely causes?",
+        "back": "Either you're pouring too fast (overwhelming the bed's drainage rate) or your grind is too fine (restricting water flow). Slow your pour rate or grind coarser next time."
+      },
+      {
+        "front": "Why do you swirl the V60 dripper gently after the final pour?",
+        "back": "Swirling flattens the coffee bed into an even disc, which helps the drawdown proceed uniformly and prevents channeling from a lopsided slurry. It's a small step that improves extraction consistency."
+      },
+      {
+        "front": "What does a brew time over 4 minutes with bitter, chalky coffee tell you about your grind?",
+        "back": "Your grind is too fine. The slow drawdown means water is over-extracting harsh compounds. Grinding coarser will speed up flow and bring the brew time back into the 3:00–3:30 range, reducing bitterness."
+      }
+    ]
+  },
+  "brewing-timing": {
+    "id": "brewing-timing",
+    "moduleId": "pour-over-fundamentals",
+    "title": "Timing & Total Brew Window",
+    "estimatedMinutes": 12,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why the clock matters in pour-over",
+        "content": "<p>Here's the thing — when you watch a barista brew pour-over, you'll notice they glance at a timer. That's not performance. <strong>Total brew time is one of the most reliable signals</strong> that your grind size, pour speed, and water temperature are all in the right neighborhood.</p><p>Think of it this way: if your coffee drains in under two minutes, the water rushed through too fast and you've under-extracted — sour, thin, lacking body. If it takes five minutes, the water lingered too long and you've over-extracted — bitter, astringent, hollow. <strong>The sweet spot for most V60 brews is around 2:30 to 3:30</strong>, where you get balanced extraction and all the flavors have time to develop.</p><p>From what I've seen, beginners either ignore the timer entirely or obsess over hitting an exact second. Neither works. The timer is a <strong>diagnostic tool</strong>, not a rigid rule — it tells you whether to adjust your grind next time.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-brew-time-diagnosis",
+        "question": "You just brewed a V60 and it finished draining at 1:50. The coffee tastes sour and thin. What's the most likely fix for your next brew?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Grind finer so the water moves through more slowly"
+          },
+          {
+            "id": "b",
+            "text": "Use hotter water to extract more quickly"
+          },
+          {
+            "id": "c",
+            "text": "Pour faster to speed up the bloom"
+          },
+          {
+            "id": "d",
+            "text": "Use less coffee to reduce extraction time"
+          }
+        ],
+        "correct": "a",
+        "explanation": "A brew time under two minutes with sour, thin coffee signals under-extraction — the water moved through too fast. Grinding finer increases resistance and slows the drawdown, giving the water more contact time to extract properly. Hotter water or pouring faster won't solve the core issue of insufficient contact time."
+      },
+      {
+        "type": "concept",
+        "title": "The anatomy of a pour-over timeline",
+        "content": "<p>A typical V60 brew breaks into three phases, and <strong>each one does different extraction work</strong>. First is the bloom (0:00–0:45): you pour just enough water to saturate the grounds — usually twice the coffee weight — and let trapped CO₂ escape. This preps the coffee to accept water evenly.</p><p>Next is the main pour (0:45–2:00): you add the rest of your water in one continuous spiral or in pulses, depending on your recipe. <strong>This is where most of the extraction happens</strong> — sugars, acids, and oils dissolve and flow into your cup. The steadier your pour, the more even the extraction.</p><p>Finally, the drawdown (2:00–3:00+): you stop pouring and let gravity finish the job. <strong>The coffee bed drains and the brew completes.</strong> If the drawdown takes forever, your grind is too fine or your filter clogged. If it races through, your grind is too coarse. The beauty of the V60 is that you can watch this happen in real time and adjust next brew.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start your timer when you start pouring",
+        "content": "Some recipes say to start the timer when you add the first water, others when the bloom ends. Pick one method and stick with it — consistency matters more than the convention. I start mine at first pour because it's simpler to remember and captures the full contact time."
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q2-target-window",
+        "sentence": "For most V60 brews, the target total brew time falls between ___ and 3:30.",
+        "acceptable_answers": [
+          "2:30",
+          "2 minutes 30 seconds",
+          "two thirty",
+          "two minutes thirty seconds",
+          "2.5 minutes",
+          "150 seconds"
+        ],
+        "explanation": "The 2:30–3:30 window is the sweet spot where you typically get balanced extraction. Faster than 2:30 often means under-extraction (sour, thin), and slower than 3:30 risks over-extraction (bitter, astringent). This isn't a rigid rule, but it's a helpful starting target."
+      },
+      {
+        "type": "concept",
+        "title": "Using the timer to tune your next brew",
+        "content": "<p>Let's get real: the first few brews will be all over the place. You'll hit 2:10 one day and 3:45 the next. That's normal. <strong>The timer is your feedback loop</strong> — it shows you whether your grind adjustment worked or whether you need to go further.</p><p>Here's the pattern I've seen work: if your brew finishes early and tastes sour or weak, <strong>grind a few clicks finer</strong>. If it finishes late and tastes bitter or harsh, grind coarser. Make one change at a time and note the result. Over a week, you'll dial in a grind setting that consistently lands you in the 2:30–3:30 window with flavors you like.</p><p>One more thing — don't ignore the taste. If your brew finishes at 3:45 but tastes incredible, you've found your recipe. <strong>The timer guides you, but your palate is the final judge.</strong> Some coffees (especially light roasts or denser beans) extract beautifully a bit slower. Trust what you're tasting.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-rigid-timing",
+        "statement": "You should always adjust your grind or technique to hit exactly 3:00 total brew time, even if the coffee tastes great at a different time.",
+        "correct": false,
+        "explanation": "The 2:30–3:30 window is a guideline, not a law. If your coffee tastes balanced and delicious at 3:45 or 2:20, you've found a recipe that works for that bean. The timer is a diagnostic tool to help you troubleshoot, but your palate is the ultimate judge of a successful brew."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Total brew time (usually 2:30–3:30 for V60) is a diagnostic signal — it tells you if your grind, pour, and water are in the right range.",
+          "A brew that finishes too fast (under 2 minutes) often tastes sour and thin; one that drags (over 4 minutes) risks bitterness.",
+          "The V60 timeline has three phases: bloom (0–45s), main pour (45s–2min), and drawdown (2–3min+).",
+          "Use the timer as a feedback loop — if your brew is off, adjust grind one step and note the result next time.",
+          "Trust your palate over the clock — if it tastes great outside the target window, you've found your recipe."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the typical target brew time range for a V60 pour-over?",
+        "back": "2:30 to 3:30. This window usually produces balanced extraction. Faster often means under-extraction (sour, thin), slower risks over-extraction (bitter, astringent)."
+      },
+      {
+        "front": "Your V60 brew finishes at 1:50 and tastes sour. What should you adjust?",
+        "back": "Grind finer. A fast brew time with sour taste signals under-extraction — the water moved through too quickly. Grinding finer slows the drawdown and increases contact time."
+      },
+      {
+        "front": "What are the three main phases of a V60 brew timeline?",
+        "back": "Bloom (0–45s) to release CO₂, main pour (45s–2min) where most extraction happens, and drawdown (2–3min+) when the bed drains and the brew completes."
+      },
+      {
+        "front": "Why is total brew time considered a diagnostic tool rather than a strict rule?",
+        "back": "It guides you toward balanced extraction, but different beans and roasts can taste excellent at different times. Your palate is the final judge — if it tastes great at 3:45, that's your recipe."
+      },
+      {
+        "front": "If your V60 brew takes 4:30 and tastes bitter, what's the likely fix?",
+        "back": "Grind coarser. A slow brew with bitter taste suggests over-extraction — the water lingered too long. Coarser grounds allow faster flow and reduce contact time."
+      }
+    ]
+  },
+  "coffee-selection": {
+    "id": "coffee-selection",
+    "moduleId": "pour-over-fundamentals",
+    "title": "Choosing & Storing Beans for Freshness",
+    "estimatedMinutes": 12,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why fresh beans matter more than you think",
+        "content": "<p>Here's the thing — you can nail every aspect of your V60 technique and still end up with flat, lifeless coffee if your beans are stale. <strong>Coffee starts losing flavor within days of roasting</strong>, not months. The oils and aromatics that give coffee its complexity break down when exposed to oxygen, and once they're gone, no amount of precise pouring will bring them back.</p><p>From what I've seen, this is the single biggest gap between home brewing and café quality. Most grocery store beans were roasted weeks or months ago, then sat on a shelf. <strong>Fresh beans will have a roast date on the bag</strong> — if you don't see one, that's your first red flag. You want beans roasted within the past two weeks, ideally.</p><p>The good news? Once you start tasting the difference, you can't go back. Fresh beans have this <strong>vibrant, layered quality</strong> — notes of fruit, chocolate, florals — that stale beans just can't touch. It's like comparing a tomato from a farmers market to one that's been refrigerated for a month.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q1-roast-date",
+        "statement": "Coffee beans begin losing significant flavor within days of roasting, so a roast date on the bag is more important than the brand name.",
+        "correct": true,
+        "explanation": "This is true. Coffee degrades rapidly after roasting due to oxidation of oils and aromatics. A roast date tells you exactly how fresh the beans are, which matters far more than marketing or brand prestige when it comes to flavor."
+      },
+      {
+        "type": "concept",
+        "title": "What to look for when buying beans",
+        "content": "<p>Start with <strong>whole bean coffee labeled with a roast date</strong>. Pre-ground coffee loses flavor even faster — within hours, not days — because grinding exposes way more surface area to air. You want to grind right before brewing, every time.</p><p>Look for <strong>single-origin beans or blends from a local roaster</strong> if you can. Single-origin means the beans come from one place (a specific country, region, or even farm), and they tend to have clearer, more distinct flavors than generic blends. Local roasters usually roast in smaller batches, so what you're buying is often only a few days old.</p><p>Don't stress too much about roast level when you're starting out. Light roasts tend to highlight the bean's origin character — fruity, floral, acidic. Medium roasts balance origin and roast flavor. Dark roasts lean into chocolate, caramel, and body, but can taste a bit flat if you're used to lighter styles. <strong>Pick what sounds appealing, then experiment</strong>. Your V60 will work with any of them, though lighter roasts can be a bit more forgiving with timing.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start with a local roaster",
+        "content": "If you have a café or roastery nearby, buy a small bag (8-12 oz) in person. You'll get beans roasted this week, and the staff can steer you toward something that matches your taste. It's way easier than gambling on a mail-order subscription when you're still figuring out what you like."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q2-buying-decision",
+        "question": "You're at a grocery store deciding between three bags of coffee. Bag A is a well-known brand, pre-ground, no roast date. Bag B is whole bean from a local roaster, roasted 5 days ago. Bag C is whole bean from a national brand, roasted 6 weeks ago. Which should you choose for the best V60 results?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Bag A — the grind is already done, saving you time and effort."
+          },
+          {
+            "id": "b",
+            "text": "Bag B — it's whole bean and recently roasted, so it's the freshest option."
+          },
+          {
+            "id": "c",
+            "text": "Bag C — national brands have better quality control than local roasters."
+          },
+          {
+            "id": "d",
+            "text": "It doesn't matter much as long as you brew carefully."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Bag B is the clear winner. Freshness (roast date within 2 weeks) and whole bean format are the two biggest factors for great pour-over. Pre-ground coffee (Bag A) goes stale in hours, and six-week-old beans (Bag C) have already lost most of their aromatics, regardless of the brand's reputation."
+      },
+      {
+        "type": "concept",
+        "title": "How to store beans so they stay fresh",
+        "content": "<p>Once you've got fresh beans, your job is to <strong>slow down the aging process as much as possible</strong>. The enemies here are oxygen, light, heat, and moisture. That means you want an airtight container in a cool, dark spot — not on the counter next to your kettle, and definitely not in a clear glass jar that looks cute but lets in light.</p><p>The bag your beans came in often has a one-way valve that lets CO₂ escape (freshly roasted beans off-gas for a few days) but keeps oxygen out. If you fold the top and clip it shut, that's honestly fine for the first week. After that, <strong>transfer them to an opaque, airtight container</strong> — something like a mason jar wrapped in a towel, or a dedicated coffee canister with a good seal.</p><p>Don't freeze your beans unless you're storing them for more than a month and you're okay with some trade-offs. Freezing can preserve flavor, but every time you open the bag, condensation forms on the beans, which messes with extraction. If you do freeze, portion them out into small bags so you only thaw what you need, once.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Use beans within 2-4 weeks of roasting",
+        "content": "Peak flavor is usually 3-14 days after roasting, once the beans have off-gassed a bit but before they've oxidized much. After about 4 weeks, you'll notice the coffee tastes duller — less aroma, fewer distinct notes. Buy smaller bags more often rather than one giant bag that sits around."
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q3-storage-enemies",
+        "sentence": "The four main enemies of coffee freshness during storage are oxygen, light, heat, and ___.",
+        "acceptable_answers": [
+          "moisture",
+          "water",
+          "humidity"
+        ],
+        "explanation": "Moisture is the fourth enemy. It causes beans to degrade faster and can introduce off-flavors or even mold. That's why you store beans in a dry, airtight container away from steam or humidity."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Coffee loses flavor within days of roasting, so always look for a roast date on the bag — not just a brand name.",
+          "Buy whole bean coffee and grind right before brewing; pre-ground coffee goes stale in hours.",
+          "Store beans in an airtight, opaque container in a cool, dark place to slow oxidation.",
+          "Use beans within 2-4 weeks of roasting for peak flavor — buy smaller bags more often.",
+          "When in doubt, start with a local roaster who can guide you toward fresh, high-quality beans."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "Why does coffee lose flavor so quickly after roasting?",
+        "back": "Coffee beans contain oils and aromatics that oxidize when exposed to air. This process starts within days of roasting, causing the coffee to lose its vibrant, complex flavors and become flat and dull."
+      },
+      {
+        "front": "What are the four main enemies of coffee freshness during storage?",
+        "back": "Oxygen, light, heat, and moisture. To keep beans fresh, store them in an airtight, opaque container in a cool, dry place away from sunlight and humidity."
+      },
+      {
+        "front": "Why should you buy whole bean coffee instead of pre-ground?",
+        "back": "Grinding exposes much more surface area to air, causing coffee to lose flavor within hours instead of days. Grinding right before brewing preserves the aromatics and oils that give coffee its complexity."
+      },
+      {
+        "front": "What is the ideal window for using coffee beans after roasting?",
+        "back": "Peak flavor is typically 3-14 days after roasting, once beans have off-gassed but before significant oxidation occurs. After about 4 weeks, beans start to taste noticeably duller and less aromatic."
+      },
+      {
+        "front": "What should you look for on a coffee bag to ensure freshness?",
+        "back": "A roast date — ideally within the past two weeks. If there's no roast date on the bag, the beans are likely stale. Roast date is more important than brand name for freshness."
+      }
+    ]
+  },
+  "common-mistakes": {
+    "id": "common-mistakes",
+    "moduleId": "pour-over-fundamentals",
+    "title": "Common Pour-Over Mistakes & How to Fix Them",
+    "estimatedMinutes": 12,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why your first few cups taste off — and why that's normal",
+        "content": "<p>Here's the thing — most people's first V60 cup tastes either weak and watery or bitter and harsh. From what I've seen, <strong>the brew either runs too fast (under-extracted) or clogs and stalls (over-extracted)</strong>. Both taste terrible, but for opposite reasons.</p><p>The good news? <strong>Almost every mistake traces back to three variables</strong>: grind size, water temperature, and pour speed. Once you know which mistake you made, the fix is straightforward. You don't need to master all of coffee science — you just need to recognize the symptom and adjust one thing at a time.</p><p>This is not about perfection. It's about <strong>building a mental map</strong> so that when your coffee tastes sour or bitter, you know exactly which knob to turn.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "mistake-symptom-match",
+        "question": "Match each common brewing mistake to the symptom you'll taste in the cup.",
+        "pairs": [
+          {
+            "left": "Grind too coarse",
+            "right": "Sour, weak, tea-like flavor"
+          },
+          {
+            "left": "Grind too fine",
+            "right": "Bitter, astringent, over-strong"
+          },
+          {
+            "left": "Water too cool",
+            "right": "Flat, dull, lacking sweetness"
+          },
+          {
+            "left": "Pouring too fast in one spot",
+            "right": "Channeling and uneven extraction"
+          }
+        ],
+        "explanation": "Each mistake leaves a distinct flavor signature. Coarse grinds let water rush through without extracting enough — you get sourness. Fine grinds trap water and extract too much bitterness. Cool water can't pull out the sugars and complexity. Fast, concentrated pours dig channels that let water bypass most of the coffee bed."
+      },
+      {
+        "type": "concept",
+        "title": "The grind-size spiral (and how to escape it)",
+        "content": "<p>This is where most beginners get stuck. Your coffee tastes sour, so you grind finer. Now it tastes bitter, so you grind coarser. Now it's sour again. <strong>You're trapped in a loop because you're making big jumps instead of small adjustments.</strong></p><p>The fix: <strong>move your grind setting in tiny increments</strong> — one notch at a time if you have a hand grinder, one or two clicks on an electric burr grinder. Brew, taste, adjust. If your coffee runs through in under two minutes, go a bit finer. If it takes over four minutes and tastes harsh, go a bit coarser. You're aiming for a <strong>total brew time around 2:30 to 3:30</strong> for most 15–20g recipes.</p><p>From what I've observed, people also forget to taste for <strong>balance, not intensity</strong>. A strong cup can still be balanced. A weak cup can still be over-extracted if the grind was uneven. Trust your palate more than the clock, but use the clock as your first checkpoint.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "The one-notch rule",
+        "content": "If you change your grind, change only one setting at a time and brew a full cup before adjusting again. It's tempting to chase the perfect setting by making two or three changes at once, but then you lose track of what actually worked."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "grind-adjustment-scenario",
+        "question": "Your coffee tastes sour and weak, and the total brew time was 2:00. What should you do next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Grind significantly coarser to speed up the brew"
+          },
+          {
+            "id": "b",
+            "text": "Grind one or two notches finer and brew again"
+          },
+          {
+            "id": "c",
+            "text": "Increase the water temperature to 100°C"
+          },
+          {
+            "id": "d",
+            "text": "Use more coffee to make the brew stronger"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Sour and weak means under-extraction — water ran through too fast without pulling enough flavor. Grinding finer slows the flow and increases contact time. Going coarser would make it worse. Raising temperature might help slightly, but grind is the bigger lever here. Adding more coffee won't fix extraction — you'll just get more sour coffee."
+      },
+      {
+        "type": "concept",
+        "title": "Pour technique mistakes that ruin an otherwise good recipe",
+        "content": "<p>Let's say your grind and temperature are dialed in, but the cup still tastes uneven or harsh. <strong>The culprit is usually your pour.</strong> The two most common mistakes: pouring too fast in the center (which digs a channel and lets water bypass the edges) and pouring too timidly around the rim (which leaves dry pockets of coffee that never extract).</p><p>Here's what works: <strong>start your pour in the center, then spiral outward in slow, concentric circles</strong>, stopping about a centimeter from the edge of the paper filter. Keep your flow steady and gentle. If you see the coffee bed swirl or form a crater, you're pouring too aggressively. If you see dry patches on the surface after your bloom, you didn't saturate evenly.</p><p>One more thing — <strong>don't let the water level drop to expose the grounds between pours.</strong> A little drop is fine, but if the bed sits exposed and dry for 20 seconds, you get uneven cooling and stalling. Keep the bed submerged and happy.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "pour-edge-statement",
+        "statement": "You should pour water all the way to the edge of the paper filter to make sure every ground gets saturated.",
+        "correct": false,
+        "explanation": "Stop about a centimeter from the edge. If you pour right to the filter, you risk water running down the paper without passing through the coffee bed — it just shortcuts to the bottom. The grounds near the edge will get saturated by the water spreading naturally from the center."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Watch for channeling",
+        "content": "If you see a deep hole form in the center of the coffee bed during your pour, that's channeling — water taking the path of least resistance and leaving the rest of the grounds under-extracted. Slow down your pour and widen your spiral."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Most mistakes produce a distinct taste: sour and weak means under-extraction (grind finer), bitter and harsh means over-extraction (grind coarser).",
+          "Adjust grind size in tiny increments — one notch at a time — and taste before making another change.",
+          "Pour in slow, concentric circles starting from the center, stopping about a centimeter from the paper edge.",
+          "Keep the coffee bed submerged between pours so it doesn't cool down or stall unevenly.",
+          "Trust your palate, but use brew time (2:30–3:30 for most recipes) as your first checkpoint."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What flavor does a too-coarse grind produce in pour-over coffee?",
+        "back": "Sour, weak, and tea-like. The water runs through too fast, under-extracting the coffee and failing to pull out enough sweetness or body."
+      },
+      {
+        "front": "What flavor does a too-fine grind produce in pour-over coffee?",
+        "back": "Bitter, astringent, and over-strong. The fine grind traps water, slowing the brew and over-extracting harsh compounds."
+      },
+      {
+        "front": "What should you do if your coffee tastes sour and the brew time is under 2 minutes?",
+        "back": "Grind finer — one or two notches. The fast brew time means under-extraction. A finer grind slows the flow and increases contact time for better extraction."
+      },
+      {
+        "front": "How should you pour water during a V60 brew to avoid channeling?",
+        "back": "Start in the center and spiral outward in slow, concentric circles, stopping about a centimeter from the paper edge. Keep the flow steady and gentle to prevent digging a hole."
+      },
+      {
+        "front": "Why shouldn't you let the water level drop completely between pours?",
+        "back": "If the coffee bed sits exposed and dry, it cools unevenly and can stall, leading to uneven extraction. Keep the bed gently submerged throughout the brew."
+      },
+      {
+        "front": "What's the typical target brew time range for a V60 pour-over?",
+        "back": "About 2:30 to 3:30 for most 15–20g recipes. Use this as a first checkpoint, then adjust grind size and taste to refine."
+      }
+    ]
+  }
+}

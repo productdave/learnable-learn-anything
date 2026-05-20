@@ -1,0 +1,19 @@
+{
+  "id": "quiz-demo",
+  "schemaVersion": 1,
+  "name": "Quiz Variants Demo",
+  "title": "Quiz Variants Demo",
+  "subtitle": "All 5 question formats the generator can produce, side by side.",
+  "eyebrow": "Demo",
+  "storageKeyPrefix": "quiz-demo",
+  "documentTitle": "Quiz Variants Demo | Learnable",
+  "searchPlaceholder": "Search…",
+  "chatPlaceholder": "Ask the AI tutor about this demo…",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "This is a demo course. The AI tutor still works.",
+  "chatSystemPrompt": "You are a learning assistant for a demo course showing quiz variants.",
+  "chatTrailingPrompt": "Be concise.",
+  "completionMessage": "great work exploring the demo",
+  "dashboardCTA": "Open the one topic in this course to see all five quiz formats render.",
+  "moduleColorAccents": ["#4338CA", "#D97706", "#059669", "#8B5CF6", "#0EA5E9"]
+}

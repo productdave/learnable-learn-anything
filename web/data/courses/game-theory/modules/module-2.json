@@ -1,0 +1,571 @@
+{
+  "prisoners-dilemma": {
+    "id": "prisoners-dilemma",
+    "moduleId": "classic-dilemmas",
+    "title": "The Prisoner's Dilemma",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The Story That Changed Everything",
+        "content": "\n        <p>Here's a scenario that will mess with your head. Two suspects get arrested after a robbery. The police split them into <strong>separate rooms</strong> and offer each one the same deal: <strong>betray your partner and go free, or stay silent and risk a heavy sentence.</strong> Neither suspect can talk to the other. Each one has to decide alone -- knowing only that the other person is facing the exact same choice.</p>\n        <p>Here's where it gets interesting. If both <strong>stay silent</strong> (cooperate with each other), the police can only nail them on a minor charge -- <strong>one year each</strong>. If one betrays (defects) while the other stays silent, the betrayer <strong>walks free</strong> while the silent partner gets <strong>five years</strong>. But if <em>both</em> betray each other, they each get <strong>three years</strong>.</p>\n        <p>This thought experiment was formalised by mathematicians <strong>Merrill Flood</strong>, <strong>Melvin Dresher</strong>, and <strong>Albert Tucker</strong> in the early 1950s. It's the single most studied scenario in all of game theory. Not because it tells us anything about crime -- but because it reveals a <strong>deep tension between what's rational for you and what's good for everyone</strong>. And that tension? It shows up everywhere in life.</p>\n      "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "classic-pd-matrix",
+        "title": "The Classic Prisoner's Dilemma",
+        "description": "Payoffs represent years of freedom preserved (higher is better). Each cell shows (Player 1, Player 2).",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "Prisoner A",
+          "colPlayer": "Prisoner B",
+          "rowStrategies": [
+            "Cooperate (Stay Silent)",
+            "Defect (Betray)"
+          ],
+          "colStrategies": [
+            "Cooperate (Stay Silent)",
+            "Defect (Betray)"
+          ],
+          "payoffs": [
+            [
+              [
+                3,
+                3
+              ],
+              [
+                0,
+                5
+              ]
+            ],
+            [
+              [
+                5,
+                0
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "Dominant Strategies and the Trap",
+        "content": "\n        <p>Let's walk through this from Prisoner A's perspective. If Prisoner B cooperates, A gets 3 by cooperating but <strong>5 by defecting</strong>. If Prisoner B defects, A gets 0 by cooperating but <strong>1 by defecting</strong>. No matter what B does, <strong>A is better off defecting</strong>. The same logic applies to B. Defection is what we call a <em>dominant strategy</em> -- it's the best response regardless of what the other player chooses.</p>\n        <p>So what's a <strong>dominant strategy</strong> exactly? It's a move that gives you a <strong>higher payoff than any alternative</strong>, no matter what your opponent does. When you have one, the \"rational\" choice seems obvious: play it. But here's the trap -- when <em>both</em> players follow their dominant strategy, they land on (Defect, Defect) and each get 1. That's <strong>far worse</strong> than the (3, 3) they could have had by cooperating.</p>\n        <p>This is the heart of the dilemma. <strong>Individually rational decisions produce a collectively irrational outcome.</strong> Each player, acting in their own self-interest, makes both of them worse off. The <strong>Nash Equilibrium</strong> of this game -- the outcome where neither player can improve by switching on their own -- is the one where <strong>both players are worse off than they need to be</strong>. (We'll dig deeper into Nash Equilibrium in the next topic.)</p>\n      "
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "The Core Paradox",
+        "content": "Here's the truth about the Prisoner's Dilemma: it proves that individual rationality can lead to collective irrationality. Two perfectly logical people, each optimising for themselves, reliably end up in a state that neither of them wants. This single insight explains an enormous range of human problems -- from arms races to climate change to why your team can't agree on anything."
+      },
+      {
+        "type": "concept",
+        "title": "Prisoner's Dilemmas in the Real World",
+        "content": "\n        <p>Once you understand the structure of the Prisoner's Dilemma, you start seeing it <strong>everywhere</strong>. The signature is always the same: <strong>each individual benefits from \"defecting\" regardless of what others do, but everyone is worse off when everyone defects.</strong></p>\n        <p><strong>Arms races.</strong> During the Cold War, both the US and USSR would have been <strong>safer (and richer)</strong> if neither built nuclear arsenals. But each side reasoned: \"If they don't build, we gain an advantage by building. If they do build, we'd better build too.\" The dominant strategy for each was to arm -- producing a world <strong>bristling with weapons</strong> that made everyone less safe.</p>\n        <p><strong>Price wars.</strong> Two competing airlines both know they'd make more money if they <strong>kept prices high</strong>. But each one thinks: \"If they keep prices high and I undercut them, I steal their customers. If they drop prices, I'd better drop mine too or I'll lose everything.\" Both cut prices. Both make less money. Both wish they hadn't -- but <strong>neither can stop first</strong>.</p>\n        <p><strong>Environmental pollution.</strong> Every factory benefits from dumping waste cheaply rather than treating it. This holds whether other factories pollute or not. The result? A river <strong>no one wanted to poison</strong>. From my perspective, <strong>climate change is a Prisoner's Dilemma played by nations</strong> -- each country has an individual incentive to keep emitting, even though collective restraint would be better for all.</p>\n      ",
+        "expandable": true
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "pd-dominant-strategy-quiz",
+        "question": "In the classic Prisoner's Dilemma, what is each player's dominant strategy?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Cooperate, because mutual cooperation gives the best combined outcome"
+          },
+          {
+            "id": "b",
+            "text": "Defect, because it yields a higher payoff regardless of what the other player does"
+          },
+          {
+            "id": "c",
+            "text": "Randomly choose, because neither option is consistently better"
+          },
+          {
+            "id": "d",
+            "text": "Cooperate if you think the other will cooperate, defect otherwise"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Defection is the dominant strategy because it produces a higher payoff no matter what the other player does. If the other cooperates, defecting gives you 5 instead of 3. If the other defects, defecting gives you 1 instead of 0. And that's exactly what makes the Prisoner's Dilemma so powerful -- the individually rational choice (defect) leads to a collectively worse outcome (1, 1) than mutual cooperation (3, 3)."
+      },
+      {
+        "type": "exercise",
+        "id": "pd-personal-exercise",
+        "title": "Your Personal Dilemma",
+        "prompt": "Describe a Prisoner's Dilemma you've experienced at work or in your personal life. What was the temptation to defect? Did you or the other person give in? What happened as a result?",
+        "hints": [
+          "Think about a situation where you and someone else both had an incentive to act selfishly, even though cooperation would have been better for both of you.",
+          "Common examples: splitting shared work, contributing to a group project, deciding whether to share information with a colleague who might use it competitively.",
+          "Consider: was there anything that could have changed the incentives to make cooperation easier?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "A dominant strategy is one that is best for you regardless of what others do.",
+          "In the Prisoner's Dilemma, defection is dominant for both players -- but mutual defection is worse for both than mutual cooperation.",
+          "Individual rationality can produce collective irrationality: the Nash Equilibrium of the PD is not the best possible outcome.",
+          "Real-world PDs appear in arms races, price wars, environmental problems, and many everyday workplace situations.",
+          "Escaping the Prisoner's Dilemma usually requires changing the game itself -- through communication, enforceable agreements, or repeated interaction."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a dominant strategy?",
+        "back": "A strategy that yields a higher payoff than any alternative, regardless of what the other player does. You should play it no matter what you expect your opponent to choose."
+      },
+      {
+        "front": "What is the core paradox of the Prisoner's Dilemma?",
+        "back": "Each player has a dominant strategy to defect, but when both defect, the outcome is worse for both than if they had cooperated. Individual rationality leads to collective irrationality."
+      },
+      {
+        "front": "In the classic PD with payoffs CC=(3,3), CD=(0,5), DC=(5,0), DD=(1,1), what is the Nash Equilibrium?",
+        "back": "(Defect, Defect) with payoffs (1, 1). Neither player can improve their outcome by switching strategy alone, even though (Cooperate, Cooperate) at (3, 3) would be better for both."
+      },
+      {
+        "front": "Why is an arms race an example of the Prisoner's Dilemma?",
+        "back": "Each nation is better off arming regardless of whether the other arms (dominance through superiority, or self-defence). But when both arm, both are poorer and less safe than if neither had. The dominant strategy leads to a collectively worse outcome."
+      },
+      {
+        "front": "What conditions define a Prisoner's Dilemma?",
+        "back": "Temptation to defect > mutual cooperation > mutual defection > being exploited (T > R > P > S). Each player benefits from defecting regardless of the other's choice, but mutual defection is worse than mutual cooperation."
+      }
+    ]
+  },
+  "nash-equilibrium": {
+    "id": "nash-equilibrium",
+    "moduleId": "classic-dilemmas",
+    "title": "Nash Equilibrium in Daily Life",
+    "estimatedMinutes": 14,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What Nash Equilibrium Really Means",
+        "content": "\n        <p>Don't worry -- this sounds more intimidating than it is. A <strong>Nash Equilibrium</strong> is a set of strategies -- one for each player -- where <strong>no player can do better by changing their strategy alone</strong>, assuming everyone else keeps theirs the same. It's named after mathematician <strong>John Nash</strong> (yes, the <em>A Beautiful Mind</em> guy), whose work on this concept earned him the Nobel Prize in Economics in 1994.</p>\n        <p>Think of it as a <em>state of mutual best responses</em>. You're playing your best response to what they're doing, and they're playing their best response to what you're doing. Neither of you has a reason to switch. The system is <strong>stable</strong> -- not because it's good, but because <strong>nobody can unilaterally improve their situation</strong>.</p>\n        <p>Here's the thing that trips people up: <strong>stability is not the same as optimality.</strong> A Nash Equilibrium can be a wonderful outcome for everyone, a terrible outcome for everyone, or anything in between. All that matters is that <strong>nobody has an incentive to deviate on their own</strong>. Understanding this distinction is the key to spotting bad equilibria in your own life -- and figuring out how to escape them.</p>\n      "
+      },
+      {
+        "type": "concept",
+        "title": "How to Find a Nash Equilibrium",
+        "content": "\n        <p>Finding Nash Equilibria in a payoff matrix is actually pretty straightforward once you know the method. For each cell, ask two questions: <strong>Can Player 1 do better by switching rows (holding the column fixed)? Can Player 2 do better by switching columns (holding the row fixed)?</strong> If the answer to both is no, that cell is a Nash Equilibrium.</p>\n        <p>Here's a practical technique: go through each column and <strong>circle the highest payoff for the row player</strong> (Player 1). Then go through each row and <strong>circle the highest payoff for the column player</strong> (Player 2). Any cell where <em>both</em> payoffs are circled is a Nash Equilibrium. If both players are simultaneously playing their best response, <strong>neither wants to move</strong>.</p>\n        <p>Some games have exactly one Nash Equilibrium (like the Prisoner's Dilemma). Others have multiple equilibria, which creates a <strong>coordination problem</strong> -- players might end up at different equilibria, or worse, in a non-equilibrium state where they're both doing poorly. Still others have <strong>no pure-strategy equilibrium</strong> at all (though they may have one in mixed strategies, where players randomise). We'll get to those later.</p>\n      "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "coordination-ne-matrix",
+        "title": "A Coordination Game: Technology Standards",
+        "description": "Two companies must choose a technology standard. They benefit most when they pick the same one, but they disagree on which is better.",
+        "editable": true,
+        "matrix": {
+          "rowPlayer": "Company A",
+          "colPlayer": "Company B",
+          "rowStrategies": [
+            "Standard X",
+            "Standard Y"
+          ],
+          "colStrategies": [
+            "Standard X",
+            "Standard Y"
+          ],
+          "payoffs": [
+            [
+              [
+                4,
+                3
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            [
+              [
+                0,
+                0
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "Stable but Suboptimal: Bad Equilibria",
+        "content": "\n        <p>From my perspective, the most dangerous Nash Equilibria are the ones that are <strong>stable but suboptimal</strong>. Everyone is stuck in a pattern that makes everyone worse off, yet <strong>no single person can fix it by changing their own behaviour alone</strong>. These \"bad equilibria\" are remarkably common in organisations, communities, and social systems.</p>\n        <p>Here's an example. Think about a team where <strong>nobody speaks up in meetings</strong> because they expect their ideas to be dismissed. Each person's silence is a best response to everyone else's silence -- if you're the only one talking, you look like a troublemaker. But if everyone spoke up, the team would make <strong>better decisions</strong>. The equilibrium is stable (nobody wants to be first to break it) but clearly suboptimal.</p>\n        <p>Or think about a neighbourhood where <strong>nobody maintains their front garden</strong> because everyone else has let theirs go. Why spend money on landscaping when the street already looks run-down? Each person's neglect is a best response to everyone else's neglect. But if everyone invested, <strong>property values would rise</strong> and the whole neighbourhood would benefit. <strong>Escaping a bad equilibrium usually requires coordinated action</strong> -- someone or something that gets multiple players to change strategy at the same time.</p>\n      "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Driving on the Same Side of the Road",
+        "content": "Why does everyone in the UK drive on the left while everyone in France drives on the right? Both are Nash Equilibria -- if everyone else drives on the left, your best response is to drive on the left too (and vice versa). Neither equilibrium is inherently better. Once established, the convention is self-enforcing because nobody wants to be the one driver going against traffic. This is a coordination game in its purest form: multiple equilibria, and the challenge is just getting everyone to the same one."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Stable Does Not Mean Good",
+        "content": "Let's get real -- a Nash Equilibrium is not necessarily good for anyone. It's just stable. A workplace culture of distrust, a market stuck with an inferior standard, or a community trapped in mutual neglect can all be Nash Equilibria. The fact that nobody can individually improve the situation is exactly what makes bad equilibria so persistent and hard to break."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "ne-identification-quiz",
+        "question": "In a game where two friends are choosing a restaurant without communicating, Player 1 prefers Italian (payoff 3) while Player 2 prefers Sushi (payoff 3), but both prefer eating together (payoff 2) over eating alone (payoff 0). Which outcomes are Nash Equilibria?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only (Italian, Italian) because Player 1 prefers it"
+          },
+          {
+            "id": "b",
+            "text": "Only (Sushi, Sushi) because Player 2 prefers it"
+          },
+          {
+            "id": "c",
+            "text": "Both (Italian, Italian) and (Sushi, Sushi) -- neither player wants to eat alone"
+          },
+          {
+            "id": "d",
+            "text": "There is no Nash Equilibrium in this game"
+          }
+        ],
+        "correct": "c",
+        "explanation": "Both (Italian, Italian) and (Sushi, Sushi) are Nash Equilibria. At (Italian, Italian), Player 1 gets their preferred restaurant and Player 2, while not at their favourite spot, prefers eating together (payoff 2) over eating alone at the sushi place (payoff 0). Neither player wants to switch on their own. The same logic applies at (Sushi, Sushi). This is a classic coordination game with multiple equilibria -- the challenge isn't finding an equilibrium, it's coordinating on the same one."
+      },
+      {
+        "type": "exercise",
+        "id": "bad-equilibrium-exercise",
+        "title": "Spotting a Bad Equilibrium",
+        "prompt": "Identify a 'bad equilibrium' in your workplace or community -- a stable pattern where everyone is stuck doing something suboptimal because no individual can improve things by changing alone. What would the better equilibrium look like? What would it take to get there?",
+        "hints": [
+          "Look for situations where \"everyone does X because everyone else does X\" even though everyone would prefer Y.",
+          "Common workplace examples: meeting culture (too many meetings, but no one stops scheduling them), email overload, knowledge hoarding vs. sharing.",
+          "Think about what kind of coordination or leadership intervention could shift the group to a better equilibrium."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "A Nash Equilibrium is a state where no player can improve their payoff by changing strategy alone -- it is stable, not necessarily desirable.",
+          "Some games have one equilibrium, some have many, and some have none in pure strategies.",
+          "Bad equilibria are stable but suboptimal patterns -- common in teams, organisations, and communities.",
+          "Escaping a bad equilibrium requires coordinated change: leadership, communication, or institutional design.",
+          "To find Nash Equilibria in a matrix, look for cells where each player is already playing their best response to the other."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a Nash Equilibrium?",
+        "back": "A set of strategies, one for each player, where no player can improve their payoff by unilaterally changing their strategy. Each player is playing their best response to the others."
+      },
+      {
+        "front": "Can a Nash Equilibrium be bad for all players?",
+        "back": "Yes. A Nash Equilibrium only requires stability (no one can improve alone), not optimality. The (Defect, Defect) outcome in the Prisoner's Dilemma is a Nash Equilibrium that is worse for both players than mutual cooperation."
+      },
+      {
+        "front": "How do you find Nash Equilibria in a payoff matrix?",
+        "back": "For each column, mark the highest payoff for the row player. For each row, mark the highest payoff for the column player. Any cell where both payoffs are marked is a Nash Equilibrium."
+      },
+      {
+        "front": "What is a coordination game?",
+        "back": "A game with multiple Nash Equilibria where the players' main challenge is coordinating on the same equilibrium. Examples: choosing which side of the road to drive on, picking a common technology standard."
+      },
+      {
+        "front": "What makes a 'bad equilibrium' so hard to escape?",
+        "back": "No single player can improve things by changing alone -- that is what makes it an equilibrium. Escaping requires coordinated, simultaneous change by multiple players, which is difficult to organise without communication or leadership."
+      }
+    ]
+  },
+  "coordination-chicken": {
+    "id": "coordination-chicken",
+    "moduleId": "classic-dilemmas",
+    "title": "Coordination and Chicken",
+    "estimatedMinutes": 14,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Coordination Games and Focal Points",
+        "content": "\n        <p>Not every strategic situation is about conflict. A lot of the time, it's about <strong>coordination</strong>. You and another player both want to <strong>match each other's choice</strong>, but you can't communicate beforehand. Where do you meet a stranger in New York City if all you know is the date? How do two drivers on a collision course decide who swerves?</p>\n        <p>Economist <strong>Thomas Schelling</strong> discovered something remarkable: people are surprisingly good at coordinating <strong>without communication</strong>. They do it by finding <strong>focal points</strong> (also called Schelling points) -- choices that stand out as natural, obvious, or culturally prominent. In his famous experiment, when asked to meet a stranger in New York City, most people chose <em>Grand Central Station at noon</em>. Not because it's objectively the best meeting spot, but because it's the place that <strong>feels most \"obvious.\"</strong></p>\n        <p>Focal points work because they leverage <strong>shared knowledge, culture, and expectations</strong>. Round numbers, prominent landmarks, conventional defaults -- these all serve as coordination mechanisms. In business, <strong>industry standards</strong> often emerge not because they're technically superior, but because they became the focal point around which everyone converged. Here's the practical takeaway: when you need to coordinate, <strong>look for the choice that everyone expects everyone else to make.</strong></p>\n      "
+      },
+      {
+        "type": "concept",
+        "title": "The Game of Chicken",
+        "content": "\n        <p>Let's get real about one of the most dramatic games in all of game theory. Two teenagers in fast cars race toward each other on a narrow road. Each has two options: <strong>swerve</strong> (back down) or <strong>drive straight</strong> (hold course). If both swerve, they both survive with their pride slightly bruised. If one swerves and the other drives straight, the one who drove straight wins the status game -- they're \"brave\" -- while the other is \"chicken.\" But if neither swerves? They crash and <strong>both lose catastrophically</strong>.</p>\n        <p>Here's what makes Chicken fundamentally different from the Prisoner's Dilemma: there's <strong>no dominant strategy</strong>. Your best move depends entirely on what the other player does. If they're going to drive straight, you should swerve (losing face beats dying). If they're going to swerve, you should drive straight (you win the status contest). The game has two Nash Equilibria: <strong>(Swerve, Straight)</strong> and <strong>(Straight, Swerve)</strong> -- but the players disagree about which one they'd prefer.</p>\n        <p>This creates an intense dynamic of <strong>brinkmanship</strong> -- each player tries to convince the other that they absolutely will not swerve, making it rational for the other to back down. The danger is that both players adopt this strategy simultaneously, and the game ends in disaster. Chicken shows up constantly in <strong>negotiations, politics, and business</strong>: mergers, trade disputes, budget standoffs, and any situation where both parties prefer to \"win\" but would rather concede than crash.</p>\n      "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "chicken-game-matrix",
+        "title": "The Game of Chicken",
+        "description": "Two drivers heading toward each other. Swerve to avoid the crash, or drive straight to prove your nerve. Higher payoffs are better.",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "Driver A",
+          "colPlayer": "Driver B",
+          "rowStrategies": [
+            "Swerve",
+            "Straight"
+          ],
+          "colStrategies": [
+            "Swerve",
+            "Straight"
+          ],
+          "payoffs": [
+            [
+              [
+                3,
+                3
+              ],
+              [
+                1,
+                5
+              ]
+            ],
+            [
+              [
+                5,
+                1
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "Commitment Devices and Credible Threats",
+        "content": "\n        <p>In Chicken, the player who can most convincingly <strong>commit to not swerving</strong> wins. This leads to a strange -- almost counterintuitive -- strategic insight: <strong>limiting your own options can give you power.</strong> If you rip your steering wheel off and throw it out the window (and your opponent sees you do it), you've made it credible that you <em>can't</em> swerve. Now your opponent must swerve or die. You win -- as long as they're rational.</p>\n        <p>This is what's called a <strong>commitment device</strong> -- a deliberate action that restricts your future choices in order to <strong>influence another player's behaviour</strong>. In negotiations, walking away from a deal, making a public announcement, or signing a binding contract can all serve as commitment devices. The key is that the commitment must be <em>credible</em> -- the other side must believe you genuinely can't (or won't) back down.</p>\n        <p>And that brings us to <strong>credible threats</strong>. A credible threat is one the other player believes you will actually carry out, because it's in your interest to do so (or because you've removed the option of backing down). A <strong>non-credible threat</strong> -- like threatening to blow up your own factory if a supplier raises prices -- will be ignored because the other player knows you won't follow through. The gap between credible and non-credible threats explains <strong>why some ultimatums work and others get laughed off</strong>.</p>\n      "
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The Workplace Game of Chicken",
+        "content": "Two colleagues both need a shared report finished, but neither wants to do the tedious data entry. Each waits, hoping the other will crack first. If both wait too long, the deadline passes and both are in trouble. If one person gives in and does the work, the other benefits. This is Chicken: no dominant strategy, an incentive to hold out, but a shared disaster if neither budges. The one who credibly signals \"I absolutely will not do this\" often gets their way -- but at the risk of mutual failure."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "schelling-focal-quiz",
+        "question": "You and a friend need to meet somewhere in a city you've both visited but can't communicate. According to Schelling's theory of focal points, what guides your choice?",
+        "options": [
+          {
+            "id": "a",
+            "text": "You should pick a random location since there is no way to coordinate without communication"
+          },
+          {
+            "id": "b",
+            "text": "You should pick the most prominent or culturally obvious landmark, expecting your friend to do the same"
+          },
+          {
+            "id": "c",
+            "text": "You should go to the location closest to you since that minimises your own cost"
+          },
+          {
+            "id": "d",
+            "text": "You should stay home and wait for your friend to call"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Schelling's key insight is that people can coordinate without communication by converging on focal points -- choices that stand out as obvious, prominent, or culturally salient. You pick the landmark you think your friend will think you'll think they'll pick. This recursive logic reliably leads people to the same prominent choice, like a famous train station, the main square, or the most well-known monument."
+      },
+      {
+        "type": "exercise",
+        "id": "chicken-personal-exercise",
+        "title": "Your Game of Chicken",
+        "prompt": "Describe a 'game of chicken' in your professional or personal life -- a situation where both sides waited for the other to give in, with rising costs of delay. How was it resolved? Did anyone use a commitment device?",
+        "hints": [
+          "Think about negotiations, standoffs, or deadline situations where both parties preferred the other to make the first move.",
+          "Examples: who does the unpleasant task, who makes the first concession in a negotiation, who apologises first after an argument.",
+          "Consider whether any commitment device (public statement, deadline, involving a third party) was used to break the standoff."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Coordination games are about matching choices; focal points help players coordinate without communication.",
+          "Focal points rely on shared culture, salience, and expectations -- the choice that \"feels obvious.\"",
+          "In Chicken, there is no dominant strategy. Your best move depends on what the other player does.",
+          "Commitment devices -- deliberately limiting your own options -- can give you strategic power in Chicken-like situations.",
+          "A threat is only effective if it is credible: the other side must believe you will follow through."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a focal point (Schelling point)?",
+        "back": "A choice that stands out as natural, obvious, or culturally prominent, allowing people to coordinate without communication. Named after Thomas Schelling, who showed that people reliably converge on salient options."
+      },
+      {
+        "front": "How does Chicken differ from the Prisoner's Dilemma?",
+        "back": "In the PD, defection is dominant -- you should always defect. In Chicken, there is no dominant strategy. Your best move depends on what the other does. Chicken has two pure-strategy Nash Equilibria (one swerves, the other doesn't), while the PD has one (both defect)."
+      },
+      {
+        "front": "What is a commitment device?",
+        "back": "A deliberate action that restricts your future options in order to influence others' behaviour. Example: publicly announcing your position so you can't back down without losing face. It works by making your threat or promise credible."
+      },
+      {
+        "front": "What makes a threat 'credible'?",
+        "back": "A threat is credible when the other player believes you will actually carry it out -- either because it's in your interest to do so, or because you've removed the ability to back down. Non-credible threats are ignored."
+      },
+      {
+        "front": "What is brinkmanship?",
+        "back": "A strategy of pushing a dangerous situation to the edge of disaster in order to force the other side to back down. Common in Chicken-like games. Effective but risky: if both sides practise brinkmanship, the outcome can be catastrophic."
+      }
+    ]
+  },
+  "trust-ultimatums": {
+    "id": "trust-ultimatums",
+    "moduleId": "classic-dilemmas",
+    "title": "Trust Games and Ultimatums",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The Trust Game: To Invest or Not",
+        "content": "\n        <p>Here's a game that strips human trust down to its <strong>strategic essentials</strong>. <strong>Player 1 (the investor)</strong> starts with some money -- say $10. They can keep it all, or send some portion to <strong>Player 2 (the trustee)</strong>. Here's the twist: whatever amount is sent gets <em>tripled</em> by the experimenter before reaching the trustee. The trustee then decides how much (if any) to send back.</p>\n        <p>So if the investor sends $10, the trustee receives <strong>$30</strong>. The trustee could send back $15 (a fair split of the gains) or keep all $30 and return <strong>nothing</strong>. A purely \"rational\" trustee, in a one-shot game, would keep everything -- after all, the money is already in their hands. Knowing this, a purely rational investor would send nothing. Both end up with $10 and $0 respectively, <strong>missing out on the $20 in value</strong> that trust would have created.</p>\n        <p>But here's what actually happens in experiments: <strong>most investors send money, and most trustees send some back.</strong> People are not perfectly selfish calculators. They have norms of fairness, reputational concerns, and genuine impulses toward reciprocity. The Trust Game reveals that trust is not naive -- it's a <em>strategic investment</em> that <strong>creates value neither party can generate alone</strong>. The question isn't whether to trust. It's <strong>how much to trust, and whom.</strong></p>\n      "
+      },
+      {
+        "type": "payoff-matrix",
+        "id": "trust-game-matrix",
+        "title": "A Simplified Trust Game",
+        "description": "The investor can Trust (send money) or Hold. The trustee can Honour (return a fair share) or Exploit (keep everything). Payoffs in dollars.",
+        "editable": false,
+        "matrix": {
+          "rowPlayer": "Investor",
+          "colPlayer": "Trustee",
+          "rowStrategies": [
+            "Trust",
+            "Hold"
+          ],
+          "colStrategies": [
+            "Honour",
+            "Exploit"
+          ],
+          "payoffs": [
+            [
+              [
+                15,
+                15
+              ],
+              [
+                0,
+                30
+              ]
+            ],
+            [
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                0
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "concept",
+        "title": "The Ultimatum Game: Fairness Under Fire",
+        "content": "\n        <p>The Ultimatum Game is even simpler -- and even more revealing. <strong>Player 1 (the proposer)</strong> receives a sum of money -- say $100 -- and must offer a split to <strong>Player 2 (the responder)</strong>. The responder can accept or reject. If they accept, both get the proposed amounts. If they reject, <em>both</em> get nothing.</p>\n        <p>Classical economics predicts the proposer should offer the smallest possible amount ($1) and the responder should accept, because <strong>$1 is better than $0</strong>. But across decades of experiments in dozens of cultures, here's what actually happens: <strong>the average offer is 40-50% of the total, and offers below 20% are frequently rejected.</strong> People will <strong>burn their own money</strong> to punish what they perceive as unfair treatment.</p>\n        <p>From my perspective, this isn't irrational -- it's deeply strategic. Rejecting an unfair offer is a <strong>credible punishment</strong> that, in a world of repeated interactions, deters future lowball behaviour. People who develop a reputation for <strong>rejecting bad deals get better offers</strong>. Fairness norms exist not just because humans are nice, but because they <em>work</em> -- they stabilise cooperation and prevent exploitation. In the workplace, this plays out constantly: people who feel underpaid or undervalued don't just accept it -- they <strong>reduce effort, quit, or sabotage</strong>. The \"irrational\" rejection has deeply rational roots.</p>\n      "
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Fairness Is a Strategic Force",
+        "content": "Here's the truth -- fairness norms are not just soft sentiments. They are powerful strategic instruments. People systematically punish unfair behaviour even at personal cost, and this willingness to punish stabilises cooperation across society. In organisations, perceived fairness affects effort, loyalty, and retention far more than pure monetary calculations predict. A manager who ignores fairness norms will face \"irrational\" resistance that is, at its root, deeply strategic."
+      },
+      {
+        "type": "concept",
+        "title": "Trust, Delegation, and the Workplace",
+        "content": "\n        <p>Every act of <strong>delegation</strong> in the workplace is a trust game. When you hand an important task to a colleague, you're investing your <strong>time, your reputation, and your peace of mind</strong>. The person you're delegating to can honour that trust (do good work, keep you informed) or exploit it (cut corners, blame you if things go wrong, take credit for success).</p>\n        <p>Effective delegation, like effective investing in the Trust Game, depends on <strong>calibrated trust</strong>. You don't give your life savings to a stranger, and you don't delegate a career-defining project to someone you've never worked with. You <strong>build trust incrementally</strong>: small tasks first, then larger ones as the person proves reliable. Each successful interaction raises the stakes you're willing to commit.</p>\n        <p>Ultimatum Game dynamics also play out in <strong>salary negotiations, project assignments, and resource allocation</strong>. If employees feel a division of work or rewards is unfair, they don't just accept it quietly -- they disengage, push back, or leave. <strong>A \"fair\" offer isn't generosity; it's the minimum viable strategy for maintaining cooperation.</strong> The cost of an unfair division isn't just the money saved -- it's the <strong>trust destroyed and the reciprocity lost</strong>.</p>\n      ",
+        "expandable": true
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "ultimatum-game-quiz",
+        "question": "In the Ultimatum Game, classical game theory predicts the responder should accept any positive offer. In practice, what actually happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Responders accept all offers, confirming the theory"
+          },
+          {
+            "id": "b",
+            "text": "Responders reject all offers below 50% of the total"
+          },
+          {
+            "id": "c",
+            "text": "Responders frequently reject offers they perceive as unfairly low (typically below 20-30%), even though rejection means getting nothing"
+          },
+          {
+            "id": "d",
+            "text": "Responders always counter-offer rather than accepting or rejecting"
+          }
+        ],
+        "correct": "c",
+        "explanation": "Experimental evidence consistently shows that people reject offers they view as unfairly low -- typically below 20-30% of the total -- even though rejection means both parties get nothing. This 'irrational' behaviour is actually a form of costly punishment that enforces fairness norms. Proposers anticipate this and typically offer 40-50%, far more than the theoretical minimum. Fairness is not just a preference; it is a strategic equilibrium sustained by the credible threat of rejection."
+      },
+      {
+        "type": "exercise",
+        "id": "delegation-trust-exercise",
+        "title": "Trust and Delegation",
+        "prompt": "Think about a time you delegated an important task to someone. What made you trust (or not trust) that person? How did the outcome affect your willingness to delegate to them in the future? What would the Trust Game predict about your decision?",
+        "hints": [
+          "Consider the factors that influenced your decision: past experience, reputation, the stakes involved, whether you had a fallback option.",
+          "Think about how the outcome (positive or negative) changed the \"payoff matrix\" for future interactions.",
+          "How did fairness play a role? Did you feel the division of credit and responsibility was fair?",
+          "Was there anything that could have served as a \"commitment device\" to make the delegation less risky?"
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "The Trust Game shows that trust is a strategic investment: it creates value that neither party can achieve alone, but it also carries risk.",
+          "In the Ultimatum Game, people consistently reject unfair offers, even at personal cost -- demonstrating that fairness norms have real strategic power.",
+          "Fairness is not irrational; it is a mechanism for enforcing cooperation and deterring exploitation.",
+          "Workplace delegation is a trust game: effective leaders build trust incrementally and understand the risks of both over-trusting and under-trusting.",
+          "The cost of unfairness is not just financial -- it destroys trust, reduces effort, and breaks down future cooperation."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "How does the Trust Game work?",
+        "back": "Player 1 (investor) can send money to Player 2 (trustee); the amount is multiplied (typically tripled) in transit. The trustee then decides how much to return. Rational one-shot analysis says send nothing, but most people invest and most trustees reciprocate."
+      },
+      {
+        "front": "What does the Ultimatum Game reveal about human behaviour?",
+        "back": "People reject offers they perceive as unfairly low, even at personal cost (both get nothing). This shows that fairness norms are a real strategic force, not just a preference. Proposers anticipate rejection and typically offer 40-50%."
+      },
+      {
+        "front": "Why is rejection in the Ultimatum Game considered 'strategically rational'?",
+        "back": "Rejecting unfair offers is costly in the short term but serves as a credible punishment that deters future lowball behaviour. In a world of repeated interactions, a reputation for rejecting bad deals gets you better offers."
+      },
+      {
+        "front": "How does the Trust Game apply to workplace delegation?",
+        "back": "Every delegation is a trust investment: you risk your time and reputation, and the other person can honour or exploit that trust. Effective leaders build trust incrementally -- starting small, raising stakes as reliability is demonstrated."
+      },
+      {
+        "front": "Why do fairness norms matter strategically in organisations?",
+        "back": "People who feel treated unfairly reduce effort, disengage, quit, or sabotage. Fairness is not generosity -- it's the minimum viable strategy for sustaining cooperation. Ignoring fairness norms triggers 'irrational' resistance with deeply rational roots."
+      },
+      {
+        "front": "What does classical game theory predict in the Ultimatum Game versus what actually happens?",
+        "back": "Theory predicts: offer the minimum ($1 of $100), accept any positive offer. Reality: proposers offer 40-50%, responders reject offers below 20-30%. The gap reveals the power of fairness norms and costly punishment in human strategic behaviour."
+      }
+    ]
+  }
+}
