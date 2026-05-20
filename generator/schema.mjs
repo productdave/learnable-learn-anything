@@ -162,17 +162,26 @@ export const TopicContentSchema = z.object({
 
 // --- Research bundle (Stage 2 output) -------------------------------
 
+// Permissive: the model sometimes returns experts/sources as a single string
+// instead of an array of objects. Accept both shapes and normalise upstream
+// rather than rejecting the whole bundle and losing all research.
+const ExpertField = z.union([
+  z.array(z.object({ name: z.string(), note: z.string() })),
+  z.string().transform(s => [{ name: s, note: '' }]),
+  z.null().transform(() => [])
+]).default([]);
+
+const SourceField = z.union([
+  z.array(z.object({ title: z.string(), url: z.string().optional() })),
+  z.string().transform(s => [{ title: s }]),
+  z.null().transform(() => [])
+]).default([]);
+
 export const ResearchBundleSchema = z.object({
   module_id: z.string(),
   key_concepts: z.array(z.string()).min(2),
   examples: z.array(z.string()).min(2),
-  experts: z.array(z.object({
-    name: z.string(),
-    note: z.string()
-  })).default([]),
+  experts: ExpertField,
   misconceptions: z.array(z.string()).default([]),
-  sources: z.array(z.object({
-    title: z.string(),
-    url: z.string().optional()
-  })).default([])
+  sources: SourceField
 });

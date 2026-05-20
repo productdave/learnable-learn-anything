@@ -4,7 +4,7 @@
 // that decides scope, module breakdown, and topic titles. Single Haiku call,
 // forced JSON output via tool use.
 
-import { CourseBriefSchema } from '../schema.mjs';
+import { CourseBriefSchema, QUIZ_VARIANTS } from '../schema.mjs';
 
 const TOOL_NAME = 'submit_course_brief';
 
@@ -130,6 +130,42 @@ Decide the right scope (single_module / mini_course / full_course), break the su
   const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
   if (!toolUse) throw new Error('Stage 1: model did not call the brief tool');
 
-  const parsed = CourseBriefSchema.parse(toolUse.input);
+  // Normalise quiz_plans: model sometimes under-fills (<3 variants), repeats,
+  // or omits entirely. Pad/dedupe/truncate to satisfy the 3-5 distinct rule
+  // before schema validation rejects the whole brief.
+  const raw = toolUse.input;
+  if (raw?.modules) {
+    for (const mod of raw.modules) {
+      for (const topic of mod.topics || []) {
+        topic.quiz_plan = normaliseQuizPlan(topic.quiz_plan);
+      }
+    }
+  }
+
+  const parsed = CourseBriefSchema.parse(raw);
   return parsed;
+}
+
+// Default priority order for padding short or empty quiz_plans.
+const DEFAULT_VARIANT_ORDER = ['multiple-choice', 'true-false', 'fill-in-blank', 'drag-match', 'short-answer'];
+
+function normaliseQuizPlan(plan) {
+  const seen = new Set();
+  const out = [];
+  for (const v of (Array.isArray(plan) ? plan : [])) {
+    if (QUIZ_VARIANTS.includes(v) && !seen.has(v)) {
+      seen.add(v);
+      out.push(v);
+    }
+  }
+  // Pad up to 3 from the default order (skipping anything already in).
+  for (const v of DEFAULT_VARIANT_ORDER) {
+    if (out.length >= 3) break;
+    if (!seen.has(v)) {
+      seen.add(v);
+      out.push(v);
+    }
+  }
+  // Cap at 5.
+  return out.slice(0, 5);
 }

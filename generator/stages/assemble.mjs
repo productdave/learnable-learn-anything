@@ -3,7 +3,7 @@
 // Take the course brief + generated topics, build the renderer-shaped files
 // (course.json, curriculum.json, modules/module-N.json), and write to disk.
 
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 
 function defaultCourseConfig(brief) {
@@ -66,6 +66,9 @@ function buildModuleFiles(brief, topicResults) {
 export function assembleAndWrite(brief, topicResults, outputDir) {
   const courseDir = resolve(outputDir, brief.id);
   const modulesDir = resolve(courseDir, 'modules');
+  // Wipe any stale files from a previous run of the same course id —
+  // otherwise old module-N.json files survive and confuse downstream tools.
+  if (existsSync(courseDir)) rmSync(courseDir, { recursive: true, force: true });
   mkdirSync(modulesDir, { recursive: true });
 
   const courseConfig = defaultCourseConfig(brief);
