@@ -24,8 +24,8 @@ const topicTool = {
       sections: {
         type: 'array',
         minItems: 5,
-        maxItems: 9,
-        description: 'An ordered sequence of teaching sections. Must include: 2-3 concept sections, at least 1 callout, exactly 1 quiz, exactly 1 exercise, exactly 1 takeaway. Order: concept → concept → callout → concept → callout → quiz → exercise → takeaway is a good default.',
+        maxItems: 13,
+        description: 'An ordered sequence of teaching sections. Must include: 2-3 concept sections, 3-5 quiz sections (one per variant in the quiz_plan, in that order), at least 1 callout, exactly 1 takeaway. INTERLEAVE the quizzes with concepts — each quiz comes immediately after the concept it tests, so the learner checks understanding while it is fresh. Do not cluster all quizzes at the end. Recommended pattern: concept → quiz → concept → callout → quiz → concept → quiz → [optional quiz #4] → [optional quiz #5] → takeaway. Exercise section is OPTIONAL; only include if a deeper application reflection genuinely adds value.',
         items: {
           oneOf: [
             {
@@ -201,23 +201,28 @@ const topicTool = {
 function buildSystem(tone) {
   return `You are a teacher writing one topic of an interactive learning module. Your job is to produce a single topic's worth of content that drops directly into the renderer.
 
-Structure each topic as a deliberate learning arc:
+Structure each topic as a deliberate learning arc with INTERLEAVED knowledge checks:
 1. Open with a "what is this and why care" concept section.
-2. Introduce the substance in 1-2 more concept sections.
-3. Use callouts (example, key-insight, warning, tip) to break up text and reinforce.
-4. Include one applied quiz that tests judgement, not recall.
-5. Include one exercise that asks the learner to apply the concept to their own life.
-6. End with a takeaway: 3-5 single-sentence summaries the learner walks away repeating.
-7. Provide 4-6 flashcards for spaced repetition.
+2. Place a quiz immediately after — testing the very thing you just taught.
+3. Introduce more substance in 1-2 more concept sections, each followed by a quiz that tests it.
+4. Use callouts (example, key-insight, warning, tip) to break up text and reinforce.
+5. End with a takeaway: 3-5 single-sentence summaries the learner walks away repeating.
+6. Provide 4-6 flashcards for spaced repetition.
 
-CHOOSING THE QUIZ FORMAT — pick the best fit for THIS topic, don't default:
-- multiple-choice: best when the topic has rich plausible distractors (judgement calls). Use most often.
-- true-false: best when there's a sharp claim or common misconception to nail down. Quick, punchy.
-- drag-match: best when there are 3-5 paired items (terms↔definitions, problems↔fixes, scenarios↔strategies). Great for vocabulary or taxonomy topics.
-- fill-in-blank: best when ONE specific value, ratio, number, name, or short phrase is the whole point of the lesson.
-- short-answer: best when the concept requires synthesis no fixed answer captures — "how would you approach…", "describe the trade-off…".
+QUIZ STRUCTURE — critical:
+- You will receive a quiz_plan (3-5 variants in order) from the topic context.
+- Produce ONE quiz section per variant in the plan, in that exact order.
+- Interleave the quizzes between concept sections — DO NOT cluster all quizzes at the end.
+- Each quiz tests the concept just before it. Choose questions that match the substance.
 
-Vary the format across topics in the same course. A 20-topic course with 20 multiple-choice quizzes is monotonous.
+Quiz variants and how to write them:
+- multiple-choice: applied judgement with 3-4 plausible distractors. Most versatile.
+- true-false: a sharp single claim. State it unambiguously. Most useful for misconceptions.
+- drag-match: 3-5 paired items (terms↔definitions, problems↔fixes, scenarios↔strategies).
+- fill-in-blank: ONE specific value/ratio/name/phrase. Sentence must contain ___ as the marker. Provide 2-4 acceptable phrasings.
+- short-answer: synthesis questions where no fixed wording captures the right answer. Provide a model sample + 2-4 key points the learner should look for.
+
+The exercise section (longer free-text reflection prompt) is OPTIONAL. Default to NOT including one — the 3-5 quizzes already give the learner active engagement. Only include an exercise if the topic genuinely benefits from a longer applied prompt that doesn't fit any quiz variant.
 
 ${tone.systemFragment}
 
@@ -234,7 +239,7 @@ Important formatting:
 Submit by calling the submit_topic tool. Do not write a preamble.`;
 }
 
-export async function runTopic(client, courseBrief, mod, topicMeta, bundle, tone, assignedVariant) {
+export async function runTopic(client, courseBrief, mod, topicMeta, bundle, tone) {
   const researchContext = bundle
     ? `RESEARCH BUNDLE for this module (use as substance):
 Key concepts: ${bundle.key_concepts.join('; ')}
@@ -259,7 +264,7 @@ ${researchContext}
 
 Now produce the topic via the submit_topic tool. Use moduleId "${mod.id}" and id "${topicMeta.id}".
 
-${assignedVariant ? `IMPORTANT — for the quiz section of this topic, you MUST use variant "${assignedVariant}". This is part of varying formats across the course. Do not use a different variant. Write the quiz so the ${assignedVariant} format genuinely fits the substance of this topic.` : ''}`;
+${topicMeta.quiz_plan && topicMeta.quiz_plan.length ? `QUIZ PLAN for this topic — you MUST produce ${topicMeta.quiz_plan.length} quiz sections in this exact order of variants: ${topicMeta.quiz_plan.map((v, i) => `(${i + 1}) "${v}"`).join(', ')}. Interleave them with the concept sections — each quiz tests the concept just before it. Do not cluster them all at the end.` : ''}`;
 
   const resp = await client.messages.create({
     model: 'claude-sonnet-4-5-20250929',
@@ -278,39 +283,16 @@ ${assignedVariant ? `IMPORTANT — for the quiz section of this topic, you MUST 
 }
 
 /**
- * Distribute quiz variants across topics so the same course has format variety.
- * Without this the LLM defaults to multiple-choice for almost everything.
- * Pattern: alternate MC with other variants, biased ~50% MC overall.
- */
-function assignQuizVariants(courseBrief) {
-  const variants = ['multiple-choice', 'true-false', 'drag-match', 'fill-in-blank', 'short-answer'];
-  // Build a shuffled-but-balanced sequence. For 20 topics: ~10 MC, ~3 of each other.
-  const assignments = new Map();
-  let idx = 0;
-  for (const mod of courseBrief.modules) {
-    for (const topic of mod.topics) {
-      // Even indices: multiple-choice. Odd indices: rotate through the others.
-      const variant = (idx % 2 === 0) ? 'multiple-choice' : variants[1 + ((idx >> 1) % 4)];
-      assignments.set(`${mod.id}/${topic.id}`, variant);
-      idx++;
-    }
-  }
-  return assignments;
-}
-
-/**
  * Run topic generation for every topic in every module, with a concurrency cap
- * to stay polite to the API.
+ * to stay polite to the API. Quiz variant choice now lives in Stage 1
+ * (`topic.quiz_plan`); Stage 3 just honors the plan.
  */
 export async function runAllTopics(client, courseBrief, researchResults, tone, { concurrency = 4 } = {}) {
-  const variantAssignments = assignQuizVariants(courseBrief);
-
-  // Flatten { mod, topic, bundle, assignedVariant } work items
+  // Flatten { mod, topic, bundle } work items — topic already carries its quiz_plan
   const work = [];
   for (const { mod, bundle } of researchResults) {
     for (const topic of mod.topics) {
-      const assignedVariant = variantAssignments.get(`${mod.id}/${topic.id}`);
-      work.push({ mod, topic, bundle, assignedVariant });
+      work.push({ mod, topic, bundle });
     }
   }
 
@@ -319,11 +301,11 @@ export async function runAllTopics(client, courseBrief, researchResults, tone, {
   const workers = Array.from({ length: Math.min(concurrency, work.length) }, async () => {
     while (cursor < work.length) {
       const i = cursor++;
-      const { mod, topic, bundle, assignedVariant } = work[i];
+      const { mod, topic, bundle } = work[i];
       try {
-        const content = await runTopic(client, courseBrief, mod, topic, bundle, tone, assignedVariant);
+        const content = await runTopic(client, courseBrief, mod, topic, bundle, tone);
         results.push({ moduleId: mod.id, topicId: topic.id, content });
-        console.log(`    ✓ ${mod.id} / ${topic.id} [${assignedVariant}]`);
+        console.log(`    ✓ ${mod.id} / ${topic.id} [${(topic.quiz_plan || []).join(', ')}]`);
       } catch (err) {
         results.push({ moduleId: mod.id, topicId: topic.id, content: null, error: err.message });
         console.log(`    ✗ ${mod.id} / ${topic.id}: ${err.message}`);

@@ -59,10 +59,21 @@ const briefTool = {
               maxItems: 6,
               items: {
                 type: 'object',
-                required: ['id', 'title'],
+                required: ['id', 'title', 'quiz_plan'],
                 properties: {
                   id: { type: 'string' },
-                  title: { type: 'string' }
+                  title: { type: 'string' },
+                  quiz_plan: {
+                    type: 'array',
+                    minItems: 3,
+                    maxItems: 5,
+                    uniqueItems: true,
+                    items: {
+                      type: 'string',
+                      enum: ['multiple-choice', 'true-false', 'drag-match', 'fill-in-blank', 'short-answer']
+                    },
+                    description: '3-5 quiz variants for THIS topic, distinct, chosen to fit the topic substance. Pick based on what works:\n- multiple-choice: plausible distractors testing judgement (default workhorse)\n- true-false: a sharp claim or a common misconception worth nailing\n- drag-match: 3-5 pairs (term↔definition, scenario↔strategy, problem↔fix)\n- fill-in-blank: ONE specific value/name/ratio is the lesson\n- short-answer: synthesis required, no single right wording\n\nMatch the variant to the substance — do not pick randomly. A "1:16 ratio" topic should include fill-in-blank. A "common pitfalls" topic should include true-false. A "matching style to context" topic wants drag-match.'
+                  }
                 }
               }
             }
@@ -81,7 +92,20 @@ Critical rules:
 - Module descriptions should preview the *substance*, not just restate the title.
 - Pick module colors from the provided palette. Use a DIFFERENT color for each module.
 - Use kebab-case ids ("pour-over-basics", not "Pour Over Basics").
-- Submit your answer by calling the submit_course_brief tool. Do not write a long preamble.`;
+
+QUIZ PLANNING per topic — this is critical:
+- Every topic must include a quiz_plan: an array of 3-5 distinct quiz variant names.
+- Choose variants that genuinely fit the substance of that topic. Quiz variant fit options:
+  - "multiple-choice" — best for applied judgement with plausible distractors. Use most often.
+  - "true-false" — best for testing a sharp claim or surfacing a common misconception.
+  - "drag-match" — best for vocab, taxonomies, scenario↔strategy pairs.
+  - "fill-in-blank" — best when ONE specific value, name, ratio, or short phrase is the whole lesson.
+  - "short-answer" — best when synthesis is required and no single fixed answer exists.
+- Variants within a topic MUST be distinct (no repeats inside one topic).
+- Across the course, mix variants — a course where every topic is the same 3 variants is monotonous.
+- A topic on "the 1:16 brew ratio" SHOULD include fill-in-blank. A topic on "common pour-over mistakes" SHOULD include true-false. A topic on "matching feedback style to situation" SHOULD include drag-match.
+
+Submit your answer by calling the submit_course_brief tool. Do not write a long preamble.`;
 
 export async function runIntake(client, userBrief) {
   const userMsg = `Design a course based on this learner request:

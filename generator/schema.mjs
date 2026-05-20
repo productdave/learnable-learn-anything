@@ -8,9 +8,15 @@ import { z } from 'zod';
 
 export const ScopeEnum = z.enum(['single_module', 'mini_course', 'full_course']);
 
+export const QUIZ_VARIANTS = ['multiple-choice', 'true-false', 'drag-match', 'fill-in-blank', 'short-answer'];
+
 export const CourseBriefTopicSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/, 'topic id must be kebab-case'),
-  title: z.string().min(3)
+  title: z.string().min(3),
+  quiz_plan: z.array(z.enum(QUIZ_VARIANTS))
+    .min(3, 'each topic needs at least 3 quizzes')
+    .max(5, 'each topic has at most 5 quizzes')
+    .refine(arr => new Set(arr).size === arr.length, 'quiz variants must be distinct within a topic')
 });
 
 export const CourseBriefModuleSchema = z.object({
@@ -150,7 +156,7 @@ export const TopicContentSchema = z.object({
   moduleId: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string().min(3),
   estimatedMinutes: z.number().int().min(5).max(60),
-  sections: z.array(SectionSchema).min(4).max(10),
+  sections: z.array(SectionSchema).min(5).max(13),
   flashcards: z.array(FlashcardSchema).min(3).max(8)
 });
 

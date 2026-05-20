@@ -41,7 +41,7 @@ function buildCurriculum(brief) {
       description: m.description,
       icon: m.icon,
       color: m.color,
-      topics: m.topics.map(t => ({ id: t.id, title: t.title }))
+      topics: m.topics.map(t => ({ id: t.id, title: t.title, quiz_plan: t.quiz_plan }))
     }))
   };
 }
