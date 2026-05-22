@@ -1,0 +1,25 @@
+{
+  "id": "ai-annotation-platform-pm",
+  "schemaVersion": 1,
+  "name": "AI Annotation Platform Product Management",
+  "title": "AI Annotation Platform Product Management",
+  "subtitle": "Walk into a director-level PM interview sounding like you built the annotation engine behind frontier AI models",
+  "eyebrow": "Free Course",
+  "storageKeyPrefix": "ai-annotation-platform-pm",
+  "documentTitle": "AI Annotation Platform Product Management | Learnable",
+  "searchPlaceholder": "Search topics in AI Annotation Platform Product Management…",
+  "chatPlaceholder": "Ask about ai annotation platform product management… (Enter to send)",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question below.",
+  "chatSystemPrompt": "You are a learning assistant embedded in an interactive course called \"AI Annotation Platform Product Management\". The course is for: Experienced platform/marketplace/trust-and-safety PM preparing for a director-level role at an AI data annotation platform like Scale AI or Meta's internal annotation product. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "completionMessage": "great work building your knowledge",
+  "dashboardCTA": "Each module builds on the one before. Start with \"From Data Labeling to AI Data Production\" and work your way through.",
+  "moduleColorAccents": [
+    "#4338CA",
+    "#D97706",
+    "#059669",
+    "#8B5CF6",
+    "#0EA5E9"
+  ]
+}

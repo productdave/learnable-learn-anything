@@ -1,0 +1,291 @@
+{
+  "title": "AI Annotation Platform Product Management",
+  "subtitle": "Walk into a director-level PM interview sounding like you built the annotation engine behind frontier AI models",
+  "modules": [
+    {
+      "id": "annotation-evolution",
+      "number": 1,
+      "title": "From Data Labeling to AI Data Production",
+      "description": "Understand how annotation has evolved from simple bounding boxes to expert feedback loops that shape frontier models. Learn the modern taxonomy of work: RLHF, red teaming, model evals, and constitutional AI.",
+      "icon": "compass",
+      "color": "#4338CA",
+      "topics": [
+        {
+          "id": "labeling-to-feedback",
+          "title": "The shift from high-volume labeling to expert human feedback",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "rlhf-mechanics",
+          "title": "RLHF workflows: preference ranking, comparison, and reward modeling",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "red-teaming-evals",
+          "title": "Red teaming, adversarial testing, and model evaluation tasks",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "annotation-taxonomy",
+          "title": "Task taxonomy: classification, segmentation, transcription, rating, ranking, chain-of-thought, critique",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "four-surfaces",
+      "number": 2,
+      "title": "The Four Product Surfaces",
+      "description": "Map the platform's four distinct user personas — requester/customer, reviewer/expert annotator, ops/workflow manager, and platform/admin — and how their needs conflict and align.",
+      "icon": "users",
+      "color": "#D97706",
+      "topics": [
+        {
+          "id": "requester-surface",
+          "title": "Requester/customer surface: dataset creation, project setup, quality SLAs, and data delivery",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "true-false"
+          ]
+        },
+        {
+          "id": "reviewer-surface",
+          "title": "Reviewer/expert surface: task interfaces, instructions, payment transparency, and cognitive load",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "ops-surface",
+          "title": "Ops surface: workforce routing, quality monitoring, adjudication queues, and throughput management",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "platform-surface",
+          "title": "Platform/admin surface: ontology management, versioning, audit logs, and compliance",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "fill-in-blank"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "competitive-landscape",
+      "number": 3,
+      "title": "Competitive Landscape and Strategic Wedges",
+      "description": "Analyze the major players (Scale AI, Labelbox, Snorkel AI, Surge AI, Mercor, SuperAnnotate) by their go-to-market wedges, platform differentiation, and where they win or lose.",
+      "icon": "target",
+      "color": "#059669",
+      "topics": [
+        {
+          "id": "scale-ai-positioning",
+          "title": "Scale AI: full-stack managed service, government/defense, and the API-first platform",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "labelbox-snorkel",
+          "title": "Labelbox (tooling + marketplace) vs. Snorkel AI (programmatic labeling, weak supervision)",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "boutique-players",
+          "title": "Surge AI, Mercor, SuperAnnotate: expert-first, niche vertical, and self-serve wedges",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "build-vs-buy",
+          "title": "Build vs. buy decision factors: why Meta, OpenAI, and Anthropic build internal tools",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quality-systems",
+      "number": 4,
+      "title": "Quality Systems and Labeler Performance",
+      "description": "Design quality control mechanisms that catch errors early and improve over time: gold sets, consensus, calibration sessions, rubrics, and adjudication workflows.",
+      "icon": "scale",
+      "color": "#0EA5E9",
+      "topics": [
+        {
+          "id": "task-design-rubrics",
+          "title": "Task design and rubrics: reducing ambiguity and anchoring judgment",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "true-false"
+          ]
+        },
+        {
+          "id": "gold-consensus",
+          "title": "Gold sets, consensus labels, and inter-annotator agreement (IAA)",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "calibration-adjudication",
+          "title": "Calibration sessions, spot-checking, and adjudication queues",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "workforce-quality",
+          "title": "Diagnosing labeler quality problems: fraud, fatigue, misunderstanding, edge cases",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "feedback-loops",
+          "title": "Feedback loops: showing labelers their accuracy and teaching through rejection reasons",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "metrics-trees",
+      "number": 5,
+      "title": "Metric Trees for AI Data Platforms",
+      "description": "Build a metric tree that balances speed, quality, and model impact. Move beyond label volume to accepted data, downstream model performance, and customer retention.",
+      "icon": "brain",
+      "color": "#E11D48",
+      "topics": [
+        {
+          "id": "north-star-metric",
+          "title": "Choosing the north star: accepted high-quality data vs. raw label volume",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "input-metrics",
+          "title": "Input metrics: task clarity, labeler training completion, gold set pass rate",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "output-metrics",
+          "title": "Output metrics: precision/recall, IAA, rejection rate, time-to-delivery",
+          "quiz_plan": [
+            "multiple-choice",
+            "fill-in-blank",
+            "true-false"
+          ]
+        },
+        {
+          "id": "model-impact",
+          "title": "Model impact metrics: uplift in eval benchmarks, human preference win rate, safety incidents",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "drag-match"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "interview-prep",
+      "number": 6,
+      "title": "Interview Execution and Question Design",
+      "description": "Prepare for common PM interview questions (product design, metrics, trade-offs, prioritization) and learn how to ask sharp questions back that signal deep platform thinking.",
+      "icon": "lightbulb",
+      "color": "#8B5CF6",
+      "topics": [
+        {
+          "id": "product-design-questions",
+          "title": "Answering product design questions: 'Design a task interface for constitutional AI feedback'",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "metrics-tradeoffs",
+          "title": "Metrics and trade-off questions: 'How would you balance throughput vs. quality?'",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "prioritization-scenarios",
+          "title": "Prioritization scenarios: roadmap for expert marketplace vs. self-serve tooling",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "questions-to-ask",
+          "title": "Sharp questions to ask back: platform architecture, quality philosophy, build vs. vendor strategy",
+          "quiz_plan": [
+            "drag-match",
+            "short-answer",
+            "multiple-choice"
+          ]
+        }
+      ]
+    }
+  ]
+}

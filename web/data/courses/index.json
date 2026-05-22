@@ -1,6 +1,15 @@
 {
   "courses": [
     {
+      "id": "ai-annotation-platform-pm",
+      "title": "AI Annotation Platform PM",
+      "subtitle": "Walk into a director-level PM interview sounding like you built the annotation engine behind frontier AI models.",
+      "modules": 6,
+      "topics": 25,
+      "accentColor": "#E11D48",
+      "icon": "briefcase"
+    },
+    {
       "id": "pour-over-coffee",
       "title": "Pour-Over Coffee Mastery",
       "subtitle": "Brew café-quality pour-over coffee at home using your V60 and gooseneck kettle.",
