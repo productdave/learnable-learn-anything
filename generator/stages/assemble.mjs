@@ -3,7 +3,7 @@
 // Take the course brief + generated topics, build the renderer-shaped files
 // (course.json, curriculum.json, modules/module-N.json), and write to disk.
 
-import { writeFileSync, mkdirSync, rmSync, existsSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 
 function defaultCourseConfig(brief) {
@@ -61,6 +61,42 @@ function buildModuleFiles(brief, topicResults) {
     out[mod.number] = mapping;
   }
   return out;
+}
+
+// === Incremental (module-by-module) writers ================================
+// Used by the per-module orchestration so a failure in one module never
+// destroys other modules, and resume can skip/merge completed topics.
+
+/** Write course.json + curriculum.json + persist the brief for resume. */
+export function writeManifests(brief, outputDir) {
+  const courseDir = resolve(outputDir, brief.id);
+  mkdirSync(resolve(courseDir, 'modules'), { recursive: true });
+  writeFileSync(resolve(courseDir, 'course.json'), JSON.stringify(defaultCourseConfig(brief), null, 2), 'utf8');
+  writeFileSync(resolve(courseDir, 'curriculum.json'), JSON.stringify(buildCurriculum(brief), null, 2), 'utf8');
+  writeFileSync(resolve(courseDir, '_brief.json'), JSON.stringify(brief, null, 2), 'utf8');
+  return courseDir;
+}
+
+/** Load a previously-persisted brief (for --resume). */
+export function loadSavedBrief(outputDir, courseId) {
+  const p = resolve(outputDir, courseId, '_brief.json');
+  if (!existsSync(p)) throw new Error(`No saved brief at ${p} — can't resume "${courseId}"`);
+  return JSON.parse(readFileSync(p, 'utf8'));
+}
+
+/** Read the existing topic map for one module: { [topicId]: content } or {}. */
+export function readModuleMap(brief, mod, outputDir) {
+  const p = resolve(outputDir, brief.id, 'modules', `module-${mod.number}.json`);
+  if (!existsSync(p)) return {};
+  try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return {}; }
+}
+
+/** Write a module's topic map (already merged by the caller). */
+export function writeModuleMap(brief, mod, map, outputDir) {
+  const modulesDir = resolve(outputDir, brief.id, 'modules');
+  mkdirSync(modulesDir, { recursive: true });
+  writeFileSync(resolve(modulesDir, `module-${mod.number}.json`), JSON.stringify(map, null, 2), 'utf8');
+  return Object.keys(map).length;
 }
 
 export function assembleAndWrite(brief, topicResults, outputDir) {
