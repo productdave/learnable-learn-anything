@@ -1,0 +1,8 @@
+{
+  "topic": "Product management for AI data annotation, human feedback (RLHF), and model evaluation platforms",
+  "goal": "Prepare for a director-level PM interview for an AI data annotation platform role (think Meta's internal Annotation product, or vendors like Scale AI). Walk in sounding like a platform PM who genuinely understands the AI data production loop — not just 'data labelling'. Be able to: explain how annotation has shifted from high-volume labelling to expert human feedback, RLHF, model evals, and red teaming; reason about the four product surfaces (requester/customer, reviewer/expert, ops, platform); compare the competitive landscape (Scale AI, Labelbox, Snorkel AI, Surge AI, Mercor, SuperAnnotate) and their wedges; design a metric tree that optimises for accepted high-quality data and model impact rather than raw label volume; diagnose and reduce contractor/labeler quality problems through task design, rubrics, gold sets, consensus, calibration and adjudication; and answer the common PM interview questions while asking sharp questions back.",
+  "starting_point": "Experienced platform / marketplace / trust-and-safety PM, but new to the AI data annotation domain. Comfortable with product strategy and metrics; NOT an ML researcher and does not want deep algorithm math.",
+  "depth": "Deep dive",
+  "time_budget": "Several hours across 2-3 days",
+  "tone": "conversational"
+}

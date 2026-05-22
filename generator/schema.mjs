@@ -177,11 +177,17 @@ const SourceField = z.union([
   z.null().transform(() => [])
 ]).default([]);
 
+const StringArrayField = z.union([
+  z.array(z.string()),
+  z.string().transform(s => [s]),
+  z.null().transform(() => [])
+]).default([]);
+
 export const ResearchBundleSchema = z.object({
   module_id: z.string(),
   key_concepts: z.array(z.string()).min(2),
   examples: z.array(z.string()).min(2),
   experts: ExpertField,
-  misconceptions: z.array(z.string()).default([]),
+  misconceptions: StringArrayField,
   sources: SourceField
 });

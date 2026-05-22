@@ -266,20 +266,62 @@ Now produce the topic via the submit_topic tool. Use moduleId "${mod.id}" and id
 
 ${topicMeta.quiz_plan && topicMeta.quiz_plan.length ? `QUIZ PLAN for this topic — you MUST produce ${topicMeta.quiz_plan.length} quiz sections in this exact order of variants: ${topicMeta.quiz_plan.map((v, i) => `(${i + 1}) "${v}"`).join(', ')}. Interleave them with the concept sections — each quiz tests the concept just before it. Do not cluster them all at the end.` : ''}`;
 
-  const resp = await client.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 4096,
-    system: buildSystem(tone),
-    tools: [topicTool],
-    tool_choice: { type: 'tool', name: TOOL_NAME },
-    messages: [{ role: 'user', content: userMsg }]
-  });
+  // Retry once — large tool outputs occasionally come back malformed
+  // (stringified arrays, truncation). Coercion fixes most; the retry
+  // catches the rest.
+  let lastErr;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const resp = await client.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 8192,
+        system: buildSystem(tone),
+        tools: [topicTool],
+        tool_choice: { type: 'tool', name: TOOL_NAME },
+        messages: [{ role: 'user', content: userMsg }]
+      });
 
-  const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
-  if (!toolUse) throw new Error(`Stage 3 [${topicMeta.id}]: model did not submit topic`);
+      const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
+      if (!toolUse) throw new Error('model did not submit topic');
 
-  const parsed = TopicContentSchema.parse(toolUse.input);
-  return parsed;
+      const input = coerceTopicInput(toolUse.input);
+      return TopicContentSchema.parse(input);
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw new Error(`Stage 3 [${topicMeta.id}]: ${lastErr?.message || 'failed after retry'}`);
+}
+
+/**
+ * Repair common malformations in the model's tool output before validation:
+ * - `sections` / `flashcards` returned as a JSON *string* instead of an array
+ * - nested arrays (options, pairs, hints, points, etc.) stringified
+ * - acceptable_answers exceeding the max (truncate to 6)
+ */
+function coerceTopicInput(input) {
+  if (!input || typeof input !== 'object') return input;
+
+  const tryParse = (v) => {
+    if (typeof v !== 'string') return v;
+    try { return JSON.parse(v); } catch { return v; }
+  };
+
+  input.sections = tryParse(input.sections);
+  input.flashcards = tryParse(input.flashcards);
+
+  if (Array.isArray(input.sections)) {
+    for (const s of input.sections) {
+      if (!s || typeof s !== 'object') continue;
+      for (const key of ['options', 'pairs', 'hints', 'points', 'acceptable_answers', 'key_points']) {
+        if (key in s) s[key] = tryParse(s[key]);
+      }
+      if (Array.isArray(s.acceptable_answers) && s.acceptable_answers.length > 6) {
+        s.acceptable_answers = s.acceptable_answers.slice(0, 6);
+      }
+    }
+  }
+  return input;
 }
 
 /**

@@ -119,8 +119,8 @@ Time budget: ${userBrief.time_budget || '(unspecified)'}
 Decide the right scope (single_module / mini_course / full_course), break the subject into modules, and propose 4-6 topic titles per module. Submit via the tool.`;
 
   const resp = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 2048,
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 4096,
     system: SYSTEM,
     tools: [briefTool],
     tool_choice: { type: 'tool', name: TOOL_NAME },
