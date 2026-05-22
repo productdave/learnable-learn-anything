@@ -66,6 +66,22 @@ function buildModuleFiles(brief, topicResults) {
 export function assembleAndWrite(brief, topicResults, outputDir) {
   const courseDir = resolve(outputDir, brief.id);
   const modulesDir = resolve(courseDir, 'modules');
+
+  // Guard: if the whole run failed (0 topics), do NOT touch the existing
+  // course dir. A wipe here would destroy good output from a prior run —
+  // e.g. when this run dies on a mid-pipeline credit/network error.
+  const succeeded = topicResults.filter(r => r.content).length;
+  if (succeeded === 0) {
+    return {
+      courseDir,
+      written: [],
+      totalTopics: topicResults.length,
+      succeededTopics: 0,
+      failedTopics: topicResults.map(f => `${f.moduleId}/${f.topicId}: ${f.error || 'unknown error'}`),
+      skippedWrite: true
+    };
+  }
+
   // Wipe any stale files from a previous run of the same course id —
   // otherwise old module-N.json files survive and confuse downstream tools.
   if (existsSync(courseDir)) rmSync(courseDir, { recursive: true, force: true });
