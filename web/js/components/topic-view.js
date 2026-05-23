@@ -5,7 +5,7 @@ import { renderExercise, initExerciseInteractivity } from './exercise.js';
 import { renderDiagram } from './diagram.js';
 import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js';
 import { renderSimulator, initSimulatorInteractivity } from './simulator.js';
-import { ttsBarHTML, initTTS } from '../tts.js';
+import { ttsBarHTML, initTTS } from '../tts.js?v=3';
 
 function renderSection(section, index) {
   switch (section.type) {
@@ -205,7 +205,7 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
   initExerciseInteractivity(container);
   initPayoffMatrixInteractivity(container);
   initSimulatorInteractivity(container);
-  initTTS(container);
+  initTTS(container, { title: topicData.title, moduleName: mod.title, moduleColor: mod.color, icon: mod.icon });
 }
 
 function initQuizInteractivity(quizEl, quizId) {
