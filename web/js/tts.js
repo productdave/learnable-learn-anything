@@ -12,8 +12,55 @@
 // and skip land on chunk boundaries (we can't start mid-utterance reliably).
 
 const SPEED_KEY = 'learnable-tts-rate';
+const VOICE_KEY = 'learnable-tts-voice';
 const SPEEDS = [0.9, 1, 1.15, 1.3, 1.5];
 const WPM = 180; // baseline words-per-minute at rate 1
+
+let voices = [];          // ranked English voices (best first)
+let selectedURI = localStorage.getItem(VOICE_KEY) || '';
+
+// macOS ships dozens of novelty voices (Bad News, Bubbles, Zarvox…). Hide them.
+const JUNK = ['bad news','good news','bells','boing','bubbles','cellos','jester','organ',
+  'superstar','trinoids','whisper','wobble','zarvox','albert','bahh','deranged','hysterical',
+  'pipe','ralph','junior','kathy','fred','grandma','grandpa','rocko','shelley','sandy','flo',
+  'eddy','reed','rishi'];
+
+function scoreVoice(v) {
+  const lang = (v.lang || '').toLowerCase();
+  if (!lang.startsWith('en')) return -1;
+  const n = v.name.toLowerCase();
+  if (JUNK.some(j => n.includes(j))) return -1;
+  let s = 0;
+  if (n.includes('siri')) s += 95;            // best on Apple
+  if (n.includes('premium')) s += 90;
+  if (n.includes('natural') || n.includes('neural')) s += 88;
+  if (n.includes('enhanced')) s += 80;
+  if (n.includes('google')) s += 70;          // Chrome cloud voices — much better than local
+  if (!v.localService) s += 20;               // cloud generally smoother
+  const good = ['samantha','ava','zoe','allison','serena','tessa','karen','daniel','moira','nicky','aaron','jamie'];
+  if (good.some(g => n === g || n.startsWith(g + ' ') || n.startsWith(g + ' ('))) s += 30;
+  if (lang === 'en-us') s += 6;
+  if (lang === 'en-gb' || lang === 'en-au') s += 3;
+  return s;
+}
+
+function loadVoices() {
+  const all = window.speechSynthesis.getVoices() || [];
+  voices = all
+    .map(v => ({ v, s: scoreVoice(v) }))
+    .filter(x => x.s >= 0)
+    .sort((a, b) => b.s - a.s)
+    .map(x => x.v);
+}
+
+function currentVoice() {
+  if (!voices.length) loadVoices();
+  if (selectedURI) {
+    const found = voices.find(v => v.voiceURI === selectedURI);
+    if (found) return found;
+  }
+  return voices[0] || null; // best-ranked
+}
 
 let chunks = [];          // [{ text, node, words, dur, start }]
 let totalDur = 0;
@@ -108,6 +155,8 @@ function speakFrom(i) {
   const { text, node } = chunks[i];
   const u = new SpeechSynthesisUtterance(text);
   u.rate = rate;
+  const voice = currentVoice();
+  if (voice) { u.voice = voice; u.lang = voice.lang; }
   u.onstart = () => {
     if (myToken !== speakToken) return;
     chunkStartTs = performance.now();
@@ -244,6 +293,10 @@ function ensurePlayer() {
         <div class="tts-meta-title" data-tts-title></div>
         <div class="tts-meta-sub" data-tts-sub></div>
       </div>
+      <div class="tts-voice-row">
+        <svg class="tts-voice-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg>
+        <select class="tts-voice-select" data-tts-voice aria-label="Choose voice"></select>
+      </div>
     </div>
 
     <div class="tts-mini" data-tts-mini>
@@ -276,6 +329,7 @@ function ensurePlayer() {
     pauseIc: q('.tts-ic-pause'),
     title: q('[data-tts-title]'),
     sub: q('[data-tts-sub]'),
+    voice: q('[data-tts-voice]'),
     mini: q('[data-tts-mini]'),
     miniTitle: q('[data-tts-mini-title]'),
     miniCover: q('[data-tts-mini-cover]'),
@@ -295,6 +349,15 @@ function ensurePlayer() {
   el.querySelectorAll('[data-tts-skip]').forEach(b =>
     b.addEventListener('click', () => skip(parseFloat(b.dataset.ttsSkip))));
 
+  ui.voice.addEventListener('change', () => {
+    selectedURI = ui.voice.value;
+    localStorage.setItem(VOICE_KEY, selectedURI);
+    if (playing) { window.speechSynthesis.cancel(); speakFrom(idx); }
+  });
+  populateVoices();
+  // Voices often load asynchronously; refresh the list when they arrive.
+  window.speechSynthesis.addEventListener?.('voiceschanged', () => { loadVoices(); populateVoices(); });
+
   // scrubber seek (click + drag)
   const scrub = q('[data-tts-scrub]');
   const seekFromEvent = (clientX) => {
@@ -308,6 +371,24 @@ function ensurePlayer() {
   scrub.addEventListener('pointerup', () => { dragging = false; });
 
   return ui;
+}
+
+function niceVoiceLabel(v) {
+  // "Samantha" stays; "Google US English" stays; trim parenthetical locale noise.
+  let n = v.name.replace(/\s*\(English \([^)]+\)\)/i, '');
+  const region = { 'en-US': 'US', 'en-GB': 'UK', 'en-AU': 'AU', 'en-IE': 'IE', 'en-IN': 'IN', 'en-ZA': 'ZA' }[v.lang] || '';
+  if (region && !n.includes(region)) n += ` · ${region}`;
+  return n;
+}
+
+function populateVoices() {
+  if (!ui?.voice) return;
+  loadVoices();
+  if (!voices.length) { ui.voice.innerHTML = '<option>Default voice</option>'; return; }
+  const chosen = currentVoice();
+  ui.voice.innerHTML = voices.map(v =>
+    `<option value="${v.voiceURI}"${chosen && v.voiceURI === chosen.voiceURI ? ' selected' : ''}>${niceVoiceLabel(v)}</option>`
+  ).join('');
 }
 
 function applyMeta() {

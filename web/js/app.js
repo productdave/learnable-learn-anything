@@ -1,7 +1,7 @@
 import { store } from './store.js';
 import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId } from './course-loader.js';
 import { renderSidebar } from './components/sidebar.js';
-import { renderTopicView } from './components/topic-view.js?v=6';
+import { renderTopicView } from './components/topic-view.js?v=7';
 import { initSearch } from './search.js';
 import { initFlashcards } from './flashcards.js';
 import { initChat } from './chat.js';

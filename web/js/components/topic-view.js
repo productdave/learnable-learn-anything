@@ -5,7 +5,7 @@ import { renderExercise, initExerciseInteractivity } from './exercise.js';
 import { renderDiagram } from './diagram.js';
 import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js';
 import { renderSimulator, initSimulatorInteractivity } from './simulator.js';
-import { ttsBarHTML, initTTS } from '../tts.js?v=3';
+import { ttsBarHTML, initTTS } from '../tts.js?v=4';
 
 function renderSection(section, index) {
   switch (section.type) {
