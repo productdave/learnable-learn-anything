@@ -5,6 +5,8 @@ import { renderTopicView } from './components/topic-view.js?v=7';
 import { initSearch } from './search.js';
 import { initFlashcards } from './flashcards.js';
 import { initChat } from './chat.js';
+import { initAuth } from './auth.js';
+import { initSync } from './sync.js';
 
 async function loadIcons() {
   try {
@@ -288,6 +290,8 @@ function setShellForLibrary() {
 async function init() {
   await loadIcons();
   initTheme();
+  await initAuth();   // no-op until Supabase is configured
+  initSync();         // mirrors localStorage progress ↔ Supabase when signed in
 
   const courseId = getCurrentCourseId();
 

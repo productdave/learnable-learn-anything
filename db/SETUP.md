@@ -20,7 +20,8 @@ What you do once, while I keep building. After this is done, paste me the projec
 3. Open `db/01-schema.sql` from this repo. Copy the entire file. Paste into the editor. Click **Run** (or ⌘+Enter).
 4. You should see "Success. No rows returned" for each statement.
 5. Create another new query. Open `db/02-rls.sql`. Copy/paste/run.
-6. Verify: in the left sidebar, click **Table Editor**. You should see 7 tables under `public`:
+6. Create one more query. Open `db/03-user-state.sql`. Copy/paste/run. (This is the per-user progress-sync table.)
+7. Verify: in the left sidebar, click **Table Editor**. You should see 8 tables under `public`:
    - `courses`
    - `generation_jobs`
    - `learner_profiles`
