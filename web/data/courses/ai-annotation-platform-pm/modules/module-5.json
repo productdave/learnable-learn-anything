@@ -133,7 +133,7 @@
       {
         "type": "concept",
         "title": "What output metrics actually measure",
-        "content": "<p>Here's the thing — output metrics tell you what you delivered, not what you controlled. They're the <strong>lagging indicators of your annotation pipeline's quality</strong>, showing up after labelers finish, after QA runs, after customers accept or reject the batch. From what I've seen in platforms like Scale and Appen, directors who treat output metrics as post-mortems rather than real-time levers miss half the story.</p><p>The four metrics that matter most are <strong>inter-annotator agreement (IAA), precision/recall against gold standards, rejection or rework rates, and time-to-delivery</strong>. IAA tells you if your task definition is coherent. Precision and recall measure false positives and false negatives before training even begins. Rejection rate captures the invisible cost of wasted work. Time-to-delivery reveals whether you can hit the training windows that model teams depend on.</p><p>These metrics sit in the middle layer of your metric tree: <strong>inputs drive them, and they predict model impact</strong>. A 10% error rate in ground truth can reduce final model accuracy by up to 15% (Waymo's experience with Scale Nucleus shows this in safety-critical LiDAR annotation). You're not just measuring quality for its own sake — you're predicting whether the data will make the model better.</p>"
+        "content": "<p>Here's the thing — output metrics tell you what you delivered, not what you controlled. They're the <strong>lagging indicators of your annotation pipeline's quality</strong>, showing up after labelers finish, after QA runs, after customers accept or reject the batch. From what I've seen in platforms like Scale and Appen, directors who treat output metrics as post-mortems rather than real-time levers miss half the story.</p><p>The four metrics that matter most are <strong>inter-annotator agreement (IAA), precision/recall against gold standards, rejection or rework rates, and time-to-delivery</strong>. IAA tells you if your task definition is coherent. Precision and recall measure false positives and false negatives before training even begins. Rejection rate captures the invisible cost of wasted work. Time-to-delivery reveals whether you can hit the training windows that model teams depend on.</p><p>These metrics sit in the middle layer of your metric tree: <strong>inputs drive them, and they predict model impact</strong>. A modest label-error rates in ground-truth data can meaningfully degrade final model accuracy (Waymo's experience with Scale Nucleus shows this in safety-critical LiDAR annotation). You're not just measuring quality for its own sake — you're predicting whether the data will make the model better.</p>"
       },
       {
         "type": "quiz",
@@ -195,7 +195,7 @@
         "type": "callout",
         "variant": "key-insight",
         "title": "70% of model errors start in the data",
-        "content": "Scale's customers pay premium rates because they've learned that 70% of model errors originate in poor or mislabeled data, not flawed algorithms. A 10% error rate in ground truth can reduce final model accuracy by up to 15%. Precision and recall on annotation let you fix the problem before it compounds in training."
+        "content": "Scale's customers pay premium rates because they've learned that 70% of model errors originate in poor or mislabeled data, not flawed algorithms. A modest label-error rates in ground-truth data can meaningfully degrade final model accuracy. Precision and recall on annotation let you fix the problem before it compounds in training."
       },
       {
         "type": "quiz",
@@ -246,7 +246,7 @@
       },
       {
         "front": "How does annotation error rate affect final model accuracy?",
-        "back": "Research from safety-critical domains (e.g., Waymo/Scale Nucleus) shows a 10% error rate in ground truth labels can reduce final model accuracy by up to 15%. This is why 70% of model errors originate in poor data, not flawed algorithms."
+        "back": "Research from safety-critical domains (e.g., Waymo/Scale Nucleus) shows even modest label-error rates in ground-truth data can meaningfully degrade final model accuracy. This is why 70% of model errors originate in poor data, not flawed algorithms."
       },
       {
         "front": "Why must time-to-delivery and quality both be balanced?",
@@ -300,7 +300,7 @@
         "type": "callout",
         "variant": "key-insight",
         "title": "Quality failures show up as algorithm problems",
-        "content": "70% of model errors originate in poor or mislabeled data, not flawed algorithms. Waymo discovered that a 10% error rate in ground truth labels can reduce final model accuracy by up to 15%. When your customer's ML team says 'the model isn't learning,' the first place to look is the annotation pipeline, not the neural architecture."
+        "content": "70% of model errors originate in poor or mislabeled data, not flawed algorithms. Industry analyses suggest that even modest label-error rates in ground-truth data can meaningfully degrade final model accuracy. When your customer's ML team says 'the model isn't learning,' the first place to look is the annotation pipeline, not the neural architecture."
       },
       {
         "type": "quiz",
@@ -360,11 +360,11 @@
       },
       {
         "front": "Why does Scale AI charge $48/hour for vetted domain specialists instead of optimizing for volume?",
-        "back": "Scale differentiates on traceability and quality because 70% of model errors originate in poor data, not flawed algorithms. Customers need to debug model failures by auditing labels and annotator decisions. A 10% error rate in ground truth can reduce final model accuracy by up to 15%."
+        "back": "Scale differentiates on traceability and quality because 70% of model errors originate in poor data, not flawed algorithms. Customers need to debug model failures by auditing labels and annotator decisions. A modest label-error rates in ground-truth data can meaningfully degrade final model accuracy."
       },
       {
         "front": "What's the relationship between annotation quality and model performance in safety-critical applications like autonomous vehicles?",
-        "back": "Waymo found that a 10% error rate in ground truth labels (e.g., LiDAR bounding boxes) can reduce final model accuracy by up to 15%. Precision, recall, and intersection-over-union (IoU) metrics in annotation directly impact safety-critical model reliability, making quality non-negotiable."
+        "back": "Industry analyses suggest that even modest label-error rates in ground-truth data (e.g., LiDAR bounding boxes) can meaningfully degrade final model accuracy. Precision, recall, and intersection-over-union (IoU) metrics in annotation directly impact safety-critical model reliability, making quality non-negotiable."
       }
     ]
   },
@@ -414,7 +414,7 @@
         "type": "callout",
         "variant": "example",
         "title": "Waymo's precision-recall obsession",
-        "content": "Scale Nucleus tracks precision, recall, and intersection over union (IoU) for Waymo's LiDAR annotation. A 10% error rate in ground truth can reduce final model accuracy by up to 15% in safety-critical systems. For them, benchmark uplift isn't abstract — it's whether the car stops for a pedestrian."
+        "content": "Scale Nucleus tracks precision, recall, and intersection over union (IoU) for Waymo's LiDAR annotation. A modest label-error rates in ground-truth data can meaningfully degrade final model accuracy in safety-critical systems. For them, benchmark uplift isn't abstract — it's whether the car stops for a pedestrian."
       },
       {
         "type": "quiz",
@@ -475,7 +475,7 @@
         "type": "callout",
         "variant": "warning",
         "title": "70% of model errors start in the data",
-        "content": "From what I've observed, teams blame the algorithm first when models underperform. But 70% of model errors originate in poor or mislabeled data, not flawed architectures. A 10% error rate in ground truth can reduce final model accuracy by up to 15%. Safety incidents are often data incidents in disguise."
+        "content": "From what I've observed, teams blame the algorithm first when models underperform. But 70% of model errors originate in poor or mislabeled data, not flawed architectures. A modest label-error rates in ground-truth data can meaningfully degrade final model accuracy. Safety incidents are often data incidents in disguise."
       },
       {
         "type": "takeaway",
