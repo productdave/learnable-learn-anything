@@ -5,6 +5,7 @@ import { renderExercise, initExerciseInteractivity } from './exercise.js';
 import { renderDiagram } from './diagram.js';
 import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js';
 import { renderSimulator, initSimulatorInteractivity } from './simulator.js';
+import { ttsBarHTML, initTTS } from '../tts.js';
 
 function renderSection(section, index) {
   switch (section.type) {
@@ -128,6 +129,7 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
           ${topicData.estimatedMinutes ? `<span class="topic-time"><svg width="14" height="14"><use href="#icon-clock"/></svg>${topicData.estimatedMinutes} min</span>` : ''}
         </div>
         <h1 class="topic-title">${topicData.title}</h1>
+        ${ttsBarHTML()}
       </div>
 
       <div class="topic-sections">
@@ -203,6 +205,7 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
   initExerciseInteractivity(container);
   initPayoffMatrixInteractivity(container);
   initSimulatorInteractivity(container);
+  initTTS(container);
 }
 
 function initQuizInteractivity(quizEl, quizId) {
