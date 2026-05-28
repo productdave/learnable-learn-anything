@@ -184,9 +184,14 @@ function startGeneration(jobId, userBrief) {
   }).then(course => {
     const savedId = saveUserCourse(course);
     updateJob(jobId, { status: 'completed', stage: 'done', message: 'Done!', savedCourseId: savedId });
-    // If the user is still watching this job's modal, jump them into the course.
+    // If the user is still watching this job's modal, jump them into the course
+    // via SPA navigation (no full reload, so any other background work keeps running).
     if (renderedJobId === jobId) {
-      setTimeout(() => { window.location.href = `?course=${encodeURIComponent(savedId)}`; }, 700);
+      setTimeout(() => {
+        close();
+        history.pushState(null, '', `?course=${encodeURIComponent(savedId)}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, 700);
     }
   }).catch(err => {
     updateJob(jobId, { status: 'failed', error: err.message || String(err) });

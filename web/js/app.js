@@ -7,7 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js?v=3';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=6';
+import { openIntake, openIntakeForJob } from './intake.js?v=7';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
 
 async function loadIcons() {
@@ -382,7 +382,6 @@ function escapeHTML(s) {
 }
 
 function setShellForLibrary() {
-  // Hide course-specific chrome: sidebar + course-only header buttons.
   const sidebar = document.getElementById('sidebar');
   if (sidebar) sidebar.style.display = 'none';
   const menuBtn = document.getElementById('mobile-menu-toggle');
@@ -394,51 +393,121 @@ function setShellForLibrary() {
   document.title = 'Learnable';
 }
 
-async function init() {
-  await loadIcons();
-  initTheme();
-  markInterruptedIfStale();  // any tab-killed jobs get flagged on boot
-  await initAuth();   // no-op until Supabase is configured
-  initSync();         // mirrors localStorage progress ↔ Supabase when signed in
-
-  const courseId = getCurrentCourseId();
-
-  // Library mode — no course selected. Render the catalog and exit.
-  if (!courseId) {
-    setShellForLibrary();
-    await renderLibrary(document.getElementById('content'));
-    return;
+function setShellForCourse() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = '';
+  const menuBtn = document.getElementById('mobile-menu-toggle');
+  if (menuBtn) menuBtn.style.display = '';
+  for (const id of ['search-trigger', 'flashcard-trigger', 'chat-trigger']) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
   }
+}
 
-  // Course mode — load and render as normal.
-  try {
-    const { config } = await loadCourse(courseId);
-    applyCourseConfigToShell(config);
-  } catch {
-    setShellForLibrary();
-    document.getElementById('content').innerHTML =
-      `<div class="empty-state"><p>Course not found: <code>${courseId}</code>. <a href="/">Back to library</a>.</p></div>`;
-    return;
-  }
+// SPA router state — tracks the current view so we know when to re-init chrome.
+let currentMode = null;          // null | 'library' | 'course'
+let currentCourseSlug = null;
+let courseChromeBooted = false;  // initSearch/Flashcards/Chat/MobileMenu only need wiring once
 
+function initCourseChromeOnce() {
+  if (courseChromeBooted) return;
   initMobileMenu();
   initSearch();
   initFlashcards();
   initChat();
+  courseChromeBooted = true;
+}
 
-  window.addEventListener('hashchange', renderRoute);
+async function renderForCurrentURL() {
+  const courseId = getCurrentCourseId();
+  const content = document.getElementById('content');
+
+  if (!courseId) {
+    setShellForLibrary();
+    currentMode = 'library';
+    currentCourseSlug = null;
+    await renderLibrary(content);
+    return;
+  }
+
+  // Course mode. If we're entering a new course (from library or a switch),
+  // load its data + flip the shell. Otherwise (same course, hash-only nav)
+  // just rerender the route.
+  if (currentMode !== 'course' || currentCourseSlug !== courseId) {
+    try {
+      const { config } = await loadCourse(courseId);
+      applyCourseConfigToShell(config);
+    } catch {
+      setShellForLibrary();
+      content.innerHTML =
+        `<div class="empty-state"><p>Course not found: <code>${courseId}</code>. <a href="/">Back to library</a>.</p></div>`;
+      currentMode = 'library';
+      currentCourseSlug = null;
+      return;
+    }
+    setShellForCourse();
+    initCourseChromeOnce();
+    currentMode = 'course';
+    currentCourseSlug = courseId;
+  }
   renderRoute();
+}
+
+/** Internal navigation that preserves the JS context (so background work survives). */
+function navigateTo(url) {
+  if (url === window.location.pathname + window.location.search + window.location.hash) {
+    renderForCurrentURL();
+    return;
+  }
+  history.pushState(null, '', url);
+  renderForCurrentURL();
+}
+
+// Hijack same-origin <a> clicks so we never trigger a full page reload.
+function installLinkInterceptor() {
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    if (link.target && link.target !== '_self') return;
+    const href = link.getAttribute('href');
+    if (!href) return;
+    // Skip external and protocol URLs.
+    if (/^(https?:|mailto:|tel:)/i.test(href)) return;
+    // Hash-only changes within the same path: let hashchange handle topic nav.
+    if (href.startsWith('#')) return;
+
+    e.preventDefault();
+    navigateTo(href);
+  });
+}
+
+async function init() {
+  await loadIcons();
+  initTheme();
+  markInterruptedIfStale();
+  await initAuth();
+  initSync();
+
+  await renderForCurrentURL();
+
+  installLinkInterceptor();
+  window.addEventListener('popstate', renderForCurrentURL);
+  window.addEventListener('hashchange', () => {
+    // Hash drives the topic route inside a course view; library mode ignores it.
+    if (currentMode === 'course') renderRoute();
+  });
 
   store.subscribe(() => {
-    renderSidebar(document.getElementById('sidebar'));
+    if (currentMode === 'course') renderSidebar(document.getElementById('sidebar'));
   });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
       const active = document.activeElement;
-      if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
+      if (active && active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
         e.preventDefault();
-        document.getElementById('search-trigger').click();
+        document.getElementById('search-trigger')?.click();
       }
     }
   });
