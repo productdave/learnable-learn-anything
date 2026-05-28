@@ -8,6 +8,7 @@ import { sb, getUser, onUserChange } from './auth.js';
 import { store } from './store.js';
 
 const SYNC_KEYS = ['progress', 'quizAnswers', 'exerciseDrafts', 'flashcardState'];
+const API_KEY_STORE = 'gametheory-api-key'; // shared with chat.js + generator/index.js
 let applyingRemote = false;   // guards against echo: applying a pull shouldn't trigger a push
 let pushTimer = null;
 let unsubStore = null;
@@ -37,8 +38,16 @@ async function pull() {
     applyingRemote = true;
     store.set(merged);
     applyingRemote = false;
+
+    // Mirror the per-user Anthropic API key. Remote wins on first pull so
+    // signing in on a new device picks up your saved key; if remote has none
+    // but local does, the next push uploads it.
+    if (remote._apiKey && remote._apiKey !== localStorage.getItem(API_KEY_STORE)) {
+      localStorage.setItem(API_KEY_STORE, remote._apiKey);
+    }
+
     pulledOnce = true;
-    schedulePush(); // write the unioned state back
+    schedulePush(); // write the unioned state back (uploads the local key if remote was empty)
   } catch (e) {
     console.warn('[sync] pull failed:', e.message);
   }
@@ -51,11 +60,20 @@ async function push() {
   const s = store.get();
   const state = {};
   for (const k of SYNC_KEYS) state[k] = s[k] || {};
+  // Per-user Anthropic API key — protected by the same RLS as the rest of
+  // the blob. Underscore-prefixed so it never collides with store keys.
+  const localKey = localStorage.getItem(API_KEY_STORE);
+  if (localKey) state._apiKey = localKey;
   try {
     await c.from('user_state').upsert({ user_id: u.id, state, updated_at: new Date().toISOString() });
   } catch (e) {
     console.warn('[sync] push failed:', e.message);
   }
+}
+
+/** Trigger a push on demand — used by callers that change state outside the store (e.g. saving the API key). */
+export function kickSync() {
+  schedulePush();
 }
 
 function schedulePush() {

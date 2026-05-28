@@ -6,6 +6,18 @@
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
+const ANTHROPIC_KEY_STORE = 'gametheory-api-key'; // shared with chat.js + generator/index.js + sync.js
+function getAnthropicKey() { return localStorage.getItem(ANTHROPIC_KEY_STORE) || ''; }
+function setAnthropicKey(k) {
+  if (k) localStorage.setItem(ANTHROPIC_KEY_STORE, k.trim());
+  else localStorage.removeItem(ANTHROPIC_KEY_STORE);
+}
+function maskKey(k) {
+  if (!k) return '';
+  if (k.length <= 14) return '••••••••';
+  return k.slice(0, 8) + '…' + k.slice(-4);
+}
+
 let client = null;
 let currentUser = null;
 const userListeners = new Set();
@@ -80,13 +92,56 @@ function openAccount() {
   const m = ensureModal();
   const body = m.querySelector('.auth-body');
   if (currentUser) {
+    const hasKey = !!getAnthropicKey();
     body.innerHTML = `
       <h2 class="auth-title">Your account</h2>
       <p class="auth-email">${currentUser.email}</p>
-      <p class="auth-note">Your progress syncs across every device you sign in on.</p>
-      <button class="auth-btn auth-signout">Sign out</button>`;
+      <p class="auth-note">Your progress and Anthropic key sync across every device you sign in on.</p>
+
+      <div class="auth-section">
+        <div class="auth-section-label">Anthropic API key</div>
+        ${hasKey ? `
+          <div class="auth-keyrow">
+            <code class="auth-keymask">${maskKey(getAnthropicKey())}</code>
+            <button class="auth-link" data-action="edit-key">Replace</button>
+            <button class="auth-link auth-link--danger" data-action="clear-key">Remove</button>
+          </div>
+          <p class="auth-help">Used by the AI tutor and course generation. Runs in your browser only.</p>
+        ` : `
+          <form class="auth-keyform">
+            <input class="auth-input auth-mono" type="password" name="anthropicKey"
+              placeholder="sk-ant-..." autocomplete="off" spellcheck="false" required>
+            <button type="submit" class="auth-btn auth-btn--compact">Save key</button>
+          </form>
+          <p class="auth-help">Runs in your browser, never leaves your device.
+            <a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get one</a> — roughly $1–3 of credit per generated course.</p>
+        `}
+      </div>
+
+      <button class="auth-btn auth-btn--ghost auth-signout">Sign out</button>`;
+
     body.querySelector('.auth-signout').addEventListener('click', async () => {
       await signOut();
+      openAccount();
+    });
+    body.querySelector('[data-action="edit-key"]')?.addEventListener('click', () => {
+      setAnthropicKey('');
+      // Re-render so the form shows
+      openAccount();
+    });
+    body.querySelector('[data-action="clear-key"]')?.addEventListener('click', async () => {
+      setAnthropicKey('');
+      const { kickSync } = await import('./sync.js?v=2');
+      kickSync();
+      openAccount();
+    });
+    body.querySelector('.auth-keyform')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = e.target.anthropicKey.value.trim();
+      if (!val) return;
+      setAnthropicKey(val);
+      const { kickSync } = await import('./sync.js?v=2');
+      kickSync();
       openAccount();
     });
   } else {

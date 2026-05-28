@@ -1,6 +1,6 @@
 import { store } from '../store.js';
 import { getCurriculum, getCourseConfig, getCurrentCourseId } from '../course-loader.js';
-import { logEvent } from '../sync.js';
+import { logEvent } from '../sync.js?v=2';
 
 // Module-level context for the topic currently being rendered — used by
 // quiz event handlers (which live in init helpers and don't see render-scope).

@@ -5,6 +5,7 @@
 
 import { hasApiKey, setApiKey, generateCourse } from './generator/index.js';
 import { saveUserCourse } from './user-courses.js';
+import { kickSync } from './sync.js?v=2';
 
 let modal = null;
 
@@ -108,7 +109,7 @@ function onSubmit(e) {
   e.preventDefault();
   const fd = new FormData(e.target);
   const apiKeyInput = (fd.get('apiKey') || '').trim();
-  if (apiKeyInput) setApiKey(apiKeyInput);
+  if (apiKeyInput) { setApiKey(apiKeyInput); kickSync(); }
   const err = e.target.querySelector('[data-error]');
   if (!hasApiKey()) {
     err.style.display = ''; err.textContent = 'An Anthropic API key is required.';

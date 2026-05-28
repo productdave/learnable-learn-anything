@@ -1,4 +1,5 @@
 import { getCourseConfig } from './course-loader.js';
+import { kickSync } from './sync.js?v=2';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const API_URL = 'https://api.anthropic.com/v1/messages';
@@ -200,6 +201,7 @@ function showKeyPrompt() {
     const val = input.value.trim();
     if (!val) { input.classList.add('error'); return; }
     setKey(val);
+    kickSync();
     el.remove();
     updateKeyBtn();
     if (state.context && !state.messages.length) {

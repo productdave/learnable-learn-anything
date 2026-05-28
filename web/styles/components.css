@@ -2933,3 +2933,41 @@
   padding: 2px 8px; border-radius: 999px;
   font-size: var(--font-xs); font-weight: 600;
 }
+
+/* === Account modal sections (Anthropic key, etc.) ====================== */
+.auth-section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-primary);
+}
+.auth-section-label {
+  font-size: var(--font-xs); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+}
+.auth-keyrow { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.auth-keymask {
+  flex: 1; min-width: 180px;
+  padding: var(--space-2) var(--space-3); border-radius: 8px;
+  background: var(--bg-secondary); color: var(--text-primary);
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--font-sm);
+}
+.auth-mono { font-family: var(--font-mono, ui-monospace, monospace); font-size: var(--font-sm); }
+.auth-keyform { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.auth-keyform .auth-input { flex: 1; min-width: 0; }
+.auth-link {
+  background: transparent; border: none; padding: 0; cursor: pointer;
+  color: var(--primary); font: inherit; font-size: var(--font-sm); font-weight: 500;
+}
+.auth-link:hover { text-decoration: underline; }
+.auth-link--danger { color: var(--color-rose, #E11D48); }
+.auth-help { font-size: var(--font-xs); color: var(--text-tertiary); margin-top: var(--space-3); line-height: 1.5; }
+.auth-help a { color: var(--primary); }
+.auth-btn--compact { min-width: 0; padding: 0 var(--space-4); }
+.auth-btn--ghost {
+  margin-top: var(--space-5);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+}
+.auth-btn--ghost:hover { background: var(--bg-secondary); color: var(--text-primary); }
