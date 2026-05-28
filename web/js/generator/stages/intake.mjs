@@ -108,14 +108,21 @@ QUIZ PLANNING per topic — this is critical:
 Submit your answer by calling the submit_course_brief tool. Do not write a long preamble.`;
 
 export async function runIntake(client, userBrief) {
+  const urls = (userBrief.source_urls || []).filter(Boolean);
+  const sourcesBlock = userBrief.source_text || urls.length
+    ? `\n\nSOURCE MATERIAL PROVIDED BY THE LEARNER — design the course PRIMARILY from this. Preserve the source's angle, terminology, and structure where useful. Use general knowledge only to fill obvious gaps.\n` +
+      (userBrief.source_text ? `\n--- Pasted text/notes ---\n${userBrief.source_text}\n` : '') +
+      (urls.length ? `\n--- Source URLs (Stage 2 research will fetch these) ---\n${urls.join('\n')}\n` : '')
+    : '';
+
   const userMsg = `Design a course based on this learner request:
 
-Topic: ${userBrief.topic}
+Topic: ${userBrief.topic || '(derive from source material below)'}
 Goal: ${userBrief.goal || '(unspecified)'}
 Starting point: ${userBrief.starting_point || '(unspecified)'}
 Depth preference: ${userBrief.depth || 'Solid foundation'}
 Time budget: ${userBrief.time_budget || '(unspecified)'}
-
+${sourcesBlock}
 Decide the right scope (single_module / mini_course / full_course), break the subject into modules, and propose 4-6 topic titles per module. Submit via the tool.`;
 
   const resp = await client.messages.create({
@@ -143,6 +150,10 @@ Decide the right scope (single_module / mini_course / full_course), break the su
   }
 
   const parsed = CourseBriefSchema.parse(raw);
+  // Carry the learner-provided source material through for later stages
+  // (Zod's strip behaviour drops unknown keys, so re-attach after parse).
+  if (userBrief.source_text) parsed.source_text = userBrief.source_text;
+  if (userBrief.source_urls && userBrief.source_urls.length) parsed.source_urls = userBrief.source_urls;
   return parsed;
 }
 

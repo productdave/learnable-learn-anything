@@ -75,6 +75,13 @@ For the assigned module, use the web_search tool aggressively to find:
 Then submit a structured research bundle via the submit_research_bundle tool. Search 3-6 times before submitting. Don't make things up — if you couldn't find good material on something, leave that field shorter.`;
 
 export async function runResearch(client, courseBrief, mod) {
+  const urls = (courseBrief.source_urls || []).filter(Boolean);
+  const sourcesBlock = courseBrief.source_text || urls.length
+    ? `\nPRIMARY SOURCES from the learner — ground your research in these first, before searching for general material:\n` +
+      (urls.length ? `URLs to fetch via web_search:\n${urls.join('\n')}\n` : '') +
+      (courseBrief.source_text ? `\nPasted text/notes:\n${courseBrief.source_text}\n` : '')
+    : '';
+
   const userMsg = `Research material for this module so it can be turned into learning content.
 
 Course: ${courseBrief.title} — ${courseBrief.subtitle}
@@ -85,8 +92,8 @@ Description: ${mod.description}
 
 Topics in this module:
 ${mod.topics.map(t => `- ${t.title}`).join('\n')}
-
-Search the web for the canonical material on these topics. Then submit your research bundle via the tool. The module_id you submit must be "${mod.id}".`;
+${sourcesBlock}
+Search the web for canonical material on these topics${urls.length ? ' (start by fetching the URLs above)' : ''}. Then submit your research bundle via the tool. The module_id you submit must be "${mod.id}".`;
 
   // Web search + final tool call in one streaming(-ish) interaction
   let messages = [{ role: 'user', content: userMsg }];

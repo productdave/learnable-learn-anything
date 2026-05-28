@@ -7,6 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js';
 import { initSync } from './sync.js';
+import { openIntake } from './intake.js';
 
 async function loadIcons() {
   try {
@@ -241,6 +242,9 @@ async function renderLibrary(container) {
   }
   const visible = library.courses.filter(c => !c.internal);
 
+  // Tag user-generated cards so the UI can mark them visually.
+  const cards = library.courses.map(c => ({ ...c }));
+
   container.innerHTML = `
     <div class="library">
       <div class="library-hero">
@@ -248,8 +252,8 @@ async function renderLibrary(container) {
         <h1 class="library-title">Learn anything.</h1>
         <p class="library-subtitle">Generated interactive courses on whatever you want to learn — with quizzes, flashcards, and an AI tutor that knows the lesson.</p>
         <div class="library-cta">
-          <button class="library-cta-btn" disabled title="Coming soon">+ Generate a new course</button>
-          <span class="library-cta-note">Generation from the web ships next. For now, browse the courses below.</span>
+          <button class="library-cta-btn" id="generate-btn">+ Generate a new course</button>
+          <span class="library-cta-note">Runs in your browser with your Anthropic key. ~$1–3 of credit per course.</span>
         </div>
       </div>
 
@@ -257,7 +261,7 @@ async function renderLibrary(container) {
         <h2 class="library-section-title">Available courses</h2>
         <div class="library-grid">
           ${visible.map(c => `
-            <a href="?course=${c.id}" class="library-card" style="--accent: ${c.accentColor || '#4338CA'}">
+            <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
               <div class="library-card-icon">
                 <svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg>
               </div>
@@ -265,6 +269,7 @@ async function renderLibrary(container) {
               <p class="library-card-subtitle">${c.subtitle}</p>
               <div class="library-card-meta">
                 ${c.modules} module${c.modules === 1 ? '' : 's'} · ${c.topics} topic${c.topics === 1 ? '' : 's'}
+                ${c.user ? ' · <span class="library-card-tag library-card-tag--mine">your course</span>' : ''}
                 ${c.partial ? ' · <span class="library-card-tag">partial</span>' : ''}
               </div>
             </a>
@@ -272,6 +277,8 @@ async function renderLibrary(container) {
         </div>
       </div>
     </div>`;
+
+  container.querySelector('#generate-btn')?.addEventListener('click', openIntake);
 }
 
 function setShellForLibrary() {

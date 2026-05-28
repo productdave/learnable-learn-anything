@@ -4,6 +4,8 @@
 // same interface will fetch from a real backend API (Supabase via a Vercel
 // function) without any consumer code changing.
 
+import { listUserCourses, getUserCourse } from './user-courses.js';
+
 const courseCache = {};
 const moduleCache = {};
 let _activeCourseId = null;
@@ -23,8 +25,23 @@ export function getCurrentCourseId() {
  */
 export async function loadLibrary() {
   const resp = await fetch('data/courses/index.json');
-  if (!resp.ok) throw new Error('Course library not available');
-  return await resp.json();
+  const bundled = resp.ok ? await resp.json() : { courses: [] };
+  // User-generated courses (localStorage) come first, freshly-made on top.
+  const user = listUserCourses().map(c => {
+    const totalTopics = c.curriculum.modules.reduce((n, m) => n + m.topics.length, 0);
+    return {
+      id: c.config.id,
+      title: c.config.title,
+      subtitle: c.config.subtitle,
+      modules: c.curriculum.modules.length,
+      topics: totalTopics,
+      accentColor: c.curriculum.modules[0]?.color || c.config.moduleColorAccents?.[0] || '#4338CA',
+      icon: c.curriculum.modules[0]?.icon || 'sparkle',
+      user: true,
+      partial: !!c.failedTopics?.length
+    };
+  });
+  return { courses: [...user, ...bundled.courses] };
 }
 
 /**
@@ -34,6 +51,15 @@ export async function loadLibrary() {
 export async function loadCourse(courseId = getCurrentCourseId()) {
   if (courseCache[courseId]) return courseCache[courseId];
 
+  // 1. Try user-generated (localStorage) first.
+  const user = getUserCourse(courseId);
+  if (user) {
+    courseCache[courseId] = { config: user.config, curriculum: user.curriculum };
+    _activeCourseId = courseId;
+    return courseCache[courseId];
+  }
+
+  // 2. Fall through to static bundled courses.
   const base = `data/courses/${courseId}`;
   const [configResp, curriculumResp] = await Promise.all([
     fetch(`${base}/course.json`),
@@ -83,6 +109,15 @@ export async function loadModule(moduleId, courseId = getCurrentCourseId()) {
   const mod = curriculum.modules.find(m => m.id === moduleId);
   if (!mod) throw new Error(`Unknown moduleId: ${moduleId}`);
 
+  // User-generated course → module data lives in localStorage.
+  const user = getUserCourse(courseId);
+  if (user) {
+    const data = user.modules?.[mod.number] || {};
+    moduleCache[cacheKey] = data;
+    return data;
+  }
+
+  // Static bundled course → fetch JSON.
   const resp = await fetch(`data/courses/${courseId}/modules/module-${mod.number}.json`);
   if (!resp.ok) throw new Error(`Module data not found: ${moduleId}`);
   const data = await resp.json();
