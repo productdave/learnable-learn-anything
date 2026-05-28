@@ -1,9 +1,9 @@
 import { store } from './store.js';
 import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId } from './course-loader.js';
 import { renderSidebar } from './components/sidebar.js';
-import { renderTopicView } from './components/topic-view.js?v=7';
+import { renderTopicView } from './components/topic-view.js?v=8';
 import { initSearch } from './search.js';
-import { initFlashcards } from './flashcards.js';
+import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js';
 import { initSync } from './sync.js';

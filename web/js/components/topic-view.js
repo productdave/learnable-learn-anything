@@ -1,5 +1,18 @@
 import { store } from '../store.js';
-import { getCurriculum, getCourseConfig } from '../course-loader.js';
+import { getCurriculum, getCourseConfig, getCurrentCourseId } from '../course-loader.js';
+import { logEvent } from '../sync.js';
+
+// Module-level context for the topic currently being rendered — used by
+// quiz event handlers (which live in init helpers and don't see render-scope).
+let currentCtx = null;
+function evtCtx() {
+  return currentCtx ? {
+    course_slug: currentCtx.courseSlug,
+    module_slug: currentCtx.moduleSlug,
+    topic_slug: currentCtx.topicSlug,
+    topic_title: currentCtx.topicTitle
+  } : {};
+}
 import { renderQuiz } from './quiz.js?v=2';
 import { renderExercise, initExerciseInteractivity } from './exercise.js';
 import { renderDiagram } from './diagram.js';
@@ -113,6 +126,14 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
   const { prev, next } = getAdjacentTopics(mod.id, topicMeta.id);
   const topicIndex = mod.topics.indexOf(topicMeta) + 1;
 
+  // Set the context every render so any quiz/event handler sees the right topic.
+  currentCtx = {
+    courseSlug: getCurrentCourseId(),
+    moduleSlug: mod.id,
+    topicSlug: topicMeta.id,
+    topicTitle: topicData.title
+  };
+
   let html = `
     <div class="topic-view">
       <div class="topic-breadcrumb">
@@ -165,6 +186,7 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
 
   container.innerHTML = html;
   window.scrollTo(0, 0);
+  logEvent('topic_started', evtCtx());
 
   container.querySelectorAll('.concept-header').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -192,6 +214,7 @@ export function renderTopicView(container, topicData, mod, topicMeta) {
         store.completeTopic(moduleId, topicId);
         completeBtn.classList.add('completed');
         completeBtn.innerHTML = `<svg width="20" height="20"><use href="#icon-check-circle"/></svg> Completed`;
+        logEvent('topic_completed', evtCtx());
       }
     });
   }
@@ -248,6 +271,7 @@ function initTrueFalse(quizEl, quizId, saved) {
       if (!selected) return;
       const isCorrect = selected === correct;
       store.saveQuizAnswer(quizId, { selected, correct: isCorrect });
+      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'true-false', correct: isCorrect });
       showTFResult(quizEl, selected, correct);
     });
   }
@@ -295,6 +319,7 @@ function initFillInBlank(quizEl, quizId, saved) {
       const answer = input.value;
       const isCorrect = acceptable.includes(normaliseFIB(answer));
       store.saveQuizAnswer(quizId, { answer, correct: isCorrect, checked: true });
+      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'fill-in-blank', correct: isCorrect });
       showFIBResult(quizEl, answer, isCorrect, acceptable);
     });
   }
@@ -336,6 +361,7 @@ function initShortAnswer(quizEl, quizId, saved) {
     checkBtn.addEventListener('click', () => {
       const answer = input.value;
       store.saveQuizAnswer(quizId, { answer, revealed: true });
+      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'short-answer', correct: null });
       reveal.style.display = '';
       checkBtn.style.display = 'none';
       input.disabled = true;
@@ -374,6 +400,7 @@ function initMultipleChoice(quizEl, quizId, saved) {
       if (!selected) return;
       const isCorrect = selected === correct;
       store.saveQuizAnswer(quizId, { selected, correct: isCorrect });
+      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'multiple-choice', correct: isCorrect });
       showMCResult(quizEl, selected, correct);
     });
   }
@@ -502,6 +529,7 @@ function initDragMatch(quizEl, quizId, saved) {
     checkBtn.addEventListener('click', () => {
       const correctPairs = JSON.parse(quizEl.dataset.correctPairs || '{}');
       store.saveQuizAnswer(quizId, { pairs, checked: true });
+      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'drag-match' });
       showDragResult(quizEl, pairs, correctPairs);
     });
   }

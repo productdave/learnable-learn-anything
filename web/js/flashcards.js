@@ -1,5 +1,6 @@
 import { store } from './store.js';
-import { loadAllModules, getCourseConfig } from './course-loader.js';
+import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js';
+import { logEvent } from './sync.js';
 
 const capitalizeFirst = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
@@ -159,6 +160,13 @@ function renderFlashcardUI(overlay, cards) {
         const currentState = store.getFlashcardState(card.id) || { ease: 2.5, interval: 0, repetitions: 0 };
         const newState = sm2(currentState, quality);
         store.saveFlashcardState(card.id, newState);
+        logEvent('flashcard_reviewed', {
+          course_slug: getCurrentCourseId(),
+          module_slug: card.moduleId,
+          card_id: card.id,
+          quality,
+          topic_title: card.topicTitle
+        });
 
         currentIndex++;
         isFlipped = false;
