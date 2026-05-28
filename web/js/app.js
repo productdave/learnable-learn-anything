@@ -267,9 +267,9 @@ async function renderLibrary(container) {
         <div class="library-grid">
           ${visible.map(c => `
             <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
-              <div class="library-card-icon">
-                <svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg>
-              </div>
+              ${c.emoji
+                ? `<div class="library-card-icon library-card-icon--emoji">${c.emoji}</div>`
+                : `<div class="library-card-icon"><svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg></div>`}
               <h3 class="library-card-title">${c.title}</h3>
               <p class="library-card-subtitle">${c.subtitle}</p>
               <div class="library-card-meta">

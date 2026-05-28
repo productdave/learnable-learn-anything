@@ -34,6 +34,7 @@ export const CourseBriefSchema = z.object({
   title: z.string().min(3),
   subtitle: z.string().min(10),
   eyebrow: z.string().optional(),
+  emoji: z.string().min(1).max(8).optional(),  // a single emoji that captures the course at a glance
   scope: ScopeEnum,
   learner_persona: z.string().min(20),
   learning_objectives: z.array(z.string()).min(2),

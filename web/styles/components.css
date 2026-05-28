@@ -3035,3 +3035,11 @@
   border-color: var(--border-primary);
 }
 .library-card-action--ghost:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+/* Emoji variant of the library card icon */
+.library-card-icon--emoji {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 30px; line-height: 1;
+  background: color-mix(in srgb, var(--accent, var(--primary)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--primary)) 22%, transparent);
+}

@@ -19,6 +19,10 @@ const briefTool = {
       title: { type: 'string', description: 'Short, evocative course title (2-5 words)' },
       subtitle: { type: 'string', description: 'One-sentence promise of what the learner will be able to do' },
       eyebrow: { type: 'string', description: 'Optional small label, e.g. "Free Course"' },
+      emoji: {
+        type: 'string',
+        description: 'A single emoji that captures this course at a glance, used as the course icon. Pick one that visually communicates the subject — e.g. ☕ for coffee, 🧠 for AI/ML, 📊 for analytics/metrics, 🎯 for negotiation/strategy, 💼 for work/PM, 🎲 for game theory, 🏷️ for data annotation, 💻 for code, 🎨 for design, ✍️ for writing, 💰 for finance, 💪 for fitness, 🍳 for cooking. Choose ONE; do not return multiple.'
+      },
       scope: {
         type: 'string',
         enum: ['single_module', 'mini_course', 'full_course'],

@@ -113,6 +113,7 @@ function defaultCourseConfig(brief) {
     title: brief.title,
     subtitle: brief.subtitle,
     eyebrow: brief.eyebrow || 'Generated course',
+    emoji: brief.emoji || '',
     storageKeyPrefix: brief.id,
     documentTitle: `${brief.title} | Learnable`,
     searchPlaceholder: `Search topics in ${brief.title}…`,

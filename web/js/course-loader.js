@@ -6,6 +6,36 @@
 
 import { listUserCourses, getUserCourse } from './user-courses.js';
 
+/** Fallback emoji for user-generated courses created before Stage 1 picked one. */
+function deriveEmoji(title = '') {
+  const t = String(title).toLowerCase();
+  const rules = [
+    [/coffee|brew|espresso|barista/, '☕'],
+    [/\bai\b|machine learning|model|llm|gpt|claude|annotat/, '🤖'],
+    [/data|analytics|stat|metric|rubric|eval/, '📊'],
+    [/game theor|negoti|strategy/, '🎲'],
+    [/product manag|\bpm\b|roadmap/, '💼'],
+    [/code|programming|software|engineer|developer/, '💻'],
+    [/cook|food|recipe|chef|bak/, '🍳'],
+    [/finance|invest|money|tax|budget/, '💰'],
+    [/health|fitness|exercise|workout|nutrition/, '💪'],
+    [/design|ux|ui|figma|typography/, '🎨'],
+    [/write|writing|essay|copywrit|content/, '✍️'],
+    [/photo|camera|photograph|cinemato/, '📷'],
+    [/music|guitar|piano|sing|drum/, '🎵'],
+    [/lang|french|spanish|chinese|german|japanese|english/, '🗣️'],
+    [/garden|plant|botan|farm/, '🌱'],
+    [/travel|trip|tour/, '✈️'],
+    [/parent|child|kid|baby/, '👶'],
+    [/sleep|meditat|mindful/, '🧘'],
+    [/marketing|growth|seo|campaign/, '📈'],
+    [/legal|law|contract/, '⚖️'],
+    [/medical|doctor|health|clinic/, '🩺']
+  ];
+  for (const [re, e] of rules) if (re.test(t)) return e;
+  return '🎓';
+}
+
 const courseCache = {};
 const moduleCache = {};
 let _activeCourseId = null;
@@ -37,6 +67,7 @@ export async function loadLibrary() {
       topics: totalTopics,
       accentColor: c.curriculum.modules[0]?.color || c.config.moduleColorAccents?.[0] || '#4338CA',
       icon: c.curriculum.modules[0]?.icon || 'sparkle',
+      emoji: c.config.emoji || deriveEmoji(c.config.title),  // Stage-1 emoji, with a keyword-derived fallback
       user: true,
       partial: !!c.failedTopics?.length
     };
