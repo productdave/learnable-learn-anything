@@ -16,12 +16,10 @@ function ensureModal() {
   modal.className = 'intake-modal';
   modal.style.display = 'none';
   modal.innerHTML = `<div class="intake-card" role="dialog" aria-modal="true"></div>`;
-  // Deliberately NOT closing on backdrop click — losing a half-filled
-  // intake to an accidental click is awful. Use the X, Cancel, or ESC.
+  // Deliberately NOT closing on backdrop click or ESC — losing a
+  // half-filled intake to an accidental dismiss is awful. Only the
+  // explicit X or Cancel buttons close this modal.
   document.body.appendChild(modal);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') close();
-  });
   return modal;
 }
 

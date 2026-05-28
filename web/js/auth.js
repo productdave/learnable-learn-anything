@@ -83,12 +83,9 @@ function ensureModal() {
       <div class="auth-body"></div>
     </div>`;
   document.body.appendChild(m);
-  // Backdrop click intentionally does NOT close — avoids losing a typed
-  // email / API key to an accidental click. Use the X or ESC.
+  // Backdrop click + ESC intentionally do NOT close — avoids losing a
+  // typed email / API key to an accidental dismiss. Only the X closes.
   m.querySelector('.auth-close').addEventListener('click', () => { m.style.display = 'none'; });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && m.style.display !== 'none') m.style.display = 'none';
-  });
   return m;
 }
 
