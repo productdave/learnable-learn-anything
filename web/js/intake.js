@@ -84,10 +84,10 @@ function renderForm() {
 
       ${hasApiKey() ? '' : `
         <label class="intake-label intake-key-row">
-          <span class="intake-label-text">Anthropic API key — runs in your browser, never leaves your device</span>
+          <span class="intake-label-text">Anthropic API key</span>
           <input class="intake-input intake-mono" type="password" name="apiKey"
             placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-          <small class="intake-help">Get one at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>. Roughly $1–3 of credit per course.</small>
+          <small class="intake-help">Runs in your browser, never leaves your device. <a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get one</a> — roughly $1–3 of credit per course.</small>
         </label>
       `}
 

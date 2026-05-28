@@ -7,7 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js';
 import { initSync } from './sync.js';
-import { openIntake } from './intake.js';
+import { openIntake } from './intake.js?v=2';
 
 async function loadIcons() {
   try {
