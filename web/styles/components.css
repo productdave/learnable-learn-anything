@@ -2803,9 +2803,13 @@
 }
 .auth-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light, rgba(67,56,202,.15)); }
 .auth-btn {
-  height: 44px; border: none; border-radius: 10px; cursor: pointer;
+  height: 44px; padding: 0 var(--space-5); min-width: 140px;
+  border: none; border-radius: 10px; cursor: pointer;
   background: var(--primary); color: #fff; font: inherit; font-size: var(--font-base); font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  align-self: flex-start;
 }
+.auth-form .auth-btn { align-self: stretch; } /* full-width when inside the form */
 .auth-btn:hover { background: var(--primary-dark, #3730A3); }
 .auth-btn:disabled { opacity: .6; cursor: default; }
 .auth-msg { margin-top: var(--space-3); font-size: var(--font-sm); padding: var(--space-3); border-radius: 10px; }
