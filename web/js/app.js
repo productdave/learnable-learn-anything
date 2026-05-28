@@ -7,7 +7,8 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js?v=3';
 import { initSync } from './sync.js?v=2';
-import { openIntake } from './intake.js?v=5';
+import { openIntake, openIntakeForJob } from './intake.js?v=6';
+import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
 
 async function loadIcons() {
   try {
@@ -245,6 +246,8 @@ async function renderLibrary(container) {
   // Tag user-generated cards so the UI can mark them visually.
   const cards = library.courses.map(c => ({ ...c }));
 
+  const activeJobs = listActiveJobs();
+
   container.innerHTML = `
     <div class="library">
       <div class="library-hero">
@@ -256,6 +259,8 @@ async function renderLibrary(container) {
           <span class="library-cta-note">Runs in your browser with your Anthropic key. ~$1–3 of credit per course.</span>
         </div>
       </div>
+
+      <div class="library-jobs-host">${jobsSectionHTML(activeJobs)}</div>
 
       <div class="library-section">
         <h2 class="library-section-title">Available courses</h2>
@@ -279,6 +284,101 @@ async function renderLibrary(container) {
     </div>`;
 
   container.querySelector('#generate-btn')?.addEventListener('click', openIntake);
+  wireJobsSection(container);
+
+  // Live updates: when a job's progress changes, re-render just the jobs section.
+  // (If a new course just finished saving, also refresh the library list.)
+  onJobsChange(() => {
+    const host = container.querySelector('.library-jobs-host');
+    if (!host) return;
+    const newJobs = listActiveJobs();
+    host.innerHTML = jobsSectionHTML(newJobs);
+    wireJobsSection(container);
+    // If a job finished and added a course to localStorage, refresh the catalog too.
+    // (Re-rendering only the catalog grid keeps things cheap.)
+    refreshLibraryCatalog(container);
+  });
+}
+
+function jobsSectionHTML(jobs) {
+  if (!jobs.length) return '';
+  return `
+    <div class="library-section library-section--jobs">
+      <h2 class="library-section-title">Currently generating</h2>
+      <div class="library-grid">
+        ${jobs.map(j => jobCardHTML(j)).join('')}
+      </div>
+    </div>`;
+}
+
+function jobCardHTML(j) {
+  const isFailed = j.status === 'failed';
+  const isInterrupted = j.status === 'interrupted';
+  const isDone = j.status === 'completed';
+  const stageLabel =
+    isFailed ? 'Failed'
+    : isInterrupted ? 'Interrupted'
+    : isDone ? 'Done'
+    : ({ intake: 'Designing outline', research: 'Researching', topics: `Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`, assemble: 'Finalising', done: 'Ready' }[j.stage] || 'Working');
+  const pct = j.topicsTotal ? Math.min(100, Math.round(((j.topicsDone || 0) / j.topicsTotal) * 100)) : (j.stage === 'intake' ? 5 : j.stage === 'research' ? 20 : 60);
+
+  return `
+    <div class="library-card library-card--job ${isFailed ? 'is-failed' : ''} ${isInterrupted ? 'is-interrupted' : ''}" data-job-id="${j.id}" style="--accent: ${isFailed ? '#E11D48' : '#4338CA'}">
+      <div class="library-card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          ${isFailed ? '<path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
+            : isInterrupted ? '<path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>'
+            : '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>'}
+        </svg>
+      </div>
+      <h3 class="library-card-title">${escapeHTML(j.title || 'New course')}</h3>
+      <p class="library-card-subtitle">${escapeHTML(stageLabel)}${j.error ? ` — ${escapeHTML(j.error)}` : ''}</p>
+      <div class="library-card-progress">
+        <div class="library-card-progress-bar"><div class="library-card-progress-fill" style="width: ${pct}%"></div></div>
+      </div>
+      <div class="library-card-meta">
+        ${isFailed || isInterrupted
+          ? `<button class="library-card-action" data-job-action="retry" data-job-id="${j.id}">Retry</button>
+             <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`
+          : `<button class="library-card-action" data-job-action="open" data-job-id="${j.id}">View progress</button>`}
+      </div>
+    </div>`;
+}
+
+function wireJobsSection(container) {
+  container.querySelectorAll('[data-job-action]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = btn.dataset.jobId;
+      const action = btn.dataset.jobAction;
+      if (action === 'open' || action === 'retry') openIntakeForJob(id);
+      else if (action === 'dismiss') removeJob(id);
+    });
+  });
+}
+
+async function refreshLibraryCatalog(container) {
+  try {
+    const lib = await loadLibrary();
+    const visible = lib.courses.filter(c => !c.internal);
+    const grid = container.querySelector('.library-section:not(.library-section--jobs) .library-grid');
+    if (!grid) return;
+    grid.innerHTML = visible.map(c => `
+      <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
+        <div class="library-card-icon"><svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg></div>
+        <h3 class="library-card-title">${c.title}</h3>
+        <p class="library-card-subtitle">${c.subtitle}</p>
+        <div class="library-card-meta">
+          ${c.modules} module${c.modules === 1 ? '' : 's'} · ${c.topics} topic${c.topics === 1 ? '' : 's'}
+          ${c.user ? ' · <span class="library-card-tag library-card-tag--mine">your course</span>' : ''}
+          ${c.partial ? ' · <span class="library-card-tag">partial</span>' : ''}
+        </div>
+      </a>`).join('');
+  } catch {}
+}
+
+function escapeHTML(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function setShellForLibrary() {
@@ -297,6 +397,7 @@ function setShellForLibrary() {
 async function init() {
   await loadIcons();
   initTheme();
+  markInterruptedIfStale();  // any tab-killed jobs get flagged on boot
   await initAuth();   // no-op until Supabase is configured
   initSync();         // mirrors localStorage progress ↔ Supabase when signed in
 

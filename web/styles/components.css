@@ -2993,3 +2993,45 @@
   color: var(--text-secondary);
 }
 .auth-btn--ghost:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+/* === Currently-generating jobs on the library ============================ */
+.library-section--jobs { margin-bottom: var(--space-6); }
+.library-card--job {
+  cursor: default;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card) 100%);
+  border: 1px solid var(--border-primary);
+}
+.library-card--job.is-failed { border-color: rgba(225,29,72,.35); }
+.library-card--job.is-interrupted { border-color: rgba(217,119,6,.35); }
+.library-card--job .library-card-icon {
+  background: var(--accent);
+  color: #fff;
+}
+.library-card--job:not(.is-failed):not(.is-interrupted) .library-card-icon svg {
+  animation: jobspin 4s linear infinite;
+}
+@keyframes jobspin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+
+.library-card-progress { margin-top: var(--space-3); }
+.library-card-progress-bar {
+  height: 4px; border-radius: 2px; background: var(--border-primary); overflow: hidden;
+}
+.library-card-progress-fill {
+  height: 100%; background: var(--accent);
+  transition: width .3s ease;
+}
+
+.library-card--job .library-card-meta { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.library-card-action {
+  appearance: none; cursor: pointer;
+  height: 32px; padding: 0 var(--space-3);
+  border-radius: 999px; border: 1px solid transparent;
+  background: var(--accent); color: #fff;
+  font: inherit; font-size: var(--font-xs); font-weight: 600;
+}
+.library-card-action:hover { filter: brightness(1.08); }
+.library-card-action--ghost {
+  background: transparent; color: var(--text-secondary);
+  border-color: var(--border-primary);
+}
+.library-card-action--ghost:hover { color: var(--text-primary); border-color: var(--text-primary); }
