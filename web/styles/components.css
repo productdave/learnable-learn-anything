@@ -2830,7 +2830,7 @@
   background: var(--bg-primary);
   border: 1px solid var(--border-primary);
   border-radius: 18px;
-  padding: var(--space-7) var(--space-6) var(--space-6);
+  padding: var(--space-8) var(--space-8) var(--space-6);
   box-shadow: 0 28px 80px rgba(0,0,0,.34);
   animation: tts-fade .2s ease;
 }
