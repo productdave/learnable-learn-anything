@@ -5,9 +5,9 @@ import { renderTopicView } from './components/topic-view.js?v=9';
 import { initSearch } from './search.js';
 import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
-import { initAuth } from './auth.js';
+import { initAuth } from './auth.js?v=2';
 import { initSync } from './sync.js?v=2';
-import { openIntake } from './intake.js?v=3';
+import { openIntake } from './intake.js?v=4';
 
 async function loadIcons() {
   try {

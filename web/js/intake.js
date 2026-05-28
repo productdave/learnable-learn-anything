@@ -16,8 +16,12 @@ function ensureModal() {
   modal.className = 'intake-modal';
   modal.style.display = 'none';
   modal.innerHTML = `<div class="intake-card" role="dialog" aria-modal="true"></div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  // Deliberately NOT closing on backdrop click — losing a half-filled
+  // intake to an accidental click is awful. Use the X, Cancel, or ESC.
   document.body.appendChild(modal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.style.display !== 'none') close();
+  });
   return modal;
 }
 
