@@ -6,10 +6,11 @@
 // dismissal. (A real page refresh kills the in-flight API calls — those jobs
 // land as 'interrupted' with a Retry option.)
 
-import { hasApiKey, setApiKey, generateCourse } from './generator/index.js';
+import { hasApiKey, setApiKey, getApiKey, generateCourse } from './generator/index.js';
 import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
+import { startGeneration as swStart } from './sw-client.js';
 
 let modal = null;
 let unsubJob = null;        // currently-rendered job's listener
@@ -159,10 +160,26 @@ function onSubmit(e) {
   renderProgress(job.id);
 }
 
-// Kicks off the generator promise and threads progress into the job.
-// The promise runs independently of the modal; closing the modal doesn't
-// cancel it.
-function startGeneration(jobId, userBrief) {
+// Kicks off the generator and threads progress into the job. Tries the
+// service worker first (survives refresh + tab close); falls back to in-page
+// generation (current behavior — survives modal close + SPA nav but dies on
+// refresh) if the SW isn't available.
+//
+// The auto-jump-into-the-new-course on completion is observed via a
+// onJobsChange subscription rather than a Promise chain, so it works whether
+// the SW or the in-page path produced the result.
+async function startGeneration(jobId, userBrief) {
+  try {
+    await swStart(jobId, userBrief, getApiKey());
+    // SW path: progress + final saveUserCourse happen in sw-client.js's
+    // global listener, which updates the jobs registry. Nothing else to do.
+  } catch (err) {
+    console.warn('[intake] SW path unavailable, falling back to in-page generation:', err.message);
+    runInPageGeneration(jobId, userBrief);
+  }
+}
+
+function runInPageGeneration(jobId, userBrief) {
   generateCourse(userBrief, (p) => {
     if (p.stage === 'intake')      updateJob(jobId, { stage: 'intake',  message: 'Designing the outline…' });
     else if (p.stage === 'intake_done') {
@@ -184,20 +201,27 @@ function startGeneration(jobId, userBrief) {
   }).then(course => {
     const savedId = saveUserCourse(course);
     updateJob(jobId, { status: 'completed', stage: 'done', message: 'Done!', savedCourseId: savedId });
-    // If the user is still watching this job's modal, jump them into the course
-    // via SPA navigation (no full reload, so any other background work keeps running).
-    if (renderedJobId === jobId) {
-      setTimeout(() => {
-        close();
-        history.pushState(null, '', `?course=${encodeURIComponent(savedId)}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }, 700);
-    }
   }).catch(err => {
     updateJob(jobId, { status: 'failed', error: err.message || String(err) });
-    console.error('[intake] generation failed:', err);
+    console.error('[intake] in-page generation failed:', err);
   });
 }
+
+// Watch the rendered job — if it just completed, auto-jump into the course.
+// This works regardless of which path (SW or in-page) finished the work.
+onJobsChange(() => {
+  if (!renderedJobId) return;
+  const j = getJob(renderedJobId);
+  if (j && j.status === 'completed' && j.savedCourseId && !autoJumpedFor.has(renderedJobId)) {
+    autoJumpedFor.add(renderedJobId);
+    setTimeout(() => {
+      close();
+      history.pushState(null, '', `?course=${encodeURIComponent(j.savedCourseId)}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }, 700);
+  }
+});
+const autoJumpedFor = new Set();
 
 // ---- progress view (reads live from the job in localStorage) -----
 

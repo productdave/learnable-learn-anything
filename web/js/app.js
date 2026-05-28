@@ -7,8 +7,9 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js?v=3';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=7';
+import { openIntake, openIntakeForJob } from './intake.js?v=8';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
+import { ensureSW } from './sw-client.js';
 
 async function loadIcons() {
   try {
@@ -488,6 +489,7 @@ async function init() {
   markInterruptedIfStale();
   await initAuth();
   initSync();
+  ensureSW(); // fire-and-forget — registers /sw.js + installs the global progress listener
 
   await renderForCurrentURL();
 
