@@ -49,6 +49,17 @@ export function getCurrentCourseId() {
   return params.get('course') || null;
 }
 
+/** Clear cached config/curriculum/module data for a course. Call after a
+ *  course is re-saved (e.g. surgical retry filled in missing topics) so the
+ *  next load reflects the fresh state. */
+export function invalidateCourseCache(courseId) {
+  delete courseCache[courseId];
+  for (const key of Object.keys(moduleCache)) {
+    if (key.startsWith(`${courseId}/`)) delete moduleCache[key];
+  }
+  if (_activeCourseId === courseId) _activeCourseId = null;
+}
+
 /**
  * Load the public course library index. For Phase 2.1 this is a static JSON
  * file served alongside course data; in Phase 2.2+ it comes from Supabase.

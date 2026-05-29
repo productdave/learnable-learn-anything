@@ -91,8 +91,14 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   // --- Stage 4: assemble in memory (no fs) ---------------------------
   onProgress({ stage: 'assemble' });
   const course = assembleCourse(brief, topicResults);
+  // Keep brief + per-module research bundles around the result so the caller
+  // can persist them — surgical retry of failed topics needs both to skip
+  // Stage 1/2 on the rerun.
+  const researchByModule = Object.fromEntries(
+    researchResults.map(({ mod, bundle }) => [mod.id, bundle])
+  );
   onProgress({ stage: 'done', course });
-  return course;
+  return { course, brief, research: researchByModule };
 }
 
 // In-memory assemble moved to assemble-browser.js so the service-worker

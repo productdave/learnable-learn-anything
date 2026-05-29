@@ -59,7 +59,76 @@ self.addEventListener('message', (event) => {
     const result = recentResults.get(msg.jobId);
     if (result && event.source) event.source.postMessage(result.payload);
   }
+
+  if (msg.type === 'gen-resume') {
+    // Surgical retry — only re-runs Stage 3 for the listed missing topics,
+    // reusing the original brief + research bundles so we don't re-pay for
+    // intake or research.
+    if (active.has(msg.jobId)) return;
+    const p = resumeMissing(msg.jobId, msg.apiKey, msg.brief, msg.research, msg.existingContent, msg.missingTopics);
+    active.set(msg.jobId, p);
+    if (event.waitUntil) event.waitUntil(p);
+  }
 });
+
+async function resumeMissing(jobId, apiKey, brief, research, existingContent, missingTopics) {
+  const client = createClient({ apiKey });
+  const tone = getTone(brief?.tone || 'conversational');
+  const total = missingTopics.length;
+  let done = 0;
+  try {
+    await broadcast({ type: 'gen-progress', jobId, stage: 'topics', total });
+    const fresh = [];
+    for (const { moduleId, topicId } of missingTopics) {
+      const mod = brief.modules.find(m => m.id === moduleId);
+      const topic = mod?.topics.find(t => t.id === topicId);
+      if (!mod || !topic) {
+        done++;
+        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_failed', moduleId, topicId, done, total, error: 'topic missing from brief' });
+        fresh.push({ moduleId, topicId, content: null, error: 'topic missing from brief' });
+        continue;
+      }
+      const bundle = research?.[moduleId] || null;
+      try {
+        const content = await runTopic(client, brief, mod, topic, bundle, tone);
+        done++;
+        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId, topicId, done, total });
+        fresh.push({ moduleId, topicId, content });
+      } catch (err) {
+        done++;
+        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_failed', moduleId, topicId, done, total, error: err.message });
+        fresh.push({ moduleId, topicId, content: null, error: err.message });
+      }
+    }
+
+    // Merge old + fresh into the full result set, in brief order.
+    const merged = [];
+    for (const mod of brief.modules) {
+      for (const topic of mod.topics) {
+        const old = existingContent?.[mod.number]?.[topic.id];
+        if (old) { merged.push({ moduleId: mod.id, topicId: topic.id, content: old }); continue; }
+        const f = fresh.find(r => r.moduleId === mod.id && r.topicId === topic.id);
+        if (f) merged.push(f);
+        else merged.push({ moduleId: mod.id, topicId: topic.id, content: null });
+      }
+    }
+
+    await broadcast({ type: 'gen-progress', jobId, stage: 'assemble' });
+    const course = assembleCourse(brief, merged);
+    const donePayload = {
+      type: 'gen-progress', jobId, stage: 'done',
+      course, _brief: brief, _research: research
+    };
+    rememberResult(jobId, donePayload);
+    await broadcast(donePayload);
+  } catch (err) {
+    const failPayload = { type: 'gen-error', jobId, error: err.message || String(err) };
+    rememberResult(jobId, failPayload);
+    await broadcast(failPayload);
+  } finally {
+    active.delete(jobId);
+  }
+}
 
 async function runGeneration(jobId, userBrief, apiKey) {
   const client = createClient({ apiKey });
@@ -106,7 +175,15 @@ async function runGeneration(jobId, userBrief, apiKey) {
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'assemble' });
     const course = assembleCourse(brief, topicResults);
-    const donePayload = { type: 'gen-progress', jobId, stage: 'done', course };
+    // Persist enough state with the course to enable surgical retry of any
+    // topics that failed (no re-paying for ones that worked).
+    const researchByModule = Object.fromEntries(
+      researchResults.map(({ mod, bundle }) => [mod.id, bundle])
+    );
+    const donePayload = {
+      type: 'gen-progress', jobId, stage: 'done',
+      course, _brief: brief, _research: researchByModule
+    };
     rememberResult(jobId, donePayload);
     await broadcast(donePayload);
   } catch (err) {

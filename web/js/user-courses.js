@@ -20,16 +20,42 @@ export function getUserCourse(id) {
   return readAll()[id] || null;
 }
 
-/** Persist a generated course. Returns the final saved id (renamed on collision). */
-export function saveUserCourse(course) {
+/** Persist a generated course. Returns the final saved id (renamed on collision).
+ *  `extra` can carry { _brief, _research } so surgical retry of failed topics
+ *  doesn't have to re-run Stage 1 or Stage 2. */
+export function saveUserCourse(course, extra = {}) {
   const all = readAll();
   let id = course.config.id;
-  // Avoid collisions with bundled course ids (game-theory / pour-over-coffee / ai-annotation-platform-pm / quiz-demo).
+  // If this same course (same id) was saved before, merge — keep prior _brief /
+  // _research, overlay new modules/curriculum, etc. This is how surgical retry
+  // updates an existing partial course in place rather than creating a new one.
+  if (all[id]) {
+    const prior = all[id];
+    course = {
+      ...prior,
+      ...course,
+      config: { ...prior.config, ...course.config },
+      _brief: extra._brief || prior._brief,
+      _research: extra._research || prior._research,
+      createdAt: prior.createdAt
+    };
+    all[id] = course;
+    writeAll(all);
+    return id;
+  }
+
+  // First-time save: rename if it collides with a bundled course slug.
   const reserved = new Set(['game-theory', 'pour-over-coffee', 'ai-annotation-platform-pm', 'quiz-demo']);
-  while (reserved.has(id) || (all[id] && all[id] !== course && all[id].config !== course.config)) {
+  while (reserved.has(id)) {
     id = `${id}-${Math.random().toString(36).slice(2, 6)}`;
   }
-  course = { ...course, config: { ...course.config, id }, createdAt: course.createdAt || Date.now() };
+  course = {
+    ...course,
+    config: { ...course.config, id },
+    _brief: extra._brief,
+    _research: extra._research,
+    createdAt: course.createdAt || Date.now()
+  };
   all[id] = course;
   writeAll(all);
   return id;

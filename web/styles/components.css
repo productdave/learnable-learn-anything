@@ -1883,6 +1883,46 @@
   font-size: var(--text-lg);
 }
 
+/* Retry CTA for topics that didn't finish generating */
+.empty-state.missing-topic {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+  color: var(--text-secondary);
+}
+.missing-topic-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #D97706 12%, transparent);
+  color: #D97706;
+  margin-bottom: var(--space-4);
+}
+.missing-topic-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
+}
+.missing-topic-body {
+  font-size: var(--text-base);
+  line-height: 1.55;
+  margin: 0 0 var(--space-6);
+}
+.missing-topic-actions {
+  display: inline-flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.missing-topic .library-card-action { height: 40px; padding: 0 var(--space-5); font-size: var(--font-sm); }
+.missing-topic-note {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
 /* ============================================
    AI CHAT PANEL
    ============================================ */
@@ -3003,11 +3043,12 @@
 }
 .library-card--job.is-failed { border-color: rgba(225,29,72,.35); }
 .library-card--job.is-interrupted { border-color: rgba(217,119,6,.35); }
+.library-card--job.is-partial { border-color: rgba(217,119,6,.45); background: linear-gradient(180deg, color-mix(in srgb, #D97706 4%, var(--bg-card)) 0%, var(--bg-card) 100%); }
 .library-card--job .library-card-icon {
   background: var(--accent);
   color: #fff;
 }
-.library-card--job:not(.is-failed):not(.is-interrupted) .library-card-icon svg {
+.library-card--job:not(.is-failed):not(.is-interrupted):not(.is-partial) .library-card-icon svg {
   animation: jobspin 4s linear infinite;
 }
 @keyframes jobspin { from { transform: rotate(0) } to { transform: rotate(360deg) } }

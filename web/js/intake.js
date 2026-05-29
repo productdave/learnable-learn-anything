@@ -198,9 +198,19 @@ function runInPageGeneration(jobId, userBrief) {
     else if (p.stage === 'topics') updateJob(jobId, { stage: 'topics', message: 'Writing topic content…', topicsDone: 0, topicsTotal: p.total });
     else if (p.stage === 'topic_done' || p.stage === 'topic_failed') updateJob(jobId, { stage: 'topics', topicsDone: p.done, topicsTotal: p.total });
     else if (p.stage === 'assemble') updateJob(jobId, { stage: 'assemble', message: 'Finalising…' });
-  }).then(course => {
-    const savedId = saveUserCourse(course);
-    updateJob(jobId, { status: 'completed', stage: 'done', message: 'Done!', savedCourseId: savedId });
+  }).then(({ course, brief, research }) => {
+    const savedId = saveUserCourse(course, { _brief: brief, _research: research });
+    // Classify outcome: all topics OK → completed; some OK + some missing →
+    // partial (retry surface activates); zero topics OK → failed.
+    const failedTopics = course.failedTopics || [];
+    const failedCount = failedTopics.length;
+    let totalTopics = 0;
+    for (const m of (course.curriculum?.modules || [])) totalTopics += (m.topics || []).length;
+    let status, message;
+    if (failedCount === 0)                { status = 'completed'; message = 'Done!'; }
+    else if (failedCount >= totalTopics)  { status = 'failed';    message = `Generation failed — no topics produced (${failedCount} errors).`; }
+    else                                  { status = 'partial';   message = `${totalTopics - failedCount} of ${totalTopics} topics done — ${failedCount} failed.`; }
+    updateJob(jobId, { status, stage: 'done', message, savedCourseId: savedId, failedCount, totalTopics });
   }).catch(err => {
     updateJob(jobId, { status: 'failed', error: err.message || String(err) });
     console.error('[intake] in-page generation failed:', err);

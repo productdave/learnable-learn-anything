@@ -7,9 +7,10 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth } from './auth.js?v=3';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=8';
+import { openIntake, openIntakeForJob } from './intake.js?v=9';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
-import { ensureSW } from './sw-client.js';
+import { ensureSW, resumeMissing } from './sw-client.js';
+import { getUserCourse } from './user-courses.js';
 
 async function loadIcons() {
   try {
@@ -167,18 +168,97 @@ async function renderRoute() {
   try {
     const moduleData = await loadModule(moduleId);
     if (!moduleData) {
-      content.innerHTML = `<div class="empty-state"><p>Module content is being prepared. Check back soon.</p></div>`;
+      content.innerHTML = missingContentHTML(moduleId, topicMeta);
+      wireMissingContent(content);
       return;
     }
     const topicData = moduleData[topicId];
     if (!topicData) {
-      content.innerHTML = `<div class="empty-state"><p>Topic content is being prepared. Check back soon.</p></div>`;
+      content.innerHTML = missingContentHTML(moduleId, topicMeta);
+      wireMissingContent(content);
       return;
     }
     renderTopicView(content, topicData, mod, topicMeta);
   } catch (e) {
-    content.innerHTML = `<div class="empty-state"><p>Module content is being prepared. Check back soon.</p></div>`;
+    content.innerHTML = missingContentHTML(moduleId, topicMeta);
+    wireMissingContent(content);
   }
+}
+
+/** Empty-state shown when a topic's content didn't get generated. For user-
+ *  generated courses with saved brief+research, offer surgical retry. For
+ *  bundled courses (or older user courses missing the resume bundles), show
+ *  the plain "being prepared" message. */
+function missingContentHTML(moduleId, topicMeta) {
+  const courseId = getCurrentCourseId();
+  const saved = courseId ? getUserCourse(courseId) : null;
+  if (!saved) {
+    return `<div class="empty-state"><p>Topic content is being prepared. Check back soon.</p></div>`;
+  }
+  const canResume = !!(saved._brief && saved._research);
+  const failedTopics = saved.failedTopics || [];
+  const failedCount = failedTopics.length;
+
+  if (canResume) {
+    return `
+      <div class="empty-state missing-topic">
+        <div class="missing-topic-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
+          </svg>
+        </div>
+        <h2 class="missing-topic-title">This topic didn't finish generating</h2>
+        <p class="missing-topic-body">
+          ${failedCount > 1
+            ? `${failedCount} topics in this course failed. The outline and research are saved — you can retry just the missing ones without re-paying for the rest.`
+            : `The outline and research are saved — you can retry just this missing topic without re-paying for the rest.`}
+        </p>
+        <div class="missing-topic-actions">
+          <button class="library-card-action" data-missing-action="retry">Retry missing topic${failedCount > 1 ? 's' : ''}</button>
+          <a class="library-card-action library-card-action--ghost" href="/">Back to library</a>
+        </div>
+        <p class="missing-topic-note">Common cause: the previous attempt ran out of Anthropic credits. Top up before retrying.</p>
+      </div>`;
+  }
+
+  // No saved brief — predates the resume feature, or generation never completed Stage 1.
+  return `
+    <div class="empty-state missing-topic">
+      <div class="missing-topic-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+      </div>
+      <h2 class="missing-topic-title">This topic didn't finish generating</h2>
+      <p class="missing-topic-body">
+        This course was created before in-place retry was supported, so the outline can't be re-used. You'll need to regenerate it from scratch.
+      </p>
+      <div class="missing-topic-actions">
+        <a class="library-card-action" href="/">Back to library</a>
+      </div>
+    </div>`;
+}
+
+function wireMissingContent(container) {
+  const btn = container.querySelector('[data-missing-action="retry"]');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Starting…';
+    try {
+      const newJobId = await resumeMissing(getCurrentCourseId());
+      if (newJobId) {
+        // Send the user back to the library where the in-progress card shows the retry.
+        window.location.href = '/';
+      } else {
+        btn.textContent = 'Nothing to retry';
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Retry missing topics';
+      alert(`Couldn't retry: ${err.message}`);
+    }
+  });
 }
 
 function initTheme() {
@@ -315,45 +395,75 @@ function jobsSectionHTML(jobs) {
 function jobCardHTML(j) {
   const isFailed = j.status === 'failed';
   const isInterrupted = j.status === 'interrupted';
+  const isPartial = j.status === 'partial';
   const isDone = j.status === 'completed';
-  const stageLabel =
-    isFailed ? 'Failed'
-    : isInterrupted ? 'Interrupted'
-    : isDone ? 'Done'
-    : ({ intake: 'Designing outline', research: 'Researching', topics: `Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`, assemble: 'Finalising', done: 'Ready' }[j.stage] || 'Working');
-  const pct = j.topicsTotal ? Math.min(100, Math.round(((j.topicsDone || 0) / j.topicsTotal) * 100)) : (j.stage === 'intake' ? 5 : j.stage === 'research' ? 20 : 60);
+
+  // Subtitle / progress label by state.
+  let stageLabel;
+  if (isFailed) stageLabel = 'Failed';
+  else if (isInterrupted) stageLabel = 'Interrupted (page refresh or closed tab)';
+  else if (isPartial) stageLabel = `${(j.totalTopics || 0) - (j.failedCount || 0)} of ${j.totalTopics || 0} topics done · ${j.failedCount || 0} failed`;
+  else if (isDone) stageLabel = 'Done';
+  else stageLabel = ({ intake: 'Designing outline', research: 'Researching', topics: `Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`, assemble: 'Finalising', done: 'Ready' }[j.stage] || 'Working');
+
+  const pct = isPartial
+    ? Math.round(((j.totalTopics - j.failedCount) / Math.max(1, j.totalTopics)) * 100)
+    : (j.topicsTotal ? Math.min(100, Math.round(((j.topicsDone || 0) / j.topicsTotal) * 100)) : (j.stage === 'intake' ? 5 : j.stage === 'research' ? 20 : 60));
+
+  const accent = isFailed ? '#E11D48' : isPartial ? '#D97706' : '#4338CA';
+  const iconPath =
+    isFailed ? '<path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
+    : isInterrupted ? '<path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>'
+    : isPartial ? '<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>'
+    : '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
+
+  let actionsHTML;
+  if (isPartial && j.savedCourseId) {
+    actionsHTML = `
+      <button class="library-card-action" data-job-action="retry-missing" data-course-id="${j.savedCourseId}">Retry missing topics</button>
+      <a class="library-card-action library-card-action--ghost" href="?course=${encodeURIComponent(j.savedCourseId)}">Open as-is</a>
+      <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`;
+  } else if (isFailed || isInterrupted) {
+    actionsHTML = `
+      <button class="library-card-action" data-job-action="retry" data-job-id="${j.id}">Retry</button>
+      <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`;
+  } else {
+    actionsHTML = `<button class="library-card-action" data-job-action="open" data-job-id="${j.id}">View progress</button>`;
+  }
 
   return `
-    <div class="library-card library-card--job ${isFailed ? 'is-failed' : ''} ${isInterrupted ? 'is-interrupted' : ''}" data-job-id="${j.id}" style="--accent: ${isFailed ? '#E11D48' : '#4338CA'}">
+    <div class="library-card library-card--job ${isFailed ? 'is-failed' : ''} ${isInterrupted ? 'is-interrupted' : ''} ${isPartial ? 'is-partial' : ''}" data-job-id="${j.id}" style="--accent: ${accent}">
       <div class="library-card-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          ${isFailed ? '<path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
-            : isInterrupted ? '<path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>'
-            : '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>'}
-        </svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>
       </div>
       <h3 class="library-card-title">${escapeHTML(j.title || 'New course')}</h3>
-      <p class="library-card-subtitle">${escapeHTML(stageLabel)}${j.error ? ` — ${escapeHTML(j.error)}` : ''}</p>
+      <p class="library-card-subtitle">${escapeHTML(stageLabel)}${j.error && !isPartial ? ` — ${escapeHTML(j.error)}` : ''}</p>
       <div class="library-card-progress">
         <div class="library-card-progress-bar"><div class="library-card-progress-fill" style="width: ${pct}%"></div></div>
       </div>
-      <div class="library-card-meta">
-        ${isFailed || isInterrupted
-          ? `<button class="library-card-action" data-job-action="retry" data-job-id="${j.id}">Retry</button>
-             <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`
-          : `<button class="library-card-action" data-job-action="open" data-job-id="${j.id}">View progress</button>`}
-      </div>
+      <div class="library-card-meta">${actionsHTML}</div>
     </div>`;
 }
 
 function wireJobsSection(container) {
   container.querySelectorAll('[data-job-action]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.preventDefault();
       const id = btn.dataset.jobId;
       const action = btn.dataset.jobAction;
-      if (action === 'open' || action === 'retry') openIntakeForJob(id);
-      else if (action === 'dismiss') removeJob(id);
+      if (action === 'open' || action === 'retry') {
+        openIntakeForJob(id);
+      } else if (action === 'dismiss') {
+        removeJob(id);
+      } else if (action === 'retry-missing') {
+        const courseId = btn.dataset.courseId;
+        try {
+          const newJobId = await resumeMissing(courseId);
+          if (newJobId) openIntakeForJob(newJobId);
+        } catch (err) {
+          alert(`Couldn't retry missing topics: ${err.message}`);
+        }
+      }
     });
   });
 }
