@@ -24,8 +24,8 @@ const topicTool = {
       sections: {
         type: 'array',
         minItems: 5,
-        maxItems: 13,
-        description: 'An ordered sequence of teaching sections. Must include: 2-3 concept sections, 3-5 quiz sections (one per variant in the quiz_plan, in that order), at least 1 callout, exactly 1 takeaway. INTERLEAVE the quizzes with concepts — each quiz comes immediately after the concept it tests, so the learner checks understanding while it is fresh. Do not cluster all quizzes at the end. Recommended pattern: concept → quiz → concept → callout → quiz → concept → quiz → [optional quiz #4] → [optional quiz #5] → takeaway. Exercise section is OPTIONAL; only include if a deeper application reflection genuinely adds value.',
+        maxItems: 15,
+        description: 'An ordered sequence of teaching sections. Must include: 2-3 concept sections, 3-5 quiz sections (one per variant in the quiz_plan, in that order), at least 1 callout, exactly 1 takeaway. OPTIONAL: 0-2 image sections (diagram/chart/screenshot) when an image clarifies a concept — place each image immediately AFTER the concept it illustrates. INTERLEAVE the quizzes with concepts — each quiz comes immediately after the concept it tests, so the learner checks understanding while it is fresh. Do not cluster all quizzes at the end. Recommended pattern: concept → [optional image] → quiz → concept → callout → quiz → concept → quiz → [optional quiz #4] → [optional quiz #5] → takeaway. Exercise section is OPTIONAL; only include if a deeper application reflection genuinely adds value.',
         items: {
           oneOf: [
             {
@@ -177,6 +177,22 @@ const topicTool = {
                   items: { type: 'string', description: 'A single sentence the learner should walk away repeating.' }
                 }
               }
+            },
+            {
+              type: 'object',
+              required: ['type', 'ref_kind', 'alt'],
+              description: 'OPTIONAL inline image — a diagram, chart, or screenshot that clarifies a concept just taught. Use 0-2 per topic, ONLY when an image meaningfully helps. Source from the research bundle images array; do not invent URLs. Place an image section AFTER the concept section it illustrates, not before. Skip decorative imagery.',
+              properties: {
+                type: { const: 'image' },
+                ref_kind: { type: 'string', enum: ['web', 'pdf'], description: '"web" for a URL from the research bundle; "pdf" for a page-index pointer into an uploaded PDF.' },
+                url: { type: 'string', description: 'Required when ref_kind="web". Copy verbatim from one of the research bundle image refs.' },
+                file_index: { type: 'integer', minimum: 0, description: 'Required when ref_kind="pdf". Which uploaded PDF.' },
+                page: { type: 'integer', minimum: 1, description: 'Required when ref_kind="pdf". 1-indexed page number.' },
+                alt: { type: 'string', description: 'Short description of what the image shows.' },
+                caption: { type: 'string', description: 'One sentence explaining what this image teaches in context of the topic.' },
+                source_title: { type: 'string', description: 'Source title (for web images).' },
+                source_url: { type: 'string', description: 'Source page URL (for web images).' }
+              }
             }
           ]
         }
@@ -224,6 +240,14 @@ Quiz variants and how to write them:
 
 The exercise section (longer free-text reflection prompt) is OPTIONAL. Default to NOT including one — the 3-5 quizzes already give the learner active engagement. Only include an exercise if the topic genuinely benefits from a longer applied prompt that doesn't fit any quiz variant.
 
+IMAGES (OPTIONAL — 0 to 2 per topic):
+- You'll receive an IMAGE BUNDLE in the prompt — a list of image refs the researcher pre-vetted. Pick from those; do not invent URLs or PDF page numbers.
+- Include an image ONLY when it genuinely clarifies a concept (an architecture diagram for an architecture concept, a chart for a comparison, a screenshot of a real interface, a labelled mechanism for a process). Skip decorative imagery.
+- Place each image AFTER the concept section it illustrates, never before.
+- Web image refs: copy the url, alt, caption, source_title, source_url verbatim.
+- PDF image refs: copy the file_index, page, alt, caption verbatim — assemble will resolve them to embedded thumbnails.
+- Many topics need zero images. That's fine. Only include them when they pull weight.
+
 ${tone.systemFragment}
 
 VOICE EXEMPLARS (anonymous reference samples — match this style, do not quote):
@@ -240,12 +264,22 @@ Submit by calling the submit_topic tool. Do not write a preamble.`;
 }
 
 export async function runTopic(client, courseBrief, mod, topicMeta, bundle, tone) {
+  const imageBundle = bundle?.images?.length
+    ? `\nIMAGE BUNDLE — pre-vetted refs you MAY include as image sections in this topic (0-2 max, only when they genuinely clarify a concept). Copy fields VERBATIM; do not invent. Skip any you don't have a good use for.\n` +
+      bundle.images.map((img, i) => {
+        if (img.kind === 'web') {
+          return `[${i}] kind:web url:${img.url} alt:"${img.alt}"${img.caption ? ` caption:"${img.caption}"` : ''}${img.source_title ? ` source_title:"${img.source_title}"` : ''}${img.source_url ? ` source_url:${img.source_url}` : ''}`;
+        }
+        return `[${i}] kind:pdf file_index:${img.file_index} page:${img.page} alt:"${img.alt}"${img.caption ? ` caption:"${img.caption}"` : ''}`;
+      }).join('\n')
+    : '';
+
   const researchContext = bundle
     ? `RESEARCH BUNDLE for this module (use as substance):
 Key concepts: ${bundle.key_concepts.join('; ')}
 Examples: ${bundle.examples.join(' | ')}
 ${bundle.experts.length ? 'Named thinkers:\n' + bundle.experts.map(e => `- ${e.name}: ${e.note}`).join('\n') : ''}
-${bundle.misconceptions.length ? 'Common misconceptions:\n' + bundle.misconceptions.map(m => `- ${m}`).join('\n') : ''}`
+${bundle.misconceptions.length ? 'Common misconceptions:\n' + bundle.misconceptions.map(m => `- ${m}`).join('\n') : ''}${imageBundle}`
     : '(No external research available — use general knowledge carefully.)';
 
   const userMsg = `Write the content for this topic.

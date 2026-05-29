@@ -190,6 +190,13 @@ export async function startGeneration(jobId, userBrief, apiKey) {
   if (!navigator.serviceWorker.controller) {
     throw new Error('Service worker not active');
   }
+  // userBrief includes `pdfs: [{ file_index, name, base64, pageThumbs }]` when
+  // the user uploaded any. The SW reads `pdfs` directly and prepends document
+  // blocks to each stage's API call; pageThumbs ride along so assemble can
+  // resolve PDF image refs to data URLs on the final course object.
+  // (Surgical retry — gen-resume — does NOT re-send PDFs in v1; rerun topics
+  // can still cite web image refs from the saved research bundle. PDF-ref
+  // sections in re-tried topics are dropped at assemble time.)
   navigator.serviceWorker.controller.postMessage({
     type: 'gen-start',
     jobId, userBrief, apiKey

@@ -46,10 +46,15 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
 
   const client = createClient({ apiKey });
   const tone = getTone(userBrief.tone || 'conversational');
+  // PDFs travel two ways: api blocks (base64) for stages 1/2, thumb data URLs
+  // for assemble image-section resolution.
+  const pdfs = userBrief.pdfs || [];
+  const pdfsForApi = pdfs.map(p => ({ file_index: p.file_index, name: p.name, base64: p.base64, pageCount: (p.pageThumbs || []).length }));
+  const pdfThumbs = pdfs.map(p => ({ file_index: p.file_index, name: p.name, pageThumbs: p.pageThumbs || [] }));
 
   // --- Stage 1: intake → course brief --------------------------------
   onProgress({ stage: 'intake' });
-  const brief = await runIntake(client, userBrief);
+  const brief = await runIntake(client, userBrief, { pdfs: pdfsForApi });
   onProgress({ stage: 'intake_done', brief });
 
   // --- Stage 2: research per module, in parallel ---------------------
@@ -57,7 +62,7 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   const researchResults = await Promise.all(
     brief.modules.map(async mod => {
       try {
-        const bundle = await runResearch(client, brief, mod);
+        const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi });
         onProgress({ stage: 'research_module', moduleId: mod.id, status: 'ok' });
         return { mod, bundle };
       } catch (err) {
@@ -90,7 +95,7 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
 
   // --- Stage 4: assemble in memory (no fs) ---------------------------
   onProgress({ stage: 'assemble' });
-  const course = assembleCourse(brief, topicResults);
+  const course = assembleCourse(brief, topicResults, { pdfThumbs });
   // Keep brief + per-module research bundles around the result so the caller
   // can persist them — surgical retry of failed topics needs both to skip
   // Stage 1/2 on the rerun.

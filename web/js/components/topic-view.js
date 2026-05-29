@@ -29,8 +29,31 @@ function renderSection(section, index) {
     case 'takeaway': return renderTakeaway(section);
     case 'payoff-matrix': return renderPayoffMatrix(section);
     case 'simulator': return renderSimulator(section);
+    case 'image': return renderImageSection(section);
     default: return '';
   }
+}
+
+function escapeAttr(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderImageSection(section) {
+  if (!section || !section.src) return '';
+  const alt = escapeAttr(section.alt || section.caption || 'Figure');
+  const caption = section.caption ? escapeAttr(section.caption) : '';
+  const srcTitle = section.source_title ? escapeAttr(section.source_title) : '';
+  const srcUrl = section.source_url ? escapeAttr(section.source_url) : '';
+  const captionHtml = caption || srcTitle
+    ? `<figcaption>${caption}${caption && srcTitle ? ' ' : ''}${srcTitle
+        ? `<span class="topic-image-source">— ${srcUrl ? `<a href="${srcUrl}" target="_blank" rel="noopener">${srcTitle}</a>` : srcTitle}</span>`
+        : ''}</figcaption>`
+    : '';
+  return `
+    <figure class="topic-image">
+      <img src="${escapeAttr(section.src)}" alt="${alt}" loading="lazy">
+      ${captionHtml}
+    </figure>`;
 }
 
 function renderConcept(section, index) {

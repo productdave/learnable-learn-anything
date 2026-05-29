@@ -1,13 +1,59 @@
 // Shared in-memory assemble step — replaces the Node `fs`-based assemble.mjs
 // for both the in-page generator and the service-worker generator.
+//
+// `opts.pdfThumbs`: [{ file_index, name, pageThumbs: [dataUrl, ...] }] used
+// to resolve image sections with ref_kind:'pdf' into a renderer-facing shape
+// where `src` is a data:image/jpeg;base64,... URL. Refs that don't resolve
+// (file_index/page out of range, or no thumbs at all) are dropped silently.
 
-export function assembleCourse(brief, topicResults) {
+export function assembleCourse(brief, topicResults, opts = {}) {
+  const pdfThumbs = opts.pdfThumbs || [];
+  // Walk every topic's sections and resolve image sections in place.
+  const resolved = topicResults.map(r => {
+    if (!r.content) return r;
+    const sections = (r.content.sections || []).map(s => resolveImageSection(s, pdfThumbs)).filter(Boolean);
+    return { ...r, content: { ...r.content, sections } };
+  });
   return {
     config: defaultCourseConfig(brief),
     curriculum: buildCurriculum(brief),
-    modules: buildModuleMaps(brief, topicResults),
-    failedTopics: topicResults.filter(r => !r.content).map(r => `${r.moduleId}/${r.topicId}`)
+    modules: buildModuleMaps(brief, resolved),
+    failedTopics: resolved.filter(r => !r.content).map(r => `${r.moduleId}/${r.topicId}`)
   };
+}
+
+/** Resolve a single section; drop unresolvable image refs. */
+function resolveImageSection(section, pdfThumbs) {
+  if (!section || section.type !== 'image') return section;
+  // Already-resolved (assemble re-run scenario): pass through.
+  if (section.src && !section.ref_kind) return section;
+  // Web ref — copy url verbatim into src.
+  if (section.ref_kind === 'web' || (!section.ref_kind && section.url)) {
+    if (!section.url) return null; // malformed
+    return {
+      type: 'image',
+      src: section.url,
+      alt: section.alt || '',
+      caption: section.caption,
+      source_title: section.source_title,
+      source_url: section.source_url
+    };
+  }
+  // PDF ref — look up the page thumb data URL.
+  if (section.ref_kind === 'pdf') {
+    const file = pdfThumbs.find(p => p.file_index === section.file_index);
+    const thumb = file?.pageThumbs?.[section.page - 1];
+    if (!thumb) return null; // can't resolve — drop the section
+    return {
+      type: 'image',
+      src: thumb,
+      alt: section.alt || '',
+      caption: section.caption,
+      source_title: file?.name || section.source_title
+    };
+  }
+  // Unknown shape — drop rather than break the topic.
+  return null;
 }
 
 function defaultCourseConfig(brief) {

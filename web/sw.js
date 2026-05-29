@@ -114,7 +114,10 @@ async function resumeMissing(jobId, apiKey, brief, research, existingContent, mi
     }
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'assemble' });
-    const course = assembleCourse(brief, merged);
+    // Surgical retry has no PDF thumb cache (PDFs aren't persisted with the
+    // course in v1). Any pdf-ref image sections from rerun topics are dropped
+    // by assemble; web-ref images still resolve normally.
+    const course = assembleCourse(brief, merged, { pdfThumbs: [] });
     const donePayload = {
       type: 'gen-progress', jobId, stage: 'done',
       course, _brief: brief, _research: research
@@ -133,17 +136,29 @@ async function resumeMissing(jobId, apiKey, brief, research, existingContent, mi
 async function runGeneration(jobId, userBrief, apiKey) {
   const client = createClient({ apiKey });
   const tone = getTone(userBrief.tone || 'conversational');
+  // PDFs come in as [{ file_index, name, base64, pageThumbs }]. base64 →
+  // `document` content blocks for Stages 1/2 (the model reads pages natively).
+  // pageThumbs → resolved into image-section `src` data URLs by assemble.
+  // Keep two lightweight views so we don't pass heavy data URLs into prompts.
+  const pdfs = userBrief.pdfs || [];
+  const pdfsForApi = pdfs.map(p => ({
+    file_index: p.file_index, name: p.name, base64: p.base64,
+    pageCount: (p.pageThumbs || []).length
+  }));
+  const pdfThumbs = pdfs.map(p => ({
+    file_index: p.file_index, name: p.name, pageThumbs: p.pageThumbs || []
+  }));
 
   try {
     await broadcast({ type: 'gen-progress', jobId, stage: 'intake' });
-    const brief = await runIntake(client, userBrief);
+    const brief = await runIntake(client, userBrief, { pdfs: pdfsForApi });
     await broadcast({ type: 'gen-progress', jobId, stage: 'intake_done', brief });
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'research', moduleCount: brief.modules.length });
     const researchResults = await Promise.all(
       brief.modules.map(async (mod) => {
         try {
-          const bundle = await runResearch(client, brief, mod);
+          const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi });
           await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'ok' });
           return { mod, bundle };
         } catch (err) {
@@ -174,7 +189,7 @@ async function runGeneration(jobId, userBrief, apiKey) {
     }
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'assemble' });
-    const course = assembleCourse(brief, topicResults);
+    const course = assembleCourse(brief, topicResults, { pdfThumbs });
     // Persist enough state with the course to enable surgical retry of any
     // topics that failed (no re-paying for ones that worked).
     const researchByModule = Object.fromEntries(

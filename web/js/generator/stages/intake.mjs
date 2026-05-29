@@ -97,6 +97,12 @@ Critical rules:
 - Pick module colors from the provided palette. Use a DIFFERENT color for each module.
 - Use kebab-case ids ("pour-over-basics", not "Pour Over Basics").
 
+When the learner provides uploaded source material (PDFs, pasted text, URLs):
+- BLEND it with broader coverage of the topic. The course should feel like a course on the SUBJECT, with the uploads informing the angle — not a verbatim restatement of the uploads.
+- Mine the uploads for specific terminology, examples, and named concepts the learner clearly cares about, and weave them into the outline.
+- Add modules / topics the uploads don't cover when the subject demands it (e.g. if the upload is interview notes on five AI terms, the course should still cover the surrounding fundamentals a learner needs).
+- If the uploads are narrow (just a deck on one sub-topic), use them to anchor ONE module and build out the surrounding modules from general knowledge of the field.
+
 QUIZ PLANNING per topic — this is critical:
 - Every topic must include a quiz_plan: an array of 3-5 distinct quiz variant names.
 - Choose variants that genuinely fit the substance of that topic. Quiz variant fit options:
@@ -111,15 +117,21 @@ QUIZ PLANNING per topic — this is critical:
 
 Submit your answer by calling the submit_course_brief tool. Do not write a long preamble.`;
 
-export async function runIntake(client, userBrief) {
+export async function runIntake(client, userBrief, opts = {}) {
   const urls = (userBrief.source_urls || []).filter(Boolean);
-  const sourcesBlock = userBrief.source_text || urls.length
-    ? `\n\nSOURCE MATERIAL PROVIDED BY THE LEARNER — design the course PRIMARILY from this. Preserve the source's angle, terminology, and structure where useful. Use general knowledge only to fill obvious gaps.\n` +
+  const pdfs = (opts.pdfs || userBrief.pdfs || []).filter(p => p && p.base64);
+  const pdfBlock = pdfs.length
+    ? `\n--- Uploaded PDFs (read as document blocks above) ---\n` +
+      pdfs.map(p => `[file_index ${p.file_index}] ${p.name}${p.pageCount ? ` (${p.pageCount} pages)` : ''}`).join('\n') + '\n'
+    : '';
+  const sourcesBlock = userBrief.source_text || urls.length || pdfs.length
+    ? `\n\nSOURCE MATERIAL PROVIDED BY THE LEARNER — incorporate this material into the outline. Preserve its angle and terminology where useful, but BLEND it with broader coverage of the topic from your own knowledge. Do not let the course become a verbatim restatement of the uploaded sources — the learner wants a real course around the subject, with the uploads as anchors.\n` +
       (userBrief.source_text ? `\n--- Pasted text/notes ---\n${userBrief.source_text}\n` : '') +
-      (urls.length ? `\n--- Source URLs (Stage 2 research will fetch these) ---\n${urls.join('\n')}\n` : '')
+      (urls.length ? `\n--- Source URLs (Stage 2 research will fetch these) ---\n${urls.join('\n')}\n` : '') +
+      pdfBlock
     : '';
 
-  const userMsg = `Design a course based on this learner request:
+  const userText = `Design a course based on this learner request:
 
 Topic: ${userBrief.topic || '(derive from source material below)'}
 Goal: ${userBrief.goal || '(unspecified)'}
@@ -129,13 +141,23 @@ Time budget: ${userBrief.time_budget || '(unspecified)'}
 ${sourcesBlock}
 Decide the right scope (single_module / mini_course / full_course), break the subject into modules, and propose 4-6 topic titles per module. Submit via the tool.`;
 
+  // Anthropic accepts a content array per message: [{type:'document',...}, {type:'text',...}]
+  // PDFs go first so the model has them in context when it reads the prompt.
+  const content = [
+    ...pdfs.map(p => ({
+      type: 'document',
+      source: { type: 'base64', media_type: 'application/pdf', data: p.base64 }
+    })),
+    { type: 'text', text: userText }
+  ];
+
   const resp = await client.messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 4096,
     system: SYSTEM,
     tools: [briefTool],
     tool_choice: { type: 'tool', name: TOOL_NAME },
-    messages: [{ role: 'user', content: userMsg }]
+    messages: [{ role: 'user', content }]
   });
 
   const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);

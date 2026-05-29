@@ -137,6 +137,43 @@ const TakeawaySectionSchema = z.object({
   points: z.array(z.string()).min(3).max(6)
 });
 
+// Image section — embeds a diagram, chart, or screenshot inline in a topic.
+// After assemble, `src` is always a resolved URL (http(s):// or data:image/...).
+// Before assemble, Stage 3 may emit either:
+//   - { type:'image', ref_kind:'web', url, alt, caption, source_title?, source_url? }
+//   - { type:'image', ref_kind:'pdf', file_index, page, alt, caption }
+// assemble-browser.js resolves the pdf ref against the in-memory PDF thumb cache
+// and produces the renderer-facing shape below.
+const ImageSectionSchema = z.object({
+  type: z.literal('image'),
+  src: z.string().min(1),
+  alt: z.string().min(1),
+  caption: z.string().optional(),
+  source_title: z.string().optional(),
+  source_url: z.string().optional()
+});
+
+// Image refs as they come back from Stage 2 (research bundle) — discriminated
+// on `kind`. Stage 3 picks a subset of these and emits image sections that
+// either point to the URL directly (web) or carry the {file_index, page}
+// pointer that assemble will resolve to a data URL (pdf).
+const WebImageRefSchema = z.object({
+  kind: z.literal('web'),
+  url: z.string().url(),
+  alt: z.string().min(1),
+  caption: z.string().optional(),
+  source_title: z.string().optional(),
+  source_url: z.string().optional()
+});
+const PdfImageRefSchema = z.object({
+  kind: z.literal('pdf'),
+  file_index: z.number().int().min(0),
+  page: z.number().int().min(1),
+  alt: z.string().min(1),
+  caption: z.string().optional()
+});
+export const ImageRefSchema = z.discriminatedUnion('kind', [WebImageRefSchema, PdfImageRefSchema]);
+
 // Outer schema must be z.union (not discriminatedUnion) because QuizSectionSchema
 // is itself a discriminated union on `variant` — Zod can't nest those.
 export const SectionSchema = z.union([
@@ -144,7 +181,8 @@ export const SectionSchema = z.union([
   CalloutSectionSchema,
   QuizSectionSchema,
   ExerciseSectionSchema,
-  TakeawaySectionSchema
+  TakeawaySectionSchema,
+  ImageSectionSchema
 ]);
 
 export const FlashcardSchema = z.object({
@@ -157,7 +195,9 @@ export const TopicContentSchema = z.object({
   moduleId: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string().min(3),
   estimatedMinutes: z.number().int().min(5).max(60),
-  sections: z.array(SectionSchema).min(5).max(13),
+  // Bumped max to 15 to allow up to 2 image sections per topic on top of the
+  // existing concept/quiz/callout/takeaway mix.
+  sections: z.array(SectionSchema).min(5).max(15),
   flashcards: z.array(FlashcardSchema).min(3).max(8)
 });
 
@@ -184,11 +224,26 @@ const StringArrayField = z.union([
   z.null().transform(() => [])
 ]).default([]);
 
+// Images optional — Stage 2 returns an array of image refs (web URLs and/or
+// PDF page pointers) that Stage 3 may choose from. Permissive: drop malformed
+// entries individually rather than rejecting the whole bundle.
+const ImagesField = z.union([
+  z.array(z.any()).transform(arr =>
+    arr.map(item => {
+      const r = ImageRefSchema.safeParse(item);
+      return r.success ? r.data : null;
+    }).filter(Boolean)
+  ),
+  z.null().transform(() => []),
+  z.undefined().transform(() => [])
+]).default([]);
+
 export const ResearchBundleSchema = z.object({
   module_id: z.string(),
   key_concepts: z.array(z.string()).min(2),
   examples: z.array(z.string()).min(2),
   experts: ExpertField,
   misconceptions: StringArrayField,
-  sources: SourceField
+  sources: SourceField,
+  images: ImagesField
 });

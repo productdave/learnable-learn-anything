@@ -11,10 +11,20 @@ import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
 import { startGeneration as swStart } from './sw-client.js';
+import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
 
 let modal = null;
 let unsubJob = null;        // currently-rendered job's listener
 let renderedJobId = null;
+
+// PDF upload state — files the user has picked for the *current* draft.
+// Reset every time renderForm() runs. Kept module-scope (not in FormData)
+// because File objects don't serialize cleanly and we do the base64 +
+// page-thumb extraction asynchronously after pick.
+const PDF_MAX_COUNT = 5;
+const PDF_MAX_BYTES = 10 * 1024 * 1024;          // 10MB per file
+const PDF_THUMB_BUDGET_TOTAL = 3 * 1024 * 1024;  // 3MB total of page-thumb data URLs
+let pickedPdfs = [];  // [{ id, name, sizeBytes, status, base64?, pageThumbs?, warning? }]
 
 function ensureModal() {
   if (modal) return modal;
@@ -53,6 +63,7 @@ export function openIntakeForJob(jobId) {
 function renderForm() {
   if (unsubJob) { unsubJob(); unsubJob = null; }
   renderedJobId = null;
+  pickedPdfs = [];  // fresh draft = fresh file list
   modal.querySelector('.intake-card').innerHTML = `
     <button class="intake-close" type="button" aria-label="Close">
       <svg width="18" height="18"><use href="#icon-x"/></svg>
@@ -67,9 +78,23 @@ function renderForm() {
           placeholder="e.g. How to make pour-over coffee at home"></textarea>
       </label>
 
-      <details class="intake-section">
-        <summary>Add source material <span class="intake-summary-hint">(optional — paste text or URLs)</span></summary>
-        <p class="intake-help">If you've already got an article, transcript, or notes you want the course built from, paste them here. URLs (one per line) get fetched and used as primary sources.</p>
+      <details class="intake-section" open>
+        <summary>Add source material <span class="intake-summary-hint">(optional — PDFs, text, or URLs)</span></summary>
+        <p class="intake-help">Drop in your own notes, slide decks, or articles and the generator will blend them with broader web research. URLs get fetched and used as primary sources.</p>
+
+        <div class="intake-label">
+          <span class="intake-label-text">PDF files</span>
+          <div class="intake-dropzone" data-dropzone>
+            <input class="intake-file-input" type="file" accept="application/pdf" multiple data-file-input>
+            <div class="intake-dropzone-prompt">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="intake-dropzone-label">Drop PDFs here or <span class="intake-dropzone-link">click to choose</span></span>
+              <span class="intake-dropzone-hint">Up to ${PDF_MAX_COUNT} files · 10MB each · pages embed as diagrams in the course</span>
+            </div>
+          </div>
+          <div class="intake-file-list" data-file-list></div>
+        </div>
+
         <label class="intake-label">
           <span class="intake-label-text">Pasted text / notes</span>
           <textarea class="intake-input intake-textarea" name="source_text" rows="5"
@@ -124,6 +149,115 @@ function renderForm() {
   card.querySelector('.intake-close').addEventListener('click', close);
   card.querySelector('.intake-cancel').addEventListener('click', close);
   card.querySelector('.intake-form').addEventListener('submit', onSubmit);
+  wireDropzone(card);
+}
+
+// ---- PDF dropzone --------------------------------------------------
+
+function wireDropzone(card) {
+  const dz = card.querySelector('[data-dropzone]');
+  const input = card.querySelector('[data-file-input]');
+  if (!dz || !input) return;
+
+  // Click anywhere on the dropzone opens the picker (except on the input
+  // itself, which already triggers natively).
+  dz.addEventListener('click', (e) => {
+    if (e.target === input) return;
+    input.click();
+  });
+
+  input.addEventListener('change', () => {
+    if (input.files && input.files.length) ingestFiles(card, Array.from(input.files));
+    input.value = ''; // allow re-picking the same file later
+  });
+
+  ['dragenter', 'dragover'].forEach(ev =>
+    dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('is-dragging'); }));
+  ['dragleave', 'drop'].forEach(ev =>
+    dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('is-dragging'); }));
+  dz.addEventListener('drop', (e) => {
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+    if (files.length) ingestFiles(card, files);
+  });
+}
+
+async function ingestFiles(card, files) {
+  const errEl = card.querySelector('[data-error]');
+  function showErr(msg) {
+    if (!errEl) return;
+    errEl.style.display = '';
+    errEl.textContent = msg;
+  }
+  function clearErr() {
+    if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  }
+  clearErr();
+
+  for (const file of files) {
+    if (pickedPdfs.length >= PDF_MAX_COUNT) {
+      showErr(`Up to ${PDF_MAX_COUNT} PDFs per course. Remove one to add more.`);
+      break;
+    }
+    if (file.size > PDF_MAX_BYTES) {
+      showErr(`"${file.name}" is ${(file.size / 1_000_000).toFixed(1)}MB — over the 10MB limit.`);
+      continue;
+    }
+    const entry = {
+      id: 'pdf_' + Math.random().toString(36).slice(2, 9),
+      name: file.name,
+      sizeBytes: file.size,
+      status: 'processing'
+    };
+    pickedPdfs.push(entry);
+    renderFileList(card);
+    try {
+      // Per-file thumb byte budget is the remaining total budget.
+      const usedThumbBytes = pickedPdfs.reduce((n, p) => n + dataUrlsBytes(p.pageThumbs || []), 0);
+      const remaining = Math.max(200_000, PDF_THUMB_BUDGET_TOTAL - usedThumbBytes);
+      const [base64, thumbResult] = await Promise.all([
+        pdfToBase64(file),
+        extractPdfPageThumbs(file, { perFileBytes: remaining })
+      ]);
+      entry.base64 = base64;
+      entry.pageThumbs = thumbResult.pageThumbs;
+      entry.warning = thumbResult.warning;
+      entry.status = 'ready';
+    } catch (err) {
+      entry.status = 'error';
+      entry.error = err.message || String(err);
+    }
+    renderFileList(card);
+  }
+}
+
+function renderFileList(card) {
+  const list = card.querySelector('[data-file-list]');
+  if (!list) return;
+  if (!pickedPdfs.length) { list.innerHTML = ''; return; }
+  list.innerHTML = pickedPdfs.map(p => {
+    let meta;
+    if (p.status === 'processing') meta = `<span class="intake-file-status">Reading…</span>`;
+    else if (p.status === 'error')  meta = `<span class="intake-file-status intake-file-status--error">Error: ${escape(p.error || 'failed')}</span>`;
+    else meta = `<span class="intake-file-status">${p.pageThumbs?.length || 0} page${p.pageThumbs?.length === 1 ? '' : 's'} · ${(p.sizeBytes / 1_000_000).toFixed(1)}MB${p.warning ? ' · ' + escape(p.warning) : ''}</span>`;
+    return `
+      <div class="intake-file-chip" data-pdf-id="${p.id}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="intake-file-meta">
+          <div class="intake-file-name">${escape(p.name)}</div>
+          ${meta}
+        </div>
+        <button type="button" class="intake-file-remove" data-pdf-remove="${p.id}" aria-label="Remove ${escape(p.name)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+  list.querySelectorAll('[data-pdf-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.pdfRemove;
+      pickedPdfs = pickedPdfs.filter(p => p.id !== id);
+      renderFileList(card);
+    });
+  });
 }
 
 function onSubmit(e) {
@@ -139,11 +273,32 @@ function onSubmit(e) {
   const topic = (fd.get('topic') || '').trim();
   const sourceText = (fd.get('source_text') || '').trim();
   const sourceUrls = (fd.get('source_urls') || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const readyPdfs = pickedPdfs.filter(p => p.status === 'ready' && p.base64);
+  const stillProcessing = pickedPdfs.some(p => p.status === 'processing');
+  const failed = pickedPdfs.filter(p => p.status === 'error');
 
-  if (!topic && !sourceText && !sourceUrls.length) {
-    err.style.display = ''; err.textContent = 'Enter a topic, paste some text, or add a URL.';
+  if (stillProcessing) {
+    err.style.display = ''; err.textContent = 'Still reading PDFs — give it a second.';
     return;
   }
+  if (failed.length && !readyPdfs.length && !topic && !sourceText && !sourceUrls.length) {
+    err.style.display = ''; err.textContent = `Couldn't read ${failed.length} PDF${failed.length === 1 ? '' : 's'}. Try a different file or paste text instead.`;
+    return;
+  }
+  if (!topic && !sourceText && !sourceUrls.length && !readyPdfs.length) {
+    err.style.display = ''; err.textContent = 'Enter a topic, paste some text, add a URL, or upload a PDF.';
+    return;
+  }
+
+  // Slim shape sent to the SW + generator. base64 is heavy (used only for the
+  // Anthropic document blocks). pageThumbs are data URLs (used by the renderer
+  // for inline image sections that reference PDF pages).
+  const pdfs = readyPdfs.map((p, i) => ({
+    file_index: i,
+    name: p.name,
+    base64: p.base64,
+    pageThumbs: p.pageThumbs || []
+  }));
 
   const userBrief = {
     topic: topic || '(infer from source material)',
@@ -152,7 +307,8 @@ function onSubmit(e) {
     depth: fd.get('depth') || 'Solid foundation',
     tone: 'conversational',
     source_text: sourceText || undefined,
-    source_urls: sourceUrls
+    source_urls: sourceUrls,
+    pdfs   // [{ file_index, name, base64, pageThumbs }]
   };
 
   const job = createJob(userBrief);
