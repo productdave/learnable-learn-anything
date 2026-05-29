@@ -10,7 +10,7 @@ import { hasApiKey, setApiKey, getApiKey, generateCourse } from './generator/ind
 import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
-import { startGeneration as swStart } from './sw-client.js';
+import { startGeneration as swStart, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
 import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
 
 let modal = null;
@@ -400,9 +400,7 @@ function renderProgress(jobId) {
   const card = modal.querySelector('.intake-card');
   const job = getJob(jobId);
   card.innerHTML = progressHTML(job);
-  card.querySelector('.intake-close').addEventListener('click', close);
-  card.querySelector('[data-retry]')?.addEventListener('click', () => retry(jobId));
-  card.querySelector('[data-dismiss]')?.addEventListener('click', () => { removeJob(jobId); close(); });
+  wireProgressActions(card, jobId);
 
   if (unsubJob) unsubJob();
   unsubJob = onJobsChange(() => {
@@ -415,6 +413,11 @@ function renderProgress(jobId) {
 function progressHTML(job) {
   const stage = job?.stage || 'intake';
   const status = job?.status || 'running';
+  const isRunning = status === 'running';
+  const isCancelling = status === 'cancelling';
+  const isFailed = status === 'failed';
+  const isInterrupted = status === 'interrupted';
+  const canResume = hasCheckpoint(job);
   return `
     <button class="intake-close" type="button" aria-label="Close"
       title="Close (generation keeps running in the background)">
@@ -431,14 +434,24 @@ function progressHTML(job) {
     </div>
 
     <div class="intake-outline" data-outline>${outlineHTML(job)}</div>
-    <div class="intake-error" data-error style="${status === 'failed' || status === 'interrupted' ? '' : 'display:none'}">
-      ${status === 'failed' ? escape('Generation failed: ' + (job.error || 'unknown error')) : ''}
-      ${status === 'interrupted' ? 'Generation was interrupted (page refresh or closed tab). The in-flight calls were lost.' : ''}
+    <div class="intake-error" data-error style="${isFailed || isInterrupted ? '' : 'display:none'}">
+      ${isFailed ? escape('Generation failed: ' + (job.error || 'unknown error')) : ''}
+      ${isInterrupted ? (canResume ? 'Generation was interrupted. Your progress is saved — Resume to pick up where it stopped.' : 'Generation was interrupted (page refresh or closed tab). No progress was saved — Retry restarts from scratch.') : ''}
     </div>
-    ${status === 'failed' || status === 'interrupted' ? `
+    ${isRunning ? `
       <div class="intake-actions">
-        <button type="button" class="intake-cancel" data-dismiss>Dismiss</button>
-        <button type="button" class="intake-submit" data-retry>Retry</button>
+        <button type="button" class="intake-cancel intake-cancel--danger" data-cancel>Cancel generation</button>
+      </div>
+    ` : ''}
+    ${isCancelling ? `
+      <div class="intake-actions">
+        <span class="intake-cancel" aria-disabled="true">Draining…</span>
+      </div>
+    ` : ''}
+    ${isFailed || isInterrupted ? `
+      <div class="intake-actions">
+        <button type="button" class="intake-cancel intake-cancel--danger" data-delete>Delete</button>
+        <button type="button" class="intake-submit" data-${canResume ? 'resume' : 'retry'}>${canResume ? 'Resume' : 'Retry'}</button>
       </div>
     ` : ''}`;
 }
@@ -447,9 +460,30 @@ function updateProgressUI(card, job) {
   // Light-touch: re-render the whole inner sheet from the latest job state.
   // The modal stays open across re-renders; only its contents swap.
   card.innerHTML = progressHTML(job);
-  card.querySelector('.intake-close').addEventListener('click', close);
-  card.querySelector('[data-retry]')?.addEventListener('click', () => retry(job.id));
-  card.querySelector('[data-dismiss]')?.addEventListener('click', () => { removeJob(job.id); close(); });
+  wireProgressActions(card, job.id);
+}
+
+function wireProgressActions(card, jobId) {
+  card.querySelector('.intake-close')?.addEventListener('click', close);
+  card.querySelector('[data-retry]')?.addEventListener('click', () => retry(jobId));
+  card.querySelector('[data-resume]')?.addEventListener('click', async () => {
+    const ok = await resumeFromCheckpoint(jobId);
+    if (!ok) retry(jobId); // no checkpoint — fall back to full restart
+  });
+  card.querySelector('[data-cancel]')?.addEventListener('click', () => {
+    if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
+    cancelGeneration(jobId);
+    close();
+  });
+  card.querySelector('[data-delete]')?.addEventListener('click', () => {
+    if (!confirm('Delete this generation? Any partial work will be lost.')) return;
+    const j = getJob(jobId);
+    if (j?.savedCourseId) {
+      import('./user-courses.js').then(m => m.removeUserCourse(j.savedCourseId));
+    }
+    removeJob(jobId);
+    close();
+  });
 }
 
 function stageHTML(name, label, currentStage, status, dataAttr) {

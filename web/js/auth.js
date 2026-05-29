@@ -119,11 +119,66 @@ function openAccount() {
         `}
       </div>
 
+      <div class="auth-section">
+        <div class="auth-section-label">Migrate courses from another deployment</div>
+        <p class="auth-help">localStorage is per-domain, so courses you generated on an older Learnable URL won't appear here automatically. On the old site, open DevTools (⌥⌘I) → Console → run <code>copy(localStorage.getItem('learnable-user-courses'))</code>, then paste below.</p>
+        <textarea class="auth-input auth-mono" data-import-json rows="3" placeholder='{"course-id": { "config": {...}, ... }}' spellcheck="false" autocomplete="off"></textarea>
+        <div class="auth-keyform" style="margin-top: var(--space-2)">
+          <button class="auth-btn auth-btn--compact" data-import-run>Import courses</button>
+          <button class="auth-btn auth-btn--ghost auth-btn--compact" data-export-run>Copy my courses</button>
+        </div>
+        <div class="auth-msg" data-import-msg style="display:none; margin-top: var(--space-2)"></div>
+      </div>
+
       <button class="auth-btn auth-btn--ghost auth-signout">Sign out</button>`;
 
     body.querySelector('.auth-signout').addEventListener('click', async () => {
       await signOut();
       openAccount();
+    });
+    body.querySelector('[data-import-run]')?.addEventListener('click', async () => {
+      const ta = body.querySelector('[data-import-json]');
+      const msg = body.querySelector('[data-import-msg]');
+      const txt = (ta?.value || '').trim();
+      if (!txt) {
+        msg.style.display = ''; msg.className = 'auth-msg auth-msg--err';
+        msg.textContent = 'Paste the JSON you copied from the old app first.';
+        return;
+      }
+      const { importCoursesJson } = await import('./user-courses.js');
+      const result = importCoursesJson(txt);
+      msg.style.display = '';
+      if (result.imported && !result.errors.length) {
+        msg.className = 'auth-msg auth-msg--ok';
+        msg.textContent = `Imported ${result.imported} course${result.imported === 1 ? '' : 's'}. Close this dialog to see them.`;
+        if (ta) ta.value = '';
+        // Tell the library to refresh.
+        window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
+      } else if (result.imported) {
+        msg.className = 'auth-msg auth-msg--ok';
+        msg.textContent = `Imported ${result.imported}, skipped ${result.skipped}. ${result.errors.join(' ')}`;
+        if (ta) ta.value = '';
+        window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
+      } else {
+        msg.className = 'auth-msg auth-msg--err';
+        msg.textContent = result.errors.length ? result.errors.join(' ') : 'No courses found in that JSON.';
+      }
+    });
+    body.querySelector('[data-export-run]')?.addEventListener('click', async () => {
+      const { exportCoursesJson } = await import('./user-courses.js');
+      const json = exportCoursesJson();
+      const msg = body.querySelector('[data-import-msg]');
+      try {
+        await navigator.clipboard.writeText(json);
+        msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
+        msg.textContent = 'Copied your courses JSON to the clipboard.';
+      } catch {
+        // Clipboard API can fail without permission — fall back to dumping in the textarea.
+        const ta = body.querySelector('[data-import-json]');
+        if (ta) ta.value = json;
+        msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
+        msg.textContent = 'Clipboard blocked — JSON dropped into the textarea above for you to copy manually.';
+      }
     });
     body.querySelector('[data-action="edit-key"]')?.addEventListener('click', () => {
       setAnthropicKey('');

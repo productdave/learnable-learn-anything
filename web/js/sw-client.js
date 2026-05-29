@@ -9,8 +9,8 @@
 //   accurate as long as the SW is still working.)
 // - Exposes startGeneration() to fire a job off in the SW.
 
-import { updateJob, getJob, createJob } from './jobs.js';
-import { saveUserCourse, getUserCourse } from './user-courses.js';
+import { updateJob, getJob, createJob, removeJob } from './jobs.js';
+import { saveUserCourse, getUserCourse, removeUserCourse } from './user-courses.js';
 import { invalidateCourseCache } from './course-loader.js';
 
 let regPromise = null;
@@ -50,7 +50,38 @@ function installGlobalListener() {
     else if (msg.type === 'gen-error') {
       updateJob(msg.jobId, { status: 'failed', error: msg.error || 'unknown error' });
     }
+    else if (msg.type === 'gen-cancelled') {
+      // SW confirmed the cancel landed. Remove the job and clean up any
+      // partial saved course. (Cancel = wipe everything created so far.)
+      const j = getJob(msg.jobId);
+      if (j?.savedCourseId) {
+        try { import('./user-courses.js').then(m => m.removeUserCourse(j.savedCourseId)); } catch {}
+      }
+      removeJob(msg.jobId);
+    }
   });
+}
+
+/** Read the per-job checkpoint, mutate it, and write back via updateJob. */
+function mergeCheckpoint(jobId, patch) {
+  const j = getJob(jobId);
+  if (!j) return;
+  const cp = { ...(j.checkpoint || {}), ...patch };
+  updateJob(jobId, { checkpoint: cp });
+}
+function addCheckpointResearch(jobId, moduleId, bundle) {
+  const j = getJob(jobId);
+  if (!j) return;
+  const cp = j.checkpoint || {};
+  cp.researchByModule = { ...(cp.researchByModule || {}), [moduleId]: bundle };
+  updateJob(jobId, { checkpoint: cp });
+}
+function addCheckpointTopic(jobId, moduleId, topicId, content) {
+  const j = getJob(jobId);
+  if (!j) return;
+  const cp = j.checkpoint || {};
+  cp.topicsByKey = { ...(cp.topicsByKey || {}), [`${moduleId}/${topicId}`]: content };
+  updateJob(jobId, { checkpoint: cp });
 }
 
 function applyProgress(msg) {
@@ -66,6 +97,9 @@ function applyProgress(msg) {
     updateJob(id, { stage: 'intake', message: 'Designing the outline…' });
   } else if (msg.stage === 'intake_done') {
     const b = msg.brief;
+    // Persist the brief into the job's checkpoint so a future refresh can
+    // resume from here without re-running Stage 1.
+    mergeCheckpoint(id, { brief: b });
     updateJob(id, {
       stage: 'research',
       message: `Researching ${b.modules.length} module${b.modules.length === 1 ? '' : 's'} in parallel…`,
@@ -78,9 +112,14 @@ function applyProgress(msg) {
     });
   } else if (msg.stage === 'research') {
     updateJob(id, { stage: 'research' });
+  } else if (msg.stage === 'research_module') {
+    // Checkpoint successful bundles so resume can skip re-research per module.
+    if (msg.status === 'ok' && msg.bundle) addCheckpointResearch(id, msg.moduleId, msg.bundle);
   } else if (msg.stage === 'topics') {
-    updateJob(id, { stage: 'topics', message: 'Writing topic content…', topicsDone: 0, topicsTotal: msg.total || 0 });
+    updateJob(id, { stage: 'topics', message: 'Writing topic content…', topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
   } else if (msg.stage === 'topic_done' || msg.stage === 'topic_failed') {
+    // Checkpoint successful topics so resume only re-runs the missing ones.
+    if (msg.stage === 'topic_done' && msg.content) addCheckpointTopic(id, msg.moduleId, msg.topicId, msg.content);
     updateJob(id, { stage: 'topics', topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
   } else if (msg.stage === 'assemble') {
     updateJob(id, { stage: 'assemble', message: 'Finalising…' });
@@ -98,7 +137,9 @@ function applyProgress(msg) {
     if (failedCount === 0)            { status = 'completed'; message = 'Done!'; }
     else if (failedCount >= totalTopics) { status = 'failed';  message = `Generation failed — no topics produced (${failedCount} errors).`; }
     else                              { status = 'partial';  message = `${totalTopics - failedCount} of ${totalTopics} topics done — ${failedCount} failed.`; }
-    updateJob(id, { status, stage: 'done', message, savedCourseId: savedId, failedCount, totalTopics });
+    // Clear the checkpoint once the course is saved — the persisted course
+    // becomes the source of truth, and partial-state retry uses _brief/_research.
+    updateJob(id, { status, stage: 'done', message, savedCourseId: savedId, failedCount, totalTopics, checkpoint: null });
   }
 }
 
@@ -214,4 +255,68 @@ export async function startGeneration(jobId, userBrief, apiKey) {
 export function querySWForJob(jobId) {
   if (!supported() || !navigator.serviceWorker.controller) return;
   navigator.serviceWorker.controller.postMessage({ type: 'gen-query', jobId });
+}
+
+/**
+ * Cancel an in-flight generation. The SW stops dispatching new topics and
+ * broadcasts gen-cancelled when it finishes draining in-flight calls. We
+ * also mark the job locally so the dashboard updates immediately, and the
+ * gen-cancelled handler does the actual cleanup (remove job + partial course).
+ */
+export function cancelGeneration(jobId) {
+  updateJob(jobId, { status: 'cancelling', message: 'Cancelling — waiting for in-flight calls to drain…' });
+  if (supported() && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'gen-cancel', jobId });
+  }
+  // Safety: if the SW is already dead, no broadcast will land. Schedule a
+  // local cleanup after a short grace period.
+  setTimeout(() => {
+    const j = getJob(jobId);
+    if (!j || j.status !== 'cancelling') return;
+    if (j.savedCourseId) { try { removeUserCourse(j.savedCourseId); } catch {} }
+    removeJob(jobId);
+  }, 35_000);
+}
+
+/**
+ * Resume an interrupted / failed job from its checkpoint. Sends the saved
+ * brief + research bundles + topic content to the SW; the SW skips work that
+ * already finished and only runs what's missing. Saves the user from paying
+ * for stages that already succeeded.
+ *
+ * Returns true if a resume was dispatched, false if no checkpoint was
+ * available (caller can fall back to a full restart).
+ */
+export async function resumeFromCheckpoint(jobId) {
+  const job = getJob(jobId);
+  if (!job) return false;
+  if (!job.checkpoint || !job.checkpoint.brief) return false;
+  await ensureSW();
+  if (!navigator.serviceWorker.controller) {
+    await new Promise((resolve) => {
+      if (navigator.serviceWorker.controller) return resolve();
+      const t = setTimeout(resolve, 1500);
+      navigator.serviceWorker.addEventListener('controllerchange', () => { clearTimeout(t); resolve(); }, { once: true });
+    });
+  }
+  if (!navigator.serviceWorker.controller) {
+    updateJob(jobId, { status: 'failed', error: 'Service worker not available' });
+    return false;
+  }
+  const apiKey = localStorage.getItem('gametheory-api-key') || '';
+  // Reset job state to running; preserve checkpoint + outline so UI stays coherent.
+  updateJob(jobId, { status: 'running', error: null, message: 'Resuming from checkpoint…', stage: job.checkpoint.topicsByKey ? 'topics' : (job.checkpoint.researchByModule ? 'research' : 'intake') });
+  navigator.serviceWorker.controller.postMessage({
+    type: 'gen-resume-checkpoint',
+    jobId,
+    apiKey,
+    userBrief: job.brief,
+    checkpoint: job.checkpoint
+  });
+  return true;
+}
+
+/** Does this job have enough checkpoint data to skip work on retry? */
+export function hasCheckpoint(job) {
+  return !!(job?.checkpoint && job.checkpoint.brief);
 }

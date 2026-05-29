@@ -3114,18 +3114,8 @@
   .library-card-delete { opacity: 0.6; }
 }
 
-/* Settings gear button next to "+ Generate" — parent .library-cta already has gap */
-.library-settings-btn {
-  appearance: none; cursor: pointer;
-  width: 44px; height: 44px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 10px;
-  border: 1px solid var(--border-primary);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  transition: color .15s ease, border-color .15s ease;
-}
-.library-settings-btn:hover { color: var(--text-primary); border-color: var(--text-primary); }
+/* (Settings gear removed — identity now comes from the account button in the
+   header, driven by Supabase auth.) */
 
 /* === Account modal sections (Anthropic key, etc.) ====================== */
 .auth-section {
@@ -3207,6 +3197,31 @@
   border-color: var(--border-primary);
 }
 .library-card-action--ghost:hover { color: var(--text-primary); border-color: var(--text-primary); }
+.library-card-action--ghost[aria-disabled="true"] { opacity: .6; cursor: default; }
+
+.library-card-action--danger {
+  background: transparent;
+  color: var(--color-rose, #E11D48);
+  border-color: color-mix(in srgb, var(--color-rose, #E11D48) 30%, transparent);
+}
+.library-card-action--danger:hover {
+  background: var(--color-rose, #E11D48);
+  color: #fff;
+  border-color: var(--color-rose, #E11D48);
+  filter: none;
+}
+
+/* Progress modal "Cancel generation" — same danger treatment for the wider
+   intake-cancel pill so the destructive action reads clearly. */
+.intake-cancel--danger {
+  color: var(--color-rose, #E11D48);
+  border-color: color-mix(in srgb, var(--color-rose, #E11D48) 30%, transparent);
+}
+.intake-cancel--danger:hover {
+  color: #fff;
+  background: var(--color-rose, #E11D48);
+  border-color: var(--color-rose, #E11D48);
+}
 
 /* Emoji variant of the library card icon */
 .library-card-icon--emoji {

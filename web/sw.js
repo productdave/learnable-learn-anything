@@ -24,6 +24,13 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 // and so we can keep the SW alive via event.waitUntil for the duration.
 const active = new Map();
 
+// Cancellation flags. When the page posts `gen-cancel`, the jobId lands here
+// and the per-topic / per-module loops bail at the next dispatch boundary.
+// In-flight Anthropic calls finish naturally (≤30s); we don't AbortController
+// them so the model doesn't waste a partial completion.
+const cancelled = new Set();
+function isCancelled(id) { return cancelled.has(id); }
+
 // Recently-completed results, kept briefly so a page that missed the live
 // broadcast (e.g. reloaded during the last stage) can ask for the result.
 const recentResults = new Map();
@@ -48,10 +55,28 @@ self.addEventListener('message', (event) => {
 
   if (msg.type === 'gen-start') {
     if (active.has(msg.jobId)) return; // already running
-    const p = runGeneration(msg.jobId, msg.userBrief, msg.apiKey);
+    cancelled.delete(msg.jobId);
+    const p = runGeneration(msg.jobId, msg.userBrief, msg.apiKey, /*checkpoint*/ {});
     active.set(msg.jobId, p);
     // Keep the SW alive until the generation settles.
     if (event.waitUntil) event.waitUntil(p);
+  }
+
+  if (msg.type === 'gen-resume-checkpoint') {
+    // Resume an interrupted/failed generation from the page's checkpoint —
+    // skip Stage 1 / per-module Stage 2 / per-topic Stage 3 work that
+    // already finished. Same runner as gen-start, different starting state.
+    if (active.has(msg.jobId)) return;
+    cancelled.delete(msg.jobId);
+    const p = runGeneration(msg.jobId, msg.userBrief, msg.apiKey, msg.checkpoint || {});
+    active.set(msg.jobId, p);
+    if (event.waitUntil) event.waitUntil(p);
+  }
+
+  if (msg.type === 'gen-cancel') {
+    // Mark the job cancelled. The runner checks this between dispatches,
+    // drains in-flight calls, and broadcasts gen-cancelled when done.
+    cancelled.add(msg.jobId);
   }
 
   if (msg.type === 'gen-query') {
@@ -134,7 +159,21 @@ async function resumeMissing(jobId, apiKey, brief, research, existingContent, mi
   }
 }
 
-async function runGeneration(jobId, userBrief, apiKey) {
+/**
+ * Generation runner. Accepts an optional `checkpoint` of work already done
+ * so it can resume after a SW death / page refresh without re-billing for
+ * stages that already succeeded.
+ *
+ * checkpoint = {
+ *   brief?,                     // Stage 1 result, if reached
+ *   researchByModule?,          // { [moduleId]: bundle } — modules already researched
+ *   topicsByKey?                // { [`${modId}/${topicId}`]: content } — topics already written
+ * }
+ *
+ * Each broadcast carries the produced artifact (brief / bundle / topic
+ * content) so the page can persist it as a checkpoint for next time.
+ */
+async function runGeneration(jobId, userBrief, apiKey, checkpoint = {}) {
   const client = createClient({ apiKey });
   const tone = getTone(userBrief.tone || 'conversational');
   // PDFs come in as [{ file_index, name, base64, pageThumbs }]. base64 →
@@ -150,11 +189,17 @@ async function runGeneration(jobId, userBrief, apiKey) {
     file_index: p.file_index, name: p.name, pageThumbs: p.pageThumbs || []
   }));
 
+  // Bail helper — used at each safe boundary. Pushes a final gen-cancelled
+  // event and exits cleanly.
+  async function bailIfCancelled() {
+    if (!isCancelled(jobId)) return false;
+    await broadcast({ type: 'gen-cancelled', jobId });
+    return true;
+  }
+
   try {
-    // Stage 0 — fetch + Readability-extract any user-provided URLs. Failures
-    // soft-fail; successful extractions ride along on the brief so Stage 1
-    // designs from the real article text (and Stage 2 grounds research +
-    // image refs in them).
+    // Stage 0 — fetch + Readability-extract any user-provided URLs. Cheap +
+    // idempotent; we re-run on every resume rather than checkpointing them.
     const sourceUrls = (userBrief.source_urls || []).filter(Boolean);
     let extractedUrls = [];
     if (sourceUrls.length) {
@@ -164,17 +209,33 @@ async function runGeneration(jobId, userBrief, apiKey) {
       });
     }
     const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
+    if (await bailIfCancelled()) return;
 
-    await broadcast({ type: 'gen-progress', jobId, stage: 'intake' });
-    const brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
-    await broadcast({ type: 'gen-progress', jobId, stage: 'intake_done', brief });
+    // Stage 1 — use checkpoint if present, else run.
+    let brief = checkpoint.brief;
+    if (!brief) {
+      await broadcast({ type: 'gen-progress', jobId, stage: 'intake' });
+      brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
+      await broadcast({ type: 'gen-progress', jobId, stage: 'intake_done', brief });
+    } else {
+      // Resumed — still emit intake_done so the outline card renders.
+      await broadcast({ type: 'gen-progress', jobId, stage: 'intake_done', brief, resumed: true });
+    }
+    if (await bailIfCancelled()) return;
 
+    // Stage 2 — per-module, parallel. Skip modules with a checkpoint bundle.
     await broadcast({ type: 'gen-progress', jobId, stage: 'research', moduleCount: brief.modules.length });
+    const existingBundles = checkpoint.researchByModule || {};
     const researchResults = await Promise.all(
       brief.modules.map(async (mod) => {
+        if (existingBundles[mod.id]) {
+          await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'ok', bundle: existingBundles[mod.id], resumed: true });
+          return { mod, bundle: existingBundles[mod.id] };
+        }
+        if (isCancelled(jobId)) return { mod, bundle: null };
         try {
           const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi, extracted_urls: extractedUrls });
-          await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'ok' });
+          await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'ok', bundle });
           return { mod, bundle };
         } catch (err) {
           await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'fail', error: err.message });
@@ -182,17 +243,27 @@ async function runGeneration(jobId, userBrief, apiKey) {
         }
       })
     );
+    if (await bailIfCancelled()) return;
 
+    // Stage 3 — per-topic, parallel-per-module. Skip topics with checkpoint content.
     const total = brief.modules.reduce((n, m) => n + m.topics.length, 0);
-    let done = 0;
-    await broadcast({ type: 'gen-progress', jobId, stage: 'topics', total });
+    const existingTopics = checkpoint.topicsByKey || {};
+    let done = Object.keys(existingTopics).length;
+    await broadcast({ type: 'gen-progress', jobId, stage: 'topics', total, done });
     const topicResults = [];
     for (const { mod, bundle } of researchResults) {
+      if (isCancelled(jobId)) break;
       const chunk = await Promise.all(mod.topics.map(async (topic) => {
+        const key = `${mod.id}/${topic.id}`;
+        if (existingTopics[key]) {
+          await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId: mod.id, topicId: topic.id, done, total, content: existingTopics[key], resumed: true });
+          return { moduleId: mod.id, topicId: topic.id, content: existingTopics[key] };
+        }
+        if (isCancelled(jobId)) return { moduleId: mod.id, topicId: topic.id, content: null, error: 'cancelled' };
         try {
           const content = await runTopic(client, brief, mod, topic, bundle, tone);
           done++;
-          await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId: mod.id, topicId: topic.id, done, total });
+          await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId: mod.id, topicId: topic.id, done, total, content });
           return { moduleId: mod.id, topicId: topic.id, content };
         } catch (err) {
           done++;
@@ -202,6 +273,7 @@ async function runGeneration(jobId, userBrief, apiKey) {
       }));
       topicResults.push(...chunk);
     }
+    if (await bailIfCancelled()) return;
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'assemble' });
     const course = assembleCourse(brief, topicResults, { pdfThumbs });
@@ -222,5 +294,6 @@ async function runGeneration(jobId, userBrief, apiKey) {
     await broadcast(failPayload);
   } finally {
     active.delete(jobId);
+    cancelled.delete(jobId);
   }
 }

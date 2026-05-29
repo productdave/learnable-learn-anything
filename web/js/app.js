@@ -5,12 +5,12 @@ import { renderTopicView } from './components/topic-view.js?v=9';
 import { initSearch } from './search.js';
 import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
-import { initAuth } from './auth.js?v=3';
+import { initAuth, getUser, onUserChange } from './auth.js?v=4';
 import { initSync } from './sync.js?v=2';
 import { openIntake, openIntakeForJob } from './intake.js?v=11';
-import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
-import { ensureSW, resumeMissing } from './sw-client.js';
-import { getUserCourse, removeUserCourse, canDeleteCourse, getCurrentUserEmail, setCurrentUserEmail, isAdmin } from './user-courses.js';
+import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
+import { ensureSW, resumeMissing, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
+import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth } from './user-courses.js';
 
 async function loadIcons() {
   try {
@@ -337,9 +337,6 @@ async function renderLibrary(container) {
         <p class="library-subtitle">Generated interactive courses on whatever you want to learn — with quizzes, flashcards, and an AI tutor that knows the lesson.</p>
         <div class="library-cta">
           <button class="library-cta-btn" id="generate-btn">+ Generate a new course</button>
-          <button class="library-settings-btn" id="settings-btn" aria-label="Settings" title="${getCurrentUserEmail() ? `Signed in as ${escapeHTML(getCurrentUserEmail())}${isAdmin() ? ' (admin)' : ''}` : 'Set your email'}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          </button>
           <span class="library-cta-note">Runs in your browser with your Anthropic key. ~$1–3 of credit per course.</span>
         </div>
       </div>
@@ -355,7 +352,6 @@ async function renderLibrary(container) {
     </div>`;
 
   container.querySelector('#generate-btn')?.addEventListener('click', openIntake);
-  container.querySelector('#settings-btn')?.addEventListener('click', openSettings);
   wireLibraryCards(container);
   wireJobsSection(container);
 
@@ -385,15 +381,18 @@ function jobsSectionHTML(jobs) {
 }
 
 function jobCardHTML(j) {
+  const isCancelling = j.status === 'cancelling';
   const isFailed = j.status === 'failed';
   const isInterrupted = j.status === 'interrupted';
   const isPartial = j.status === 'partial';
   const isDone = j.status === 'completed';
+  const canResume = hasCheckpoint(j);
 
   // Subtitle / progress label by state.
   let stageLabel;
-  if (isFailed) stageLabel = 'Failed';
-  else if (isInterrupted) stageLabel = 'Interrupted (page refresh or closed tab)';
+  if (isCancelling) stageLabel = j.message || 'Cancelling…';
+  else if (isFailed) stageLabel = 'Failed';
+  else if (isInterrupted) stageLabel = canResume ? 'Interrupted — resume to keep your progress' : 'Interrupted (page refresh or closed tab)';
   else if (isPartial) stageLabel = `${(j.totalTopics || 0) - (j.failedCount || 0)} of ${j.totalTopics || 0} topics done · ${j.failedCount || 0} failed`;
   else if (isDone) stageLabel = 'Done';
   else stageLabel = ({ intake: 'Designing outline', research: 'Researching', topics: `Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`, assemble: 'Finalising', done: 'Ready' }[j.stage] || 'Working');
@@ -402,7 +401,7 @@ function jobCardHTML(j) {
     ? Math.round(((j.totalTopics - j.failedCount) / Math.max(1, j.totalTopics)) * 100)
     : (j.topicsTotal ? Math.min(100, Math.round(((j.topicsDone || 0) / j.topicsTotal) * 100)) : (j.stage === 'intake' ? 5 : j.stage === 'research' ? 20 : 60));
 
-  const accent = isFailed ? '#E11D48' : isPartial ? '#D97706' : '#4338CA';
+  const accent = isFailed ? '#E11D48' : (isPartial || isCancelling || isInterrupted) ? '#D97706' : '#4338CA';
   const iconPath =
     isFailed ? '<path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'
     : isInterrupted ? '<path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>'
@@ -410,17 +409,24 @@ function jobCardHTML(j) {
     : '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
 
   let actionsHTML;
-  if (isPartial && j.savedCourseId) {
+  if (isCancelling) {
+    actionsHTML = `<span class="library-card-action library-card-action--ghost" aria-disabled="true">Draining…</span>`;
+  } else if (isPartial && j.savedCourseId) {
     actionsHTML = `
       <button class="library-card-action" data-job-action="retry-missing" data-course-id="${j.savedCourseId}">Retry missing topics</button>
       <a class="library-card-action library-card-action--ghost" href="?course=${encodeURIComponent(j.savedCourseId)}">Open as-is</a>
-      <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`;
+      <button class="library-card-action library-card-action--danger" data-job-action="delete-partial" data-job-id="${j.id}" data-course-id="${j.savedCourseId}">Delete</button>`;
   } else if (isFailed || isInterrupted) {
+    const retryLabel = canResume ? 'Resume' : 'Retry';
+    const retryAction = canResume ? 'resume' : 'retry';
     actionsHTML = `
-      <button class="library-card-action" data-job-action="retry" data-job-id="${j.id}">Retry</button>
-      <button class="library-card-action library-card-action--ghost" data-job-action="dismiss" data-job-id="${j.id}">Dismiss</button>`;
+      <button class="library-card-action" data-job-action="${retryAction}" data-job-id="${j.id}">${retryLabel}</button>
+      <button class="library-card-action library-card-action--danger" data-job-action="delete-job" data-job-id="${j.id}">Delete</button>`;
   } else {
-    actionsHTML = `<button class="library-card-action" data-job-action="open" data-job-id="${j.id}">View progress</button>`;
+    // Running.
+    actionsHTML = `
+      <button class="library-card-action" data-job-action="open" data-job-id="${j.id}">View progress</button>
+      <button class="library-card-action library-card-action--danger" data-job-action="cancel" data-job-id="${j.id}">Cancel</button>`;
   }
 
   return `
@@ -445,6 +451,26 @@ function wireJobsSection(container) {
       const action = btn.dataset.jobAction;
       if (action === 'open' || action === 'retry') {
         openIntakeForJob(id);
+      } else if (action === 'resume') {
+        // Resume from checkpoint — skip Stage 1/2/3 work that already succeeded.
+        const ok = await resumeFromCheckpoint(id);
+        if (ok) openIntakeForJob(id);
+        else openIntakeForJob(id);  // fallback opens the modal, which can full-restart
+      } else if (action === 'cancel') {
+        if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
+        cancelGeneration(id);
+      } else if (action === 'delete-job') {
+        if (!confirm('Delete this generation? Any partial work is discarded — this cannot be undone.')) return;
+        const j = getJobLazy(id);
+        if (j?.savedCourseId) {
+          try { removeUserCourse(j.savedCourseId); invalidateCourseCache(j.savedCourseId); } catch {}
+        }
+        removeJob(id);
+      } else if (action === 'delete-partial') {
+        if (!confirm('Delete this partial course and its job? Any topics that did get generated will be lost.')) return;
+        const courseId = btn.dataset.courseId;
+        try { removeUserCourse(courseId); invalidateCourseCache(courseId); } catch {}
+        removeJob(id);
       } else if (action === 'dismiss') {
         removeJob(id);
       } else if (action === 'retry-missing') {
@@ -520,57 +546,16 @@ function wireLibraryCards(container) {
   });
 }
 
-// ---- Settings (identity) modal ------------------------------------
-
-let _settingsModal = null;
-function ensureSettingsModal() {
-  if (_settingsModal) return _settingsModal;
-  _settingsModal = document.createElement('div');
-  _settingsModal.id = 'settings-modal';
-  _settingsModal.className = 'intake-modal';
-  _settingsModal.style.display = 'none';
-  _settingsModal.innerHTML = `<div class="intake-card" role="dialog" aria-modal="true"></div>`;
-  document.body.appendChild(_settingsModal);
-  return _settingsModal;
-}
-
-function openSettings() {
-  const modal = ensureSettingsModal();
-  modal.style.display = '';
-  const current = getCurrentUserEmail();
-  const card = modal.querySelector('.intake-card');
-  card.innerHTML = `
-    <button class="intake-close" type="button" aria-label="Close">
-      <svg width="18" height="18"><use href="#icon-x"/></svg>
-    </button>
-    <h2 class="intake-title">Your identity</h2>
-    <p class="intake-sub">Used to mark you as the author of courses you generate, so you (and admins) can delete them later. Stored locally on this device — when Learnable adds sign-in, this becomes your account.</p>
-    <form class="intake-form" data-settings-form>
-      <label class="intake-label">
-        <span class="intake-label-text">Email</span>
-        <input class="intake-input intake-mono" type="email" name="email"
-          placeholder="you@example.com" value="${escapeHTML(current)}" autocomplete="email">
-      </label>
-      ${isAdmin(current) ? `<p class="intake-help" style="color: var(--primary)">You're recognised as an admin.</p>` : ''}
-      <div class="intake-actions">
-        <button type="button" class="intake-cancel" data-settings-cancel>Cancel</button>
-        <button type="submit" class="intake-submit">Save</button>
-      </div>
-    </form>`;
-  card.querySelector('.intake-close').addEventListener('click', closeSettings);
-  card.querySelector('[data-settings-cancel]').addEventListener('click', closeSettings);
-  card.querySelector('[data-settings-form]').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    setCurrentUserEmail(String(fd.get('email') || '').trim());
-    closeSettings();
-    // Re-render so the settings tooltip + delete affordances update.
+// Identity comes from Supabase auth — sync the email into user-courses.js so
+// canDeleteCourse / saveUserCourse stamping has it available synchronously
+// (called from the library card render path on every paint).
+function bridgeAuthIdentity() {
+  _setCurrentUserEmailFromAuth(getUser()?.email || '');
+  onUserChange((u) => {
+    _setCurrentUserEmailFromAuth(u?.email || '');
+    // Re-render the library so delete affordances update with the new identity.
     if (currentMode === 'library') renderForCurrentURL();
   });
-}
-
-function closeSettings() {
-  if (_settingsModal) _settingsModal.style.display = 'none';
 }
 
 function escapeHTML(s) {
@@ -683,7 +668,12 @@ async function init() {
   initTheme();
   markInterruptedIfStale();
   await initAuth();
+  bridgeAuthIdentity();
   initSync();
+  // Library re-render when courses get imported via the account modal.
+  window.addEventListener('learnable-courses-imported', () => {
+    if (currentMode === 'library') renderForCurrentURL();
+  });
   ensureSW(); // fire-and-forget — registers /sw.js + installs the global progress listener
 
   await renderForCurrentURL();
