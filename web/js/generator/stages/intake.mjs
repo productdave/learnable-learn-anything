@@ -120,6 +120,18 @@ Submit your answer by calling the submit_course_brief tool. Do not write a long 
 export async function runIntake(client, userBrief, opts = {}) {
   const urls = (userBrief.source_urls || []).filter(Boolean);
   const pdfs = (opts.pdfs || userBrief.pdfs || []).filter(p => p && p.base64);
+  const extracted = (userBrief.extracted_urls || []).filter(e => e && e.textContent);
+  // Limit per-URL text + total budget so we don't blow up the prompt with
+  // four 50KB articles. ~6k chars per URL, up to 4 URLs => ~24KB.
+  const extractedBlock = extracted.length
+    ? `\n--- Extracted contents of the source URLs above (already fetched) ---\n` +
+      extracted.map((e, i) => {
+        const head = `[URL ${i + 1}] ${e.url}\nTitle: ${e.title || '(unknown)'}` + (e.byline ? `\nBy: ${e.byline}` : '');
+        const body = `\n${e.textContent.slice(0, 6000)}` + (e.textContent.length > 6000 ? '\n…[truncated]' : '');
+        return `${head}\n${body}`;
+      }).join('\n\n---\n\n') + '\n'
+    : '';
+  const failedUrls = urls.filter(u => !extracted.some(e => e.url === u || e.url.startsWith(u) || u.startsWith(e.url)));
   const pdfBlock = pdfs.length
     ? `\n--- Uploaded PDFs (read as document blocks above) ---\n` +
       pdfs.map(p => `[file_index ${p.file_index}] ${p.name}${p.pageCount ? ` (${p.pageCount} pages)` : ''}`).join('\n') + '\n'
@@ -127,7 +139,8 @@ export async function runIntake(client, userBrief, opts = {}) {
   const sourcesBlock = userBrief.source_text || urls.length || pdfs.length
     ? `\n\nSOURCE MATERIAL PROVIDED BY THE LEARNER — incorporate this material into the outline. Preserve its angle and terminology where useful, but BLEND it with broader coverage of the topic from your own knowledge. Do not let the course become a verbatim restatement of the uploaded sources — the learner wants a real course around the subject, with the uploads as anchors.\n` +
       (userBrief.source_text ? `\n--- Pasted text/notes ---\n${userBrief.source_text}\n` : '') +
-      (urls.length ? `\n--- Source URLs (Stage 2 research will fetch these) ---\n${urls.join('\n')}\n` : '') +
+      (urls.length ? `\n--- Source URL list ---\n${urls.join('\n')}\n${failedUrls.length ? `(Note: ${failedUrls.length} of these couldn't be fetched and aren't quoted below.)\n` : ''}` : '') +
+      extractedBlock +
       pdfBlock
     : '';
 
@@ -180,6 +193,7 @@ Decide the right scope (single_module / mini_course / full_course), break the su
   // (Zod's strip behaviour drops unknown keys, so re-attach after parse).
   if (userBrief.source_text) parsed.source_text = userBrief.source_text;
   if (userBrief.source_urls && userBrief.source_urls.length) parsed.source_urls = userBrief.source_urls;
+  if (extracted.length) parsed.extracted_urls = extracted;
   return parsed;
 }
 

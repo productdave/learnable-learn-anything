@@ -55,7 +55,14 @@ function installGlobalListener() {
 
 function applyProgress(msg) {
   const id = msg.jobId;
-  if (msg.stage === 'intake') {
+  if (msg.stage === 'fetching_urls') {
+    const total = msg.total || 0;
+    const done = msg.done || 0;
+    const label = total > 1
+      ? `Reading ${done}/${total} source URL${done === 1 && total !== 1 ? '' : 's'}…`
+      : 'Reading source URL…';
+    updateJob(id, { stage: 'intake', message: label });
+  } else if (msg.stage === 'intake') {
     updateJob(id, { stage: 'intake', message: 'Designing the outline…' });
   } else if (msg.stage === 'intake_done') {
     const b = msg.brief;

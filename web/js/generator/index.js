@@ -24,6 +24,7 @@ import { runResearch } from './stages/research.mjs';
 import { runTopic } from './stages/topic.mjs';
 import { getTone } from './tones/conversational.mjs';
 import { assembleCourse } from './assemble-browser.js';
+import { fetchExtractedUrls } from './fetch-urls.js';
 
 // Reuse the AI tutor's existing key slot so users only have to enter their
 // Anthropic key once. (The slot name is legacy from the original app — kept
@@ -52,9 +53,18 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   const pdfsForApi = pdfs.map(p => ({ file_index: p.file_index, name: p.name, base64: p.base64, pageCount: (p.pageThumbs || []).length }));
   const pdfThumbs = pdfs.map(p => ({ file_index: p.file_index, name: p.name, pageThumbs: p.pageThumbs || [] }));
 
+  // --- Stage 0: fetch + extract any source URLs ----------------------
+  const sourceUrls = (userBrief.source_urls || []).filter(Boolean);
+  let extractedUrls = [];
+  if (sourceUrls.length) {
+    onProgress({ stage: 'fetching_urls', done: 0, total: sourceUrls.length });
+    extractedUrls = await fetchExtractedUrls(sourceUrls, (p) => onProgress({ stage: 'fetching_urls', ...p }));
+  }
+  const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
+
   // --- Stage 1: intake → course brief --------------------------------
   onProgress({ stage: 'intake' });
-  const brief = await runIntake(client, userBrief, { pdfs: pdfsForApi });
+  const brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
   onProgress({ stage: 'intake_done', brief });
 
   // --- Stage 2: research per module, in parallel ---------------------
@@ -62,7 +72,7 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   const researchResults = await Promise.all(
     brief.modules.map(async mod => {
       try {
-        const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi });
+        const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi, extracted_urls: extractedUrls });
         onProgress({ stage: 'research_module', moduleId: mod.id, status: 'ok' });
         return { mod, bundle };
       } catch (err) {

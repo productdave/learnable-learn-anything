@@ -113,15 +113,36 @@ Then submit a structured research bundle via the submit_research_bundle tool. Se
 export async function runResearch(client, courseBrief, mod, opts = {}) {
   const urls = (courseBrief.source_urls || []).filter(Boolean);
   const pdfs = (opts.pdfs || []).filter(p => p && p.base64);
+  // Stage 0 already fetched + Readability-extracted these. Use them as primary
+  // substance; tell the model NOT to re-fetch.
+  const extracted = (opts.extracted_urls || courseBrief.extracted_urls || []).filter(e => e && e.textContent);
+
+  const extractedBlock = extracted.length
+    ? `\n--- EXTRACTED URL CONTENTS (already fetched — do NOT re-fetch these) ---\n` +
+      extracted.map((e, i) => {
+        const imgList = (e.images || []).slice(0, 8);
+        const imgs = imgList.length
+          ? `\nAvailable images on this page (you may include any of these as image refs of kind:"web" — copy src verbatim):\n` +
+            imgList.map(img => `  - src=${img.src}${img.alt ? `  alt="${img.alt.slice(0, 80)}"` : ''}`).join('\n')
+          : '';
+        const head = `[URL ${i + 1}] ${e.url}\nTitle: ${e.title || '(unknown)'}` + (e.byline ? `\nBy: ${e.byline}` : '');
+        const body = `\n${e.textContent.slice(0, 10000)}` + (e.textContent.length > 10000 ? '\n…[truncated]' : '');
+        return `${head}${imgs}${body}`;
+      }).join('\n\n---\n\n') + '\n'
+    : '';
+  const failedUrls = urls.filter(u => !extracted.some(e => e.url === u || e.url.startsWith(u) || u.startsWith(e.url)));
+
   const pdfBlock = pdfs.length
     ? `\nUPLOADED PDFs you can see as documents in this message:\n` +
       pdfs.map(p => `- file_index ${p.file_index}: "${p.name}"${p.pageCount ? ` (${p.pageCount} pages)` : ''}`).join('\n') +
       `\nFor any page that is essentially a diagram, table, chart, or annotated screenshot worth showing inline, include an image ref of kind "pdf" with that file_index and 1-indexed page number.\n`
     : '';
-  const sourcesBlock = courseBrief.source_text || urls.length || pdfs.length
+
+  const sourcesBlock = courseBrief.source_text || urls.length || pdfs.length || extracted.length
     ? `\nPRIMARY SOURCES from the learner — ground your research in these first, before searching for general material:\n` +
-      (urls.length ? `URLs to fetch via web_search:\n${urls.join('\n')}\n` : '') +
       (courseBrief.source_text ? `\nPasted text/notes:\n${courseBrief.source_text}\n` : '') +
+      extractedBlock +
+      (failedUrls.length ? `\nThese URLs were submitted but could not be fetched (don't try web_search on them, just acknowledge the gap):\n${failedUrls.join('\n')}\n` : '') +
       pdfBlock
     : '';
 
@@ -136,7 +157,7 @@ Description: ${mod.description}
 Topics in this module:
 ${mod.topics.map(t => `- ${t.title}`).join('\n')}
 ${sourcesBlock}
-Search the web for canonical material on these topics${urls.length ? ' (start by fetching the URLs above)' : ''}. While you search, COLLECT 4-8 image refs (diagrams, charts, screenshots) — mixing canonical web images and any diagram-worthy pages from the uploaded PDFs above. Then submit your research bundle via the tool. The module_id you submit must be "${mod.id}".`;
+Use web_search for ADDITIONAL canonical material — broader context, comparisons, recent developments — NOT to re-fetch the URLs above (their text is already quoted). Also COLLECT 4-8 image refs total: prefer ones from the "Available images" lists already extracted from the user's URLs (kind:"web", copy src verbatim) and any diagram-worthy PDF pages (kind:"pdf"); then search the web for additional diagrams/charts/screenshots if more are needed. Submit the research bundle via the tool. The module_id you submit must be "${mod.id}".`;
 
   // Anthropic accepts a content array per message: [{type:'document',...}, {type:'text',...}]
   const initialContent = [

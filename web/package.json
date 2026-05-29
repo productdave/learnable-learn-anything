@@ -1,0 +1,14 @@
+{
+  "name": "learnable-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Static frontend + serverless functions for Learnable. Vercel deploy root.",
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "linkedom": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

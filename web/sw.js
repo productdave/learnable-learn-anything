@@ -13,6 +13,7 @@ import { runTopic } from './js/generator/stages/topic.mjs';
 import { getTone } from './js/generator/tones/conversational.mjs';
 import { createClient } from './js/generator/anthropic-fetch.js';
 import { assembleCourse } from './js/generator/assemble-browser.js';
+import { fetchExtractedUrls } from './js/generator/fetch-urls.js';
 
 // Activate immediately on install — we want new versions to take over so
 // updates ship without users having to close every tab.
@@ -150,15 +151,29 @@ async function runGeneration(jobId, userBrief, apiKey) {
   }));
 
   try {
+    // Stage 0 — fetch + Readability-extract any user-provided URLs. Failures
+    // soft-fail; successful extractions ride along on the brief so Stage 1
+    // designs from the real article text (and Stage 2 grounds research +
+    // image refs in them).
+    const sourceUrls = (userBrief.source_urls || []).filter(Boolean);
+    let extractedUrls = [];
+    if (sourceUrls.length) {
+      await broadcast({ type: 'gen-progress', jobId, stage: 'fetching_urls', done: 0, total: sourceUrls.length });
+      extractedUrls = await fetchExtractedUrls(sourceUrls, (p) => {
+        broadcast({ type: 'gen-progress', jobId, stage: 'fetching_urls', ...p });
+      });
+    }
+    const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
+
     await broadcast({ type: 'gen-progress', jobId, stage: 'intake' });
-    const brief = await runIntake(client, userBrief, { pdfs: pdfsForApi });
+    const brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
     await broadcast({ type: 'gen-progress', jobId, stage: 'intake_done', brief });
 
     await broadcast({ type: 'gen-progress', jobId, stage: 'research', moduleCount: brief.modules.length });
     const researchResults = await Promise.all(
       brief.modules.map(async (mod) => {
         try {
-          const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi });
+          const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi, extracted_urls: extractedUrls });
           await broadcast({ type: 'gen-progress', jobId, stage: 'research_module', moduleId: mod.id, status: 'ok' });
           return { mod, bundle };
         } catch (err) {

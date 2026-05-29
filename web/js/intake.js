@@ -337,7 +337,11 @@ async function startGeneration(jobId, userBrief) {
 
 function runInPageGeneration(jobId, userBrief) {
   generateCourse(userBrief, (p) => {
-    if (p.stage === 'intake')      updateJob(jobId, { stage: 'intake',  message: 'Designing the outline…' });
+    if (p.stage === 'fetching_urls') {
+      const t = p.total || 0, d = p.done || 0;
+      updateJob(jobId, { stage: 'intake', message: t > 1 ? `Reading ${d}/${t} source URLs…` : 'Reading source URL…' });
+    }
+    else if (p.stage === 'intake')      updateJob(jobId, { stage: 'intake',  message: 'Designing the outline…' });
     else if (p.stage === 'intake_done') {
       const b = p.brief;
       updateJob(jobId, {
