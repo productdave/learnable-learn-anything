@@ -3084,6 +3084,49 @@
   font-size: var(--font-xs); font-weight: 600;
 }
 
+/* Delete affordance — hover-revealed × button in the corner of a card you
+   own (or, as admin, any user-generated card). */
+.library-card-delete {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s ease, color .15s ease, border-color .15s ease, background .15s ease;
+  z-index: 2;
+}
+.library-card:hover .library-card-delete,
+.library-card-delete:focus-visible {
+  opacity: 1;
+}
+.library-card-delete:hover {
+  color: #fff;
+  background: var(--color-rose, #E11D48);
+  border-color: var(--color-rose, #E11D48);
+}
+/* On touch devices there's no hover — keep the × visible at lower opacity. */
+@media (hover: none) {
+  .library-card-delete { opacity: 0.6; }
+}
+
+/* Settings gear button next to "+ Generate" — parent .library-cta already has gap */
+.library-settings-btn {
+  appearance: none; cursor: pointer;
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  transition: color .15s ease, border-color .15s ease;
+}
+.library-settings-btn:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
 /* === Account modal sections (Anthropic key, etc.) ====================== */
 .auth-section {
   margin-top: var(--space-5);

@@ -80,7 +80,8 @@ export async function loadLibrary() {
       icon: c.curriculum.modules[0]?.icon || 'sparkle',
       emoji: c.config.emoji || deriveEmoji(c.config.title),  // Stage-1 emoji, with a keyword-derived fallback
       user: true,
-      partial: !!c.failedTopics?.length
+      partial: !!c.failedTopics?.length,
+      createdBy: c.createdBy || null  // pass author through so canDeleteCourse can run on the slim summary
     };
   });
   return { courses: [...user, ...bundled.courses] };

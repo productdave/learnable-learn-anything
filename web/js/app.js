@@ -1,5 +1,5 @@
 import { store } from './store.js';
-import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId } from './course-loader.js';
+import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js';
 import { renderSidebar } from './components/sidebar.js';
 import { renderTopicView } from './components/topic-view.js?v=9';
 import { initSearch } from './search.js';
@@ -10,7 +10,7 @@ import { initSync } from './sync.js?v=2';
 import { openIntake, openIntakeForJob } from './intake.js?v=11';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob } from './jobs.js';
 import { ensureSW, resumeMissing } from './sw-client.js';
-import { getUserCourse } from './user-courses.js';
+import { getUserCourse, removeUserCourse, canDeleteCourse, getCurrentUserEmail, setCurrentUserEmail, isAdmin } from './user-courses.js';
 
 async function loadIcons() {
   try {
@@ -337,6 +337,9 @@ async function renderLibrary(container) {
         <p class="library-subtitle">Generated interactive courses on whatever you want to learn — with quizzes, flashcards, and an AI tutor that knows the lesson.</p>
         <div class="library-cta">
           <button class="library-cta-btn" id="generate-btn">+ Generate a new course</button>
+          <button class="library-settings-btn" id="settings-btn" aria-label="Settings" title="${getCurrentUserEmail() ? `Signed in as ${escapeHTML(getCurrentUserEmail())}${isAdmin() ? ' (admin)' : ''}` : 'Set your email'}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
           <span class="library-cta-note">Runs in your browser with your Anthropic key. ~$1–3 of credit per course.</span>
         </div>
       </div>
@@ -346,25 +349,14 @@ async function renderLibrary(container) {
       <div class="library-section">
         <h2 class="library-section-title">Available courses</h2>
         <div class="library-grid">
-          ${visible.map(c => `
-            <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
-              ${c.emoji
-                ? `<div class="library-card-icon library-card-icon--emoji">${c.emoji}</div>`
-                : `<div class="library-card-icon"><svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg></div>`}
-              <h3 class="library-card-title">${c.title}</h3>
-              <p class="library-card-subtitle">${c.subtitle}</p>
-              <div class="library-card-meta">
-                ${c.modules} module${c.modules === 1 ? '' : 's'} · ${c.topics} topic${c.topics === 1 ? '' : 's'}
-                ${c.user ? ' · <span class="library-card-tag library-card-tag--mine">your course</span>' : ''}
-                ${c.partial ? ' · <span class="library-card-tag">partial</span>' : ''}
-              </div>
-            </a>
-          `).join('')}
+          ${visible.map(c => libraryCardHTML(c)).join('')}
         </div>
       </div>
     </div>`;
 
   container.querySelector('#generate-btn')?.addEventListener('click', openIntake);
+  container.querySelector('#settings-btn')?.addEventListener('click', openSettings);
+  wireLibraryCards(container);
   wireJobsSection(container);
 
   // Live updates: when a job's progress changes, re-render just the jobs section.
@@ -474,18 +466,111 @@ async function refreshLibraryCatalog(container) {
     const visible = lib.courses.filter(c => !c.internal);
     const grid = container.querySelector('.library-section:not(.library-section--jobs) .library-grid');
     if (!grid) return;
-    grid.innerHTML = visible.map(c => `
-      <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
-        <div class="library-card-icon"><svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg></div>
-        <h3 class="library-card-title">${c.title}</h3>
-        <p class="library-card-subtitle">${c.subtitle}</p>
-        <div class="library-card-meta">
-          ${c.modules} module${c.modules === 1 ? '' : 's'} · ${c.topics} topic${c.topics === 1 ? '' : 's'}
-          ${c.user ? ' · <span class="library-card-tag library-card-tag--mine">your course</span>' : ''}
-          ${c.partial ? ' · <span class="library-card-tag">partial</span>' : ''}
-        </div>
-      </a>`).join('');
+    grid.innerHTML = visible.map(c => libraryCardHTML(c)).join('');
+    wireLibraryCards(container);
   } catch {}
+}
+
+/** Single-source-of-truth card render — used by both the initial library
+ *  paint and the post-job-change refresh so the delete affordance is
+ *  consistent everywhere. */
+function libraryCardHTML(c) {
+  const iconHtml = c.emoji
+    ? `<div class="library-card-icon library-card-icon--emoji">${c.emoji}</div>`
+    : `<div class="library-card-icon"><svg width="28" height="28"><use href="#icon-${c.icon || 'target'}"/></svg></div>`;
+  const deleteBtn = canDeleteCourse(c)
+    ? `<button class="library-card-delete" data-delete-course="${escapeHTML(c.id)}" data-course-title="${escapeHTML(c.title)}" aria-label="Delete ${escapeHTML(c.title)}" title="Delete course">
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+       </button>`
+    : '';
+  return `
+    <a href="?course=${encodeURIComponent(c.id)}" class="library-card ${c.user ? 'library-card--user' : ''}" style="--accent: ${c.accentColor || '#4338CA'}">
+      ${deleteBtn}
+      ${iconHtml}
+      <h3 class="library-card-title">${escapeHTML(c.title)}</h3>
+      <p class="library-card-subtitle">${escapeHTML(c.subtitle || '')}</p>
+      <div class="library-card-meta">
+        ${c.modules} module${c.modules === 1 ? '' : 's'} · ${c.topics} topic${c.topics === 1 ? '' : 's'}
+        ${c.user ? ' · <span class="library-card-tag library-card-tag--mine">your course</span>' : ''}
+        ${c.partial ? ' · <span class="library-card-tag">partial</span>' : ''}
+      </div>
+    </a>`;
+}
+
+function wireLibraryCards(container) {
+  container.querySelectorAll('[data-delete-course]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      // The delete button lives inside an <a> wrapping the whole card; stop
+      // the click from navigating to the course.
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.dataset.deleteCourse;
+      const title = btn.dataset.courseTitle || 'this course';
+      if (!confirm(`Delete "${title}"? This removes the course from your library. This can't be undone.`)) return;
+      try {
+        removeUserCourse(id);
+        invalidateCourseCache(id);
+      } catch (err) {
+        alert(`Couldn't delete: ${err.message || err}`);
+        return;
+      }
+      // Re-render so the card vanishes immediately.
+      refreshLibraryCatalog(container);
+    });
+  });
+}
+
+// ---- Settings (identity) modal ------------------------------------
+
+let _settingsModal = null;
+function ensureSettingsModal() {
+  if (_settingsModal) return _settingsModal;
+  _settingsModal = document.createElement('div');
+  _settingsModal.id = 'settings-modal';
+  _settingsModal.className = 'intake-modal';
+  _settingsModal.style.display = 'none';
+  _settingsModal.innerHTML = `<div class="intake-card" role="dialog" aria-modal="true"></div>`;
+  document.body.appendChild(_settingsModal);
+  return _settingsModal;
+}
+
+function openSettings() {
+  const modal = ensureSettingsModal();
+  modal.style.display = '';
+  const current = getCurrentUserEmail();
+  const card = modal.querySelector('.intake-card');
+  card.innerHTML = `
+    <button class="intake-close" type="button" aria-label="Close">
+      <svg width="18" height="18"><use href="#icon-x"/></svg>
+    </button>
+    <h2 class="intake-title">Your identity</h2>
+    <p class="intake-sub">Used to mark you as the author of courses you generate, so you (and admins) can delete them later. Stored locally on this device — when Learnable adds sign-in, this becomes your account.</p>
+    <form class="intake-form" data-settings-form>
+      <label class="intake-label">
+        <span class="intake-label-text">Email</span>
+        <input class="intake-input intake-mono" type="email" name="email"
+          placeholder="you@example.com" value="${escapeHTML(current)}" autocomplete="email">
+      </label>
+      ${isAdmin(current) ? `<p class="intake-help" style="color: var(--primary)">You're recognised as an admin.</p>` : ''}
+      <div class="intake-actions">
+        <button type="button" class="intake-cancel" data-settings-cancel>Cancel</button>
+        <button type="submit" class="intake-submit">Save</button>
+      </div>
+    </form>`;
+  card.querySelector('.intake-close').addEventListener('click', closeSettings);
+  card.querySelector('[data-settings-cancel]').addEventListener('click', closeSettings);
+  card.querySelector('[data-settings-form]').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    setCurrentUserEmail(String(fd.get('email') || '').trim());
+    closeSettings();
+    // Re-render so the settings tooltip + delete affordances update.
+    if (currentMode === 'library') renderForCurrentURL();
+  });
+}
+
+function closeSettings() {
+  if (_settingsModal) _settingsModal.style.display = 'none';
 }
 
 function escapeHTML(s) {

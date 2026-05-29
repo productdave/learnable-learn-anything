@@ -106,6 +106,7 @@
 
 .library-card {
   --accent: #4338CA;
+  position: relative;            /* anchor for the absolute-positioned delete button */
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
