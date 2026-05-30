@@ -3039,6 +3039,50 @@
 .topic-image figcaption a:hover { text-decoration: underline; }
 .topic-image-source { color: var(--text-tertiary); font-size: var(--font-xs); }
 
+/* Progress view — bar + elapsed time */
+.intake-progress {
+  margin: var(--space-3) 0 var(--space-2);
+}
+.intake-progress-meta {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: var(--space-2);
+}
+.intake-progress-pct {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.intake-progress-elapsed {
+  font-size: var(--font-xs);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.intake-progress-bar {
+  height: 8px; border-radius: 999px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+.intake-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary, #4338CA), #6366F1);
+  border-radius: 999px;
+  transition: width .35s ease;
+  position: relative;
+  overflow: hidden;
+}
+.intake-progress-fill::after {
+  /* Subtle moving shimmer so the user sees the bar is "alive" between events. */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  animation: intake-shimmer 1.6s linear infinite;
+}
+@keyframes intake-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 /* Progress view */
 .intake-stages {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2);

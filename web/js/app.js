@@ -7,7 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth, getUser, onUserChange } from './auth.js?v=4';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=11';
+import { openIntake, openIntakeForJob } from './intake.js?v=12';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';

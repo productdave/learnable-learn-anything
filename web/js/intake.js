@@ -40,6 +40,7 @@ function ensureModal() {
 
 function close() {
   if (unsubJob) { unsubJob(); unsubJob = null; }
+  stopElapsedTimer();
   renderedJobId = null;
   if (modal) modal.style.display = 'none';
 }
@@ -395,12 +396,28 @@ const autoJumpedFor = new Set();
 
 // ---- progress view (reads live from the job in localStorage) -----
 
+let elapsedTimer = null;
+function startElapsedTimer(jobId) {
+  stopElapsedTimer();
+  elapsedTimer = setInterval(() => {
+    if (!modal || modal.style.display === 'none') { stopElapsedTimer(); return; }
+    const job = getJob(jobId);
+    if (!job || (job.status !== 'running' && job.status !== 'cancelling')) { stopElapsedTimer(); return; }
+    const el = modal.querySelector('[data-elapsed]');
+    if (el && job.startedAt) el.textContent = formatElapsed(Date.now() - job.startedAt) + ' elapsed';
+  }, 1000);
+}
+function stopElapsedTimer() {
+  if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+}
+
 function renderProgress(jobId) {
   renderedJobId = jobId;
   const card = modal.querySelector('.intake-card');
   const job = getJob(jobId);
   card.innerHTML = progressHTML(job);
   wireProgressActions(card, jobId);
+  startElapsedTimer(jobId);
 
   if (unsubJob) unsubJob();
   unsubJob = onJobsChange(() => {
@@ -418,6 +435,8 @@ function progressHTML(job) {
   const isFailed = status === 'failed';
   const isInterrupted = status === 'interrupted';
   const canResume = hasCheckpoint(job);
+  const pct = computeProgressPct(job);
+  const elapsed = job?.startedAt ? formatElapsed(Date.now() - job.startedAt) : '';
   return `
     <button class="intake-close" type="button" aria-label="Close"
       title="Close (generation keeps running in the background)">
@@ -425,6 +444,15 @@ function progressHTML(job) {
     </button>
     <h2 class="intake-title" data-job-title>${escape(job?.title || 'Generating your course…')}</h2>
     <p class="intake-sub" data-msg>${escape(job?.message || '')}</p>
+
+    ${isRunning || isCancelling ? `
+      <div class="intake-progress">
+        <div class="intake-progress-meta">
+          <span class="intake-progress-pct" data-pct>${pct}%</span>
+          ${elapsed ? `<span class="intake-progress-elapsed" data-elapsed>${escape(elapsed)} elapsed</span>` : ''}
+        </div>
+        <div class="intake-progress-bar"><div class="intake-progress-fill" style="width: ${pct}%"></div></div>
+      </div>` : ''}
 
     <div class="intake-stages">
       ${stageHTML('intake', 'Outline', stage, status)}
@@ -524,4 +552,40 @@ function retry(jobId) {
 
 function escape(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/** Overall progress as 0..100 based on which stages have happened.
+ *  Stages get rough weights, then within Stage 3 we lerp with topics done.
+ *  Stage budget: fetch 0–5 · intake 5–15 · research 15–35 · topics 35–95 · assemble 95–100. */
+function computeProgressPct(job) {
+  if (!job) return 0;
+  if (job.status === 'completed') return 100;
+  if (job.status === 'failed' || job.status === 'interrupted') return 0;
+  const stage = job.stage || 'intake';
+  const cp = job.checkpoint || {};
+  const modulesTotal = job.outline?.modules?.length || cp.brief?.modules?.length || 0;
+  const modulesDone  = Object.keys(cp.researchByModule || {}).length;
+  const topicsDone   = job.topicsDone || 0;
+  const topicsTotal  = job.topicsTotal || (cp.brief?.modules || []).reduce((n, m) => n + (m.topics?.length || 0), 0) || 0;
+
+  if (stage === 'intake')   return cp.brief ? 15 : 10;
+  if (stage === 'research') {
+    if (!modulesTotal) return 20;
+    return Math.round(15 + 20 * Math.min(1, modulesDone / modulesTotal));
+  }
+  if (stage === 'topics') {
+    if (!topicsTotal) return 35;
+    return Math.round(35 + 60 * Math.min(1, topicsDone / topicsTotal));
+  }
+  if (stage === 'assemble') return 97;
+  if (stage === 'done')     return 100;
+  return 5;
+}
+
+function formatElapsed(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '';
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60), rs = s % 60;
+  return `${m}m ${rs.toString().padStart(2, '0')}s`;
 }

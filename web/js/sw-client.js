@@ -115,12 +115,38 @@ function applyProgress(msg) {
   } else if (msg.stage === 'research_module') {
     // Checkpoint successful bundles so resume can skip re-research per module.
     if (msg.status === 'ok' && msg.bundle) addCheckpointResearch(id, msg.moduleId, msg.bundle);
+    // Surface a granular research message based on how many modules are done.
+    const j = getJob(id);
+    if (j) {
+      const modulesDone = Object.keys(j.checkpoint?.researchByModule || {}).length;
+      const modulesTotal = j.outline?.modules?.length || j.checkpoint?.brief?.modules?.length || 0;
+      const moduleTitle = (j.checkpoint?.brief?.modules || []).find(m => m.id === msg.moduleId)?.title;
+      const label = msg.status === 'ok'
+        ? `Researched ${modulesDone}/${modulesTotal}${moduleTitle ? ` · just finished “${moduleTitle}”` : ''}`
+        : `Research warning${moduleTitle ? ` for “${moduleTitle}”` : ''} — continuing without it`;
+      updateJob(id, { stage: 'research', message: label });
+    }
   } else if (msg.stage === 'topics') {
     updateJob(id, { stage: 'topics', message: 'Writing topic content…', topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
   } else if (msg.stage === 'topic_done' || msg.stage === 'topic_failed') {
     // Checkpoint successful topics so resume only re-runs the missing ones.
     if (msg.stage === 'topic_done' && msg.content) addCheckpointTopic(id, msg.moduleId, msg.topicId, msg.content);
-    updateJob(id, { stage: 'topics', topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
+    // Resolve a human title for the topic so the modal can say what just finished.
+    const j = getJob(id);
+    let topicTitle = msg.topicId;
+    if (j?.checkpoint?.brief?.modules) {
+      const mod = j.checkpoint.brief.modules.find(m => m.id === msg.moduleId);
+      const t = mod?.topics?.find(t => t.id === msg.topicId);
+      if (t?.title) topicTitle = t.title;
+    }
+    const verb = msg.stage === 'topic_done' ? 'Wrote' : 'Skipped (error)';
+    updateJob(id, {
+      stage: 'topics',
+      topicsDone: msg.done || 0,
+      topicsTotal: msg.total || 0,
+      message: `${verb} “${topicTitle}” — ${msg.done || 0}/${msg.total || 0} topics done`,
+      lastTopicTitle: topicTitle
+    });
   } else if (msg.stage === 'assemble') {
     updateJob(id, { stage: 'assemble', message: 'Finalising…' });
   } else if (msg.stage === 'done') {
