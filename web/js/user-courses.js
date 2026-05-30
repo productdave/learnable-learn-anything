@@ -59,6 +59,25 @@ function writeAll(obj) {
   catch { return false; }
 }
 
+// Listeners (course-sync subscribes; library may too in future). Internal.
+const _listeners = new Set();
+function _emit(evt) { _listeners.forEach(fn => { try { fn(evt); } catch {} }); }
+export function _onCoursesChanged(fn) { _listeners.add(fn); return () => _listeners.delete(fn); }
+/** Read the full local courses map (for sync to compute diffs). Internal. */
+export function _readAllCourses() { return readAll(); }
+/** Install a course row from a remote pull without re-emitting (avoids echo). */
+export function _installCourseFromRemote(id, course) {
+  const all = readAll();
+  all[id] = { ...course, config: { ...(course.config || {}), id } };
+  writeAll(all);
+}
+/** Delete locally without firing the "removed" event (cloud→local). */
+export function _removeCourseLocalSilent(id) {
+  const all = readAll();
+  delete all[id];
+  writeAll(all);
+}
+
 export function listUserCourses() {
   return Object.values(readAll()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
@@ -85,10 +104,12 @@ export function saveUserCourse(course, extra = {}) {
       _brief: extra._brief || prior._brief,
       _research: extra._research || prior._research,
       createdAt: prior.createdAt,
-      createdBy: prior.createdBy || extra.createdBy || getCurrentUserEmail() || undefined
+      createdBy: prior.createdBy || extra.createdBy || getCurrentUserEmail() || undefined,
+      updatedAt: Date.now()
     };
     all[id] = course;
     writeAll(all);
+    _emit({ type: 'saved', id, course });
     return id;
   }
 
@@ -107,10 +128,12 @@ export function saveUserCourse(course, extra = {}) {
     _brief: extra._brief,
     _research: extra._research,
     createdAt: course.createdAt || Date.now(),
-    createdBy: course.createdBy || author
+    createdBy: course.createdBy || author,
+    updatedAt: Date.now()
   };
   all[id] = course;
   writeAll(all);
+  _emit({ type: 'saved', id, course });
   return id;
 }
 
@@ -118,6 +141,7 @@ export function removeUserCourse(id) {
   const all = readAll();
   delete all[id];
   writeAll(all);
+  _emit({ type: 'removed', id });
 }
 
 // --- Cross-deployment migration ---------------------------------------
@@ -165,6 +189,7 @@ export function importCoursesJson(text) {
   const reserved = new Set(['game-theory', 'pour-over-coffee', 'ai-annotation-platform-pm', 'quiz-demo']);
   let imported = 0, skipped = 0;
   const errors = [];
+  const savedIds = [];
 
   for (const [origId, course] of entries) {
     if (!course || !course.config || !course.curriculum) {
@@ -184,11 +209,19 @@ export function importCoursesJson(text) {
     all[id] = {
       ...course,
       config: { ...course.config, id },
-      createdAt: course.createdAt || Date.now()
-      // createdBy is preserved as-is so the original author still owns it
+      createdAt: course.createdAt || Date.now(),
+      // Bump updatedAt so cloud sync recognises this as fresh material to upload.
+      updatedAt: Date.now()
+      // createdBy is preserved as-is so the original author still owns it.
+      // _syncedAt is intentionally cleared so this device pushes it up.
     };
+    delete all[id]._syncedAt;
+    savedIds.push(id);
     imported++;
   }
   writeAll(all);
+  // Fire a "saved" event per imported course so course-sync schedules an
+  // upload to the cloud for each.
+  for (const id of savedIds) _emit({ type: 'saved', id, course: all[id] });
   return { imported, skipped, errors };
 }

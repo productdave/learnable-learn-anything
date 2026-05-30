@@ -10,7 +10,8 @@ import { initSync } from './sync.js?v=2';
 import { openIntake, openIntakeForJob } from './intake.js?v=11';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
-import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth } from './user-courses.js';
+import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';
+import { initCourseSync, syncCoursesNow } from './course-sync.js?v=1';
 
 async function loadIcons() {
   try {
@@ -670,9 +671,17 @@ async function init() {
   await initAuth();
   bridgeAuthIdentity();
   initSync();
+  initCourseSync();
+  // When a cloud pull installs / removes courses, refresh the library so the
+  // new cards show up without a page reload.
+  _onCoursesChanged(() => {
+    if (currentMode === 'library') refreshLibraryCatalog(document.getElementById('content'));
+  });
   // Library re-render when courses get imported via the account modal.
+  // After import, also kick a sync so the freshly-pasted courses land in cloud.
   window.addEventListener('learnable-courses-imported', () => {
     if (currentMode === 'library') renderForCurrentURL();
+    syncCoursesNow().catch(() => {});
   });
   ensureSW(); // fire-and-forget — registers /sw.js + installs the global progress listener
 
