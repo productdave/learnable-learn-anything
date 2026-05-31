@@ -118,11 +118,18 @@ async function resumeMissing(jobId, apiKey, brief, research, existingContent, mi
       try {
         const content = await runTopic(client, brief, mod, topic, bundle, tone);
         done++;
-        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId, topicId, done, total });
+        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_done', moduleId, topicId, done, total, content });
         fresh.push({ moduleId, topicId, content });
       } catch (err) {
         done++;
-        await broadcast({ type: 'gen-progress', jobId, stage: 'topic_failed', moduleId, topicId, done, total, error: err.message });
+        // eslint-disable-next-line no-console
+        console.error(`[sw:resume] topic_failed ${moduleId}/${topicId}:`, err);
+        await broadcast({
+          type: 'gen-progress', jobId, stage: 'topic_failed', moduleId, topicId, done, total,
+          error: err.message,
+          errorKind: err.kind || null,
+          errorAttempts: err.attempts || null
+        });
         fresh.push({ moduleId, topicId, content: null, error: err.message });
       }
     }
@@ -267,7 +274,17 @@ async function runGeneration(jobId, userBrief, apiKey, checkpoint = {}) {
           return { moduleId: mod.id, topicId: topic.id, content };
         } catch (err) {
           done++;
-          await broadcast({ type: 'gen-progress', jobId, stage: 'topic_failed', moduleId: mod.id, topicId: topic.id, done, total, error: err.message });
+          // SW console log so DevTools (Application → Service Workers → Inspect)
+          // shows the full Error object with stack and attached fields.
+          // eslint-disable-next-line no-console
+          console.error(`[sw] topic_failed ${mod.id}/${topic.id}:`, err);
+          await broadcast({
+            type: 'gen-progress', jobId, stage: 'topic_failed',
+            moduleId: mod.id, topicId: topic.id, done, total,
+            error: err.message,
+            errorKind: err.kind || null,         // 'api' | 'schema' | 'tool' | 'unknown'
+            errorAttempts: err.attempts || null  // [{ status?, type?, issues?, message }, ...]
+          });
           return { moduleId: mod.id, topicId: topic.id, content: null, error: err.message };
         }
       }));

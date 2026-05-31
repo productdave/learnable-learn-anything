@@ -140,13 +140,32 @@ function applyProgress(msg) {
       if (t?.title) topicTitle = t.title;
     }
     const verb = msg.stage === 'topic_done' ? 'Wrote' : 'Skipped (error)';
-    updateJob(id, {
+    const patch = {
       stage: 'topics',
       topicsDone: msg.done || 0,
       topicsTotal: msg.total || 0,
       message: `${verb} “${topicTitle}” — ${msg.done || 0}/${msg.total || 0} topics done`,
       lastTopicTitle: topicTitle
-    });
+    };
+    // On failure: append a structured entry to job.failures so the modal +
+    // dashboard card can surface every error with full detail. Also page-side
+    // console so it shows up in DevTools without opening the SW inspector.
+    if (msg.stage === 'topic_failed') {
+      const prior = (j?.failures || []).slice();
+      prior.push({
+        moduleId: msg.moduleId,
+        topicId: msg.topicId,
+        topicTitle,
+        error: msg.error || 'unknown',
+        kind: msg.errorKind || null,
+        attempts: msg.errorAttempts || null,
+        at: Date.now()
+      });
+      patch.failures = prior;
+      // eslint-disable-next-line no-console
+      console.warn(`[learnable] topic failed: ${topicTitle} (${msg.moduleId}/${msg.topicId}) →`, msg.errorAttempts || msg.error);
+    }
+    updateJob(id, patch);
   } else if (msg.stage === 'assemble') {
     updateJob(id, { stage: 'assemble', message: 'Finalising…' });
   } else if (msg.stage === 'done') {

@@ -3039,6 +3039,75 @@
 .topic-image figcaption a:hover { text-decoration: underline; }
 .topic-image-source { color: var(--text-tertiary); font-size: var(--font-xs); }
 
+/* Failure log — collapsible "N topics failed" with per-attempt detail */
+.intake-failures {
+  margin-top: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-rose, #E11D48) 25%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-rose, #E11D48) 6%, transparent);
+  overflow: hidden;
+}
+.intake-failures > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
+  display: flex; align-items: center; gap: var(--space-2);
+  color: var(--color-rose, #E11D48);
+  font-weight: 600;
+  font-size: var(--font-sm);
+}
+.intake-failures > summary::-webkit-details-marker { display: none; }
+.intake-failures > summary::marker { content: ''; }
+.intake-failures > summary:hover { background: color-mix(in srgb, var(--color-rose, #E11D48) 10%, transparent); }
+.intake-failures-list {
+  list-style: none; padding: 0 0 var(--space-2);
+  margin: 0;
+  max-height: 320px; overflow-y: auto;
+  border-top: 1px solid color-mix(in srgb, var(--color-rose, #E11D48) 20%, transparent);
+}
+.intake-failure {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-rose, #E11D48) 12%, transparent);
+}
+.intake-failure:last-child { border-bottom: none; }
+.intake-failure-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3);
+}
+.intake-failure-title {
+  font-weight: 600; font-size: var(--font-sm);
+  color: var(--text-primary);
+}
+.intake-failure-meta {
+  font-size: var(--font-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+.intake-failure-summary {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+.intake-failure-attempts {
+  list-style: none; padding: 0; margin: var(--space-2) 0 0;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+.intake-failure-attempt { margin-bottom: var(--space-1); }
+.intake-failure-attempt code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  background: var(--bg-secondary);
+  padding: 1px 6px; border-radius: 4px;
+  word-break: break-word;
+}
+.intake-failure-issues {
+  margin: var(--space-1) 0 0 var(--space-4);
+  padding: 0;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.intake-failure-more { font-style: italic; }
+
 /* Progress view — bar + elapsed time */
 .intake-progress {
   margin: var(--space-3) 0 var(--space-2);

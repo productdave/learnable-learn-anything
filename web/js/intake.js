@@ -462,6 +462,7 @@ function progressHTML(job) {
     </div>
 
     <div class="intake-outline" data-outline>${outlineHTML(job)}</div>
+    ${(job?.failures || []).length ? failuresHTML(job.failures) : ''}
     <div class="intake-error" data-error style="${isFailed || isInterrupted ? '' : 'display:none'}">
       ${isFailed ? escape('Generation failed: ' + (job.error || 'unknown error')) : ''}
       ${isInterrupted ? (canResume ? 'Generation was interrupted. Your progress is saved — Resume to pick up where it stopped.' : 'Generation was interrupted (page refresh or closed tab). No progress was saved — Retry restarts from scratch.') : ''}
@@ -588,4 +589,43 @@ function formatElapsed(ms) {
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60), rs = s % 60;
   return `${m}m ${rs.toString().padStart(2, '0')}s`;
+}
+
+/** Collapsible "Failures (N)" section that shows each topic error in full. */
+function failuresHTML(failures) {
+  if (!failures || !failures.length) return '';
+  return `
+    <details class="intake-failures">
+      <summary>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        ${failures.length} topic${failures.length === 1 ? '' : 's'} failed — click for details
+      </summary>
+      <ul class="intake-failures-list">
+        ${failures.map(f => failureItemHTML(f)).join('')}
+      </ul>
+    </details>`;
+}
+
+function failureItemHTML(f) {
+  const att = (f.attempts || []).map((a, i) => {
+    if (a.kind === 'schema') {
+      return `<li class="intake-failure-attempt"><strong>Attempt ${i + 1} (schema):</strong> <code>${escape(a.message)}</code>${a.issues?.length ? `<ul class="intake-failure-issues">${a.issues.map(x => `<li>${escape(x)}</li>`).join('')}${a.more ? `<li class="intake-failure-more">… and ${a.more} more</li>` : ''}</ul>` : ''}</li>`;
+    }
+    if (a.kind === 'api') {
+      return `<li class="intake-failure-attempt"><strong>Attempt ${i + 1} (API ${escape(String(a.status))}${a.type ? ` ${escape(a.type)}` : ''}):</strong> <code>${escape(a.message)}</code></li>`;
+    }
+    return `<li class="intake-failure-attempt"><strong>Attempt ${i + 1}:</strong> <code>${escape(a.message || 'unknown')}</code></li>`;
+  }).join('');
+  const moduleTopic = `${escape(f.moduleId)} / ${escape(f.topicId)}`;
+  return `
+    <li class="intake-failure">
+      <div class="intake-failure-head">
+        <div class="intake-failure-title">${escape(f.topicTitle || f.topicId)}</div>
+        <div class="intake-failure-meta">${moduleTopic}</div>
+      </div>
+      <div class="intake-failure-summary">${escape(f.error || 'unknown')}</div>
+      ${att ? `<ul class="intake-failure-attempts">${att}</ul>` : ''}
+    </li>`;
 }

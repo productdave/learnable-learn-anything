@@ -24,9 +24,16 @@ export function createClient({ apiKey }) {
         if (!r.ok) {
           const text = await r.text().catch(() => '');
           let detail = text;
-          try { detail = JSON.parse(text)?.error?.message || text; } catch { /* leave as text */ }
-          const err = new Error(`Anthropic API ${r.status}: ${detail}`);
+          let type = null;
+          try {
+            const parsed = JSON.parse(text);
+            detail = parsed?.error?.message || text;
+            type   = parsed?.error?.type || null;
+          } catch { /* leave as text */ }
+          const err = new Error(`Anthropic API ${r.status}${type ? ` ${type}` : ''}: ${detail}`);
           err.status = r.status;
+          err.type = type;
+          err.body = text;
           throw err;
         }
         return r.json();

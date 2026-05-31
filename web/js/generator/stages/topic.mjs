@@ -302,8 +302,9 @@ ${topicMeta.quiz_plan && topicMeta.quiz_plan.length ? `QUIZ PLAN for this topic 
 
   // Retry once — large tool outputs occasionally come back malformed
   // (stringified arrays, truncation). Coercion fixes most; the retry
-  // catches the rest.
-  let lastErr;
+  // catches the rest. We keep BOTH attempt errors so the surfaced message
+  // makes the failure mode obvious.
+  const attemptErrors = [];
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const resp = await client.messages.create({
@@ -315,16 +316,77 @@ ${topicMeta.quiz_plan && topicMeta.quiz_plan.length ? `QUIZ PLAN for this topic 
         messages: [{ role: 'user', content: userMsg }]
       });
 
+      // Surface model-side stop reasons that aren't a successful tool call.
       const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
-      if (!toolUse) throw new Error('model did not submit topic');
+      if (!toolUse) {
+        const textChunk = (resp.content || []).find(b => b.type === 'text');
+        const stop = resp.stop_reason || 'unknown';
+        const sample = textChunk?.text ? ` Text reply: "${textChunk.text.slice(0, 200)}${textChunk.text.length > 200 ? '…' : ''}"` : '';
+        throw new Error(`model did not call submit_topic (stop_reason=${stop}).${sample}`);
+      }
 
       const input = coerceTopicInput(toolUse.input);
       return TopicContentSchema.parse(input);
     } catch (err) {
-      lastErr = err;
+      attemptErrors.push(err);
+      // Console log so the SW's DevTools view shows the full picture (status,
+      // body, zod issues) without us having to broadcast huge payloads.
+      try {
+        // eslint-disable-next-line no-console
+        console.error(`[stage3:${topicMeta.id}] attempt ${attempt + 1} failed:`, err);
+        if (err?.issues) console.error(`[stage3:${topicMeta.id}] zod issues:`, err.issues);
+        if (err?.body)   console.error(`[stage3:${topicMeta.id}] api body:`, err.body);
+      } catch {}
     }
   }
-  throw new Error(`Stage 3 [${topicMeta.id}]: ${lastErr?.message || 'failed after retry'}`);
+  // Build a structured, human-readable summary covering both attempts.
+  const summary = describeTopicErrors(attemptErrors);
+  const wrapped = new Error(`Stage 3 [${topicMeta.id}]: ${summary.headline}`);
+  wrapped.attempts = summary.attempts; // [{ status?, type?, issues?, message }]
+  wrapped.kind = summary.kind;         // 'api' | 'schema' | 'tool' | 'unknown'
+  throw wrapped;
+}
+
+/**
+ * Convert raw caught errors into a structured summary the UI can render.
+ * Zod errors get their issues flattened; API errors keep status + type.
+ */
+function describeTopicErrors(errs) {
+  const attempts = errs.map((e) => {
+    // Zod parse error (most common kind here)
+    if (e?.issues && Array.isArray(e.issues)) {
+      const top = e.issues.slice(0, 5).map(i => `${i.path?.join('.') || '<root>'}: ${i.message}`);
+      return {
+        kind: 'schema',
+        message: 'Generated content failed schema validation',
+        issues: top,
+        more: Math.max(0, e.issues.length - 5)
+      };
+    }
+    // Anthropic API error (we attached status + type in anthropic-fetch.js)
+    if (typeof e?.status === 'number') {
+      return {
+        kind: 'api',
+        status: e.status,
+        type: e.type || null,
+        message: e.message || 'API error'
+      };
+    }
+    return { kind: 'unknown', message: e?.message || String(e) };
+  });
+  // Headline = the most informative of the two attempts.
+  const worst = attempts.find(a => a.kind === 'api')
+             || attempts.find(a => a.kind === 'schema')
+             || attempts[attempts.length - 1] || { message: 'failed' };
+  let headline;
+  if (worst.kind === 'api') {
+    headline = `API ${worst.status}${worst.type ? ` (${worst.type})` : ''}: ${worst.message.replace(/^Anthropic API \d+( \w+)?: /, '')}`;
+  } else if (worst.kind === 'schema') {
+    headline = `Schema mismatch — ${worst.issues?.[0] || 'see issues'}`;
+  } else {
+    headline = worst.message || 'unknown failure';
+  }
+  return { headline, attempts, kind: worst.kind };
 }
 
 /**

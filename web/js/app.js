@@ -7,7 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth, getUser, onUserChange } from './auth.js?v=4';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=12';
+import { openIntake, openIntakeForJob } from './intake.js?v=13';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';
@@ -416,12 +416,14 @@ function jobCardHTML(j) {
     actionsHTML = `
       <button class="library-card-action" data-job-action="retry-missing" data-course-id="${j.savedCourseId}">Retry missing topics</button>
       <a class="library-card-action library-card-action--ghost" href="?course=${encodeURIComponent(j.savedCourseId)}">Open as-is</a>
+      ${(j.failures || []).length ? `<button class="library-card-action library-card-action--ghost" data-job-action="open" data-job-id="${j.id}">View errors</button>` : ''}
       <button class="library-card-action library-card-action--danger" data-job-action="delete-partial" data-job-id="${j.id}" data-course-id="${j.savedCourseId}">Delete</button>`;
   } else if (isFailed || isInterrupted) {
     const retryLabel = canResume ? 'Resume' : 'Retry';
     const retryAction = canResume ? 'resume' : 'retry';
     actionsHTML = `
       <button class="library-card-action" data-job-action="${retryAction}" data-job-id="${j.id}">${retryLabel}</button>
+      ${(j.failures || []).length ? `<button class="library-card-action library-card-action--ghost" data-job-action="open" data-job-id="${j.id}">View errors</button>` : ''}
       <button class="library-card-action library-card-action--danger" data-job-action="delete-job" data-job-id="${j.id}">Delete</button>`;
   } else {
     // Running.
