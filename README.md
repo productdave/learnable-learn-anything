@@ -1,6 +1,8 @@
-# AI Product Management — Interactive Learning
+# AI Foundations for PM — Interactive Learning
 
-An interactive self-paced course on AI Product Management. No build tools, no dependencies — just open `index.html` in a browser.
+A [Product Academy](https://productacademy.io) interactive self-paced course on AI Product Management. No build tools, no dependencies — just open `index.html` in a browser.
+
+> **Looking for the deployment workshop?** See [storylingo-demo](https://github.com/deewang/storylingo-demo) — a hands-on exercise where you clone a voice AI app, configure environment variables, and deploy it to Railway.
 
 ## What's inside
 
