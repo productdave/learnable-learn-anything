@@ -1,1 +1,6 @@
 .vercel
+
+# Nested repos (each has its own GitHub remote)
+storylingo/
+storylingo-demo/
+Penny-Deals-Agent/

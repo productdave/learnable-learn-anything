@@ -6,6 +6,24 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8765", "-d", "/Users/davidwang/AI Learning"],
       "port": 8765
+    },
+    {
+      "name": "game-theory",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8766", "-d", "/Users/davidwang/Game Theory"],
+      "port": 8766
+    },
+    {
+      "name": "learnable-web",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8767", "-d", "/Users/davidwang/Learnable/web"],
+      "port": 8767
+    },
+    {
+      "name": "penny-deals",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "/Users/davidwang/AI Learning/Penny-Deals-Agent", "--", "--port=3010"],
+      "port": 3010
     }
   ]
 }
