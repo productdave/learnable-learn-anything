@@ -34,6 +34,55 @@ const pendingDeletes = new Set(); // ids waiting to be deleted remotely
 let pulledOnce = false;
 let inUserChange = false;
 
+// --- Observable status -----------------------------------------------
+// Visible from the account modal so the user can see exactly what sync is
+// doing (or why it isn't). Updated by every pull / push / delete attempt.
+const status = {
+  lastPullAt: 0,
+  lastPullError: null,        // string | null
+  lastPullCloudCount: null,   // number | null
+  lastPushAt: 0,
+  lastPushError: null,        // string | null
+  pushFailuresById: new Map() // id → { error, kind, at }
+};
+const statusListeners = new Set();
+function emitStatus() {
+  statusListeners.forEach(fn => { try { fn(getStatus()); } catch {} });
+}
+/** Snapshot of the current sync state for UI display. */
+export function getStatus() {
+  return {
+    lastPullAt: status.lastPullAt,
+    lastPullError: status.lastPullError,
+    lastPullCloudCount: status.lastPullCloudCount,
+    lastPushAt: status.lastPushAt,
+    lastPushError: status.lastPushError,
+    pushFailures: Array.from(status.pushFailuresById.entries()).map(([id, e]) => ({ id, ...e }))
+  };
+}
+export function onSyncStatus(fn) {
+  statusListeners.add(fn);
+  return () => statusListeners.delete(fn);
+}
+
+/** Classify a Supabase error so the UI can tell the user what to do. */
+function classifyError(err) {
+  const msg = String(err?.message || err || '');
+  const code = err?.code || '';
+  // Postgres "relation does not exist" — the migration SQL hasn't been run.
+  if (/relation .* does not exist/i.test(msg) || code === '42P01') {
+    return { kind: 'missing_table', message: 'The `user_courses` table does not exist in Supabase yet. Run the migration SQL (account modal → Cloud sync → Show migration SQL).' };
+  }
+  // RLS denial
+  if (/row-level security|permission denied|not authorized/i.test(msg) || code === '42501') {
+    return { kind: 'rls_denied', message: 'Supabase blocked the write — the row-level-security policies on user_courses aren\'t set up. Re-run the migration SQL.' };
+  }
+  if (/network|fetch|failed to fetch/i.test(msg)) {
+    return { kind: 'network', message: 'Network error — check your connection.' };
+  }
+  return { kind: 'unknown', message: msg || 'Unknown sync error' };
+}
+
 async function pullAll() {
   const c = await sb();
   const u = getUser();
@@ -41,9 +90,21 @@ async function pullAll() {
   let data;
   try {
     const res = await c.from('user_courses').select('id, payload, updated_at').eq('owner_id', u.id);
+    if (res.error) throw res.error;
     data = res.data || [];
+    status.lastPullAt = Date.now();
+    status.lastPullError = null;
+    status.lastPullCloudCount = data.length;
+    // eslint-disable-next-line no-console
+    console.info(`[course-sync] pulled ${data.length} cloud course${data.length === 1 ? '' : 's'} for ${u.email}`);
   } catch (e) {
-    console.warn('[course-sync] pull failed:', e.message);
+    const c2 = classifyError(e);
+    status.lastPullAt = Date.now();
+    status.lastPullError = c2.message;
+    status.lastPullCloudCount = null;
+    // eslint-disable-next-line no-console
+    console.error('[course-sync] pull failed:', c2.kind, c2.message, e);
+    emitStatus();
     return;
   }
 
@@ -75,9 +136,16 @@ async function pullAll() {
   pulledOnce = true;
 
   // 3. Local courses not in cloud (yet) → upload.
+  const toUpload = [];
   for (const [id, local] of Object.entries(_readAllCourses())) {
-    if (!cloudById.has(id)) schedulePush(id);
+    if (!cloudById.has(id)) toUpload.push(id);
   }
+  if (toUpload.length) {
+    // eslint-disable-next-line no-console
+    console.info(`[course-sync] queuing upload of ${toUpload.length} local course${toUpload.length === 1 ? '' : 's'} missing from cloud:`, toUpload);
+  }
+  toUpload.forEach(id => schedulePush(id));
+  emitStatus();
 }
 
 async function pushOne(id) {
@@ -105,8 +173,20 @@ async function pushOne(id) {
       updated[id]._syncedAt = updatedAt;
       try { localStorage.setItem('learnable-user-courses', JSON.stringify(updated)); } catch {}
     }
+    status.lastPushAt = Date.now();
+    status.lastPushError = null;
+    status.pushFailuresById.delete(id);
+    // eslint-disable-next-line no-console
+    console.info(`[course-sync] pushed “${course.config?.title || id}” → cloud`);
+    emitStatus();
   } catch (e) {
-    console.warn('[course-sync] push failed for', id, e.message);
+    const c2 = classifyError(e);
+    status.lastPushAt = Date.now();
+    status.lastPushError = c2.message;
+    status.pushFailuresById.set(id, { error: c2.message, kind: c2.kind, at: Date.now() });
+    // eslint-disable-next-line no-console
+    console.error(`[course-sync] push failed for “${course.config?.title || id}”:`, c2.kind, c2.message, e);
+    emitStatus();
   }
 }
 
@@ -167,4 +247,25 @@ export function initCourseSync() {
 /** Manual re-pull (e.g. after course import). */
 export async function syncCoursesNow() {
   await pullAll();
+}
+
+/**
+ * Force every local course up to the cloud, regardless of `_syncedAt`. Used
+ * by the "Sync all to cloud now" button on the account modal when the user
+ * suspects something didn't sync. Pushes are sequential (not debounced) so
+ * the UI can report the final state when this resolves.
+ */
+export async function pushAllNow() {
+  const u = getUser();
+  if (!u) return { pushed: 0, failed: 0 };
+  const ids = Object.keys(_readAllCourses());
+  let pushed = 0, failed = 0;
+  for (const id of ids) {
+    // Cancel any pending debounce — we're doing the push directly now.
+    clearTimeout(pushTimers.get(id));
+    pushTimers.delete(id);
+    await pushOne(id);
+    if (status.pushFailuresById.has(id)) failed++; else pushed++;
+  }
+  return { pushed, failed };
 }

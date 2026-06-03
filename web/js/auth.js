@@ -119,6 +119,11 @@ function openAccount() {
         `}
       </div>
 
+      <div class="auth-section" data-cloud-sync-section>
+        <div class="auth-section-label">Cloud sync</div>
+        <div data-cloud-sync-body><span class="auth-help">Loading sync status…</span></div>
+      </div>
+
       <div class="auth-section">
         <div class="auth-section-label">Migrate courses from another deployment</div>
         <p class="auth-help">localStorage is per-domain, so courses you generated on an older Learnable URL won't appear here automatically. On the old site, open DevTools (⌥⌘I) → Console → run <code>copy(localStorage.getItem('learnable-user-courses'))</code>, then paste below.</p>
@@ -136,6 +141,8 @@ function openAccount() {
       await signOut();
       openAccount();
     });
+    // Cloud-sync section is async — load + wire after the modal is mounted.
+    renderCloudSyncSection(body).catch(() => {});
     body.querySelector('[data-import-run]')?.addEventListener('click', async () => {
       const ta = body.querySelector('[data-import-json]');
       const msg = body.querySelector('[data-import-msg]');
@@ -245,6 +252,125 @@ export async function signOut() {
   currentUser = null;
   refreshAccountButton();
   emitUser();
+}
+
+// ---- Cloud sync status (per-course backup to Supabase user_courses) ----
+
+const MIGRATION_SQL = `-- Run once in Supabase → SQL Editor.
+create table if not exists public.user_courses (
+  id text not null,
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  payload jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key (id, owner_id)
+);
+
+alter table public.user_courses enable row level security;
+
+drop policy if exists "owner_select" on public.user_courses;
+drop policy if exists "owner_insert" on public.user_courses;
+drop policy if exists "owner_update" on public.user_courses;
+drop policy if exists "owner_delete" on public.user_courses;
+
+create policy "owner_select" on public.user_courses for select using (auth.uid() = owner_id);
+create policy "owner_insert" on public.user_courses for insert with check (auth.uid() = owner_id);
+create policy "owner_update" on public.user_courses for update using (auth.uid() = owner_id);
+create policy "owner_delete" on public.user_courses for delete using (auth.uid() = owner_id);`;
+
+async function renderCloudSyncSection(body) {
+  const host = body.querySelector('[data-cloud-sync-body]');
+  if (!host) return;
+  const { getStatus, onSyncStatus, pushAllNow, syncCoursesNow } = await import('./course-sync.js?v=1');
+  const { _readAllCourses } = await import('./user-courses.js');
+
+  function render(status) {
+    const localCount = Object.keys(_readAllCourses()).length;
+    const cloudCount = status.lastPullCloudCount;
+    const fmtAgo = (ms) => {
+      if (!ms) return 'never';
+      const s = Math.round((Date.now() - ms) / 1000);
+      if (s < 60) return `${s}s ago`;
+      if (s < 3600) return `${Math.round(s / 60)}m ago`;
+      return `${Math.round(s / 3600)}h ago`;
+    };
+    const pullErrHTML = status.lastPullError ? `<p class="auth-msg auth-msg--err" style="margin-top: var(--space-2)">${escapeText(status.lastPullError)}</p>` : '';
+    const failuresHTML = status.pushFailures.length ? `
+      <details class="auth-help" style="margin-top: var(--space-2)">
+        <summary style="cursor:pointer">${status.pushFailures.length} course${status.pushFailures.length === 1 ? '' : 's'} failed to push — details</summary>
+        <ul style="margin: var(--space-1) 0 0 var(--space-4); padding: 0">
+          ${status.pushFailures.map(f => `<li><code>${escapeText(f.id)}</code> — ${escapeText(f.error)}</li>`).join('')}
+        </ul>
+      </details>` : '';
+    const needsMigration =
+      (status.lastPullError && /table does not exist|migration SQL/i.test(status.lastPullError)) ||
+      status.pushFailures.some(f => f.kind === 'missing_table' || /table does not exist/i.test(f.error || ''));
+    const sqlHTML = needsMigration ? `
+      <details open class="auth-help" style="margin-top: var(--space-3); padding: var(--space-3); background: color-mix(in srgb, var(--color-rose, #E11D48) 8%, transparent); border: 1px solid color-mix(in srgb, var(--color-rose, #E11D48) 25%, transparent); border-radius: 8px;">
+        <summary style="cursor:pointer; font-weight:600; color: var(--color-rose, #E11D48)">⚠ The user_courses table doesn't exist yet — run this SQL</summary>
+        <p style="margin-top: var(--space-2)">Open <a href="https://supabase.com/dashboard/project/olzardlkaxgjqvwnjzil/sql/new" target="_blank" rel="noopener">Supabase → SQL Editor</a>, paste the block below, click Run. Then come back and hit "Sync all to cloud now".</p>
+        <pre style="margin-top: var(--space-2); padding: var(--space-2); background: var(--bg-secondary); border-radius: 6px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; max-height: 240px; overflow-y: auto"><code>${escapeText(MIGRATION_SQL)}</code></pre>
+        <button class="auth-btn auth-btn--compact" data-copy-sql style="margin-top: var(--space-2)">Copy SQL</button>
+      </details>` : '';
+    host.innerHTML = `
+      <div class="auth-keyrow" style="margin-bottom: var(--space-2)">
+        <div style="flex: 1">
+          <strong>${localCount}</strong> course${localCount === 1 ? '' : 's'} on this device · ${cloudCount === null ? '<span class="auth-help">cloud unknown</span>' : `<strong>${cloudCount}</strong> in cloud`}
+          <div class="auth-help" style="margin-top: var(--space-1)">
+            Last pull: ${fmtAgo(status.lastPullAt)}${status.lastPushAt ? ` · last push: ${fmtAgo(status.lastPushAt)}` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="auth-keyform">
+        <button class="auth-btn auth-btn--compact" data-sync-push>Sync all to cloud now</button>
+        <button class="auth-btn auth-btn--ghost auth-btn--compact" data-sync-pull>Pull from cloud</button>
+      </div>
+      <div class="auth-msg" data-sync-msg style="display:none; margin-top: var(--space-2)"></div>
+      ${pullErrHTML}
+      ${failuresHTML}
+      ${sqlHTML}`;
+
+    host.querySelector('[data-sync-push]')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true; btn.textContent = 'Syncing…';
+      const msgEl = host.querySelector('[data-sync-msg]');
+      const result = await pushAllNow();
+      msgEl.style.display = '';
+      if (result.failed === 0) {
+        msgEl.className = 'auth-msg auth-msg--ok';
+        msgEl.textContent = `Pushed ${result.pushed} course${result.pushed === 1 ? '' : 's'} to the cloud.`;
+      } else {
+        msgEl.className = 'auth-msg auth-msg--err';
+        msgEl.textContent = `Pushed ${result.pushed}, failed ${result.failed}. See details below.`;
+      }
+      btn.disabled = false; btn.textContent = 'Sync all to cloud now';
+    });
+    host.querySelector('[data-sync-pull]')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true; btn.textContent = 'Pulling…';
+      await syncCoursesNow();
+      btn.disabled = false; btn.textContent = 'Pull from cloud';
+    });
+    host.querySelector('[data-copy-sql]')?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(MIGRATION_SQL); } catch {}
+      const b = host.querySelector('[data-copy-sql]');
+      if (b) { b.textContent = 'Copied ✓'; setTimeout(() => { b.textContent = 'Copy SQL'; }, 1500); }
+    });
+  }
+
+  // First render with whatever status is currently known.
+  render(getStatus());
+  // Subscribe so the panel updates live as pushes/pulls finish.
+  const unsub = onSyncStatus((s) => { render(s); });
+  // When the modal closes, drop the subscription.
+  const modal = document.getElementById('auth-modal');
+  const observer = new MutationObserver(() => {
+    if (modal?.style.display === 'none') { unsub(); observer.disconnect(); }
+  });
+  if (modal) observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+}
+
+function escapeText(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
 /** Call once at app boot. No-op if Supabase isn't configured. */
