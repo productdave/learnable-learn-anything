@@ -685,6 +685,12 @@ async function init() {
     if (currentMode === 'library') renderForCurrentURL();
     syncCoursesNow().catch(() => {});
   });
+  // Cloud pull installed or removed courses on the library page — refresh the
+  // catalog so the user sees their cards without having to interact first.
+  // Distinct from `-imported` so this listener doesn't kick another pull.
+  window.addEventListener('learnable-cloud-pulled', () => {
+    if (currentMode === 'library') refreshLibraryCatalog(document.getElementById('content'));
+  });
   ensureSW(); // fire-and-forget — registers /sw.js + installs the global progress listener
 
   await renderForCurrentURL();

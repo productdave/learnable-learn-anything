@@ -20,7 +20,7 @@
 //     previously synced (and therefore really got deleted, not "never
 //     uploaded yet").
 
-import { sb, getUser, onUserChange } from './auth.js?v=4';
+import { sb, getUser, onUserChange } from './auth.js?v=5';
 import {
   _readAllCourses,
   _onCoursesChanged,
@@ -110,6 +110,7 @@ async function pullAll() {
 
   const cloudById = new Map(data.map(r => [r.id, r]));
   const localAll = _readAllCourses();
+  let localChanged = false;
 
   // 1. Cloud rows → install locally if newer or absent.
   for (const row of data) {
@@ -121,6 +122,7 @@ async function pullAll() {
       // missing from cloud, it was deleted remotely."
       const installed = { ...row.payload, _syncedAt: remoteTs };
       _installCourseFromRemote(row.id, installed);
+      localChanged = true;
     }
   }
 
@@ -130,6 +132,7 @@ async function pullAll() {
   for (const [id, local] of Object.entries(localAll)) {
     if (local._syncedAt && !cloudById.has(id)) {
       _removeCourseLocalSilent(id);
+      localChanged = true;
     }
   }
 
@@ -146,6 +149,18 @@ async function pullAll() {
   }
   toUpload.forEach(id => schedulePush(id));
   emitStatus();
+
+  // If the pull installed or removed anything locally, tell the library to
+  // re-render. _installCourseFromRemote / _removeCourseLocalSilent deliberately
+  // don't fire the per-course `saved`/`removed` event (to avoid an upload
+  // echo). Use a dedicated `learnable-cloud-pulled` event — distinct from the
+  // user-initiated `learnable-courses-imported` event so the listener doesn't
+  // schedule yet another pull and loop. Fixes: after a magic-link sign-in
+  // the library would stay empty until the user clicked something — now it
+  // refreshes the moment the pull lands.
+  if (localChanged && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('learnable-cloud-pulled'));
+  }
 }
 
 async function pushOne(id) {
