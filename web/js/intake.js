@@ -10,7 +10,8 @@ import { hasApiKey, setApiKey, getApiKey, generateCourse } from './generator/ind
 import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
-import { startGeneration as swStart, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
+import { startGeneration as swStart, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
+import { cloudGenAvailable, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration } from './cloud-gen-client.js?v=1';
 import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
 
 let modal = null;
@@ -326,10 +327,23 @@ function onSubmit(e) {
 // onJobsChange subscription rather than a Promise chain, so it works whether
 // the SW or the in-page path produced the result.
 async function startGeneration(jobId, userBrief) {
+  // Preferred path: cloud worker (Vercel function + Supabase Realtime).
+  // Survives refresh + tab close because the work runs on the server. Requires
+  // the user to be signed in (so the function has an Anthropic key to read
+  // from user_state, and so Supabase RLS can scope the row).
+  if (cloudGenAvailable()) {
+    try {
+      await startCloudGeneration(jobId, userBrief);
+      return; // updates flow in via Realtime → applyJobRow → updateJob
+    } catch (err) {
+      console.warn('[intake] cloud path failed, falling back to SW:', err.message);
+      updateJob(jobId, { message: `Cloud generation unavailable (${err.message}). Falling back to local SW…` });
+    }
+  }
+  // Fallback: existing Service Worker path. Used when the user isn't signed
+  // in or when the cloud function errored. Doesn't survive tab close.
   try {
     await swStart(jobId, userBrief, getApiKey());
-    // SW path: progress + final saveUserCourse happen in sw-client.js's
-    // global listener, which updates the jobs registry. Nothing else to do.
   } catch (err) {
     console.warn('[intake] SW path unavailable, falling back to in-page generation:', err.message);
     runInPageGeneration(jobId, userBrief);
@@ -496,12 +510,19 @@ function wireProgressActions(card, jobId) {
   card.querySelector('.intake-close')?.addEventListener('click', close);
   card.querySelector('[data-retry]')?.addEventListener('click', () => retry(jobId));
   card.querySelector('[data-resume]')?.addEventListener('click', async () => {
-    const ok = await resumeFromCheckpoint(jobId);
-    if (!ok) retry(jobId); // no checkpoint — fall back to full restart
+    // Prefer cloud resume when signed in (the row + checkpoint live in
+    // generation_jobs). Fall back to SW resume from in-memory checkpoint.
+    if (cloudGenAvailable()) {
+      try { await resumeCloudGeneration(jobId); return; }
+      catch (err) { console.warn('[intake] cloud resume failed:', err.message); }
+    }
+    const ok = await swResume(jobId);
+    if (!ok) retry(jobId);
   });
   card.querySelector('[data-cancel]')?.addEventListener('click', () => {
     if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
-    cancelGeneration(jobId);
+    if (cloudGenAvailable()) cancelCloudGeneration(jobId);
+    else swCancel(jobId);
     close();
   });
   card.querySelector('[data-delete]')?.addEventListener('click', () => {

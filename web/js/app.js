@@ -7,9 +7,10 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth, getUser, onUserChange } from './auth.js?v=5';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=13';
+import { openIntake, openIntakeForJob } from './intake.js?v=14';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
-import { ensureSW, resumeMissing, cancelGeneration, resumeFromCheckpoint, hasCheckpoint } from './sw-client.js';
+import { ensureSW, resumeMissing, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
+import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=1';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';
 import { initCourseSync, syncCoursesNow } from './course-sync.js?v=1';
 
@@ -455,13 +456,18 @@ function wireJobsSection(container) {
       if (action === 'open' || action === 'retry') {
         openIntakeForJob(id);
       } else if (action === 'resume') {
-        // Resume from checkpoint — skip Stage 1/2/3 work that already succeeded.
-        const ok = await resumeFromCheckpoint(id);
+        // Resume from checkpoint — prefer cloud (state lives in generation_jobs).
+        if (cloudGenAvailable()) {
+          try { await resumeCloudGeneration(id); openIntakeForJob(id); return; }
+          catch (err) { console.warn('[dashboard] cloud resume failed:', err.message); }
+        }
+        const ok = await swResume(id);
         if (ok) openIntakeForJob(id);
         else openIntakeForJob(id);  // fallback opens the modal, which can full-restart
       } else if (action === 'cancel') {
         if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
-        cancelGeneration(id);
+        if (cloudGenAvailable()) cancelCloudGeneration(id);
+        else swCancel(id);
       } else if (action === 'delete-job') {
         if (!confirm('Delete this generation? Any partial work is discarded — this cannot be undone.')) return;
         const j = getJobLazy(id);
@@ -674,6 +680,9 @@ async function init() {
   bridgeAuthIdentity();
   initSync();
   initCourseSync();
+  // Re-subscribe to any in-flight cloud generations from before this page
+  // load. If the user refreshed mid-generation, this restores live progress.
+  rehydrateCloudSubscriptions().catch(() => {});
   // When a cloud pull installs / removes courses, refresh the library so the
   // new cards show up without a page reload.
   _onCoursesChanged(() => {

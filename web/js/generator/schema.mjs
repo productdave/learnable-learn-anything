@@ -1,8 +1,13 @@
 // Zod schemas that target the renderer's existing topic schema.
 // Stage 1 produces a CourseBrief; Stage 3 produces Topic content.
 // Stage 4 validates everything before writing to disk.
+//
+// Imports `zod` as a bare specifier so the same file runs in both contexts:
+//   • Browser / Service Worker — resolved via the importmap in index.html
+//     (mapped to `https://esm.sh/zod@3.23.8`).
+//   • Vercel function / Node — resolved via node_modules from web/package.json.
 
-import { z } from 'https://esm.sh/zod@3.23.8';
+import { z } from 'zod';
 
 // --- Course brief (Stage 1 output) ----------------------------------
 

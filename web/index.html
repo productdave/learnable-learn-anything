@@ -13,6 +13,17 @@
   <link rel="stylesheet" href="styles/components.css?v=12">
   <link rel="stylesheet" href="styles/learnable.css?v=1">
   <link rel="stylesheet" href="styles/themes.css?v=1">
+
+  <!-- Importmap so generator/schema.mjs can use bare `import { z } from 'zod'`.
+       Same file runs in the browser/SW (resolved here) and in Vercel functions
+       (resolved via node_modules). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "zod": "https://esm.sh/zod@3.23.8"
+    }
+  }
+  </script>
 </head>
 <body>
   <div id="icons" style="display:none"></div>
@@ -114,6 +125,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/app.js?v=27"></script>
+  <script type="module" src="js/app.js?v=28"></script>
 </body>
 </html>

@@ -1,0 +1,234 @@
+// Page-side glue for the server-side generation pipeline.
+//
+// Replaces the Service Worker path (web/sw.js + sw-client.js) for new
+// generations. The pipeline now runs in a Vercel function (5-minute
+// maxDuration) and writes state to Supabase generation_jobs as it goes;
+// this module:
+//
+//   1. Uploads any PDFs from the userBrief to Supabase Storage so the
+//      function can fetch them — direct postMessage to the function would
+//      blow the 4.5MB request body limit.
+//   2. POSTs /api/gen/start with brief + PDF refs + signed access token.
+//   3. Subscribes to the row in `generation_jobs` via Supabase Realtime.
+//      Each row update translates into the existing `updateJob` calls so
+//      the dashboard / progress modal UI stays identical.
+//   4. Exposes cancelGeneration(jobId) → POST /api/gen/cancel, and
+//      resumeFromCheckpoint(jobId) → POST /api/gen/resume.
+
+import { updateJob, getJob, createJob, removeJob } from './jobs.js';
+import { sb, getUser } from './auth.js?v=5';
+import { invalidateCourseCache } from './course-loader.js';
+import { syncCoursesNow } from './course-sync.js?v=1';
+
+const STORAGE_BUCKET = 'course-uploads';
+const subs = new Map();   // jobId → Realtime channel handle
+
+// --------------------------------------------------------------------
+// Public API
+// --------------------------------------------------------------------
+
+/** Whether the page can talk to the cloud worker. */
+export function cloudGenAvailable() {
+  return typeof fetch === 'function' && !!getUser();
+}
+
+/**
+ * Start a generation against the cloud worker. Returns the jobId.
+ * Throws if the user isn't signed in, has no API key on file, or the API
+ * call fails outright.
+ */
+export async function startCloudGeneration(jobId, userBrief) {
+  const user = getUser();
+  if (!user) throw new Error('Sign in first — cloud generation requires an account.');
+
+  const accessToken = await getAccessToken();
+  if (!accessToken) throw new Error('No access token available — try signing in again.');
+
+  // 1. Upload PDFs to Supabase Storage if there are any.
+  const pdfRefs = await uploadPdfsToStorage(jobId, userBrief.pdfs || []);
+
+  // 2. Build the slim brief — strip the heavy base64 blobs out, keep the
+  //    page-thumb data URLs (they go into the saved course later, not into
+  //    the API request).
+  const slimBrief = {
+    topic: userBrief.topic,
+    goal: userBrief.goal,
+    starting_point: userBrief.starting_point,
+    depth: userBrief.depth,
+    time_budget: userBrief.time_budget,
+    tone: userBrief.tone || 'conversational',
+    source_text: userBrief.source_text,
+    source_urls: userBrief.source_urls || [],
+    pdfRefs
+  };
+
+  // 3. POST /api/gen/start. Function inserts the row, returns jobId, then
+  //    keeps running the pipeline. Real-time updates land via subscription.
+  const resp = await fetch('/api/gen/start', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({ jobId, brief: slimBrief })
+  });
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '');
+    let detail = errText;
+    try { detail = JSON.parse(errText)?.error || errText; } catch {}
+    throw new Error(`Cloud generation start failed: ${resp.status} ${detail}`);
+  }
+  const data = await resp.json();
+  const finalJobId = data.jobId || jobId;
+
+  // 4. Subscribe to row updates → fan into jobs registry.
+  subscribeToJob(finalJobId);
+  return finalJobId;
+}
+
+/** Cancel a running cloud generation. Updates the local job immediately. */
+export async function cancelCloudGeneration(jobId) {
+  updateJob(jobId, { status: 'cancelling', message: 'Cancelling — waiting for in-flight calls to drain…' });
+  const token = await getAccessToken();
+  if (!token) return;
+  await fetch('/api/gen/cancel', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    body: JSON.stringify({ jobId })
+  }).catch(() => {});
+}
+
+/** Resume an interrupted / failed cloud generation from its checkpoint. */
+export async function resumeCloudGeneration(jobId) {
+  const token = await getAccessToken();
+  if (!token) throw new Error('Sign in to resume.');
+  updateJob(jobId, { status: 'running', error: null, message: 'Resuming…' });
+  const resp = await fetch('/api/gen/resume', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    body: JSON.stringify({ jobId })
+  });
+  if (!resp.ok) throw new Error('Resume request failed');
+  subscribeToJob(jobId);
+}
+
+/** Re-subscribe to all in-flight cloud jobs (called on page boot). */
+export async function rehydrateCloudSubscriptions() {
+  if (!getUser()) return;
+  const client = await sb();
+  if (!client) return;
+  const { data } = await client
+    .from('generation_jobs')
+    .select('id, status')
+    .in('status', ['running', 'cancelling', 'queued']);
+  for (const row of data || []) subscribeToJob(row.id);
+}
+
+// --------------------------------------------------------------------
+// Realtime subscription
+// --------------------------------------------------------------------
+
+function subscribeToJob(jobId) {
+  if (subs.has(jobId)) return;
+  (async () => {
+    const client = await sb();
+    if (!client) return;
+    // Fetch current row state once so the UI hydrates from cloud rather than
+    // waiting for the next update event.
+    const { data: row } = await client.from('generation_jobs').select('*').eq('id', jobId).maybeSingle();
+    if (row) applyJobRow(row);
+
+    const channel = client
+      .channel(`gen-${jobId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'generation_jobs',
+        filter: `id=eq.${jobId}`
+      }, (payload) => applyJobRow(payload.new))
+      .subscribe();
+    subs.set(jobId, channel);
+  })();
+}
+
+function applyJobRow(row) {
+  if (!row) return;
+  const patch = {
+    status: mapStatus(row.status),
+    stage: row.stage,
+    message: row.message || '',
+    topicsDone: row.topics_done || 0,
+    topicsTotal: row.topics_total || 0
+  };
+  if (row.brief?.title) patch.title = row.brief.title;
+  if (row.outline) patch.outline = row.outline;
+  if (row.failures?.length) patch.failures = row.failures;
+  if (row.saved_course_id) patch.savedCourseId = row.saved_course_id;
+  if (row.error) patch.error = row.error;
+  // Mirror the checkpoint structure so the existing job-card resume path keeps
+  // working as a fallback (it reads job.checkpoint.brief, .researchByModule,
+  // .topicsByKey).
+  patch.checkpoint = {
+    brief: row.brief || null,
+    researchByModule: row.research || null,
+    topicsByKey: row.topics_by_key || null
+  };
+  updateJob(row.id, patch);
+
+  // On terminal states, drop the subscription + invalidate caches + tell
+  // course-sync to pull (so the freshly-saved course appears in the library).
+  if (['completed', 'partial', 'failed', 'cancelled'].includes(row.status)) {
+    const ch = subs.get(row.id);
+    if (ch) { try { ch.unsubscribe(); } catch {} subs.delete(row.id); }
+    if (row.saved_course_id) {
+      invalidateCourseCache(row.saved_course_id);
+      syncCoursesNow().catch(() => {});
+    }
+  }
+}
+
+function mapStatus(s) {
+  // generation_jobs.status uses: queued | running | cancelling | completed | partial | failed | cancelled
+  // jobs registry uses:          running | cancelling | completed | partial | failed | interrupted
+  if (s === 'queued') return 'running';
+  if (s === 'cancelled') return 'failed';
+  return s;
+}
+
+// --------------------------------------------------------------------
+// PDF upload helpers
+// --------------------------------------------------------------------
+
+async function uploadPdfsToStorage(jobId, pdfs) {
+  if (!pdfs?.length) return [];
+  const client = await sb();
+  if (!client) throw new Error('Supabase unavailable');
+  const u = getUser();
+  const refs = [];
+  for (const p of pdfs) {
+    const safeName = (p.name || `pdf-${p.file_index}.pdf`).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${u.id}/${jobId}/${p.file_index}-${safeName}`;
+    // Decode the base64 we already have client-side back into a Blob to upload.
+    const bytes = Uint8Array.from(atob(p.base64), c => c.charCodeAt(0));
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const { error } = await client.storage.from(STORAGE_BUCKET).upload(path, blob, {
+      upsert: true,
+      contentType: 'application/pdf'
+    });
+    if (error) throw new Error(`Could not upload "${p.name}": ${error.message}`);
+    refs.push({
+      file_index: p.file_index,
+      name: p.name,
+      storage_path: path,
+      pageThumbs: p.pageThumbs || []
+    });
+  }
+  return refs;
+}
+
+async function getAccessToken() {
+  const client = await sb();
+  if (!client) return null;
+  const { data } = await client.auth.getSession();
+  return data?.session?.access_token || null;
+}
