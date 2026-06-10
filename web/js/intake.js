@@ -140,6 +140,10 @@ function renderForm() {
         </label>
       `}
 
+      <div class="intake-runmode" data-runmode>
+        <!-- Filled in by renderRunMode() once we know whether the user is signed in -->
+      </div>
+
       <div class="intake-actions">
         <button type="button" class="intake-cancel">Cancel</button>
         <button type="submit" class="intake-submit">Generate course</button>
@@ -152,6 +156,27 @@ function renderForm() {
   card.querySelector('.intake-cancel').addEventListener('click', close);
   card.querySelector('.intake-form').addEventListener('submit', onSubmit);
   wireDropzone(card);
+  renderRunMode(card);
+}
+
+/** Shows whether the next generation will run in cloud (durable) or browser
+ *  (won't survive a refresh). Signals to the user before they click Generate. */
+function renderRunMode(card) {
+  const host = card.querySelector('[data-runmode]');
+  if (!host) return;
+  if (cloudGenAvailable()) {
+    host.innerHTML = `
+      <div class="intake-runmode-pill intake-runmode-pill--cloud">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        Cloud generation · survives refresh + tab close
+      </div>`;
+  } else {
+    host.innerHTML = `
+      <div class="intake-runmode-pill intake-runmode-pill--browser">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        Browser-only · sign in for cloud generation that survives refresh
+      </div>`;
+  }
 }
 
 // ---- PDF dropzone --------------------------------------------------

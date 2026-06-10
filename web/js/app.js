@@ -7,7 +7,7 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth, getUser, onUserChange } from './auth.js?v=5';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=14';
+import { openIntake, openIntakeForJob } from './intake.js?v=15';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
 import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=1';

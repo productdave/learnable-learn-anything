@@ -3108,6 +3108,26 @@
 }
 .intake-failure-more { font-style: italic; }
 
+/* Run-mode signal — shows whether next generation is cloud or browser-only */
+.intake-runmode { margin: var(--space-3) 0 var(--space-2); }
+.intake-runmode-pill {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: 4px var(--space-3);
+  border-radius: 999px;
+  font-size: var(--font-xs); font-weight: 500;
+  border: 1px solid;
+}
+.intake-runmode-pill--cloud {
+  background: color-mix(in srgb, var(--primary, #4338CA) 8%, transparent);
+  color: var(--primary, #4338CA);
+  border-color: color-mix(in srgb, var(--primary, #4338CA) 25%, transparent);
+}
+.intake-runmode-pill--browser {
+  background: color-mix(in srgb, #D97706 8%, transparent);
+  color: #D97706;
+  border-color: color-mix(in srgb, #D97706 25%, transparent);
+}
+
 /* Progress view — bar + elapsed time */
 .intake-progress {
   margin: var(--space-3) 0 var(--space-2);

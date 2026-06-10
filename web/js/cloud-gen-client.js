@@ -112,16 +112,34 @@ export async function resumeCloudGeneration(jobId) {
   subscribeToJob(jobId);
 }
 
-/** Re-subscribe to all in-flight cloud jobs (called on page boot). */
+/**
+ * Re-subscribe to all in-flight cloud jobs + bring in recently-terminal jobs.
+ * Called on page boot. Picks up:
+ *  - Any running / cancelling / queued jobs (subscribe to live updates).
+ *  - Any partial / failed / cancelled jobs from the last 24h that AREN'T
+ *    already in localStorage (so they appear on the dashboard rather than
+ *    silently being lost).
+ *  - Completed jobs aren't re-pulled here — their courses appear via the
+ *    course-sync pull instead.
+ */
 export async function rehydrateCloudSubscriptions() {
   if (!getUser()) return;
   const client = await sb();
   if (!client) return;
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data } = await client
     .from('generation_jobs')
-    .select('id, status')
-    .in('status', ['running', 'cancelling', 'queued']);
-  for (const row of data || []) subscribeToJob(row.id);
+    .select('id, status, user_brief, brief, outline, message, stage, topics_done, topics_total, failures, saved_course_id, error, started_at, updated_at, research, topics_by_key')
+    .gte('updated_at', dayAgo)
+    .in('status', ['running', 'cancelling', 'queued', 'partial', 'failed', 'cancelled']);
+  for (const row of data || []) {
+    // Hydrate the local job from this row (creates if missing), then for
+    // live ones also subscribe to future updates.
+    applyJobRow(row);
+    if (['running', 'cancelling', 'queued'].includes(row.status)) {
+      subscribeToJob(row.id);
+    }
+  }
 }
 
 // --------------------------------------------------------------------
@@ -153,6 +171,31 @@ function subscribeToJob(jobId) {
 
 function applyJobRow(row) {
   if (!row) return;
+  // Reconstruct the local job entry if it doesn't exist (e.g. user signed in
+  // on a new device, or localStorage was cleared). updateJob() bails when
+  // the id isn't already in the registry, so without this, rehydration on a
+  // fresh device would silently drop everything.
+  if (!getJob(row.id)) {
+    const userBrief = row.user_brief || {};
+    createJob({
+      ...userBrief,
+      // createJob assigns its own id; we need this one. Patch below overrides.
+    });
+    // createJob auto-generates an id. Replace its row with our row id by
+    // direct localStorage write — small but cleanest path.
+    try {
+      const KEY = 'learnable-gen-jobs';
+      const all = JSON.parse(localStorage.getItem(KEY) || '{}');
+      // Find the just-created job (newest by startedAt) and re-key it.
+      const newest = Object.entries(all).sort((a, b) => b[1].startedAt - a[1].startedAt)[0];
+      if (newest && newest[0] !== row.id) {
+        const job = newest[1];
+        delete all[newest[0]];
+        all[row.id] = { ...job, id: row.id };
+        localStorage.setItem(KEY, JSON.stringify(all));
+      }
+    } catch {}
+  }
   const patch = {
     status: mapStatus(row.status),
     stage: row.stage,
