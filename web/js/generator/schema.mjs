@@ -149,14 +149,29 @@ const TakeawaySectionSchema = z.object({
 //   - { type:'image', ref_kind:'pdf', file_index, page, alt, caption }
 // assemble-browser.js resolves the pdf ref against the in-memory PDF thumb cache
 // and produces the renderer-facing shape below.
+// Accepts BOTH lifecycle shapes of an image section:
+//   • Pre-assemble (what Stage 3 emits): { ref_kind:'web', url } or
+//     { ref_kind:'pdf', file_index, page } — refs into the research bundle.
+//   • Post-assemble (what the renderer reads): { src } — a resolved URL or
+//     data URL.
+// Validation runs at Stage 3 parse time (before assemble), so the schema MUST
+// admit the ref shapes; assemble-browser.js normalises to `src` and drops
+// unresolvable refs.
 const ImageSectionSchema = z.object({
   type: z.literal('image'),
-  src: z.string().min(1),
+  src: z.string().min(1).optional(),
+  ref_kind: z.enum(['web', 'pdf']).optional(),
+  url: z.string().optional(),
+  file_index: z.number().int().min(0).optional(),
+  page: z.number().int().min(1).optional(),
   alt: z.string().min(1),
   caption: z.string().optional(),
   source_title: z.string().optional(),
   source_url: z.string().optional()
-});
+}).refine(
+  s => s.src || s.url || (s.file_index !== undefined && s.page !== undefined),
+  'image section needs src, url, or a pdf {file_index, page} ref'
+);
 
 // Image refs as they come back from Stage 2 (research bundle) — discriminated
 // on `kind`. Stage 3 picks a subset of these and emits image sections that

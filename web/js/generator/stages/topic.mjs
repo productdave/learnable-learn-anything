@@ -309,7 +309,11 @@ ${topicMeta.quiz_plan && topicMeta.quiz_plan.length ? `QUIZ PLAN for this topic 
     try {
       const resp = await client.messages.create({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 8192,
+        // 16k — a topic with 3 concepts + 5 quizzes + images + flashcards can
+        // exceed 8k tokens of tool JSON; truncation produced malformed
+        // sections ("Expected array, received string"). Billed on actual
+        // usage, so the higher ceiling costs nothing when unused.
+        max_tokens: 16384,
         system: buildSystem(tone),
         tools: [topicTool],
         tool_choice: { type: 'tool', name: TOOL_NAME },
@@ -414,6 +418,12 @@ function coerceTopicInput(input) {
       }
       if (Array.isArray(s.acceptable_answers) && s.acceptable_answers.length > 6) {
         s.acceptable_answers = s.acceptable_answers.slice(0, 6);
+      }
+      // Quiz/exercise ids must be ≥3 chars (they're storage keys). The model
+      // sometimes emits terse ids like "q1" — prefix with the topic id, which
+      // also guards against cross-topic key collisions.
+      if (typeof s.id === 'string' && s.id.length > 0 && s.id.length < 3 && typeof input.id === 'string') {
+        s.id = `${input.id}-${s.id}`;
       }
     }
   }
