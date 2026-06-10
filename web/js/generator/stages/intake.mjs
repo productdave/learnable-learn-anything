@@ -97,6 +97,11 @@ Critical rules:
 - Pick module colors from the provided palette. Use a DIFFERENT color for each module.
 - Use kebab-case ids ("pour-over-basics", not "Pour Over Basics").
 
+RECENCY — critical:
+- The user message includes today's date. Treat THAT as "now" — your training data may be 1-2 years behind it.
+- When the learner asks for "latest", "current", "newest", or similar: do NOT bake your training-era years, model names, or version numbers into module/topic titles. A title like "the 2024 landscape" or "What's new in GPT-4o" is wrong if today is later than your training data — you don't actually know what the latest is. Use evergreen phrasing instead ("the current landscape", "today's frontier models", "state of the art") — Stage 2 web research grounds the content in what's ACTUALLY current at generation time.
+- Only put a specific year, model name, or version in a title when the learner explicitly asked about it.
+
 When the learner provides uploaded source material (PDFs, pasted text, URLs):
 - BLEND it with broader coverage of the topic. The course should feel like a course on the SUBJECT, with the uploads informing the angle — not a verbatim restatement of the uploads.
 - Mine the uploads for specific terminology, examples, and named concepts the learner clearly cares about, and weave them into the outline.
@@ -144,7 +149,9 @@ export async function runIntake(client, userBrief, opts = {}) {
       pdfBlock
     : '';
 
-  const userText = `Design a course based on this learner request:
+  const userText = `Today's date: ${new Date().toISOString().slice(0, 10)}
+
+Design a course based on this learner request:
 
 Topic: ${userBrief.topic || '(derive from source material below)'}
 Goal: ${userBrief.goal || '(unspecified)'}

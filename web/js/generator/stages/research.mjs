@@ -108,6 +108,8 @@ For the assigned module, use the web_search tool aggressively to find:
 
 If PDFs were uploaded by the learner, you have them as document blocks in this conversation. You can SEE their pages. For each PDF page that is essentially a diagram, table, chart, or annotated screenshot worth showing inline in the course, include an image ref of kind "pdf" with the file_index + page number. Skip text-only pages — those are read for substance, not embedded as images.
 
+RECENCY: the user message includes today's date — treat it as "now". Your training data lags reality; the web does not. For fast-moving fields (AI, software, markets), prioritize sources from the last 12-18 months relative to today's date, and let search results OVERRIDE what you remember: if your training data says X is the newest model/tool/framework but search shows it's been superseded, the research bundle must reflect the current reality, not your training era.
+
 Then submit a structured research bundle via the submit_research_bundle tool. Search 3-6 times before submitting. Don't make things up — if you couldn't find good material on something, leave that field shorter.`;
 
 export async function runResearch(client, courseBrief, mod, opts = {}) {
@@ -146,7 +148,9 @@ export async function runResearch(client, courseBrief, mod, opts = {}) {
       pdfBlock
     : '';
 
-  const userText = `Research material for this module so it can be turned into learning content.
+  const userText = `Today's date: ${new Date().toISOString().slice(0, 10)}
+
+Research material for this module so it can be turned into learning content.
 
 Course: ${courseBrief.title} — ${courseBrief.subtitle}
 Learner: ${courseBrief.learner_persona}

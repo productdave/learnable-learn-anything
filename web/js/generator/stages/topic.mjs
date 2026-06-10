@@ -253,6 +253,8 @@ ${tone.systemFragment}
 VOICE EXEMPLARS (anonymous reference samples — match this style, do not quote):
 ${tone.exemplars.map((e, i) => `Sample ${i + 1}:\n${e}`).join('\n\n')}
 
+RECENCY: today's date is ${new Date().toISOString().slice(0, 10)}. Your training data may be 1-2 years behind it. Where the research bundle names newer models, tools, versions, or events than you remember, TRUST THE BUNDLE — it came from live web search. Never frame the present as your training era ("new in 2024", "the latest GPT-4o") unless the research bundle confirms it's still current.
+
 Important formatting:
 - "concept" content is HTML. Wrap paragraphs in <p>. Use <strong> for 2-4 inline keywords per paragraph. Use <em> sparingly.
 - "callout" content is plain text — no HTML tags.
