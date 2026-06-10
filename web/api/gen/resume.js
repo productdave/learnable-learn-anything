@@ -5,6 +5,7 @@
 // checkpoint (brief, research per module, topics_by_key). Skips work that
 // already finished — no re-billing.
 
+import { waitUntil } from '@vercel/functions';
 import { readJsonBody, userFromRequest, readApiKey } from '../_lib/supabase-server.mjs';
 import { runGeneration } from '../_lib/gen-runner.mjs';
 
@@ -47,8 +48,8 @@ export default async function handler(req, res) {
 
   res.status(200).json({ jobId, resumed: true });
 
-  try {
-    await runGeneration({
+  waitUntil(
+    runGeneration({
       supabase,
       jobId,
       ownerId: user.id,
@@ -61,8 +62,8 @@ export default async function handler(req, res) {
         topics_by_key: job.topics_by_key || {},
         failures: job.failures || []
       }
-    });
-  } catch (err) {
-    console.error(`[/api/gen/resume] runner threw for ${jobId}:`, err);
-  }
+    }).catch((err) => {
+      console.error(`[/api/gen/resume] runner threw for ${jobId}:`, err);
+    })
+  );
 }

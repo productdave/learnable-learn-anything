@@ -8,6 +8,7 @@
 // finishes or maxDuration is hit. Real-time status updates land in the
 // generation_jobs row; the client subscribes to those via Realtime.
 
+import { waitUntil } from '@vercel/functions';
 import { readJsonBody, userFromRequest, readApiKey } from '../_lib/supabase-server.mjs';
 import { runGeneration } from '../_lib/gen-runner.mjs';
 
@@ -54,13 +55,14 @@ export default async function handler(req, res) {
   });
   if (insertErr) return res.status(500).json({ error: 'Could not create job: ' + insertErr.message });
 
-  // Respond immediately so the client UI can switch to progress mode. The
-  // Vercel runtime keeps the function alive until the awaited promise (the
-  // generation pipeline) settles, even after we've sent the response.
+  // Respond immediately so the client UI can switch to progress mode, then
+  // keep the pipeline running via waitUntil — the officially supported way
+  // to continue work after the response on Vercel. Without it the runtime
+  // may freeze the function the moment the response is sent.
   res.status(200).json({ jobId });
 
-  try {
-    await runGeneration({
+  waitUntil(
+    runGeneration({
       supabase,
       jobId,
       ownerId: user.id,
@@ -68,10 +70,10 @@ export default async function handler(req, res) {
       userBrief,
       pdfRefs,
       checkpoint: null
-    });
-  } catch (err) {
-    // Errors are already persisted on the row by the runner; nothing more to
-    // do here. Just log so Vercel captures it.
-    console.error(`[/api/gen/start] runner threw for ${jobId}:`, err);
-  }
+    }).catch((err) => {
+      // Errors are already persisted on the row by the runner; just log so
+      // Vercel captures it.
+      console.error(`[/api/gen/start] runner threw for ${jobId}:`, err);
+    })
+  );
 }
