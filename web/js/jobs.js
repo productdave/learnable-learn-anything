@@ -65,14 +65,26 @@ export function onJobsChange(fn) {
   return () => listeners.delete(fn);
 }
 
-/** On boot: any 'running' job whose tab is gone (no heartbeat in 60s) is marked interrupted. */
+/** Watchdog — called at boot AND on an interval while the page is open.
+ *  - 'running' jobs with no heartbeat go 'interrupted' (Resume/Delete appear).
+ *    Cloud jobs get a longer leash (3 min): a single Stage-3 topic call can
+ *    take 45s+ between row updates, and Realtime keeps lastUpdatedAt fresh
+ *    while the function is alive.
+ *  - 'cancelling' jobs stuck > 60s flip to 'failed' so the card regains its
+ *    Delete button instead of showing "Draining…" forever (happens when the
+ *    cancel was sent to a runner that wasn't actually running the job). */
 export function markInterruptedIfStale() {
   const all = readAll();
-  const cutoff = Date.now() - STALE_MS;
+  const now = Date.now();
   let changed = false;
   for (const j of Object.values(all)) {
-    if (j.status === 'running' && j.lastUpdatedAt < cutoff) {
+    const staleMs = j.runner === 'cloud' ? 3 * 60 * 1000 : STALE_MS;
+    if (j.status === 'running' && j.lastUpdatedAt < now - staleMs) {
       j.status = 'interrupted';
+      changed = true;
+    } else if (j.status === 'cancelling' && j.lastUpdatedAt < now - STALE_MS) {
+      j.status = 'failed';
+      j.error = 'Cancel timed out — the runner may have already stopped. Safe to delete.';
       changed = true;
     }
   }

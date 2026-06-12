@@ -81,6 +81,11 @@ export async function startCloudGeneration(jobId, userBrief) {
   const data = await resp.json();
   const finalJobId = data.jobId || jobId;
 
+  // Tag the job with its runner so Cancel / Resume route to the right place.
+  // (Cancelling a cloud job via the SW — or vice versa — silently no-ops and
+  // leaves the card stuck in "Draining…".)
+  updateJob(finalJobId, { runner: 'cloud' });
+
   // 4. Subscribe to row updates → fan into jobs registry.
   subscribeToJob(finalJobId);
   return finalJobId;
@@ -90,12 +95,24 @@ export async function startCloudGeneration(jobId, userBrief) {
 export async function cancelCloudGeneration(jobId) {
   updateJob(jobId, { status: 'cancelling', message: 'Cancelling — waiting for in-flight calls to drain…' });
   const token = await getAccessToken();
-  if (!token) return;
-  await fetch('/api/gen/cancel', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify({ jobId })
-  }).catch(() => {});
+  if (token) {
+    await fetch('/api/gen/cancel', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      body: JSON.stringify({ jobId })
+    }).catch(() => {});
+  }
+  // Safety net: if no cancelled/terminal row update lands within 60s (the
+  // function already exited, the row doesn't exist, Realtime dropped), clean
+  // up locally so the card doesn't sit in "Draining…" forever.
+  setTimeout(async () => {
+    const j = getJob(jobId);
+    if (!j || j.status !== 'cancelling') return;
+    if (j.savedCourseId) {
+      try { (await import('./user-courses.js')).removeUserCourse(j.savedCourseId); } catch {}
+    }
+    removeJob(jobId);
+  }, 60_000);
 }
 
 /** Resume an interrupted / failed cloud generation from its checkpoint. */
@@ -197,6 +214,7 @@ function applyJobRow(row) {
     } catch {}
   }
   const patch = {
+    runner: 'cloud',   // rehydrated rows are cloud jobs by definition
     status: mapStatus(row.status),
     stage: row.stage,
     message: row.message || '',

@@ -9,7 +9,7 @@
 //   accurate as long as the SW is still working.)
 // - Exposes startGeneration() to fire a job off in the SW.
 
-import { updateJob, getJob, createJob, removeJob } from './jobs.js';
+import { updateJob, getJob, createJob, removeJob, listActiveJobs } from './jobs.js';
 import { saveUserCourse, getUserCourse, removeUserCourse } from './user-courses.js';
 import { invalidateCourseCache } from './course-loader.js';
 
@@ -212,6 +212,14 @@ export async function resumeMissing(courseId) {
   }
   if (!missingTopics.length) return null; // nothing to do
 
+  // Dedupe: remove any older non-running job pointing at this course so each
+  // retry doesn't pile another card onto the dashboard.
+  for (const old of listActiveJobs()) {
+    if (old.savedCourseId === courseId && old.status !== 'running' && old.status !== 'cancelling') {
+      removeJob(old.id);
+    }
+  }
+
   // Create a job to track progress.
   const job = createJob({
     topic: saved.config.title,
@@ -221,6 +229,7 @@ export async function resumeMissing(courseId) {
   // Pre-fill the job's outline so the dashboard card looks coherent immediately.
   updateJob(job.id, {
     stage: 'topics',
+    runner: 'sw',                    // retry-missing runs on the Service Worker
     title: saved.config.title,
     message: `Retrying ${missingTopics.length} topic${missingTopics.length === 1 ? '' : 's'}…`,
     topicsTotal: missingTopics.length,
@@ -294,6 +303,8 @@ export async function startGeneration(jobId, userBrief, apiKey) {
     type: 'gen-start',
     jobId, userBrief, apiKey
   });
+  // Tag the runner so Cancel / Resume route here, not to the cloud API.
+  updateJob(jobId, { runner: 'sw' });
 }
 
 /** Ask the SW whether it remembers the result of a job (used after reload). */

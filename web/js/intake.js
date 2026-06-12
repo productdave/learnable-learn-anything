@@ -11,7 +11,7 @@ import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
 import { startGeneration as swStart, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
-import { cloudGenAvailable, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration } from './cloud-gen-client.js?v=1';
+import { cloudGenAvailable, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration } from './cloud-gen-client.js?v=2';
 import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
 
 let modal = null;
@@ -371,6 +371,7 @@ async function startGeneration(jobId, userBrief) {
     await swStart(jobId, userBrief, getApiKey());
   } catch (err) {
     console.warn('[intake] SW path unavailable, falling back to in-page generation:', err.message);
+    updateJob(jobId, { runner: 'page' });
     runInPageGeneration(jobId, userBrief);
   }
 }
@@ -535,9 +536,10 @@ function wireProgressActions(card, jobId) {
   card.querySelector('.intake-close')?.addEventListener('click', close);
   card.querySelector('[data-retry]')?.addEventListener('click', () => retry(jobId));
   card.querySelector('[data-resume]')?.addEventListener('click', async () => {
-    // Prefer cloud resume when signed in (the row + checkpoint live in
-    // generation_jobs). Fall back to SW resume from in-memory checkpoint.
-    if (cloudGenAvailable()) {
+    // Route by where the job actually ran — a cloud resume for an SW job
+    // 404s, an SW resume for a cloud job no-ops. Both leave the user stuck.
+    const job = getJob(jobId);
+    if (job?.runner === 'cloud' && cloudGenAvailable()) {
       try { await resumeCloudGeneration(jobId); return; }
       catch (err) { console.warn('[intake] cloud resume failed:', err.message); }
     }
@@ -546,7 +548,8 @@ function wireProgressActions(card, jobId) {
   });
   card.querySelector('[data-cancel]')?.addEventListener('click', () => {
     if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
-    if (cloudGenAvailable()) cancelCloudGeneration(jobId);
+    const job = getJob(jobId);
+    if (job?.runner === 'cloud') cancelCloudGeneration(jobId);
     else swCancel(jobId);
     close();
   });
@@ -637,9 +640,14 @@ function formatElapsed(ms) {
   return `${m}m ${rs.toString().padStart(2, '0')}s`;
 }
 
-/** Collapsible "Failures (N)" section that shows each topic error in full. */
-function failuresHTML(failures) {
-  if (!failures || !failures.length) return '';
+/** Collapsible "Failures (N)" section that shows each topic error in full.
+ *  Deduped by module/topic (keeping the most recent attempt) so retries don't
+ *  inflate the count — "22 topics failed" on a 12-topic course confuses. */
+function failuresHTML(rawFailures) {
+  if (!rawFailures || !rawFailures.length) return '';
+  const byKey = new Map();
+  for (const f of rawFailures) byKey.set(`${f.moduleId}/${f.topicId}`, f); // later entries win
+  const failures = [...byKey.values()];
   return `
     <details class="intake-failures">
       <summary>

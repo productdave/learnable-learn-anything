@@ -7,10 +7,10 @@ import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
 import { initAuth, getUser, onUserChange } from './auth.js?v=5';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=15';
+import { openIntake, openIntakeForJob } from './intake.js?v=16';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
-import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=1';
+import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=2';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';
 import { initCourseSync, syncCoursesNow } from './course-sync.js?v=1';
 
@@ -456,8 +456,11 @@ function wireJobsSection(container) {
       if (action === 'open' || action === 'retry') {
         openIntakeForJob(id);
       } else if (action === 'resume') {
-        // Resume from checkpoint — prefer cloud (state lives in generation_jobs).
-        if (cloudGenAvailable()) {
+        // Resume from checkpoint — route by where the job actually ran.
+        // (Sending a cloud resume for an SW job 404s; an SW resume for a
+        // cloud job no-ops. Both leave the user stuck.)
+        const job = getJobLazy(id);
+        if (job?.runner === 'cloud' && cloudGenAvailable()) {
           try { await resumeCloudGeneration(id); openIntakeForJob(id); return; }
           catch (err) { console.warn('[dashboard] cloud resume failed:', err.message); }
         }
@@ -466,7 +469,8 @@ function wireJobsSection(container) {
         else openIntakeForJob(id);  // fallback opens the modal, which can full-restart
       } else if (action === 'cancel') {
         if (!confirm('Cancel this generation? Anything created so far will be discarded.')) return;
-        if (cloudGenAvailable()) cancelCloudGeneration(id);
+        const job = getJobLazy(id);
+        if (job?.runner === 'cloud') cancelCloudGeneration(id);
         else swCancel(id);
       } else if (action === 'delete-job') {
         if (!confirm('Delete this generation? Any partial work is discarded — this cannot be undone.')) return;
@@ -676,6 +680,10 @@ async function init() {
   await loadIcons();
   initTheme();
   markInterruptedIfStale();
+  // Re-run the watchdog while the page is open — otherwise a job whose runner
+  // died (SW replaced by a deploy, cloud function timed out, cancel that never
+  // landed) shows "running"/"Draining…" forever until a manual refresh.
+  setInterval(markInterruptedIfStale, 30 * 1000);
   await initAuth();
   bridgeAuthIdentity();
   initSync();
