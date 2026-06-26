@@ -2289,6 +2289,10 @@
 .chat-send-btn:disabled { opacity: 0.45; cursor: default; }
 
 @media (max-width: 768px) {
+  .intake-agent-roster {
+    grid-template-columns: 1fr;
+  }
+
   #chat-panel {
     width: 100%;
     top: auto;
@@ -2883,6 +2887,49 @@
 .intake-close:hover { background: var(--bg-secondary); color: var(--text-primary); }
 .intake-title { font-size: var(--font-xl); font-weight: 700; margin: 0 0 var(--space-2); color: var(--text-primary); }
 .intake-sub { font-size: var(--font-sm); color: var(--text-secondary); line-height: 1.5; margin: 0 0 var(--space-5); }
+
+.intake-agent-roster {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+}
+
+.intake-agent {
+  min-width: 0;
+  padding: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  opacity: 0.62;
+}
+
+.intake-agent.active {
+  opacity: 1;
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-card));
+}
+
+.intake-agent span,
+.intake-agent small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.intake-agent span {
+  color: var(--text-primary);
+  font-size: var(--font-xs);
+  font-weight: 800;
+}
+
+.intake-agent small {
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: 650;
+}
 .intake-form { display: flex; flex-direction: column; gap: var(--space-4); }
 .intake-label { display: flex; flex-direction: column; gap: var(--space-2); }
 .intake-label-text {
@@ -3207,6 +3254,91 @@
 }
 .intake-outline-list li:first-child { border-top: none; }
 .intake-outline-list li span { color: var(--text-tertiary); font-size: var(--font-xs); white-space: nowrap; }
+
+.intake-review-card {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-lg);
+}
+.intake-review-kicker {
+  color: var(--text-tertiary);
+  font-size: var(--font-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+.intake-review-card h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--text-primary);
+  font-size: var(--font-lg);
+}
+.intake-review-card p {
+  margin: 0 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.5;
+}
+.intake-review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.intake-review-meta span {
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-card));
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+.intake-review-list {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.intake-review-list section {
+  padding: var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+.intake-review-list strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  margin-bottom: var(--space-1);
+}
+.intake-review-list ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.45;
+}
+.intake-review-feedback { margin-top: var(--space-4); }
+
+@media (max-width: 640px) {
+  .intake-stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .intake-stage {
+    min-width: 0;
+    padding: var(--space-2);
+  }
+
+  .intake-stage span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 
 /* Library card "your course" tag */
 .library-card--user { position: relative; }

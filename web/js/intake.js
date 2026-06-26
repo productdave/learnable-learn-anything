@@ -6,17 +6,27 @@
 // dismissal. (A real page refresh kills the in-flight API calls — those jobs
 // land as 'interrupted' with a Retry option.)
 
-import { hasApiKey, setApiKey, getApiKey, generateCourse } from './generator/index.js';
+import {
+  hasApiKey,
+  setApiKey,
+  getApiKey,
+  generateCourse,
+  designCourseBrief,
+  researchCourseBrief,
+  writeCourseFromResearch
+} from './generator/index.js?v=2';
 import { saveUserCourse } from './user-courses.js';
 import { kickSync } from './sync.js?v=2';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js';
 import { startGeneration as swStart, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
-import { cloudGenAvailable, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration } from './cloud-gen-client.js?v=2';
+import { cloudGenAvailable, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration } from './cloud-gen-client.js?v=3';
 import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
+import { COURSE_AGENT_SEQUENCE, agentMessage, agentNameForStage } from './generator/agents.mjs';
 
 let modal = null;
 let unsubJob = null;        // currently-rendered job's listener
 let renderedJobId = null;
+const reviewRuns = new Map(); // jobId -> { userBrief, brief, context, researchResults }
 
 // PDF upload state — files the user has picked for the *current* draft.
 // Reset every time renderForm() runs. Kept module-scope (not in FormData)
@@ -53,6 +63,13 @@ export function openIntake() {
   renderForm();
 }
 
+/** Open the generation form with fields already filled by the agent home. */
+export function openIntakeWithDraft(draft = {}) {
+  ensureModal();
+  modal.style.display = '';
+  renderForm(draft);
+}
+
 /** Open the progress view for an already-running (or interrupted) job. */
 export function openIntakeForJob(jobId) {
   ensureModal();
@@ -62,7 +79,7 @@ export function openIntakeForJob(jobId) {
 
 // ---- form ---------------------------------------------------------
 
-function renderForm() {
+function renderForm(draft = {}) {
   if (unsubJob) { unsubJob(); unsubJob = null; }
   renderedJobId = null;
   pickedPdfs = [];  // fresh draft = fresh file list
@@ -146,12 +163,23 @@ function renderForm() {
 
       <div class="intake-actions">
         <button type="button" class="intake-cancel">Cancel</button>
-        <button type="submit" class="intake-submit">Generate course</button>
+        <button type="submit" class="intake-submit">Start with Curriculum Designer</button>
       </div>
       <div class="intake-error" data-error style="display:none"></div>
     </form>
   `;
   const card = modal.querySelector('.intake-card');
+  const form = card.querySelector('.intake-form');
+  if (form) {
+    form.elements.topic.value = draft.topic || '';
+    form.elements.source_text.value = draft.source_text || '';
+    form.elements.source_urls.value = Array.isArray(draft.source_urls)
+      ? draft.source_urls.join('\n')
+      : (draft.source_urls || '');
+    form.elements.goal.value = draft.goal || '';
+    form.elements.starting_point.value = draft.starting_point || '';
+    form.elements.depth.value = draft.depth || 'Solid foundation';
+  }
   card.querySelector('.intake-close').addEventListener('click', close);
   card.querySelector('.intake-cancel').addEventListener('click', close);
   card.querySelector('.intake-form').addEventListener('submit', onSubmit);
@@ -164,19 +192,11 @@ function renderForm() {
 function renderRunMode(card) {
   const host = card.querySelector('[data-runmode]');
   if (!host) return;
-  if (cloudGenAvailable()) {
-    host.innerHTML = `
-      <div class="intake-runmode-pill intake-runmode-pill--cloud">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-        Cloud generation · survives refresh + tab close
-      </div>`;
-  } else {
-    host.innerHTML = `
-      <div class="intake-runmode-pill intake-runmode-pill--browser">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-        Browser-only · sign in for cloud generation that survives refresh
-      </div>`;
-  }
+  host.innerHTML = `
+    <div class="intake-runmode-pill intake-runmode-pill--browser">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      Human review workflow · pauses after curriculum and research
+    </div>`;
 }
 
 // ---- PDF dropzone --------------------------------------------------
@@ -339,8 +359,77 @@ function onSubmit(e) {
   };
 
   const job = createJob(userBrief);
-  startGeneration(job.id, userBrief);
+  startReviewableGeneration(job.id, userBrief);
   renderProgress(job.id);
+}
+
+async function startReviewableGeneration(jobId, userBrief) {
+  updateJob(jobId, { runner: 'human-loop', status: 'running', stage: 'intake', message: agentMessage('intake') });
+  try {
+    const { brief, context } = await designCourseBrief(userBrief, (p) => {
+      if (p.stage === 'fetching_urls') {
+        const t = p.total || 0, d = p.done || 0;
+        updateJob(jobId, { stage: 'intake', message: t > 1 ? `${agentNameForStage('intake')} is reading ${d}/${t} source URLs…` : `${agentNameForStage('intake')} is reading source URL…` });
+      } else if (p.stage === 'intake') {
+        updateJob(jobId, { stage: 'intake', message: agentMessage('intake') });
+      }
+    });
+    reviewRuns.set(jobId, { userBrief, brief, context });
+    updateJob(jobId, {
+      status: 'review_curriculum',
+      stage: 'intake',
+      message: 'Review the curriculum direction before research starts.',
+      title: brief.title,
+      outline: {
+        title: brief.title,
+        subtitle: brief.subtitle,
+        modules: brief.modules.map(m => ({ title: m.title, topicCount: m.topics.length }))
+      },
+      review: { kind: 'curriculum', brief }
+    });
+  } catch (err) {
+    updateJob(jobId, { status: 'failed', error: err.message || String(err) });
+    console.error('[intake] curriculum review step failed:', err);
+  }
+}
+
+async function continueToResearch(jobId, feedback = '') {
+  const run = reviewRuns.get(jobId);
+  if (!run?.brief || !run?.context) return;
+  if (feedback.trim()) {
+    run.brief.human_feedback = [run.brief.human_feedback, feedback.trim()].filter(Boolean).join('\n\n');
+  }
+  updateJob(jobId, { status: 'running', stage: 'research', message: `${agentNameForStage('research')} is researching ${run.brief.modules.length} module${run.brief.modules.length === 1 ? '' : 's'}…` });
+  try {
+    const researchResults = await researchCourseBrief(run.brief, run.context, (p) => {
+      if (p.stage === 'research') updateJob(jobId, { stage: 'research', message: agentMessage('research') });
+      if (p.stage === 'research_module') {
+        const done = (getJob(jobId)?.researchDone || 0) + 1;
+        updateJob(jobId, { stage: 'research', researchDone: done, message: `${agentNameForStage('research')} finished ${done}/${run.brief.modules.length} modules…` });
+      }
+    });
+    run.researchResults = researchResults;
+    reviewRuns.set(jobId, run);
+    updateJob(jobId, {
+      status: 'review_research',
+      stage: 'research',
+      message: 'Review the research direction before lessons are written.',
+      review: { kind: 'research', researchResults }
+    });
+  } catch (err) {
+    updateJob(jobId, { status: 'failed', error: err.message || String(err) });
+    console.error('[intake] research review step failed:', err);
+  }
+}
+
+async function continueToLessonWriting(jobId, feedback = '') {
+  const run = reviewRuns.get(jobId);
+  if (!run?.brief || !run?.context || !run?.researchResults) return;
+  if (feedback.trim()) {
+    run.brief.human_feedback = [run.brief.human_feedback, feedback.trim()].filter(Boolean).join('\n\n');
+  }
+  updateJob(jobId, { status: 'running', stage: 'topics', message: agentMessage('topics'), topicsDone: 0, topicsTotal: 0 });
+  runInPageWritingFromReview(jobId, run);
 }
 
 // Kicks off the generator and threads progress into the job. Tries the
@@ -382,12 +471,12 @@ function runInPageGeneration(jobId, userBrief) {
       const t = p.total || 0, d = p.done || 0;
       updateJob(jobId, { stage: 'intake', message: t > 1 ? `Reading ${d}/${t} source URLs…` : 'Reading source URL…' });
     }
-    else if (p.stage === 'intake')      updateJob(jobId, { stage: 'intake',  message: 'Designing the outline…' });
+    else if (p.stage === 'intake')      updateJob(jobId, { stage: 'intake',  message: agentMessage('intake') });
     else if (p.stage === 'intake_done') {
       const b = p.brief;
       updateJob(jobId, {
         stage: 'research',
-        message: `Researching ${b.modules.length} module${b.modules.length === 1 ? '' : 's'} in parallel…`,
+        message: `${agentNameForStage('research')} is researching ${b.modules.length} module${b.modules.length === 1 ? '' : 's'} in parallel…`,
         title: b.title,
         outline: {
           title: b.title,
@@ -396,9 +485,9 @@ function runInPageGeneration(jobId, userBrief) {
         }
       });
     }
-    else if (p.stage === 'topics') updateJob(jobId, { stage: 'topics', message: 'Writing topic content…', topicsDone: 0, topicsTotal: p.total });
+    else if (p.stage === 'topics') updateJob(jobId, { stage: 'topics', message: agentMessage('topics'), topicsDone: 0, topicsTotal: p.total });
     else if (p.stage === 'topic_done' || p.stage === 'topic_failed') updateJob(jobId, { stage: 'topics', topicsDone: p.done, topicsTotal: p.total });
-    else if (p.stage === 'assemble') updateJob(jobId, { stage: 'assemble', message: 'Finalising…' });
+    else if (p.stage === 'assemble') updateJob(jobId, { stage: 'assemble', message: agentMessage('assemble') });
   }).then(({ course, brief, research }) => {
     const savedId = saveUserCourse(course, { _brief: brief, _research: research });
     // Classify outcome: all topics OK → completed; some OK + some missing →
@@ -415,6 +504,29 @@ function runInPageGeneration(jobId, userBrief) {
   }).catch(err => {
     updateJob(jobId, { status: 'failed', error: err.message || String(err) });
     console.error('[intake] in-page generation failed:', err);
+  });
+}
+
+function runInPageWritingFromReview(jobId, run) {
+  writeCourseFromResearch(run.brief, run.researchResults, run.context, (p) => {
+    if (p.stage === 'topics') updateJob(jobId, { stage: 'topics', message: agentMessage('topics'), topicsDone: 0, topicsTotal: p.total });
+    else if (p.stage === 'topic_done' || p.stage === 'topic_failed') updateJob(jobId, { stage: 'topics', topicsDone: p.done, topicsTotal: p.total });
+    else if (p.stage === 'assemble') updateJob(jobId, { stage: 'assemble', message: agentMessage('assemble') });
+  }).then(({ course, brief, research }) => {
+    const savedId = saveUserCourse(course, { _brief: brief, _research: research });
+    const failedTopics = course.failedTopics || [];
+    const failedCount = failedTopics.length;
+    let totalTopics = 0;
+    for (const m of (course.curriculum?.modules || [])) totalTopics += (m.topics || []).length;
+    let status, message;
+    if (failedCount === 0)                { status = 'completed'; message = 'Done!'; }
+    else if (failedCount >= totalTopics)  { status = 'failed';    message = `Generation failed — no topics produced (${failedCount} errors).`; }
+    else                                  { status = 'partial';   message = `${totalTopics - failedCount} of ${totalTopics} topics done — ${failedCount} failed.`; }
+    reviewRuns.delete(jobId);
+    updateJob(jobId, { status, stage: 'done', message, savedCourseId: savedId, failedCount, totalTopics, review: null });
+  }).catch(err => {
+    updateJob(jobId, { status: 'failed', error: err.message || String(err) });
+    console.error('[intake] reviewable lesson writing failed:', err);
   });
 }
 
@@ -474,6 +586,7 @@ function progressHTML(job) {
   const isCancelling = status === 'cancelling';
   const isFailed = status === 'failed';
   const isInterrupted = status === 'interrupted';
+  const isReview = status === 'review_curriculum' || status === 'review_research';
   const canResume = hasCheckpoint(job);
   const pct = computeProgressPct(job);
   const elapsed = job?.startedAt ? formatElapsed(Date.now() - job.startedAt) : '';
@@ -484,6 +597,13 @@ function progressHTML(job) {
     </button>
     <h2 class="intake-title" data-job-title>${escape(job?.title || 'Generating your course…')}</h2>
     <p class="intake-sub" data-msg>${escape(job?.message || '')}</p>
+    <div class="intake-agent-roster">
+      ${COURSE_AGENT_SEQUENCE.map(agent => `
+        <div class="intake-agent ${agent.stage === stage || (agent.id === 'practiceDesigner' && stage === 'topics') ? 'active' : ''}">
+          <span>${escape(agent.name)}</span>
+          <small>${escape(agent.short)}</small>
+        </div>`).join('')}
+    </div>
 
     ${isRunning || isCancelling ? `
       <div class="intake-progress">
@@ -495,13 +615,14 @@ function progressHTML(job) {
       </div>` : ''}
 
     <div class="intake-stages">
-      ${stageHTML('intake', 'Outline', stage, status)}
-      ${stageHTML('research', 'Research', stage, status)}
-      ${stageHTML('topics', `Topics ${job?.topicsTotal ? `${job.topicsDone}/${job.topicsTotal}` : ''}`.trim(), stage, status, 'topics-label')}
+      ${stageHTML('intake', 'Curriculum review', stage, status)}
+      ${stageHTML('research', 'Research review', stage, status)}
+      ${stageHTML('topics', `Lessons ${job?.topicsTotal ? `${job.topicsDone}/${job.topicsTotal}` : ''}`.trim(), stage, status, 'topics-label')}
       ${stageHTML('done', 'Ready', stage, status)}
     </div>
 
     <div class="intake-outline" data-outline>${outlineHTML(job)}</div>
+    ${isReview ? reviewHTML(job) : ''}
     ${(job?.failures || []).length ? failuresHTML(job.failures) : ''}
     <div class="intake-error" data-error style="${isFailed || isInterrupted ? '' : 'display:none'}">
       ${isFailed ? escape('Generation failed: ' + (job.error || 'unknown error')) : ''}
@@ -562,6 +683,58 @@ function wireProgressActions(card, jobId) {
     removeJob(jobId);
     close();
   });
+  card.querySelector('[data-review-continue]')?.addEventListener('click', () => {
+    const feedback = card.querySelector('[data-review-feedback]')?.value || '';
+    const job = getJob(jobId);
+    if (job?.status === 'review_curriculum') continueToResearch(jobId, feedback);
+    if (job?.status === 'review_research') continueToLessonWriting(jobId, feedback);
+  });
+  card.querySelector('[data-review-regenerate]')?.addEventListener('click', () => {
+    const feedback = card.querySelector('[data-review-feedback]')?.value || '';
+    const job = getJob(jobId);
+    if (job?.status === 'review_curriculum') regenerateCurriculum(jobId, feedback);
+    if (job?.status === 'review_research') rerunResearch(jobId, feedback);
+  });
+}
+
+async function regenerateCurriculum(jobId, feedback = '') {
+  const run = reviewRuns.get(jobId);
+  if (!run?.userBrief) return;
+  const revisedBrief = {
+    ...run.userBrief,
+    source_text: [run.userBrief.source_text, feedback ? `Human feedback on the previous curriculum:\n${feedback}` : '']
+      .filter(Boolean)
+      .join('\n\n')
+  };
+  updateJob(jobId, { status: 'running', stage: 'intake', message: `${agentNameForStage('intake')} is revising the curriculum…` });
+  try {
+    const { brief, context } = await designCourseBrief(revisedBrief, (p) => {
+      if (p.stage === 'intake') updateJob(jobId, { stage: 'intake', message: `${agentNameForStage('intake')} is revising the curriculum…` });
+    });
+    reviewRuns.set(jobId, { userBrief: revisedBrief, brief, context });
+    updateJob(jobId, {
+      status: 'review_curriculum',
+      stage: 'intake',
+      message: 'Review the revised curriculum direction.',
+      title: brief.title,
+      outline: {
+        title: brief.title,
+        subtitle: brief.subtitle,
+        modules: brief.modules.map(m => ({ title: m.title, topicCount: m.topics.length }))
+      },
+      review: { kind: 'curriculum', brief }
+    });
+  } catch (err) {
+    updateJob(jobId, { status: 'failed', error: err.message || String(err) });
+  }
+}
+
+async function rerunResearch(jobId, feedback = '') {
+  const run = reviewRuns.get(jobId);
+  if (!run?.brief || !run?.context) return;
+  run.brief.human_feedback = [run.brief.human_feedback, feedback.trim()].filter(Boolean).join('\n\n');
+  reviewRuns.set(jobId, run);
+  continueToResearch(jobId, '');
 }
 
 function stageHTML(name, label, currentStage, status, dataAttr) {
@@ -570,7 +743,7 @@ function stageHTML(name, label, currentStage, status, dataAttr) {
   const cur = order.indexOf(currentStage);
   let cls = '';
   if (status === 'completed' || (cur > ix)) cls = 'done';
-  else if (cur === ix && status === 'running') cls = 'active';
+  else if (cur === ix && (status === 'running' || (status === 'review_curriculum' && name === 'intake') || (status === 'review_research' && name === 'research'))) cls = 'active';
   else if (status === 'failed' || status === 'interrupted') cls = '';
   return `<div class="intake-stage ${cls}" data-stage="${name}">
     <span class="intake-stage-dot"></span>
@@ -588,6 +761,72 @@ function outlineHTML(job) {
       <ul class="intake-outline-list">
         ${o.modules.map(m => `<li><strong>${escape(m.title)}</strong><span>${m.topicCount} topic${m.topicCount === 1 ? '' : 's'}</span></li>`).join('')}
       </ul>
+    </div>`;
+}
+
+function reviewHTML(job) {
+  if (job.status === 'review_curriculum') return curriculumReviewHTML(job.review?.brief);
+  if (job.status === 'review_research') return researchReviewHTML(job.review?.researchResults || []);
+  return '';
+}
+
+function curriculumReviewHTML(brief) {
+  if (!brief) return '';
+  return `
+    <div class="intake-review-card">
+      <div class="intake-review-kicker">${escape(agentNameForStage('intake'))} checkpoint</div>
+      <h3>Does this course direction feel right?</h3>
+      <p>${escape(brief.subtitle || '')}</p>
+      <div class="intake-review-meta">
+        <span>${escape((brief.scope || '').replace('_', ' ') || 'course')}</span>
+        <span>${brief.modules?.length || 0} module${brief.modules?.length === 1 ? '' : 's'}</span>
+        <span>${(brief.modules || []).reduce((n, m) => n + (m.topics?.length || 0), 0)} topics</span>
+      </div>
+      <div class="intake-review-list">
+        ${(brief.modules || []).map(mod => `
+          <section>
+            <strong>Module ${mod.number}: ${escape(mod.title)}</strong>
+            <p>${escape(mod.description || '')}</p>
+            <ul>${(mod.topics || []).map(t => `<li>${escape(t.title)}</li>`).join('')}</ul>
+          </section>`).join('')}
+      </div>
+      ${reviewActionsHTML('Approve curriculum and research', 'Revise curriculum')}
+    </div>`;
+}
+
+function researchReviewHTML(researchResults) {
+  return `
+    <div class="intake-review-card">
+      <div class="intake-review-kicker">${escape(agentNameForStage('research'))} checkpoint</div>
+      <h3>Is the research pointing in the right direction?</h3>
+      <p>Check the concepts, examples, misconceptions, and source direction before Lesson Writer starts spending tokens on full lessons.</p>
+      <div class="intake-review-list">
+        ${researchResults.map(({ mod, bundle }) => `
+          <section>
+            <strong>${escape(mod.title)}</strong>
+            ${bundle ? `
+              <p>${escape((bundle.key_concepts || []).slice(0, 4).join(' · '))}</p>
+              <ul>
+                ${(bundle.examples || []).slice(0, 3).map(x => `<li>${escape(x)}</li>`).join('')}
+                ${(bundle.misconceptions || []).slice(0, 2).map(x => `<li>Misconception: ${escape(x)}</li>`).join('')}
+              </ul>
+            ` : `<p>Research failed for this module. You can rerun research with feedback.</p>`}
+          </section>`).join('')}
+      </div>
+      ${reviewActionsHTML('Approve research and write lessons', 'Rerun research')}
+    </div>`;
+}
+
+function reviewActionsHTML(continueLabel, regenerateLabel) {
+  return `
+    <label class="intake-label intake-review-feedback">
+      <span class="intake-label-text">Feedback for the agent</span>
+      <textarea class="intake-input intake-textarea" data-review-feedback rows="4"
+        placeholder="Add anything to fix, remove, emphasise, or use as extra context before continuing."></textarea>
+    </label>
+    <div class="intake-actions">
+      <button type="button" class="intake-cancel" data-review-regenerate>${escape(regenerateLabel)}</button>
+      <button type="button" class="intake-submit" data-review-continue>${escape(continueLabel)}</button>
     </div>`;
 }
 

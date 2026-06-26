@@ -12,6 +12,7 @@
 import { updateJob, getJob, createJob, removeJob, listActiveJobs } from './jobs.js';
 import { saveUserCourse, getUserCourse, removeUserCourse } from './user-courses.js';
 import { invalidateCourseCache } from './course-loader.js';
+import { agentMessage, agentNameForStage } from './generator/agents.mjs';
 
 let regPromise = null;
 let listenerInstalled = false;
@@ -90,11 +91,11 @@ function applyProgress(msg) {
     const total = msg.total || 0;
     const done = msg.done || 0;
     const label = total > 1
-      ? `Reading ${done}/${total} source URL${done === 1 && total !== 1 ? '' : 's'}…`
-      : 'Reading source URL…';
+      ? `${agentNameForStage('intake')} is reading ${done}/${total} source URL${done === 1 && total !== 1 ? '' : 's'}…`
+      : `${agentNameForStage('intake')} is reading source URL…`;
     updateJob(id, { stage: 'intake', message: label });
   } else if (msg.stage === 'intake') {
-    updateJob(id, { stage: 'intake', message: 'Designing the outline…' });
+    updateJob(id, { stage: 'intake', message: agentMessage('intake') });
   } else if (msg.stage === 'intake_done') {
     const b = msg.brief;
     // Persist the brief into the job's checkpoint so a future refresh can
@@ -102,7 +103,7 @@ function applyProgress(msg) {
     mergeCheckpoint(id, { brief: b });
     updateJob(id, {
       stage: 'research',
-      message: `Researching ${b.modules.length} module${b.modules.length === 1 ? '' : 's'} in parallel…`,
+      message: `${agentNameForStage('research')} is researching ${b.modules.length} module${b.modules.length === 1 ? '' : 's'} in parallel…`,
       title: b.title,
       outline: {
         title: b.title,
@@ -122,12 +123,12 @@ function applyProgress(msg) {
       const modulesTotal = j.outline?.modules?.length || j.checkpoint?.brief?.modules?.length || 0;
       const moduleTitle = (j.checkpoint?.brief?.modules || []).find(m => m.id === msg.moduleId)?.title;
       const label = msg.status === 'ok'
-        ? `Researched ${modulesDone}/${modulesTotal}${moduleTitle ? ` · just finished “${moduleTitle}”` : ''}`
-        : `Research warning${moduleTitle ? ` for “${moduleTitle}”` : ''} — continuing without it`;
+        ? `${agentNameForStage('research')} finished ${modulesDone}/${modulesTotal}${moduleTitle ? ` · “${moduleTitle}”` : ''}`
+        : `${agentNameForStage('research')} warning${moduleTitle ? ` for “${moduleTitle}”` : ''} — continuing without it`;
       updateJob(id, { stage: 'research', message: label });
     }
   } else if (msg.stage === 'topics') {
-    updateJob(id, { stage: 'topics', message: 'Writing topic content…', topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
+    updateJob(id, { stage: 'topics', message: agentMessage('topics'), topicsDone: msg.done || 0, topicsTotal: msg.total || 0 });
   } else if (msg.stage === 'topic_done' || msg.stage === 'topic_failed') {
     // Checkpoint successful topics so resume only re-runs the missing ones.
     if (msg.stage === 'topic_done' && msg.content) addCheckpointTopic(id, msg.moduleId, msg.topicId, msg.content);
@@ -139,12 +140,12 @@ function applyProgress(msg) {
       const t = mod?.topics?.find(t => t.id === msg.topicId);
       if (t?.title) topicTitle = t.title;
     }
-    const verb = msg.stage === 'topic_done' ? 'Wrote' : 'Skipped (error)';
+    const verb = msg.stage === 'topic_done' ? `${agentNameForStage('topics')} wrote` : `${agentNameForStage('topics')} skipped`;
     const patch = {
       stage: 'topics',
       topicsDone: msg.done || 0,
       topicsTotal: msg.total || 0,
-      message: `${verb} “${topicTitle}” — ${msg.done || 0}/${msg.total || 0} topics done`,
+      message: `${verb} “${topicTitle}” — ${msg.done || 0}/${msg.total || 0} lessons checked`,
       lastTopicTitle: topicTitle
     };
     // On failure: append a structured entry to job.failures so the modal +
@@ -167,7 +168,7 @@ function applyProgress(msg) {
     }
     updateJob(id, patch);
   } else if (msg.stage === 'assemble') {
-    updateJob(id, { stage: 'assemble', message: 'Finalising…' });
+    updateJob(id, { stage: 'assemble', message: agentMessage('assemble') });
   } else if (msg.stage === 'done') {
     const j = getJob(id);
     if (j?.savedCourseId && (j.status === 'completed' || j.status === 'partial')) return; // already handled
@@ -361,7 +362,8 @@ export async function resumeFromCheckpoint(jobId) {
   }
   const apiKey = localStorage.getItem('gametheory-api-key') || '';
   // Reset job state to running; preserve checkpoint + outline so UI stays coherent.
-  updateJob(jobId, { status: 'running', error: null, message: 'Resuming from checkpoint…', stage: job.checkpoint.topicsByKey ? 'topics' : (job.checkpoint.researchByModule ? 'research' : 'intake') });
+  const resumeStage = job.checkpoint.topicsByKey ? 'topics' : (job.checkpoint.researchByModule ? 'research' : 'intake');
+  updateJob(jobId, { status: 'running', error: null, message: agentMessage(resumeStage, 'Resuming from checkpoint…'), stage: resumeStage });
   navigator.serviceWorker.controller.postMessage({
     type: 'gen-resume-checkpoint',
     jobId,

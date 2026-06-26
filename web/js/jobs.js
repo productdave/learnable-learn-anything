@@ -3,6 +3,8 @@
 // and a page refresh can detect interrupted jobs (in-flight API calls die
 // when the tab does — we can't auto-resume them but we can surface a Retry).
 
+import { agentMessage } from './generator/agents.mjs';
+
 const KEY = 'learnable-gen-jobs';
 const listeners = new Set();
 const STALE_MS = 60 * 1000; // a 'running' job with no progress in >60s = the tab/refresh killed it
@@ -26,7 +28,7 @@ export function createJob(brief) {
       : (brief.source_text ? 'New course from your text' : 'New course'),
     status: 'running',     // running | interrupted | completed | failed
     stage: 'intake',       // intake | research | topics | assemble | done
-    message: 'Designing the outline…',
+    message: agentMessage('intake'),
     topicsDone: 0,
     topicsTotal: 0,
     outline: null,         // populated when Stage 1 returns: { title, subtitle, modules: [...] }

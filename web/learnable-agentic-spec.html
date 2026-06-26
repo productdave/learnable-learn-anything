@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learnable Agentic Product Spec</title>
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --paper: #ffffff;
+      --ink: #18181b;
+      --muted: #5f6368;
+      --soft: #ececea;
+      --line: #deded9;
+      --accent: #4338ca;
+      --accent-soft: #eef2ff;
+      --green: #047857;
+      --amber: #b45309;
+      --rose: #be123c;
+      --radius: 10px;
+      --shadow: 0 18px 50px rgba(24, 24, 27, 0.08);
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .shell {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 28px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      padding: 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 28px rgba(24, 24, 27, 0.05);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      font-weight: 850;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      background: var(--accent);
+      color: white;
+      font-weight: 900;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero,
+    .section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 34px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 880px;
+      font-size: clamp(34px, 5vw, 62px);
+    }
+
+    h2 {
+      font-size: clamp(24px, 3vw, 34px);
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .metric {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fbfbfa;
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .section {
+      padding: 28px;
+      scroll-margin-top: 24px;
+    }
+
+    .section > p {
+      max-width: 820px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .card {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fbfbfa;
+    }
+
+    .card p,
+    .card ul,
+    .card ol {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.green { background: #ecfdf5; color: var(--green); }
+    .tag.amber { background: #fffbeb; color: var(--amber); }
+    .tag.rose { background: #fff1f2; color: var(--rose); }
+
+    .workflow {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fbfbfa;
+    }
+
+    .num {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      font-weight: 850;
+    }
+
+    .step h3 { margin-bottom: 4px; }
+    .step p { margin: 0; color: var(--muted); }
+
+    .step .owner {
+      justify-self: end;
+      white-space: nowrap;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #f4f4f2;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fbfbfa;
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 16px;
+      font-weight: 850;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .detail-body {
+      padding: 0 16px 16px;
+      color: var(--muted);
+    }
+
+    .tabs {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fbfbfa;
+      overflow: hidden;
+    }
+
+    .tab-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 18px;
+    }
+
+    .tab-panel.active { display: block; }
+
+    .schema {
+      position: relative;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 9px;
+      background: #111827;
+      color: #e5e7eb;
+      overflow: auto;
+    }
+
+    .schema button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      padding: 6px 9px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    pre {
+      margin: 0;
+      padding-top: 24px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .table-wrap {
+      margin-top: 18px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: #fbfbfa;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f2f2ef;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px;
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: var(--accent-soft);
+    }
+
+    .callout p { margin: 0; color: #312e81; }
+
+    .footer {
+      padding: 22px 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero, .section { padding: 22px; }
+      .hero-grid, .grid.two, .grid.three { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 38px minmax(0, 1fr); }
+      .step .owner { grid-column: 2; justify-self: start; }
+    }
+
+    @media (max-width: 520px) {
+      .nav { grid-template-columns: 1fr; }
+      .hero, .section, .sidebar { border-radius: 8px; }
+      .step { grid-template-columns: 1fr; }
+      .step .owner { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Spec navigation">
+      <div class="brand">
+        <span class="mark">L</span>
+        <span>Learnable Spec</span>
+      </div>
+      <ol class="nav">
+        <li><a href="#thesis" class="active">Thesis</a></li>
+        <li><a href="#product">Product</a></li>
+        <li><a href="#workflow">Workflow</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#sdk">Agents SDK</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#ui">UI</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#sources">Sources</a></li>
+      </ol>
+    </aside>
+
+    <main class="main">
+      <header class="hero" id="thesis">
+        <p class="eyebrow">Product specification - June 25, 2026</p>
+        <h1>Learnable is an agent you talk to, not a SaaS dashboard you manage.</h1>
+        <p class="lede">
+          Learnable turns a learner's intent, context, files, links, notes, and feedback into a complete course.
+          It does this through a visible agent workflow: collect context, design curriculum, ask for human approval,
+          research, ask for human approval again, write lessons and practice, then review and publish the course.
+        </p>
+        <div class="hero-grid">
+          <div class="metric">
+            <strong>Core promise</strong>
+            <span>Create a course with the learner, not for the learner in a black box.</span>
+          </div>
+          <div class="metric">
+            <strong>Primary interface</strong>
+            <span>A workflow agent with human checkpoints and context intake.</span>
+          </div>
+          <div class="metric">
+            <strong>Technical spine</strong>
+            <span>OpenAI Agents SDK for orchestration, tools, handoffs, guardrails, state, and tracing.</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="section" id="product">
+        <p class="eyebrow">What Learnable Does</p>
+        <h2>A course creation agent for serious self-directed learning.</h2>
+        <p>
+          Learnable helps someone go from "I want to learn this" to a usable, personal course. It is not trying to be
+          a marketplace, corporate LMS, creator platform, or generic content generator. It is an agentic learning
+          system that asks for context, makes judgment calls, shows its intermediate work, and lets the human steer
+          before expensive lesson generation begins.
+        </p>
+        <div class="grid three">
+          <div class="card">
+            <h3>For the learner</h3>
+            <p>Say what you want to learn, add any context you already have, approve the direction, then study a course that fits your goal and starting point.</p>
+          </div>
+          <div class="card">
+            <h3>For the agent</h3>
+            <p>Coordinate specialist sub-agents, preserve source context, expose decisions, and produce structured course artifacts.</p>
+          </div>
+          <div class="card">
+            <h3>For the product</h3>
+            <p>Make the creation process legible. The user should always know which agent is working and when their feedback matters.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Positioning:</strong> Learnable is "ChatGPT for building and taking a course," but with an explicit workflow, durable course artifacts, and review gates before the agent commits to the full build.</p>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <p class="eyebrow">Core Workflow</p>
+        <h2>The learner and the agent co-create the course.</h2>
+        <div class="workflow">
+          <div class="step">
+            <span class="num">1</span>
+            <div>
+              <h3>Context intake</h3>
+              <p>The learner gives the topic, goal, current level, desired depth, files, pasted notes, URLs, constraints, examples, and "do not cover" guidance.</p>
+            </div>
+            <span class="owner">Human input</span>
+          </div>
+          <div class="step">
+            <span class="num">2</span>
+            <div>
+              <h3>Curriculum design</h3>
+              <p>The Curriculum Designer proposes the course scope, module sequence, topic map, prerequisites, outcomes, and expected difficulty.</p>
+            </div>
+            <span class="owner">Agent work</span>
+          </div>
+          <div class="step">
+            <span class="num">3</span>
+            <div>
+              <h3>Curriculum review checkpoint</h3>
+              <p>The learner approves, edits, or rejects the direction. Feedback is folded into the next design pass before research starts.</p>
+            </div>
+            <span class="owner">Human approval</span>
+          </div>
+          <div class="step">
+            <span class="num">4</span>
+            <div>
+              <h3>Research pass</h3>
+              <p>The Researcher grounds each module in sources, examples, key concepts, misconceptions, practical use cases, and diagrams worth creating.</p>
+            </div>
+            <span class="owner">Agent work</span>
+          </div>
+          <div class="step">
+            <span class="num">5</span>
+            <div>
+              <h3>Research review checkpoint</h3>
+              <p>The learner verifies the source direction, asks for more depth, removes irrelevant branches, and adds more context before lessons are written.</p>
+            </div>
+            <span class="owner">Human approval</span>
+          </div>
+          <div class="step">
+            <span class="num">6</span>
+            <div>
+              <h3>Lesson and practice creation</h3>
+              <p>The Lesson Writer and Practice Designer produce explanations, examples, quizzes, exercises, flashcards, summaries, and optional projects.</p>
+            </div>
+            <span class="owner">Agent work</span>
+          </div>
+          <div class="step">
+            <span class="num">7</span>
+            <div>
+              <h3>Review and publish</h3>
+              <p>The Reviewer checks consistency, missing assets, factual risk, level fit, quiz alignment, and course navigation before saving a version.</p>
+            </div>
+            <span class="owner">Agent work</span>
+          </div>
+          <div class="step">
+            <span class="num">8</span>
+            <div>
+              <h3>Learn and iterate</h3>
+              <p>The learner studies the course, asks the Tutor for help, and can ask Learnable to revise sections based on confusion or new goals.</p>
+            </div>
+            <span class="owner">Human plus agent</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="agents">
+        <p class="eyebrow">Agent System</p>
+        <h2>Specialists with one orchestrator, not five unrelated prompts.</h2>
+        <p>
+          Learnable should use one Course Orchestrator as the visible agent. The learner talks to this agent. Behind it,
+          specialist agents are invoked through handoffs or agent-as-tool calls depending on whether the conversation
+          should move to the specialist or simply ask the specialist for a structured artifact.
+        </p>
+        <div class="grid two">
+          <details open>
+            <summary>Course Orchestrator</summary>
+            <div class="detail-body">
+              Owns the run state, decides the next step, routes to specialists, streams progress to the UI, asks for human approval, and resolves conflicts between agents.
+            </div>
+          </details>
+          <details>
+            <summary>Context Intake Agent</summary>
+            <div class="detail-body">
+              Converts raw user input, files, URLs, notes, and constraints into a normalized learning brief. It should ask follow-up questions only when missing information would materially change the course.
+            </div>
+          </details>
+          <details>
+            <summary>Curriculum Designer</summary>
+            <div class="detail-body">
+              Creates modules, sequence, outcomes, topic boundaries, difficulty curve, prerequisites, and assessment strategy. It should optimize for learnability, not just coverage.
+            </div>
+          </details>
+          <details>
+            <summary>Researcher</summary>
+            <div class="detail-body">
+              Produces source-backed research bundles: key concepts, examples, misconceptions, diagrams, source notes, and open questions for the learner to approve.
+            </div>
+          </details>
+          <details>
+            <summary>Lesson Writer</summary>
+            <div class="detail-body">
+              Writes each lesson with a deliberate arc: why it matters, explanation, concrete example, common mistake, recap, and next step.
+            </div>
+          </details>
+          <details>
+            <summary>Practice Designer</summary>
+            <div class="detail-body">
+              Creates quizzes, exercises, flashcards, prompts, and projects that test what was just taught. It should mix recall, application, and transfer.
+            </div>
+          </details>
+          <details>
+            <summary>Reviewer</summary>
+            <div class="detail-body">
+              Checks coherence, source coverage, duplicate topics, missing practice, hallucination risk, tone, and whether lessons meet the original goal.
+            </div>
+          </details>
+          <details>
+            <summary>Learning Tutor</summary>
+            <div class="detail-body">
+              Runs after the course exists. It answers questions using the course content, adjusts explanations to the learner, and can request course updates when confusion repeats.
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" id="sdk">
+        <p class="eyebrow">OpenAI Agents SDK Design</p>
+        <h2>Use the SDK for orchestration, approvals, tools, state, and observability.</h2>
+        <p>
+          OpenAI positions the Agents SDK for apps that plan, use tools, collaborate across specialists, and maintain enough state for multi-step work. That maps cleanly to Learnable because course generation is not one prompt. It is a run with source ingestion, specialist work, approval interruptions, and final artifact assembly.
+        </p>
+        <div class="grid three">
+          <div class="card">
+            <h3>Agent definitions</h3>
+            <p>Each agent has a name, instructions, tools, optional handoffs, guardrails, and structured outputs. Learnable should version these instructions like product code.</p>
+            <div class="tag-row"><span class="tag">instructions</span><span class="tag">tools</span><span class="tag">output schema</span></div>
+          </div>
+          <div class="card">
+            <h3>Handoffs and tools</h3>
+            <p>Use handoffs when the active specialist should own a run segment. Use agents as tools when the orchestrator needs a bounded artifact from a specialist.</p>
+            <div class="tag-row"><span class="tag green">handoff</span><span class="tag green">agent as tool</span></div>
+          </div>
+          <div class="card">
+            <h3>Guardrails</h3>
+            <p>Run input checks before expensive work and output checks before saving a course. Reject unsafe, impossible, or source-conflicting instructions early.</p>
+            <div class="tag-row"><span class="tag rose">input guardrail</span><span class="tag rose">output guardrail</span></div>
+          </div>
+          <div class="card">
+            <h3>Human in the loop</h3>
+            <p>Represent curriculum and research approvals as explicit run interruptions. Store the artifact, feedback, and continuation input.</p>
+            <div class="tag-row"><span class="tag amber">approval</span><span class="tag amber">resume</span></div>
+          </div>
+          <div class="card">
+            <h3>Sessions and state</h3>
+            <p>Use server-side run records plus SDK session/conversation support so the agent can continue without resending the entire history every time.</p>
+            <div class="tag-row"><span class="tag">run state</span><span class="tag">course version</span></div>
+          </div>
+          <div class="card">
+            <h3>Tracing and evals</h3>
+            <p>Trace agent runs during development and production debugging. Evaluate workflows against known learning briefs and expected course quality criteria.</p>
+            <div class="tag-row"><span class="tag">traces</span><span class="tag">eval set</span></div>
+          </div>
+        </div>
+
+        <div class="schema">
+          <button data-copy="#agent-code">Copy</button>
+<pre id="agent-code">CourseOrchestrator
+  tools:
+    - ingest_file
+    - fetch_url
+    - search_sources
+    - save_course_version
+    - render_course_preview
+  specialist calls:
+    - ContextIntakeAgent as tool -> LearningBrief
+    - CurriculumDesigner as tool -> CoursePlan
+    - Researcher as tool -> ResearchBundle[]
+    - LessonWriter as tool -> Lesson[]
+    - PracticeDesigner as tool -> PracticeSet[]
+    - Reviewer as tool -> ReviewReport
+  interruptions:
+    - approve_course_plan
+    - approve_research_direction
+  guardrails:
+    - input_scope_check
+    - source_integrity_check
+    - course_quality_check</pre>
+        </div>
+      </section>
+
+      <section class="section" id="data">
+        <p class="eyebrow">Data Model</p>
+        <h2>Everything important becomes a durable artifact.</h2>
+        <p>
+          The product should not rely on an invisible chat transcript. Each stage should produce structured outputs that can be reviewed, revised, traced, tested, and reused.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Object</th>
+                <th>Purpose</th>
+                <th>Important Fields</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LearningBrief</td>
+                <td>Normalized user intent and context.</td>
+                <td>topic, goal, learner_level, depth, constraints, source_assets, success_criteria</td>
+                <td>Context Intake Agent</td>
+              </tr>
+              <tr>
+                <td>SourceAsset</td>
+                <td>Files, URLs, notes, transcripts, or pasted material.</td>
+                <td>type, title, content_ref, extracted_text, metadata, trust_level</td>
+                <td>Ingestion tools</td>
+              </tr>
+              <tr>
+                <td>CoursePlan</td>
+                <td>Reviewable curriculum before research and writing.</td>
+                <td>title, promise, modules, topics, outcomes, prerequisites, exclusions</td>
+                <td>Curriculum Designer</td>
+              </tr>
+              <tr>
+                <td>HumanFeedback</td>
+                <td>Approval notes and requested changes at checkpoints.</td>
+                <td>checkpoint, decision, notes, requested_changes, timestamp</td>
+                <td>Learner</td>
+              </tr>
+              <tr>
+                <td>ResearchBundle</td>
+                <td>Module-level grounding for the lesson writer.</td>
+                <td>key_concepts, examples, misconceptions, source_notes, diagram_ideas</td>
+                <td>Researcher</td>
+              </tr>
+              <tr>
+                <td>Lesson</td>
+                <td>Course unit learners actually study.</td>
+                <td>title, objective, explanation, example, misconception, recap, references</td>
+                <td>Lesson Writer</td>
+              </tr>
+              <tr>
+                <td>PracticeSet</td>
+                <td>Learning checks tied to lesson objectives.</td>
+                <td>quiz_items, exercises, flashcards, projects, answer_keys</td>
+                <td>Practice Designer</td>
+              </tr>
+              <tr>
+                <td>ReviewReport</td>
+                <td>Final quality gate before publish.</td>
+                <td>issues, fixes_applied, residual_risks, quality_score, publish_decision</td>
+                <td>Reviewer</td>
+              </tr>
+              <tr>
+                <td>CourseVersion</td>
+                <td>Immutable saved course snapshot.</td>
+                <td>course_id, version, plan, lessons, practice, sources, review_report</td>
+                <td>Orchestrator</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="ui">
+        <p class="eyebrow">UI Specification</p>
+        <h2>The interface should show the workflow before the course.</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Home screen</h3>
+            <ul>
+              <li>Workflow cards are the primary surface.</li>
+              <li>"New course" and "Add context" open the same intake flow.</li>
+              <li>Active runs show exactly which step needs human input.</li>
+              <li>Recent courses sit below the workflow, not above it.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Context intake</h3>
+            <ul>
+              <li>Topic or question.</li>
+              <li>Goal and reason for learning.</li>
+              <li>Current level and desired depth.</li>
+              <li>Files, URLs, pasted text, notes, examples, and constraints.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Checkpoint review</h3>
+            <ul>
+              <li>Show the artifact, not just a status message.</li>
+              <li>Use "Approve" and "Revise" as the main actions.</li>
+              <li>Give the learner one feedback box with examples of useful feedback.</li>
+              <li>Preserve all checkpoint decisions in the course history.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Course player</h3>
+            <ul>
+              <li>Sidebar module navigation.</li>
+              <li>Lesson content, quiz, flashcards, and exercises in one flow.</li>
+              <li>Tutor answers only from course content and approved sources unless asked to expand.</li>
+              <li>Confusion signals can trigger revisions.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="requirements">
+        <p class="eyebrow">Requirements</p>
+        <h2>What must be true for Learnable to feel like Learnable.</h2>
+        <div class="grid two">
+          <details open>
+            <summary>Functional requirements</summary>
+            <div class="detail-body">
+              <ul>
+                <li>Create a course from a short prompt.</li>
+                <li>Create a course from rich context, including files, URLs, and pasted notes.</li>
+                <li>Pause for human review after curriculum design.</li>
+                <li>Pause for human review after research.</li>
+                <li>Regenerate curriculum or research from feedback.</li>
+                <li>Generate lessons, quizzes, exercises, flashcards, and summaries.</li>
+                <li>Save generated courses as versioned artifacts.</li>
+                <li>Resume interrupted runs from checkpoints.</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Quality requirements</summary>
+            <div class="detail-body">
+              <ul>
+                <li>The course must match the stated learner level and goal.</li>
+                <li>Every topic must have at least one learning objective.</li>
+                <li>Every lesson must include practice.</li>
+                <li>Research-backed claims should preserve source references.</li>
+                <li>The reviewer must flag weak source coverage, duplicated topics, and unsupported claims.</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Safety and trust requirements</summary>
+            <div class="detail-body">
+              <ul>
+                <li>Tell the learner when source extraction fails.</li>
+                <li>Never silently ignore user-provided context.</li>
+                <li>Show what changed after feedback.</li>
+                <li>Separate generated conclusions from quoted source material.</li>
+                <li>Use guardrails for unsafe requests, copyrighted source handling, and medical/legal/financial learning topics.</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Non-goals</summary>
+            <div class="detail-body">
+              <ul>
+                <li>No SaaS admin dashboard as the core product.</li>
+                <li>No public course marketplace in the first version.</li>
+                <li>No instructor analytics suite before the learner loop is excellent.</li>
+                <li>No opaque one-click "generate everything" as the default for serious courses.</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <p class="eyebrow">Build Roadmap</p>
+        <h2>Start with the smallest agentic loop that proves the product.</h2>
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist">
+            <button class="tab active" data-tab="mvp">MVP</button>
+            <button class="tab" data-tab="v1">V1</button>
+            <button class="tab" data-tab="v2">V2</button>
+            <button class="tab" data-tab="later">Later</button>
+          </div>
+          <div class="tab-panel active" data-panel="mvp">
+            <h3>MVP: visible course creation workflow</h3>
+            <ul>
+              <li>Workflow home screen.</li>
+              <li>Context intake with topic, pasted text, URLs, and files.</li>
+              <li>Curriculum Designer with human review.</li>
+              <li>Researcher with human review.</li>
+              <li>Lesson Writer, Practice Designer, and Reviewer producing a saved local course.</li>
+              <li>Basic tracing and run logs for every generation.</li>
+            </ul>
+          </div>
+          <div class="tab-panel" data-panel="v1">
+            <h3>V1: durable agent runs</h3>
+            <ul>
+              <li>Server-side run persistence.</li>
+              <li>Resume after browser close or network interruption.</li>
+              <li>Course version history.</li>
+              <li>Structured source library per course.</li>
+              <li>Quality evals for common course briefs.</li>
+            </ul>
+          </div>
+          <div class="tab-panel" data-panel="v2">
+            <h3>V2: adaptive learning loop</h3>
+            <ul>
+              <li>Tutor uses learner progress and confusion signals.</li>
+              <li>Course revisions from repeated missed questions.</li>
+              <li>Spaced repetition queue.</li>
+              <li>Personal learning memory across courses.</li>
+              <li>Optional voice tutor for lesson review.</li>
+            </ul>
+          </div>
+          <div class="tab-panel" data-panel="later">
+            <h3>Later: collaboration and publishing</h3>
+            <ul>
+              <li>Share a course with a friend or cohort.</li>
+              <li>Export to PDF, Markdown, slides, or LMS formats.</li>
+              <li>Instructor mode.</li>
+              <li>Team knowledge-base courses.</li>
+              <li>Public course publishing only if the learner product is already strong.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sources">
+        <p class="eyebrow">Official Sources Used</p>
+        <h2>OpenAI docs checked for the SDK assumptions.</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Agents SDK overview</h3>
+            <p>Used for the decision that Learnable should own orchestration, tool execution, approvals, and state.</p>
+            <p><a href="https://developers.openai.com/api/docs/guides/agents" target="_blank" rel="noreferrer">developers.openai.com/api/docs/guides/agents</a></p>
+          </div>
+          <div class="card">
+            <h3>TypeScript Agents SDK</h3>
+            <p>Used for the TypeScript-oriented direction: agents, handoffs, guardrails, tracing, sandbox-capable workflows.</p>
+            <p><a href="https://openai.github.io/openai-agents-js/" target="_blank" rel="noreferrer">openai.github.io/openai-agents-js</a></p>
+          </div>
+          <div class="card">
+            <h3>Running agents</h3>
+            <p>Used for the run model: run, run streamed, state, sessions, tracing config, error behavior, and human-in-the-loop integrations.</p>
+            <p><a href="https://openai.github.io/openai-agents-python/running_agents/" target="_blank" rel="noreferrer">openai.github.io/openai-agents-python/running_agents</a></p>
+          </div>
+          <div class="card">
+            <h3>Handoffs, tools, guardrails, tracing</h3>
+            <p>Used for the specialist-agent shape and quality gates in the Learnable workflow.</p>
+            <p>
+              <a href="https://openai.github.io/openai-agents-python/handoffs/" target="_blank" rel="noreferrer">Handoffs</a>,
+              <a href="https://openai.github.io/openai-agents-python/tools/" target="_blank" rel="noreferrer">Tools</a>,
+              <a href="https://openai.github.io/openai-agents-python/guardrails/" target="_blank" rel="noreferrer">Guardrails</a>,
+              <a href="https://openai.github.io/openai-agents-python/tracing/" target="_blank" rel="noreferrer">Tracing</a>
+            </p>
+          </div>
+        </div>
+        <div class="footer">
+          This spec is intentionally product-first. It describes what Learnable should do and how the agentic architecture should behave before committing to implementation details.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const navLinks = [...document.querySelectorAll('.nav a')];
+    const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+    const activateNav = () => {
+      const y = window.scrollY + 120;
+      let active = sections[0];
+      for (const section of sections) {
+        if (section.offsetTop <= y) active = section;
+      }
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + active.id);
+      });
+    };
+
+    window.addEventListener('scroll', activateNav, { passive: true });
+    activateNav();
+
+    document.querySelectorAll('[data-tabs]').forEach(tabset => {
+      const tabs = [...tabset.querySelectorAll('[data-tab]')];
+      const panels = [...tabset.querySelectorAll('[data-panel]')];
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const id = tab.dataset.tab;
+          tabs.forEach(t => t.classList.toggle('active', t === tab));
+          panels.forEach(panel => panel.classList.toggle('active', panel.dataset.panel === id));
+        });
+      });
+    });
+
+    document.querySelectorAll('[data-copy]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const target = document.querySelector(button.dataset.copy);
+        if (!target) return;
+        try {
+          await navigator.clipboard.writeText(target.innerText);
+          const old = button.textContent;
+          button.textContent = 'Copied';
+          setTimeout(() => { button.textContent = old; }, 1200);
+        } catch {
+          button.textContent = 'Select text';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

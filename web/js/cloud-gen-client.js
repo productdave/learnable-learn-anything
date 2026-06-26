@@ -19,6 +19,7 @@ import { updateJob, getJob, createJob, removeJob } from './jobs.js';
 import { sb, getUser } from './auth.js?v=5';
 import { invalidateCourseCache } from './course-loader.js';
 import { syncCoursesNow } from './course-sync.js?v=1';
+import { agentMessage } from './generator/agents.mjs';
 
 const STORAGE_BUCKET = 'course-uploads';
 const subs = new Map();   // jobId → Realtime channel handle
@@ -119,7 +120,7 @@ export async function cancelCloudGeneration(jobId) {
 export async function resumeCloudGeneration(jobId) {
   const token = await getAccessToken();
   if (!token) throw new Error('Sign in to resume.');
-  updateJob(jobId, { status: 'running', error: null, message: 'Resuming…' });
+  updateJob(jobId, { status: 'running', error: null, message: agentMessage('research', 'Resuming…') });
   const resp = await fetch('/api/gen/resume', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },

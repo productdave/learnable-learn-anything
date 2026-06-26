@@ -215,7 +215,8 @@ function openAccount() {
         <input type="email" class="auth-input" placeholder="you@example.com" autocomplete="email" required />
         <button type="submit" class="auth-btn">Send magic link</button>
       </form>
-      <div class="auth-msg" style="display:none"></div>`;
+      <div class="auth-msg" style="display:none"></div>
+      ${localCourseTransferHTML()}`;
     const form = body.querySelector('.auth-form');
     const msg = body.querySelector('.auth-msg');
     form.addEventListener('submit', async (e) => {
@@ -239,11 +240,77 @@ function openAccount() {
         btn.disabled = false; btn.textContent = 'Send magic link';
         msg.style.display = '';
         msg.className = 'auth-msg auth-msg--err';
-        msg.textContent = err.message || 'Could not send link. Is this email on the allowlist?';
+        msg.textContent = authErrorMessage(err);
       }
     });
+    wireLocalCourseTransfer(body);
   }
   m.style.display = '';
+}
+
+function localCourseTransferHTML() {
+  return `
+    <div class="auth-section">
+      <div class="auth-section-label">Local courses on this browser</div>
+      <p class="auth-help">You do not need to sign in to export or import generated courses. This reads the courses saved in this browser's localStorage.</p>
+      <textarea class="auth-input auth-mono" data-import-json rows="3" placeholder='{"course-id": { "config": {...}, ... }}' spellcheck="false" autocomplete="off"></textarea>
+      <div class="auth-keyform" style="margin-top: var(--space-2)">
+        <button class="auth-btn auth-btn--compact" data-import-run>Import courses</button>
+        <button class="auth-btn auth-btn--ghost auth-btn--compact" data-export-run>Copy my courses</button>
+      </div>
+      <div class="auth-msg" data-import-msg style="display:none; margin-top: var(--space-2)"></div>
+    </div>`;
+}
+
+function wireLocalCourseTransfer(body) {
+  body.querySelector('[data-import-run]')?.addEventListener('click', async () => {
+    const ta = body.querySelector('[data-import-json]');
+    const msg = body.querySelector('[data-import-msg]');
+    const txt = (ta?.value || '').trim();
+    if (!txt) {
+      msg.style.display = ''; msg.className = 'auth-msg auth-msg--err';
+      msg.textContent = 'Paste exported courses JSON first.';
+      return;
+    }
+    const { importCoursesJson } = await import('./user-courses.js');
+    const result = importCoursesJson(txt);
+    msg.style.display = '';
+    if (result.imported) {
+      msg.className = 'auth-msg auth-msg--ok';
+      msg.textContent = `Imported ${result.imported}, skipped ${result.skipped}. ${result.errors.join(' ')}`.trim();
+      if (ta) ta.value = '';
+      window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
+    } else {
+      msg.className = 'auth-msg auth-msg--err';
+      msg.textContent = result.errors.length ? result.errors.join(' ') : 'No courses found in that JSON.';
+    }
+  });
+  body.querySelector('[data-export-run]')?.addEventListener('click', async () => {
+    const { exportCoursesJson } = await import('./user-courses.js');
+    const json = exportCoursesJson();
+    const msg = body.querySelector('[data-import-msg]');
+    try {
+      await navigator.clipboard.writeText(json);
+      msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
+      msg.textContent = 'Copied your courses JSON to the clipboard.';
+    } catch {
+      const ta = body.querySelector('[data-import-json]');
+      if (ta) ta.value = json;
+      msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
+      msg.textContent = 'Clipboard blocked - JSON dropped into the textarea above for you to copy manually.';
+    }
+  });
+}
+
+function authErrorMessage(err) {
+  if (location.protocol === 'file:') {
+    return 'Sign-in needs the HTTP app URL, not file://. Open http://localhost:8765/index.html or http://10.0.0.102:8765/index.html and try again.';
+  }
+  const msg = err?.message || String(err || '');
+  if (/failed to fetch|network/i.test(msg)) {
+    return 'Could not reach Supabase auth. Check that this page is opened from http://localhost:8765 or your LAN URL, and that the Supabase project is reachable.';
+  }
+  return msg || 'Could not send link. Is this email on the allowlist?';
 }
 
 export async function signOut() {

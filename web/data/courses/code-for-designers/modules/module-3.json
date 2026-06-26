@@ -1,0 +1,580 @@
+{
+  "javascript-fundamentals": {
+    "id": "javascript-fundamentals",
+    "moduleId": "making-it-interactive",
+    "title": "Variables, Data Types, and Basic Logic",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What JavaScript brings to the table",
+        "content": "<p>Here's the thing — HTML is structure, CSS is style, and <strong>JavaScript is what makes your page actually <em>do</em> something</strong>. When a user clicks a button and a menu slides open, or types in a search box and sees instant results, that's JavaScript listening, thinking, and updating the page in real time.</p><p>At its core, JavaScript is about <strong>storing information in variables</strong>, making decisions with logic, and <strong>responding to user actions</strong>. You'll use <code>let</code> and <code>const</code> to hold data (like a click count or a user's name), write functions to bundle up reusable instructions, and hook into events so the browser knows what to do when someone interacts with your design.</p><p>From what I've seen working with designers, the moment this clicks is when you realize you can <strong>read the current state of your page and change it on the fly</strong> — no page reload, no server needed. That's the unlock.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q1-variable-keyword",
+        "sentence": "When you need a variable whose value will change over time (like a click counter), you should declare it with ___.",
+        "acceptable_answers": [
+          "let",
+          "Let",
+          "the let keyword"
+        ],
+        "explanation": "Use 'let' for values that change and 'const' for values that don't. Modern JavaScript avoids 'var' because it has confusing scoping rules that can cause bugs when variables leak out of blocks."
+      },
+      {
+        "type": "concept",
+        "title": "Variables and data types: the building blocks",
+        "content": "<p>Variables are labeled containers for data. You declare one with <code>let counter = 0;</code> or <code>const userName = 'Alex';</code> — the difference is that <strong>let allows reassignment</strong> (you can say <code>counter = 5;</code> later) while <strong>const locks the value</strong> (trying to reassign throws an error). Use <code>const</code> by default; only reach for <code>let</code> when you know the value will change.</p><p>JavaScript has a handful of <strong>primitive data types</strong> you'll use constantly: <strong>string</strong> (text in quotes, like <code>'hello'</code>), <strong>number</strong> (integers and decimals, like <code>42</code> or <code>3.14</code>), <strong>boolean</strong> (<code>true</code> or <code>false</code>), and two special ones — <strong>null</strong> (you intentionally set it to \"nothing\") and <strong>undefined</strong> (the variable exists but hasn't been assigned a value yet).</p><p>Here's a gotcha that trips everyone up at first: <strong>HTML input fields always return strings</strong>. If a user types <code>5</code> into a text box, JavaScript sees <code>'5'</code> (a string), not the number 5. So <code>'5' + '1'</code> gives you <code>'51'</code>, not <code>6</code>. You fix this by converting with <code>Number()</code> or <code>parseInt()</code> before doing math. (Wes Bos calls this the \"input string gotcha\" in his BeginnerJavaScript course, and I've debugged it a dozen times myself.)</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "The input string trap",
+        "content": "When you grab a value from an HTML input field, it's always a string — even if the user typed a number. If you try to add two input values without converting them first, JavaScript will concatenate them as text ('5' + '1' = '51') instead of doing math. Wrap them in Number() or parseInt() to convert before calculating."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q2-data-type-issue",
+        "question": "You're building a simple calculator. A user types '8' into one input and '3' into another. You write <code>result = input1.value + input2.value;</code> and display it. What does the user see?",
+        "options": [
+          {
+            "id": "a",
+            "text": "11"
+          },
+          {
+            "id": "b",
+            "text": "'83'"
+          },
+          {
+            "id": "c",
+            "text": "undefined"
+          },
+          {
+            "id": "d",
+            "text": "NaN (Not a Number)"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Input values are always strings, so JavaScript treats the + as string concatenation, not addition. You'd see '83' instead of 11. To fix it, convert both values with Number() or parseInt() before adding."
+      },
+      {
+        "type": "concept",
+        "title": "Functions: packaging your instructions",
+        "content": "<p>A function is a <strong>reusable block of code with a name</strong>. Instead of writing the same five lines over and over, you bundle them into a function and call it whenever you need it. You define one like this: <code>function greet(name) { return 'Hello, ' + name; }</code> — now <code>greet('Sam')</code> gives you <code>'Hello, Sam'</code>.</p><p>Functions can <strong>accept parameters</strong> (the values you pass in, like <code>name</code>) and <strong>return a result</strong> with the <code>return</code> keyword. They're everywhere in interactive design: a function that validates a form, toggles a menu, fetches data, or updates a counter. The pattern is always the same — give it a name, pass in what it needs, get back what it produces.</p><p>From what I've observed, beginners often inline everything at first (dumping 20 lines into an event listener), then discover that <strong>pulling logic into named functions</strong> makes debugging way easier. If your toggle breaks, you know exactly where to look.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start with one thing",
+        "content": "Don't try to learn variables, functions, events, and the DOM all at once. Pick one interactive thing you want to build — a button that counts clicks, a text input that mirrors what you type — and look up only what you need for that. You'll retain way more than reading a giant tutorial start to finish."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-const-reassign",
+        "statement": "If you declare a variable with const, you can still change its value later by reassigning it.",
+        "correct": false,
+        "explanation": "That's the whole point of const — it prevents reassignment. If you try <code>const x = 5; x = 10;</code>, JavaScript will throw an error. Use let when you need to reassign, and const when the value should stay fixed."
+      },
+      {
+        "type": "concept",
+        "title": "Events and the DOM: making pages respond",
+        "content": "<p>The <strong>DOM (Document Object Model)</strong> is how JavaScript sees your HTML — it's a tree-like structure where every element, attribute, and bit of text is a node you can read or change. When you write <code>document.querySelector('.button')</code>, you're asking JavaScript to find that element in the DOM so you can do something with it.</p><p>To make your page interactive, you <strong>attach event listeners</strong> to elements. An event listener says \"when this happens (a click, a keypress, a scroll), run this function.\" The syntax looks like <code>button.addEventListener('click', function() { ... });</code> — now every time someone clicks that button, your code runs.</p><p>Once you've selected an element, you can <strong>manipulate it</strong> in all kinds of ways: change its text with <code>textContent</code>, add or remove CSS classes with <code>classList.add()</code> or <code>classList.toggle()</code>, or tweak inline styles with <code>element.style.color = 'red';</code>. This is where design and code merge — you're directly controlling what the user sees, in real time.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/DOM-model.svg/1200px-DOM-model.svg.png",
+        "alt": "Diagram showing the DOM tree structure with document at root, html element below it, and head and body as children with nested elements",
+        "caption": "The DOM represents HTML as a tree structure where each element, attribute, and text node can be accessed and modified by JavaScript.",
+        "source_title": "Document Object Model - Wikipedia",
+        "source_url": "https://en.wikipedia.org/wiki/Document_Object_Model"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "textContent vs innerHTML",
+        "content": "Use textContent when you're inserting plain text into an element — it's faster and safer because it won't parse HTML tags. innerHTML lets you insert actual HTML markup, but if you're not careful it can open security holes (imagine a user typing a <script> tag into a comment form). For most use cases, textContent is the right default."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Use const for values that won't change and let for values that will — avoid var in modern JavaScript.",
+          "HTML input fields always return strings, so convert them with Number() or parseInt() before doing math.",
+          "Functions let you bundle reusable logic with a name, making your code easier to read and debug.",
+          "Event listeners connect user actions (clicks, keypresses) to JavaScript functions that update the page in real time.",
+          "The DOM is JavaScript's view of your HTML — you select elements with querySelector and modify them with textContent, classList, or style properties."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What's the difference between let and const when declaring variables in JavaScript?",
+        "back": "Use const when the value won't change (it prevents reassignment), and let when the value will change over time. Modern JavaScript avoids var because it has confusing scoping rules."
+      },
+      {
+        "front": "Why does adding two input values sometimes give you '53' instead of 8?",
+        "back": "HTML input fields always return strings, so '5' + '3' concatenates the text instead of adding numbers. Convert them first with Number() or parseInt() to get the math result."
+      },
+      {
+        "front": "What does an event listener do in JavaScript?",
+        "back": "An event listener waits for a specific user action (like a click or keypress) and runs a function when that action happens. It's how you make web pages interactive."
+      },
+      {
+        "front": "What's the DOM and why does it matter for interactive design?",
+        "back": "The DOM (Document Object Model) is JavaScript's tree-like representation of your HTML. It lets you find elements with querySelector and change their content, classes, or styles in real time."
+      },
+      {
+        "front": "When should you use textContent instead of innerHTML?",
+        "back": "Use textContent when inserting plain text — it's safer and won't parse HTML tags. Use innerHTML only when you actually need to insert HTML markup, and be careful with user-generated content."
+      },
+      {
+        "front": "What's the difference between null and undefined in JavaScript?",
+        "back": "null is an intentional empty value you assign ('this is deliberately nothing'), while undefined means a variable has been declared but hasn't been given a value yet."
+      }
+    ]
+  },
+  "functions-and-events": {
+    "id": "functions-and-events",
+    "moduleId": "making-it-interactive",
+    "title": "Functions and Event Listeners: Making Things Happen on Click",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why functions and events are where design comes alive",
+        "content": "<p>Here's the thing—HTML is structure and CSS is style, but <strong>JavaScript is where your design starts responding to people</strong>. A button that changes color when you click it, a form that validates as you type, a menu that slides open—all of that happens because JavaScript is listening for events and running functions in response.</p><p>Think of <strong>functions as reusable recipes</strong> for doing something specific. You write the steps once, then call that function whenever you need it. <strong>Event listeners are the triggers</strong>: they sit quietly in the background, waiting for a user to click, type, or move the mouse, then they fire your function. Together, they turn static designs into living interfaces.</p><p>From what I've seen, this is the moment where designers who learn to code get genuinely excited. You're not just making things look good anymore—you're <strong>making them do things</strong>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-function-event-relationship",
+        "question": "You want a button to change the background color of a paragraph when clicked. Which combination makes this happen?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Write a function that changes the color, then attach an event listener to the button that calls that function on click"
+          },
+          {
+            "id": "b",
+            "text": "Write CSS :hover styles on the button and let the browser handle the color change automatically"
+          },
+          {
+            "id": "c",
+            "text": "Write a function that runs when the page loads and changes the color once"
+          },
+          {
+            "id": "d",
+            "text": "Add an event listener to the paragraph element and wait for the user to click the paragraph"
+          }
+        ],
+        "correct": "a",
+        "explanation": "You need a function that does the work (changing the color) and an event listener attached to the button that waits for a click and then calls that function. CSS :hover only works on the element being hovered, a load-time function runs too early, and listening on the paragraph means the button won't trigger anything."
+      },
+      {
+        "type": "concept",
+        "title": "Writing functions: the basic recipe",
+        "content": "<p>A function in JavaScript looks like this: <strong>function nameOfFunction() { ... }</strong>. Inside the curly braces, you put the steps you want to run. To use the function later, you <strong>call it by writing its name followed by parentheses</strong>: nameOfFunction().</p><p>Functions can also <strong>accept parameters</strong>—bits of data you pass in—and <strong>return a result</strong>. For example, function addNumbers(a, b) { return a + b; } takes two numbers and gives you back their sum. But for most interactive design work, you'll start with simple functions that just do something (change a class, update text, toggle visibility) without needing to return anything.</p><p>Wes Bos, who created the JavaScript30 course, teaches functions through small, real projects—like a click counter or a color changer. The pattern is always the same: <strong>write the function, then wire it up to an event</strong>. Once you've done it a few times, it clicks.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start with arrow functions if they feel clearer",
+        "content": "Modern JavaScript also lets you write functions as const myFunction = () => { ... }. This arrow syntax is shorter and avoids some quirks with the 'this' keyword. For now, either style works—pick whichever feels more readable to you."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q2-function-parts",
+        "question": "Match each function concept to its role:",
+        "pairs": [
+          {
+            "left": "function greet() { ... }",
+            "right": "Defines a reusable block of code named greet"
+          },
+          {
+            "left": "greet()",
+            "right": "Calls (executes) the function named greet"
+          },
+          {
+            "left": "function add(a, b) { ... }",
+            "right": "Accepts two parameters (a and b) when called"
+          },
+          {
+            "left": "return total;",
+            "right": "Sends a value back to whoever called the function"
+          }
+        ],
+        "explanation": "Defining a function creates the recipe, calling it runs the recipe, parameters let you pass in data, and return sends a result back. These four pieces cover most of what you'll do with functions in interactive design."
+      },
+      {
+        "type": "concept",
+        "title": "Event listeners: wiring up user actions",
+        "content": "<p>An <strong>event listener waits for something to happen</strong>—a click, a key press, a form submission—then runs a function in response. The syntax is: element.addEventListener('click', myFunction). You <strong>select the element you want to watch</strong>, tell it what event to listen for, and pass in the function to run.</p><p>Here's a concrete example: you have a button with id=\"colorButton\" and a function called changeColor. To make the button trigger the function on click, you write: document.getElementById('colorButton').addEventListener('click', changeColor). Notice you write the function name <em>without</em> parentheses—you're passing the function itself, not calling it immediately.</p><p>The most common events you'll use: <strong>click, input (for text fields), submit (for forms), and mouseover</strong>. Kyle Simpson, who wrote the 'You Don't Know JS' series, emphasizes that understanding event listeners is key to thinking in JavaScript—you're not writing a script that runs top to bottom once, you're setting up listeners that sit idle and spring to life when users interact.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q3-addeventlistener-syntax",
+        "sentence": "To attach a click listener to an element, you write: element.___(eventName, functionName).",
+        "acceptable_answers": [
+          "addEventListener",
+          "add event listener",
+          "addeventlistener"
+        ],
+        "explanation": "addEventListener is the method that attaches a listener to an element. It takes two arguments: the event name as a string (like 'click') and the function to run when that event fires. This is the modern, recommended way to handle events in JavaScript."
+      },
+      {
+        "type": "concept",
+        "title": "Selecting elements and changing them: the DOM in action",
+        "content": "<p>Before you can listen to an element or change it, you need to <strong>select it from the DOM</strong>—the tree-like representation of your HTML that JavaScript can read and manipulate. The two most common methods: <strong>document.querySelector('selector')</strong> (uses CSS selector syntax, returns the first match) and <strong>document.getElementById('id')</strong> (faster if you have an id).</p><p>Once you have an element, you can <strong>change its content, classes, or styles</strong>. Use textContent to change plain text, classList.add() or classList.toggle() to manage CSS classes, and style.property to change inline styles directly. For example: myElement.textContent = 'New text'; or myElement.classList.toggle('active'); or myElement.style.backgroundColor = 'blue';.</p><p>From what I've observed, designers pick this up fastest when they think of it like Figma layers or Photoshop groups—you're <strong>selecting a layer (the element) and then adjusting its properties</strong>. The DOM is just your design file in a form JavaScript can talk to.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/DOM-model.svg/1200px-DOM-model.svg.png",
+        "alt": "Diagram showing the DOM tree structure with document at root, html element below it, and head and body as children with nested elements",
+        "caption": "The DOM represents HTML as a tree structure where each element, attribute, and text node can be accessed and modified by JavaScript.",
+        "source_title": "Document Object Model - Wikipedia",
+        "source_url": "https://en.wikipedia.org/wiki/Document_Object_Model"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Use textContent for plain text, not innerHTML",
+        "content": "innerHTML parses HTML and can create security risks if you're inserting user input—it can execute embedded scripts. textContent is safer for plain text and won't run any code. Only use innerHTML when you genuinely need to insert HTML markup."
+      },
+      {
+        "type": "concept",
+        "title": "A complete example: click counter",
+        "content": "<p>Let's walk through a classic first project: a button that counts how many times you've clicked it. You need <strong>a variable to store the count, a function to increment it and update the display, and an event listener to trigger that function</strong>.</p><p>Here's the pattern in code: let count = 0; (initialize the counter), then function incrementCount() { count++; document.getElementById('display').textContent = count; } (update the count and show it), then document.getElementById('btn').addEventListener('click', incrementCount); (wire the button to the function).</p><p>This tiny example contains the whole loop: <strong>state (the variable), behavior (the function), and interaction (the event listener)</strong>. Once you've built a click counter, you can adapt the same structure to toggle visibility, change colors, validate forms—pretty much any interactive pattern a designer needs.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Variables from input fields are always strings",
+        "content": "HTML input fields return strings, so if you're building a calculator or adding numbers, '5' + '1' will give you '51' not 6. You need to convert with Number() or parseInt() first. This catches everyone at least once—don't worry, it's a rite of passage."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Functions are reusable blocks of code that do specific tasks—write them once, call them whenever you need.",
+          "Event listeners wait for user actions (click, input, submit) and then run a function in response.",
+          "Select DOM elements with querySelector or getElementById, then change them with textContent, classList, or style properties.",
+          "The basic interactive pattern: define a function, select an element, attach an event listener that calls the function.",
+          "Always use textContent for plain text and remember that input values are strings—convert them with Number() if you need math."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What does an event listener do in JavaScript?",
+        "back": "An event listener waits for a specific user action (like a click, key press, or form submission) and then runs a function in response. Syntax: element.addEventListener('click', functionName)."
+      },
+      {
+        "front": "What's the difference between textContent and innerHTML?",
+        "back": "textContent sets or gets plain text and is safe for user input. innerHTML parses HTML and can execute embedded scripts, creating security risks. Use textContent unless you genuinely need to insert HTML markup."
+      },
+      {
+        "front": "How do you select a DOM element with an id of 'mainButton'?",
+        "back": "document.getElementById('mainButton') or document.querySelector('#mainButton'). getElementById is faster, querySelector uses CSS selector syntax and is more flexible."
+      },
+      {
+        "front": "Why is '5' + '1' equal to '51' in JavaScript?",
+        "back": "HTML input fields return strings, not numbers. The + operator concatenates strings, so '5' + '1' joins them into '51'. To add them as numbers, convert first with Number('5') or parseInt('5')."
+      },
+      {
+        "front": "What are the three key pieces of a click counter?",
+        "back": "A variable to store the count (let count = 0), a function to increment it and update the display (count++; element.textContent = count), and an event listener to trigger the function on click (element.addEventListener('click', functionName))."
+      },
+      {
+        "front": "What does classList.toggle() do?",
+        "back": "classList.toggle('className') adds a class to an element if it's not there, or removes it if it is. It's perfect for toggling states like 'active', 'hidden', or 'done' in response to user actions."
+      }
+    ]
+  },
+  "dom-manipulation": {
+    "id": "dom-manipulation",
+    "moduleId": "making-it-interactive",
+    "title": "Changing the Page: DOM Selection and Manipulation",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What the DOM actually is — and why you care",
+        "content": "<p>Here's the thing — when your HTML loads in the browser, it doesn't just sit there as text. The browser parses it into <strong>a tree structure called the DOM (Document Object Model)</strong>, where every element, attribute, and piece of text becomes a node you can reach into and change. Think of it as the <strong>live, in-memory version</strong> of your page that JavaScript can read and manipulate.</p><p>From what I've seen, this is the moment coding clicks for designers. You're not editing a static file anymore — you're <strong>reaching into a running page and changing it on the fly</strong>. Click a button, toggle a class, swap some text. The page reacts instantly. That's the DOM at work, and it's how every interactive site you've ever used actually works under the hood.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/DOM-model.svg/1200px-DOM-model.svg.png",
+        "alt": "Diagram showing the DOM tree structure with document at root, html element below it, and head and body as children with nested elements",
+        "caption": "The DOM represents HTML as a tree structure where each element, attribute, and text node can be accessed and modified by JavaScript.",
+        "source_title": "Document Object Model - Wikipedia",
+        "source_url": "https://en.wikipedia.org/wiki/Document_Object_Model"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dom-manipulation-q1",
+        "question": "You've just written some HTML with a heading, a paragraph, and a button. When the browser loads it, what happens to that HTML?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The browser displays it pixel-by-pixel but doesn't keep a structured representation in memory"
+          },
+          {
+            "id": "b",
+            "text": "The browser converts it into a tree structure (the DOM) that JavaScript can access and modify"
+          },
+          {
+            "id": "c",
+            "text": "JavaScript directly reads the .html file every time it needs to change something on the page"
+          },
+          {
+            "id": "d",
+            "text": "The HTML stays as plain text until you explicitly convert it to a DOM with a special function"
+          }
+        ],
+        "correct": "b",
+        "explanation": "The browser automatically parses your HTML into the DOM — a live tree structure in memory. JavaScript interacts with that tree, not the original HTML file. Option A misses that the browser keeps a structured model; C and D are wrong because the DOM is built automatically on page load, not read from disk repeatedly."
+      },
+      {
+        "type": "concept",
+        "title": "Finding elements: querySelector and friends",
+        "content": "<p>Before you can change an element, you have to <strong>grab it</strong>. The two workhorses are <strong>querySelector()</strong> (grabs the first match) and <strong>querySelectorAll()</strong> (grabs all matches). They take any CSS selector — the same ones you've been writing in your stylesheets. <code>document.querySelector('.button-primary')</code> finds the first element with that class. Simple.</p><p>You'll also see <strong>getElementById()</strong> in older code (it's faster but only works for IDs). From what I've observed, most modern code just uses <code>querySelector</code> for everything — it's flexible, familiar if you already know CSS, and the performance difference rarely matters until you're dealing with thousands of elements.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Use the same selectors you already know",
+        "content": "If you can write a CSS rule like .card > .title or button[disabled], you already know how to select elements in JavaScript. querySelector uses exactly the same syntax — no new language to learn."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dom-manipulation-q2",
+        "statement": "document.querySelector('.card') will return an array containing all elements with the class 'card' on the page.",
+        "correct": false,
+        "explanation": "querySelector returns only the FIRST matching element (or null if none exist). If you want all matches, you need querySelectorAll(), which returns a NodeList (array-like collection) of every element that matches the selector."
+      },
+      {
+        "type": "concept",
+        "title": "Changing what you found: textContent, innerHTML, and classList",
+        "content": "<p>Once you've grabbed an element, <strong>textContent</strong> lets you change its text. Safe, simple, no surprises. If you need to insert actual HTML tags, <strong>innerHTML</strong> does that — but be careful, because it parses HTML and can execute scripts if you're inserting user input (a real security risk). For most cases, stick with textContent.</p><p>Want to toggle styles? Don't mess with <code>element.style</code> directly (it gets messy fast). Instead, use <strong>classList.add()</strong>, <strong>classList.remove()</strong>, and <strong>classList.toggle()</strong> to swap CSS classes on and off. This keeps your styling in CSS where it belongs, and your JavaScript just flips the switch. Wes Bos hammers this in JavaScript30 — it's the cleanest pattern I've seen for interactive design.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "innerHTML can be a security hole",
+        "content": "If you're inserting user input with innerHTML, you're opening the door to cross-site scripting attacks. Someone could type in a script tag and run malicious code. For plain text, always use textContent. Save innerHTML for when you control the markup and know it's safe."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dom-manipulation-q3",
+        "question": "Match each DOM manipulation method to the task it's best suited for:",
+        "pairs": [
+          {
+            "left": "textContent",
+            "right": "Safely change the plain text inside an element"
+          },
+          {
+            "left": "innerHTML",
+            "right": "Insert HTML markup when you control the source"
+          },
+          {
+            "left": "classList.toggle()",
+            "right": "Add or remove a CSS class to change styling"
+          },
+          {
+            "left": "style.color",
+            "right": "Directly change a single inline CSS property"
+          }
+        ],
+        "explanation": "textContent is the safe choice for text; innerHTML is powerful but risky with user input; classList methods keep styling in CSS; and direct style properties work but get messy fast — better to toggle classes instead."
+      },
+      {
+        "type": "concept",
+        "title": "Putting it together: a real example",
+        "content": "<p>Let's say you're building a simple button click counter. You'd use <strong>querySelector</strong> to grab the button and a paragraph where the count displays. You'd attach an <strong>event listener</strong> to the button (we'll dig into those in the next topic), and inside that listener you'd <strong>increment a variable</strong> and update the paragraph's <strong>textContent</strong> with the new count. Four concepts, one small interaction.</p><p>Or take a toggle button that shows and hides content. Grab the content div with <code>querySelector</code>, then on click, check if it has a class like <code>hidden</code>. Use <code>classList.toggle('hidden')</code> to flip it on or off. Your CSS already defines what <code>.hidden</code> does (probably <code>display: none;</code>). JavaScript just changes the class. Clean separation, easy to debug.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Keep style in CSS, state in classes",
+        "content": "The pattern that scales best: your CSS defines how things look in different states (normal, active, hidden, error), and your JavaScript just toggles the class names. You're not mixing presentation logic into your scripts, and your designer brain stays happy."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "The DOM is the live tree structure the browser creates from your HTML — JavaScript modifies that tree, not the original file.",
+          "Use querySelector() with CSS selectors to grab elements; querySelectorAll() gets all matches instead of just the first.",
+          "textContent safely changes plain text; innerHTML inserts HTML but can be a security risk with user input.",
+          "classList.add(), .remove(), and .toggle() let you change styling by swapping CSS classes on and off.",
+          "Keep your styles in CSS and your JavaScript focused on changing classes and content — clean separation makes debugging easier."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the DOM, and how does it relate to your HTML?",
+        "back": "The DOM (Document Object Model) is the live, tree-structured representation of your HTML that the browser creates in memory. JavaScript reads and manipulates the DOM, not the original HTML file."
+      },
+      {
+        "front": "What's the difference between querySelector() and querySelectorAll()?",
+        "back": "querySelector() returns the first element that matches the CSS selector (or null if none exist). querySelectorAll() returns a NodeList containing all matching elements."
+      },
+      {
+        "front": "When should you use textContent vs. innerHTML?",
+        "back": "Use textContent for plain text — it's safe and won't execute scripts. Use innerHTML only when you need to insert HTML markup and you control the source, because it can execute embedded scripts and create security risks with user input."
+      },
+      {
+        "front": "How do you toggle a CSS class on an element using JavaScript?",
+        "back": "Use element.classList.toggle('className') — it adds the class if it's not there, removes it if it is. This keeps your styling in CSS and your JavaScript clean."
+      },
+      {
+        "front": "Why is classList.toggle() better than directly changing element.style properties?",
+        "back": "classList keeps your styling logic in CSS where it belongs. Changing element.style directly mixes presentation into JavaScript and gets messy fast — toggling classes is cleaner and easier to maintain."
+      }
+    ]
+  },
+  "debugging-for-designers": {
+    "id": "debugging-for-designers",
+    "moduleId": "making-it-interactive",
+    "title": "Debugging Basics and Browser Dev Tools",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why debugging is your secret weapon",
+        "content": "<p>Here's the thing — when you're starting out, most coding time isn't spent writing new code. <strong>It's spent figuring out why the code you already wrote doesn't do what you expected.</strong> That button click that does nothing, the form that clears itself too soon, the color that won't change — these moments are where you actually learn how JavaScript works.</p><p>The good news? Browsers come with a full debugging suite built right in. <strong>Chrome DevTools, Firefox DevTools, and Safari's Web Inspector</strong> let you pause your code mid-execution, inspect what's in every variable, and step through line by line. From what I've seen, designers who learn to use these tools early end up collaborating way more effectively with engineers — because they can say \"I traced it to line 47 where this variable is a string instead of a number\" instead of just \"it's broken.\"</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-debugging-purpose",
+        "question": "You click a button that's supposed to update a counter, but nothing happens. What's the best first step to figure out why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the entire JavaScript file from scratch"
+          },
+          {
+            "id": "b",
+            "text": "Open DevTools Console to check for error messages and verify the event listener is attached"
+          },
+          {
+            "id": "c",
+            "text": "Ask a developer to fix it for you"
+          },
+          {
+            "id": "d",
+            "text": "Add more CSS to the button to make it more visible"
+          }
+        ],
+        "correct": "b",
+        "explanation": "The Console shows JavaScript errors and lets you test if your event listener is even firing. Option A wastes time rewriting working code, C skips the learning opportunity, and D confuses styling with logic — the button is broken functionally, not visually."
+      },
+      {
+        "type": "concept",
+        "title": "The Console: your first debugging friend",
+        "content": "<p>The Console tab in DevTools is where JavaScript errors show up, and where you can <strong>talk directly to your code while it's running.</strong> If you type <code>console.log(myVariable)</code> in your script, the value appears in the Console when that line executes. This is the fastest way to see what's actually inside a variable at any moment.</p><p>I've seen people spend an hour guessing why something's broken when <strong>five well-placed console.log() statements</strong> would have shown them the problem in two minutes. Log the variable right before the bug happens. Log what you're selecting from the DOM. Log whether your if-statement is even running. The pattern that works: narrow down which line is the problem, then inspect what's in memory at that point.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Use descriptive console.log labels",
+        "content": "Instead of console.log(userInput), write console.log('User input value:', userInput). When you have ten logs firing, the label tells you which one you're looking at. Even better: console.log({userInput}) wraps it in an object so you see both the name and the value."
+      },
+      {
+        "type": "concept",
+        "title": "Common bug: strings from inputs",
+        "content": "<p>This one catches everyone. <strong>HTML input fields always return strings</strong>, even when the user types a number. So if you build a simple calculator and do <code>let sum = input1 + input2</code>, JavaScript treats the plus as string concatenation — <code>'5' + '1'</code> becomes <code>'51'</code>, not <code>6</code>.</p><p>The fix: wrap the input value in <code>Number()</code> or <code>parseInt()</code> to convert it. Wes Bos calls this one of the top three beginner trip-ups in his JavaScript30 course, and I agree. <strong>Use console.log(typeof myVariable)</strong> to check whether you're holding a string or a number — that's usually the smoking gun.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q2-input-strings",
+        "statement": "When a user types \"42\" into an HTML input field, JavaScript automatically converts it to the number 42 so you can do math with it immediately.",
+        "correct": false,
+        "explanation": "HTML inputs always return strings. The value \"42\" is still the string '42' until you explicitly convert it with Number() or parseInt(). This is why '5' + '1' concatenates to '51' instead of adding to 6 — a super common bug when building calculators or counters."
+      },
+      {
+        "type": "concept",
+        "title": "Breakpoints: pausing time",
+        "content": "<p>Console.log is great for quick checks, but when things get messy, you want to <strong>freeze your code mid-flight and look around.</strong> That's what breakpoints do. In the Sources panel (Chrome) or Debugger tab (Firefox), you can click the line number next to any line of code to set a breakpoint. When execution hits that line, everything stops.</p><p>Now you can hover over any variable to see its current value, step forward one line at a time with the Step Over button, or dive into a function call with Step Into. <strong>You're basically walking through your code in slow motion</strong>, watching exactly what changes and when. For me, this was the moment debugging stopped feeling like guesswork and started feeling like detective work.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://developer.chrome.com/static/docs/devtools/javascript/image/the-sources-panel-the-d-fb3b38f2b1c9e_1920.png",
+        "alt": "Screenshot of Chrome DevTools Sources panel showing code editor with breakpoints, file navigator, and debugger controls",
+        "caption": "The Chrome DevTools Sources panel lets you pause JavaScript execution at breakpoints and inspect variable values to debug your code.",
+        "source_title": "Debug JavaScript - Chrome DevTools",
+        "source_url": "https://developer.chrome.com/docs/devtools/javascript"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "Debugging a calculator",
+        "content": "You build a simple calculator and notice that 5 + 1 gives you 51 instead of 6. Set a breakpoint right before the addition line, refresh the page, and enter your numbers. When the breakpoint pauses execution, hover over the input variables — DevTools shows they're strings ('5' and '1') instead of numbers. Wrap them in Number() and the bug disappears."
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "q3-debugging-workflow",
+        "question": "You've added an event listener to a button, but clicking it does nothing—no error in the Console, just silence. Describe your debugging workflow using DevTools to figure out what's wrong.",
+        "sample_answer": "First I'd check the Console for any errors. If there are none, I'd use console.log inside the event listener function to see if it's even firing. If nothing logs, the listener isn't attached—maybe I'm selecting the wrong element or the script runs before the DOM loads. I'd verify the querySelector is finding the button by logging the selected element. If it's null, I know the selector is wrong or the script timing is off. Once I confirm the listener fires, I'd step through the function logic with breakpoints to see where it diverges from what I expect.",
+        "key_points": [
+          "Check the Console for error messages first",
+          "Use console.log to verify the event listener is firing",
+          "Check that querySelector actually found the element (log it to see if it's null)",
+          "Use breakpoints to step through the logic and inspect variable values"
+        ],
+        "explanation": "A silent failure usually means the event listener never attached, which means the element wasn't found (wrong selector, script ran too early) or the listener wasn't wired up. Console.log and breakpoints turn guessing into systematic elimination."
+      },
+      {
+        "type": "concept",
+        "title": "Watch expressions and the call stack",
+        "content": "<p>Once you're paused at a breakpoint, the right sidebar in DevTools gives you even more power. <strong>Watch expressions</strong> let you type any variable name or expression — like <code>userInput * 2</code> or <code>items.length</code> — and DevTools will show you its live value as you step through the code. It's like having a dashboard of the exact data you care about.</p><p>The <strong>call stack</strong> shows you how you got to this line — which function called this function, and what called that one, all the way back to the first event. If you're deep inside a helper function and wondering \"wait, how did I even end up here?\", the call stack tells the story. Kyle Simpson emphasizes this in <em>You Don't Know JS</em>: understanding execution context (where you are and how you got there) is half the battle in debugging closures and scope issues.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Debugging is learning",
+        "content": "Every bug you fix teaches you how JavaScript actually works—not how you thought it worked. The gap between your mental model and the real behavior is where the learning happens. Embrace the breakpoints."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "The Console shows errors and lets you log variable values with console.log() to see what's actually happening.",
+          "HTML input fields always return strings—use Number() or parseInt() to convert them before doing math.",
+          "Breakpoints pause your code mid-execution so you can inspect variables, step through line by line, and see exactly where things go wrong.",
+          "Watch expressions and the call stack give you a live dashboard of values and show you how execution got to the current line.",
+          "Debugging isn't a sign you're bad at coding—it's the main way you learn how the language really behaves."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What's the difference between console.log() and a breakpoint in DevTools?",
+        "back": "console.log() prints values to the Console while your code keeps running. A breakpoint pauses execution completely so you can inspect variables, step through code line by line, and see the full state at that moment."
+      },
+      {
+        "front": "Why does '5' + '1' equal '51' instead of 6 in JavaScript?",
+        "back": "HTML input fields always return strings. The + operator treats '5' and '1' as strings and concatenates them. To do math, convert with Number() or parseInt() first."
+      },
+      {
+        "front": "What does the call stack in DevTools show you?",
+        "back": "The call stack shows the chain of function calls that led to the current line—which function called this one, what called that, all the way back to the original event or script start."
+      },
+      {
+        "front": "How do you check if a querySelector actually found an element?",
+        "back": "Log it: console.log(document.querySelector('.my-button')). If it returns null, the selector didn't match anything—either the class name is wrong or the script ran before the DOM loaded."
+      },
+      {
+        "front": "What's a watch expression in DevTools?",
+        "back": "A custom expression you add in the debugger sidebar (like userInput * 2 or items.length) that shows its live value as you step through paused code—like a dashboard for the data you care about."
+      }
+    ]
+  }
+}

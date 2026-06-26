@@ -7,6 +7,7 @@
 // Parallel across topics, capped to avoid rate limits.
 
 import { TopicContentSchema } from '../schema.mjs';
+import { agentSystemLines } from '../agents.mjs';
 
 const TOOL_NAME = 'submit_topic';
 
@@ -215,7 +216,9 @@ const topicTool = {
 };
 
 function buildSystem(tone) {
-  return `You are a teacher writing one topic of an interactive learning module. Your job is to produce a single topic's worth of content that drops directly into the renderer.
+  return `${agentSystemLines('lessonWriter', 'practiceDesigner')}
+
+Produce a single topic's worth of content that drops directly into the renderer.
 
 Structure each topic as a deliberate learning arc with INTERLEAVED knowledge checks:
 1. Open with a "what is this and why care" concept section.
@@ -288,6 +291,7 @@ ${bundle.misconceptions.length ? 'Common misconceptions:\n' + bundle.misconcepti
 
 Course: "${courseBrief.title}" — ${courseBrief.subtitle}
 Learner: ${courseBrief.learner_persona}
+${courseBrief.human_feedback ? `\nHuman feedback from curriculum/research review:\n${courseBrief.human_feedback}\n` : ''}
 
 Module ${mod.number}: ${mod.title}
 Module description: ${mod.description}

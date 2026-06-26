@@ -19,6 +19,7 @@ import { getTone } from '../../js/generator/tones/conversational.mjs';
 import { createClient as createAnthropic } from '../../js/generator/anthropic-fetch.js';
 import { assembleCourse } from '../../js/generator/assemble-browser.js';
 import { signedPdfUrl } from './supabase-server.mjs';
+import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 
 const STAGE3_CONCURRENCY = 4;
 
@@ -67,7 +68,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
     const sourceUrls = (userBrief.source_urls || []).filter(Boolean);
     let extractedUrls = checkpoint?.extracted_urls || [];
     if (sourceUrls.length && !extractedUrls.length) {
-      await patch({ stage: 'intake', status: 'running', message: `Reading ${sourceUrls.length} source URL${sourceUrls.length === 1 ? '' : 's'}…` });
+      await patch({ stage: 'intake', status: 'running', message: `${agentNameForStage('intake')} is reading ${sourceUrls.length} source URL${sourceUrls.length === 1 ? '' : 's'}…` });
       extractedUrls = await serverFetchUrls(sourceUrls);
     }
     const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
@@ -76,7 +77,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
     // Stage 1 — brief.
     let brief = checkpoint?.brief;
     if (!brief) {
-      await patch({ stage: 'intake', status: 'running', message: 'Designing the outline…' });
+      await patch({ stage: 'intake', status: 'running', message: agentMessage('intake') });
       brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
       const outline = {
         title: brief.title,
@@ -87,11 +88,11 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
       await patch({
         brief, outline,
         stage: 'research',
-        message: `Researching ${brief.modules.length} module${brief.modules.length === 1 ? '' : 's'} in parallel…`,
+        message: `${agentNameForStage('research')} is researching ${brief.modules.length} module${brief.modules.length === 1 ? '' : 's'} in parallel…`,
         topics_total: topicsTotal
       });
     } else {
-      await patch({ stage: 'research', message: 'Resuming from checkpoint…' });
+      await patch({ stage: 'research', message: `${agentNameForStage('research')} is resuming from checkpoint…` });
     }
     if (await bailIfCancelled()) return;
 
@@ -109,7 +110,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
           await patch({
             research: researchByModule,
             stage: 'research',
-            message: `Researched ${done}/${total} · just finished “${mod.title}”`
+            message: `${agentNameForStage('research')} finished ${done}/${total} · “${mod.title}”`
           });
           return { mod, bundle };
         } catch (err) {
@@ -125,7 +126,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
     const topicsByKey = checkpoint?.topics_by_key || {};
     const failures = (checkpoint?.failures || []).slice();
     let done = Object.keys(topicsByKey).length;
-    await patch({ stage: 'topics', message: 'Writing topic content…', topics_done: done, topics_total: total });
+    await patch({ stage: 'topics', message: agentMessage('topics'), topics_done: done, topics_total: total });
 
     const work = [];
     for (const { mod, bundle } of researchResults) {
@@ -149,7 +150,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
           await patch({
             topics_by_key: topicsByKey,
             topics_done: done,
-            message: `Wrote “${topic.title}” — ${done}/${total} topics done`
+            message: `${agentNameForStage('topics')} wrote “${topic.title}” — ${done}/${total} lessons done`
           });
         } catch (err) {
           done++;
@@ -163,7 +164,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
           await patch({
             failures,
             topics_done: done,
-            message: `Skipped (error) “${topic.title}” — ${done}/${total} topics done`
+            message: `${agentNameForStage('topics')} skipped “${topic.title}” — ${done}/${total} lessons checked`
           });
           console.error(`[gen ${jobId}] topic failed ${key}:`, err);
         }
@@ -173,7 +174,7 @@ export async function runGeneration({ supabase, jobId, ownerId, apiKey, userBrie
     if (await bailIfCancelled()) return;
 
     // Stage 4 — assemble + save course.
-    await patch({ stage: 'assemble', message: 'Finalising…' });
+    await patch({ stage: 'assemble', message: agentMessage('assemble') });
     const topicResults = [];
     for (const mod of brief.modules) {
       for (const topic of mod.topics) {

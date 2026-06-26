@@ -8,6 +8,7 @@
 import { waitUntil } from '@vercel/functions';
 import { readJsonBody, userFromRequest, readApiKey } from '../_lib/supabase-server.mjs';
 import { runGeneration } from '../_lib/gen-runner.mjs';
+import { agentMessage } from '../../js/generator/agents.mjs';
 
 export const config = {
   runtime: 'nodejs',
@@ -42,7 +43,7 @@ export default async function handler(req, res) {
   await supabase.from('generation_jobs').update({
     status: 'running',
     error: null,
-    message: 'Resuming from checkpoint…',
+    message: agentMessage('research', 'Resuming from checkpoint…'),
     updated_at: new Date().toISOString()
   }).eq('id', jobId);
 

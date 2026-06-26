@@ -1,0 +1,26 @@
+{
+  "id": "code-for-designers",
+  "schemaVersion": 1,
+  "name": "Code for Designers",
+  "title": "Code for Designers",
+  "subtitle": "Learn programming fundamentals and build your first website or app with confidence",
+  "eyebrow": "Generated course",
+  "emoji": "💻",
+  "storageKeyPrefix": "code-for-designers",
+  "documentTitle": "Code for Designers | Learnable",
+  "searchPlaceholder": "Search topics in Code for Designers…",
+  "chatPlaceholder": "Ask about code for designers… (Enter to send)",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question below.",
+  "chatSystemPrompt": "You are a learning assistant embedded in an interactive course called \"Code for Designers\". The course is for: Designer with no coding experience who wants to collaborate better with engineers and build their own websites or simple apps.. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "completionMessage": "great work building your knowledge",
+  "dashboardCTA": "Each module builds on the one before. Start with \"Thinking Like a Programmer\" and work your way through.",
+  "moduleColorAccents": [
+    "#4338CA",
+    "#D97706",
+    "#059669",
+    "#8B5CF6",
+    "#0EA5E9"
+  ]
+}

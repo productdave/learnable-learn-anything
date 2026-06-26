@@ -5,6 +5,7 @@
 // forced JSON output via tool use.
 
 import { CourseBriefSchema, QUIZ_VARIANTS } from '../schema.mjs';
+import { agentSystemLines } from '../agents.mjs';
 
 const TOOL_NAME = 'submit_course_brief';
 
@@ -88,7 +89,9 @@ const briefTool = {
   }
 };
 
-const SYSTEM = `You are a curriculum designer. Given a learner's topic and constraints, design a course outline that genuinely fits the topic's breadth.
+const SYSTEM = `${agentSystemLines('curriculum')}
+
+Given a learner's topic and constraints, design a course outline that genuinely fits the topic's breadth.
 
 Critical rules:
 - SCOPE is yours to decide. Don't default to 6 modules. A narrow practical topic ("pour-over coffee", "negotiating a salary") usually wants single_module. A broad subject ("game theory", "personal finance") may want full_course. Match the topic to the scope honestly.

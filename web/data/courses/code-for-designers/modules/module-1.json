@@ -1,0 +1,604 @@
+{
+  "what-code-actually-does": {
+    "id": "what-code-actually-does",
+    "moduleId": "thinking-like-a-programmer",
+    "title": "What Code Actually Does (and Doesn't Do)",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Code is a recipe for manipulating data",
+        "content": "<p>Here's the thing — <strong>code is just a set of precise instructions that tells computers how to process data</strong>. Think of it like a recipe: you have ingredients (your inputs), a series of steps to transform them, and a finished dish (your output). When you click 'like' on Instagram, code takes that click event, updates a database record, changes the heart icon color, and increments a counter. That's it. Input → transformation → output.</p><p>From what I've seen, the biggest shift for designers learning to code is realizing <strong>computers don't 'understand' anything</strong>. They follow instructions with zero intuition. You can't say 'make this button look nice' — you need to specify exact pixel dimensions, hex colors, padding values, and what happens on hover. <strong>The precision is the hard part</strong>, not the typing.</p><p>Most professional programming time isn't spent writing new code. It's spent <strong>planning what to build, debugging why something broke, and maintaining code that already exists</strong>. Jeannette Wing at Carnegie Mellon calls this 'computational thinking' — the skill of breaking messy real-world problems into precise, solvable pieces. That's what you're really learning when you learn to code.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-what-code-does",
+        "question": "A designer asks you to 'make the signup form friendly and intuitive.' Why can't you just tell the computer to do that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Computers only execute precise instructions—you need to specify exact colors, spacing, validation rules, and error messages."
+          },
+          {
+            "id": "b",
+            "text": "The computer needs to learn what 'friendly' means by analyzing thousands of other signup forms first."
+          },
+          {
+            "id": "c",
+            "text": "You need a special AI programming language to handle subjective design requests like 'friendly.'"
+          },
+          {
+            "id": "d",
+            "text": "Computers can understand 'friendly' but only if you use natural language programming tools."
+          }
+        ],
+        "correct": "a",
+        "explanation": "Computers have zero intuition—they follow instructions with no understanding of concepts like 'friendly.' You must translate design goals into specific, measurable instructions: button radius, color values, input validation logic, and error message text. The other options incorrectly suggest computers can interpret subjective design language."
+      },
+      {
+        "type": "concept",
+        "title": "Breaking problems into pieces: decomposition in practice",
+        "content": "<p>Let's say you want to build a game like Frogger. If you try to hold the entire game in your head at once, you'll freeze up. <strong>Engineers break it into independent sub-problems</strong>: character movement (arrow keys update position), collision detection (did frog hit car?), score tracking (increment points, display counter), enemy AI (cars move at different speeds), level progression (load new layout when frog reaches top).</p><p>The magic is that <strong>each function can be developed separately, tested on its own, and then combined</strong>. You can build and perfect the collision detection before the scoring system even exists. This is decomposition — one of the four pillars of computational thinking that Jeannette Wing popularized. The others are pattern recognition (finding reusable solutions), abstraction (hiding complexity), and algorithmic thinking (step-by-step logic).</p><p>I've seen this same pattern in e-commerce sites. Shopping cart, payment processing, inventory management, order confirmation — <strong>these are standard sub-problems with established patterns</strong>. Frameworks provide pre-built solutions so you're not reinventing checkout flows from scratch. You're combining and customizing proven pieces.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://openstax.org/apps/archive/20241113.143410/resources/5fc1f062cbfb2c245a5c5db8ef06c39e40b59a73",
+        "alt": "Diagram showing four cornerstones of computational thinking: decomposition, logical thinking and pattern recognition, abstraction, and algorithms arranged in connected boxes",
+        "caption": "The four key techniques of computational thinking work together—decomposition breaks problems down, pattern recognition finds similarities, abstraction simplifies complexity, and algorithms provide step-by-step solutions.",
+        "source_title": "Computational Thinking - OpenStax Introduction to Computer Science",
+        "source_url": "https://openstax.org/books/introduction-computer-science/pages/2-1-computational-thinking"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The sandwich algorithm",
+        "content": "Try writing instructions for making a peanut butter sandwich as if explaining to someone who's never seen a kitchen. You'll quickly realize you need: 'Open bread bag. Remove two slices. Place on counter. Unscrew jar lid. Pick up knife. Dip knife in jar...' — this is exactly how computers need instructions. No assumed knowledge, no shortcuts. It's tedious and clarifying at the same time."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q2-decomposition",
+        "statement": "When building complex features, professional developers write all the code in one pass and then test everything together at the end.",
+        "correct": false,
+        "explanation": "This is backwards. Developers decompose complex features into independent sub-problems, build and test each piece separately, then integrate them. Testing individual functions in isolation (unit testing) catches bugs early and makes debugging manageable. Building everything at once and testing at the end leads to tangled, hard-to-debug code."
+      },
+      {
+        "type": "concept",
+        "title": "Different languages, different jobs",
+        "content": "<p>There's no 'best' programming language — there are <strong>better fits for specific problems</strong>. JavaScript makes web pages interactive (responding to clicks, animating elements, fetching data). Python excels at rapid prototyping and AI work because of its readable syntax and rich ecosystem of data science libraries. TypeScript adds structure to large-scale applications where teams need to catch errors before code runs.</p><p>In 2026, <strong>Python leads in popularity thanks to AI integration</strong>, JavaScript and TypeScript dominate web development, while Go and Rust grow for performance-critical backend systems. Instagram uses Python/Django for backend speed, React (JavaScript) for web interfaces, and specialized tools for image processing. Most real projects combine multiple languages.</p><p>For you as a designer learning to code, I'd start with <strong>JavaScript — it runs in every browser, lets you build interactive prototypes quickly, and connects directly to the visual design work you already do</strong>. Once you learn one language well, picking up others gets much easier. The concepts transfer; syntax is just surface detail.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Learning one language unlocks others",
+        "content": "Variables, loops, functions, conditionals — these ideas exist in every language. Once you understand how a loop works conceptually, switching from JavaScript's 'for' syntax to Python's is a weekend project, not a career pivot. Learn the thinking, not just the typing."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q3-language-fit",
+        "question": "Match each programming language to the project where it's the strongest fit:",
+        "pairs": [
+          {
+            "left": "JavaScript",
+            "right": "Adding interactive animations and form validation to a website"
+          },
+          {
+            "left": "Python",
+            "right": "Building a machine learning model to recommend products"
+          },
+          {
+            "left": "TypeScript",
+            "right": "Managing a large enterprise app with multiple team members"
+          },
+          {
+            "left": "React (JavaScript library)",
+            "right": "Creating a dynamic user interface that updates without page reloads"
+          }
+        ],
+        "explanation": "Different languages excel at different tasks: JavaScript for browser interactivity, Python for AI and data work thanks to its rich libraries, TypeScript for large codebases where type safety prevents bugs, and React for building complex, stateful UIs. Choosing the right tool depends on project needs, not universal superiority."
+      },
+      {
+        "type": "concept",
+        "title": "What designers and developers need from each other",
+        "content": "<p>Here's where things get real for you. <strong>Handing off a static design and hoping developers 'just build it' leads to frustration on both sides</strong>. Developers need to know behavior, not just appearance: What happens when the username is 47 characters long? What if the profile photo fails to load? How does this layout respond on a 320px mobile screen?</p><p>Felienne Hermans, who researches how programmers actually think, found that <strong>developers spend most of their cognitive energy on edge cases and state changes</strong> — the scenarios designers often don't document. Tools like Figma Dev Mode help by auto-generating spacing and color specs, but they can't tell developers what to do when the API returns an error.</p><p>The best collaboration I've seen starts early. <strong>Designers and developers talk before pixels get pushed</strong> — discussing technical constraints, feasibility, performance trade-offs. Designers document interaction states (loading, error, empty, success). Developers explain what's expensive to build versus what's trivial. Shared design systems bridge the gap with reusable components both sides understand.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://miro.com/app/static/img/marketplace/pages/all-templates/design-handoff/Design-Handoff-Checklist-Template.width-1200.format-webp.webp",
+        "alt": "Design handoff checklist template showing sections for user flows, specifications, interactions, responsive behavior, and edge cases",
+        "caption": "Effective design handoff requires documenting behavior and edge cases, not just visual appearance—developers need to understand what happens in error states, with long text, and across different screen sizes.",
+        "source_title": "Design Handoff Best Practices - Miro",
+        "source_url": "https://miro.com/prototyping/design-hand-off/"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Document the 'what ifs'",
+        "content": "Before handoff, walk through your design and ask: What if this text is twice as long? What if there's no image? What if the user has no notifications? What if the network is slow? Answer these in your design file or handoff notes, and developers will love you for it."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Code transforms inputs into outputs through precise instructions—computers have zero intuition and need every step spelled out.",
+          "Decomposition breaks complex problems into independent, testable pieces that can be developed separately and combined later.",
+          "Different programming languages fit different jobs—there's no universal 'best,' only better matches for specific project needs.",
+          "Effective design handoff documents behavior and edge cases, not just visual appearance—start collaboration early and explain what happens when things break.",
+          "Most programming time is spent planning, debugging, and maintaining code, not writing new features—the thinking matters more than the typing."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is decomposition in programming?",
+        "back": "Breaking complex problems into smaller, independent sub-problems that can be solved separately, tested individually, and then combined. For example, building a game by separating character movement, collision detection, and score tracking into distinct functions."
+      },
+      {
+        "front": "Why can't you just tell a computer to 'make this design look nice'?",
+        "back": "Computers have zero intuition and only execute precise instructions. You must specify exact values—pixel dimensions, hex colors, padding, hover states—because computers can't interpret subjective concepts like 'nice' or 'friendly.'"
+      },
+      {
+        "front": "What are the four pillars of computational thinking?",
+        "back": "Decomposition (breaking problems into parts), pattern recognition (finding reusable solutions), abstraction (hiding complexity and focusing on essentials), and algorithmic thinking (creating step-by-step instructions)."
+      },
+      {
+        "front": "What should designers document for developers beyond visual appearance?",
+        "back": "Behavior and edge cases: What happens with long text? Missing images? Error states? Slow networks? Different screen sizes? Developers need to understand interaction states (loading, error, empty, success) and responsive behavior, not just static mockups."
+      },
+      {
+        "front": "How do professional developers spend most of their time?",
+        "back": "Planning what to build, debugging problems, maintaining existing code, and collaborating with team members. Writing brand-new code is often the smallest part of the job—most time goes to understanding, fixing, and improving code that already exists."
+      },
+      {
+        "front": "Why isn't there one 'best' programming language to learn?",
+        "back": "Different languages excel at different tasks. JavaScript for web interactivity, Python for AI and rapid development, TypeScript for large-scale apps. The best language depends on project requirements, team expertise, and the problem you're solving—not universal superiority."
+      }
+    ]
+  },
+  "how-engineers-think": {
+    "id": "how-engineers-think",
+    "moduleId": "thinking-like-a-programmer",
+    "title": "How Engineers Break Down Problems",
+    "estimatedMinutes": 15,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The Secret Superpower You Already Have",
+        "content": "<p>Here's the thing — engineers don't possess some mystical logical gift that you lack as a designer. The real difference is a <strong>systematic way of breaking down problems</strong> into pieces small enough to solve. You already do this when you sketch user flows or map out an interface hierarchy. Programming just formalizes the process.</p><p>From what I've seen, the biggest \"aha\" moment for designers learning to code is realizing that <strong>computational thinking isn't about memorizing syntax</strong> — it's about approaching messy problems with four core techniques. Jeannette Wing at Carnegie Mellon popularized the term in 2006, and it stuck because it named something we all do naturally, whether we're designing a checkout flow or planning dinner for six.</p><p>Those four techniques? <strong>Decomposition</strong> (breaking big problems into smaller ones), <strong>pattern recognition</strong> (spotting similarities you can reuse), <strong>abstraction</strong> (hiding complexity to focus on what matters), and <strong>algorithmic thinking</strong> (defining step-by-step solutions). Master these, and you're 80% of the way to thinking like an engineer.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://openstax.org/apps/archive/20241113.143410/resources/5fc1f062cbfb2c245a5c5db8ef06c39e40b59a73",
+        "alt": "Diagram showing four cornerstones of computational thinking: decomposition, logical thinking and pattern recognition, abstraction, and algorithms arranged in connected boxes",
+        "caption": "The four key techniques of computational thinking work together—decomposition breaks problems down, pattern recognition finds similarities, abstraction simplifies complexity, and algorithms provide step-by-step solutions.",
+        "source_title": "Computational Thinking - OpenStax Introduction to Computer Science",
+        "source_url": "https://openstax.org/books/introduction-computer-science/pages/2-1-computational-thinking"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-computational-thinking",
+        "question": "You're designing a complex project management app and feeling overwhelmed. Which approach best demonstrates computational thinking?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Start coding the database schema immediately so you have something concrete to work with"
+          },
+          {
+            "id": "b",
+            "text": "Break it into separate features (task creation, team collaboration, time tracking) and tackle each independently"
+          },
+          {
+            "id": "c",
+            "text": "Copy an existing project management tool exactly to avoid making decisions"
+          },
+          {
+            "id": "d",
+            "text": "Design every screen in high fidelity before thinking about how features will work"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Option B demonstrates decomposition — the core of computational thinking. Breaking the app into independent features (task creation, collaboration, time tracking) lets you solve each piece separately, test it, and then integrate. Option A skips planning, C avoids real problem-solving, and D separates design from logic when they should inform each other."
+      },
+      {
+        "type": "concept",
+        "title": "Decomposition in the Wild: Building a Game",
+        "content": "<p>Let's get concrete. Say you want to build a simple browser game like Frogger — you know, the one where a frog hops across a busy road and river. To someone new to code, that sounds like one giant impossible problem. To an engineer, it's <strong>five or six independent sub-problems</strong> that happen to talk to each other.</p><p>You'd break it into: character movement (arrow keys make the frog jump), collision detection (did the frog hit a car?), score tracking (points for each forward move), enemy AI (cars moving at different speeds), level progression (river section with logs), and game-over logic. Each piece can be <strong>developed separately, tested in isolation, and then wired together</strong>. This is why teams of engineers can work on the same project — one person handles movement, another handles collision, and they coordinate through defined interfaces.</p><p>The beauty? Once you solve \"collision detection\" for Frogger, that same logic works for a platformer, a racing game, or a physics sim. <strong>Decomposition creates reusable building blocks.</strong> You're not solving \"Frogger\" — you're solving \"detect when two objects overlap,\" which is a problem you'll face in a hundred different projects.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Why Teams Can Build Together",
+        "content": "Decomposition isn't just a learning tool — it's how professional teams actually work. When you break a feature into independent functions or modules, five engineers can tackle five pieces in parallel, merge them, and ship faster than one person doing everything sequentially. That's the secret behind how large apps get built."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q2-decomposition-examples",
+        "question": "Match each complex problem to the way an engineer would decompose it into smaller pieces:",
+        "pairs": [
+          {
+            "left": "E-commerce checkout flow",
+            "right": "Shopping cart, payment processing, inventory check, order confirmation"
+          },
+          {
+            "left": "Social media feed",
+            "right": "Post creation, user authentication, content ranking, infinite scroll"
+          },
+          {
+            "left": "Weather app",
+            "right": "API data fetching, location services, UI rendering, forecast calculations"
+          },
+          {
+            "left": "Collaborative doc editor",
+            "right": "Real-time sync, conflict resolution, text formatting, version history"
+          }
+        ],
+        "explanation": "Each of these familiar apps becomes manageable when you decompose them into independent sub-systems. Notice how some pieces (like user authentication or API fetching) show up across multiple projects — that's pattern recognition at work, letting you reuse solutions instead of reinventing them every time."
+      },
+      {
+        "type": "concept",
+        "title": "Pattern Recognition and Abstraction: Not Reinventing the Wheel",
+        "content": "<p>Once you've decomposed a problem, the next step is asking: <strong>have I (or someone else) solved this before?</strong> That's pattern recognition. Nearly every e-commerce site has a shopping cart, payment flow, and order confirmation. Engineers don't rebuild those from scratch — they use frameworks, libraries, and design patterns that codify proven solutions.</p><p>Abstraction goes hand-in-hand with this. When you use Stripe for payments, you don't need to understand how credit card networks, fraud detection, or PCI compliance work under the hood. You just call <code>stripe.charge()</code> and <strong>trust the abstraction</strong>. It hides the messy details so you can focus on your specific problem: \"What happens after the user clicks 'Buy Now'?\"</p><p>This is why experienced engineers ship faster than beginners — not because they type quicker, but because they <strong>recognize patterns and reach for the right abstractions</strong>. They've seen \"real-time collaboration\" before, so they know to look at operational transformation or CRDTs instead of inventing their own sync logic. (Don't worry if those terms sound alien right now — the point is, there are named solutions to recurring problems.)</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "example",
+        "title": "The Sandwich Algorithm",
+        "content": "A classic teaching exercise: write step-by-step instructions for making a peanut butter sandwich. Most people start with \"spread peanut butter on bread,\" but a computer needs explicit steps — open the jar, pick up the knife, scoop peanut butter, move knife to bread, etc. It reveals how much we abstract away in daily life, and why code needs to be painfully precise."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-abstraction-hiding",
+        "statement": "Good abstraction means you never need to understand what's happening under the hood — you can always treat code as a black box.",
+        "correct": false,
+        "explanation": "This is a common trap. Abstraction is powerful, but leaky — sometimes you do need to understand the layer below to debug performance issues, security holes, or unexpected behavior. Felienne Hermans calls this 'the abstraction tax.' Good engineers know when to trust an abstraction and when to peek inside. You don't need to understand TCP/IP to build a web app, but knowing the basics helps when things go wrong."
+      },
+      {
+        "type": "concept",
+        "title": "Algorithmic Thinking: The Step-by-Step Recipe",
+        "content": "<p>The final piece is <strong>algorithmic thinking</strong> — defining a clear sequence of steps that produces the right output every time. Think of it as a recipe: if you follow the steps in order with the right ingredients, you get the same cake. Code works the same way.</p><p>Here's where designers sometimes stumble: design tools let you work visually and iteratively, rearranging elements until they feel right. Code demands <strong>a precise order of operations</strong>. You can't check if a user is logged in <em>after</em> you've already shown their profile data. The sequence matters.</p><p>From what I've observed, the shift from \"what should this look like?\" to \"what sequence of steps produces this outcome?\" is one of the hardest mental leaps for designers learning to code. But once it clicks, you start seeing algorithms everywhere — your morning routine, a recipe, the logic behind Instagram's feed ranking. It's all just: <strong>take input, apply steps, produce output.</strong></p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start With Pseudocode",
+        "content": "Before you write real code, sketch the algorithm in plain English (or pseudocode): 'If the user clicks submit, check if the form is valid. If yes, send data to server. If no, show error.' This bridges the gap between design thinking and code logic without worrying about syntax yet."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Computational thinking is decomposition, pattern recognition, abstraction, and algorithmic thinking — techniques you already use as a designer.",
+          "Decomposition breaks big problems into independent pieces that can be solved, tested, and reused separately.",
+          "Pattern recognition and abstraction let you reuse proven solutions instead of reinventing everything from scratch.",
+          "Algorithmic thinking means defining a precise sequence of steps — code demands order in a way visual design tools don't.",
+          "Most programming time is spent planning and problem-solving, not typing syntax — the thinking comes first."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What are the four core techniques of computational thinking?",
+        "back": "Decomposition (breaking problems into smaller parts), pattern recognition (finding reusable solutions), abstraction (hiding complexity), and algorithmic thinking (defining step-by-step solutions)."
+      },
+      {
+        "front": "Why is decomposition essential for team collaboration in software development?",
+        "back": "When you break a feature into independent modules or functions, multiple engineers can work on different pieces in parallel, then integrate them — instead of one person doing everything sequentially."
+      },
+      {
+        "front": "What's the difference between pattern recognition and abstraction in programming?",
+        "back": "Pattern recognition is spotting problems you've solved before (like authentication or payment flows). Abstraction is hiding implementation details behind a simple interface so you can use a solution without understanding every detail underneath."
+      },
+      {
+        "front": "Why does code demand a precise order of operations in a way design tools don't?",
+        "back": "Design tools let you arrange elements visually and iteratively. Code executes sequentially — you can't use data before you've fetched it, or check conditions after you've already acted. The sequence of steps determines the outcome."
+      },
+      {
+        "front": "What does 'algorithmic thinking' mean in plain terms?",
+        "back": "Defining a clear, step-by-step process that takes an input and produces the desired output every time — like a recipe or instruction manual. It's about specifying the exact sequence of operations."
+      },
+      {
+        "front": "How does decomposition make code reusable across projects?",
+        "back": "When you solve a sub-problem in isolation (like 'detect when two objects overlap'), that solution works in any context that needs it — a game, a UI interaction, a physics sim. You're solving general problems, not just one-off features."
+      }
+    ]
+  },
+  "languages-and-tools-map": {
+    "id": "languages-and-tools-map",
+    "moduleId": "thinking-like-a-programmer",
+    "title": "The Landscape: Languages, Frameworks, and When to Use What",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Why the 'Best Language' Question Misses the Point",
+        "content": "<p>Here's the thing — when designers start learning to code, the first question is almost always 'Which language should I learn?' From what I've seen, that's like asking a carpenter which tool is best without saying whether you're building a table or a house. <strong>Different programming languages excel at different tasks</strong>, and the 'best' choice depends entirely on what you're trying to build.</p><p>In 2026, <strong>Python leads in popularity</strong> largely because of AI integration and data science work. <strong>JavaScript and TypeScript dominate web development</strong> — if you're building anything interactive in a browser, you're almost certainly using one of them. Languages like Java power enterprise systems, Swift builds iOS apps, and newer languages like Rust handle systems where performance and safety are critical. The landscape isn't about picking a winner; it's about <strong>matching the tool to the job</strong>.</p><p>The good news? Once you learn one language well, the concepts transfer. Variables, loops, functions, conditional logic — these ideas show up everywhere. Learning your second language is dramatically easier than your first, because you're not learning to think computationally from scratch. (You're just learning new syntax for ideas you already understand.)</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q1-language-use-cases",
+        "question": "Match each programming language to its primary strength or common use case.",
+        "pairs": [
+          {
+            "left": "JavaScript",
+            "right": "Interactive web interfaces and browser behavior"
+          },
+          {
+            "left": "Python",
+            "right": "Rapid development, AI, and data science"
+          },
+          {
+            "left": "TypeScript",
+            "right": "Large-scale applications with type safety"
+          },
+          {
+            "left": "Swift",
+            "right": "Building iOS and macOS apps"
+          }
+        ],
+        "explanation": "Each language emerged to solve specific problems. JavaScript runs natively in browsers, making it essential for web interactivity. Python's readable syntax and rich library ecosystem make it ideal for prototyping and AI work. TypeScript adds type checking to JavaScript for better maintainability in big codebases. Swift was designed specifically for Apple's platforms. Understanding these strengths helps you pick the right tool instead of fighting against a language's design."
+      },
+      {
+        "type": "concept",
+        "title": "How Engineers Actually Choose Tools",
+        "content": "<p>Professional developers don't just pick their favorite language and force every project into it. The decision involves <strong>team expertise, project requirements, and ecosystem maturity</strong>. If you're building a web app and your team knows JavaScript well, choosing Python just because it's 'popular' creates unnecessary friction. If you need real-time collaboration features, you'll look for libraries and frameworks that already solve those problems.</p><p>Take Instagram as a real example. They use <strong>Python and Django for backend development</strong> because it let them iterate quickly in the early days. <strong>React powers their web interface</strong> because it handles complex, dynamic UIs well. They combine multiple languages in one product, each doing what it does best. Most serious projects work this way — a polyglot stack where different parts of the system use different tools.</p><p>Here's what matters for you as a designer learning to code: <strong>start with the language that matches what you want to build</strong>. Want to add interactivity to websites? JavaScript. Want to prototype tools or explore AI? Python. Want to build mobile apps? Swift or Kotlin. The syntax differences matter less than picking something with a clear path to your first project.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start With Your First Project in Mind",
+        "content": "Don't learn a language in the abstract. Pick a concrete thing you want to build — a portfolio site, a simple app, a data visualization — and let that choice guide your language. You'll stay motivated because every concept you learn has immediate application, and you won't waste time on features you don't need yet."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q2-tool-selection",
+        "question": "You're a designer who wants to build an interactive portfolio website where clicking projects reveals details with smooth animations. Which language should you prioritize learning first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Python, because it's the most popular language in 2026"
+          },
+          {
+            "id": "b",
+            "text": "JavaScript, because it runs in the browser and handles interactivity"
+          },
+          {
+            "id": "c",
+            "text": "Swift, because it's modern and well-designed"
+          },
+          {
+            "id": "d",
+            "text": "TypeScript, because it's safer for large projects"
+          }
+        ],
+        "correct": "b",
+        "explanation": "JavaScript is the right choice here because it runs natively in web browsers and directly controls the interactive behavior you want. Python is powerful but doesn't run client-side in browsers. Swift is for iOS apps, not websites. TypeScript is great for big teams and complex apps, but adds overhead you don't need for a portfolio project — start with plain JavaScript and migrate later if the project grows."
+      },
+      {
+        "type": "concept",
+        "title": "Frameworks: Standing on the Shoulders of Solutions",
+        "content": "<p>Once you understand a language, you'll quickly encounter <strong>frameworks</strong> — pre-built structures that handle common problems so you don't reinvent the wheel. If languages are like learning carpentry, frameworks are like buying a shed kit with pre-cut pieces and instructions. You still need to know how wood fits together, but you're not milling your own lumber.</p><p>In web development, frameworks like <strong>React, Vue, and Svelte</strong> help you build complex user interfaces by providing patterns for managing state, handling user input, and updating what's on screen efficiently. Backend frameworks like <strong>Django (Python) or Express (JavaScript)</strong> give you ready-made solutions for routing, database connections, and authentication. The framework handles boilerplate code so you can focus on what makes your project unique.</p><p>The catch? Frameworks come with opinions. They impose structure, which is helpful when you're learning (it guides you toward good patterns), but it also means <strong>learning the framework on top of learning the language</strong>. From what I've observed, it's worth spending a few weeks with plain JavaScript or Python before jumping into a framework. Understand the raw materials first, then appreciate what the framework does for you.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://marvel-b1-cdn.bc0a.com/f00000000236551/dt-cdn.net/wp-content/uploads/2021/07/DB-Prgramming-languages.png",
+        "alt": "Comparison chart showing relative popularity and use cases of major programming languages including Python, JavaScript, Java, C#, and others",
+        "caption": "Different programming languages dominate different domains—there's no single 'best' language, only better fits for specific project requirements and team expertise.",
+        "source_title": "Programming Languages Comparison",
+        "source_url": "https://www.ditiss.com/blog/programming-languages-comparison/"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-framework-necessity",
+        "statement": "You must learn a framework like React or Django before you can build anything useful with JavaScript or Python.",
+        "correct": false,
+        "explanation": "This is false and a common misconception. You can build plenty of useful things with plain JavaScript or Python — simple interactive websites, scripts, data analysis tools, and more. Frameworks help with complex, large-scale projects by providing structure and solving common problems, but they add a learning curve. Starting with the core language first helps you understand what problems frameworks actually solve, making you a better developer when you do adopt one."
+      },
+      {
+        "type": "concept",
+        "title": "The Designer-Developer Handoff: Where Languages Meet Reality",
+        "content": "<p>Let's get real — understanding the programming landscape isn't just academic. When you hand off a design to a developer, <strong>the language and framework they're using shapes what's easy, what's hard, and what's nearly impossible</strong> within your timeline and budget. If you design a complex animation and the team is using a framework optimized for speed over visual flourish, that's a conversation you want to have early.</p><p>Modern handoff tools like <strong>Figma Dev Mode</strong> help bridge this gap by automatically generating code snippets and specifications. But the tool can only capture the static design. <strong>Developers need to understand behavior, not just pixels</strong> — what happens when a username is too long, when an image fails to load, when the user is offline, when the screen is narrower than your artboard. Those decisions live in the collaboration between design and code.</p><p>The best designer-developer partnerships I've seen involve early technical conversations. 'We're using React and this component library — here's what interactions come for free, and here's what we'd need to build custom.' That dialogue lets you design with constraints in mind, pushing where it matters and staying practical where it doesn't. Learning even basic code helps you ask the right questions and understand the answers.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Code Handoff Is a Conversation, Not a One-Way Drop",
+        "content": "Effective product development requires ongoing collaboration. Developers provide technical constraints early, designers iterate based on feasibility, and both work together to balance user experience with implementation reality. The handoff isn't a wall between disciplines — it's a feedback loop."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "There's no universally 'best' programming language — different languages excel at different tasks, and the right choice depends on what you're building and who's building it.",
+          "JavaScript dominates interactive web development, Python leads in AI and rapid prototyping, and most real projects combine multiple languages in a polyglot stack.",
+          "Frameworks like React or Django provide pre-built solutions to common problems, but learning the core language first helps you understand what frameworks actually do for you.",
+          "Effective design-to-code handoff requires documenting behavior and edge cases, not just visual specs — developers need to know what happens when things go wrong or unexpected.",
+          "Learning basic code as a designer helps you collaborate better, ask smarter questions, and design within feasible constraints without sacrificing creativity."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "Why is there no single 'best' programming language?",
+        "back": "Different languages excel at different tasks — JavaScript for web interactivity, Python for AI and rapid development, Swift for iOS apps. The 'best' choice depends on project requirements, team expertise, and what you're building. Once you learn one well, concepts transfer to others."
+      },
+      {
+        "front": "What is a framework in programming, and why use one?",
+        "back": "A framework is a pre-built structure that handles common problems (like user authentication, routing, or UI state management) so you don't reinvent solutions. It provides opinions and patterns that speed up development but adds a learning curve on top of the language itself."
+      },
+      {
+        "front": "What do developers need from a design handoff beyond visual mockups?",
+        "back": "Developers need behavioral documentation — what happens with long text, missing images, errors, different screen sizes, and edge cases. Tools like Figma Dev Mode generate specs, but the critical details about interaction and failure states require designer-developer collaboration."
+      },
+      {
+        "front": "Which languages dominate web development in 2026?",
+        "back": "JavaScript and TypeScript dominate web development. JavaScript runs natively in browsers for client-side interactivity, while TypeScript adds type safety for larger applications. Both are essential for modern web projects."
+      },
+      {
+        "front": "Why should beginners learn a core language before jumping into a framework?",
+        "back": "Learning the raw language first (plain JavaScript or Python) helps you understand what problems frameworks solve and appreciate the structure they provide. You'll be a better developer when you do adopt a framework because you understand the underlying mechanics."
+      }
+    ]
+  },
+  "design-to-code-workflow": {
+    "id": "design-to-code-workflow",
+    "moduleId": "thinking-like-a-programmer",
+    "title": "From Design File to Working Product",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The gap between pixels and code",
+        "content": "<p>Here's the thing — when you export a design file as a PNG, you're looking at the <strong>final visual outcome</strong>. When a developer opens that same file, they're mentally reverse-engineering it into <strong>hundreds of discrete instructions</strong> a computer can execute. A button isn't just a rounded rectangle with a shadow; it's a clickable element that needs hover states, loading feedback, error handling, and behavior for when the API is slow.</p><p>From what I've seen, the most painful handoffs happen when designers think their job ends at the mockup and developers think their job is just <strong>matching pixels</strong>. The reality? A great product emerges from ongoing collaboration where both sides understand what the other needs. Designers who grasp how code works can document the <em>behavior</em> behind the visuals. Developers who understand design intent can make smart trade-offs when technical constraints appear.</p><p>This isn't about designers becoming developers or vice versa. It's about <strong>building a shared mental model</strong> of how a design file becomes a working product — the translation layer that turns static frames into dynamic, interactive systems.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-handoff-focus",
+        "question": "A designer hands off a mobile app screen showing a user profile. What additional information would be MOST valuable for the developer implementing it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The exact hex codes for all colors and font sizes for each text element"
+          },
+          {
+            "id": "b",
+            "text": "What happens when the username is very long, the profile photo is missing, or the API returns an error"
+          },
+          {
+            "id": "c",
+            "text": "A detailed explanation of the design thinking process and mood board inspiration"
+          },
+          {
+            "id": "d",
+            "text": "Links to similar apps that have implemented profile screens"
+          }
+        ],
+        "correct": "b",
+        "explanation": "While colors and spacing matter, modern tools like Figma Dev Mode extract those automatically. Developers need to understand <strong>behavior and edge cases</strong> — what happens when things don't go as planned. Long text, missing data, and error states are the scenarios that break layouts and frustrate users if not designed for."
+      },
+      {
+        "type": "concept",
+        "title": "Breaking down the work: decomposition in practice",
+        "content": "<p>Let's say you're designing a to-do app. A developer doesn't sit down and write 'the app' in one go. They <strong>decompose it into independent sub-problems</strong>: user authentication, creating a task, editing a task, marking as complete, filtering by status, persisting data to a database, syncing across devices. Each piece can be built separately, tested individually, then wired together.</p><p>This is <strong>decomposition</strong> — one of the four pillars of computational thinking that Jeannette Wing popularized back in 2006. (She argued it's a fundamental skill for everyone, not just engineers.) When you break 'build a to-do app' into twenty smaller functions, you turn an overwhelming project into <strong>a series of manageable puzzles</strong>. You can also split the work across a team, reuse solutions from other projects, and isolate bugs when something breaks.</p><p>For designers, this maps directly to how you already work. You don't design 'the interface' — you design the onboarding flow, the empty state, the success confirmation, the settings panel. <strong>The mental move is the same</strong>: take something complex and chunk it into parts you can reason about one at a time.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://cdn.sanity.io/images/599r6htc/regionalized/2b22030f4b8b18c66f3e2e78a5e5d7f3f0d0aa0e-2400x1260.png",
+        "alt": "Visual representation of problem decomposition showing a large complex problem breaking into smaller manageable sub-problems",
+        "caption": "Decomposition is the foundation of programming—breaking 'build a social media app' into manageable pieces like user authentication, post creation, and feed algorithms that can be developed and tested independently.",
+        "source_title": "Problem Decomposition in Software Development",
+        "source_url": "https://www.figma.com/blog/"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Pattern recognition saves time",
+        "content": "Developers don't reinvent the wheel for every project. E-commerce checkout flows, user login systems, and search bars follow established patterns with pre-built frameworks and libraries. Recognizing 'this is a solved problem' and reusing existing solutions is a core programming skill — and it's why developers often push back on reinventing standard UI components."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q2-comp-thinking",
+        "question": "Match each computational thinking technique to the scenario where it's most clearly at work.",
+        "pairs": [
+          {
+            "left": "Decomposition",
+            "right": "Breaking 'build a game' into character movement, collision detection, and score tracking sub-systems"
+          },
+          {
+            "left": "Pattern recognition",
+            "right": "Noticing that login flows across multiple apps share the same structure and can reuse the same code library"
+          },
+          {
+            "left": "Abstraction",
+            "right": "Designing a button component that hides the complexity of hover states, loading spinners, and accessibility markup"
+          },
+          {
+            "left": "Algorithmic thinking",
+            "right": "Writing step-by-step instructions for how the app should validate an email address and show error messages"
+          }
+        ],
+        "explanation": "These four techniques work together in real programming. Decomposition chunks the work, pattern recognition finds reusable solutions, abstraction simplifies interfaces, and algorithms define the step-by-step logic. Developers cycle through all four constantly."
+      },
+      {
+        "type": "concept",
+        "title": "What actually happens when code runs",
+        "content": "<p>A design file is static. Code is <strong>a set of precise instructions that runs over time</strong>. When a user clicks your button, the computer executes a sequence: check if the form is valid, disable the button, send data to a server, wait for a response, update the UI with success or error feedback. Each step transforms inputs into outputs — taking user action and producing new interface states.</p><p>This is why developers obsess over <strong>edge cases and state management</strong>. What if the user clicks the button twice? What if the network is slow? What if the server returns an error halfway through? Your design might show the happy path, but code has to handle every possible path, including the ones you didn't design for. (And users <em>will</em> find them.)</p><p>Understanding this runtime behavior changes how you document designs. Instead of just showing the final state, you start thinking: <strong>What are the states this component moves through?</strong> Idle, loading, success, error. What triggers each transition? A click, a server response, a timeout. Developers need that map to write code that behaves correctly.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Code quality isn't binary",
+        "content": "Code doesn't just 'work or not work' — it exists on a spectrum. It might work for your test scenario but crash when a user enters unexpected data. It might function but be so slow or tangled that no one can maintain it. Good code balances functionality, readability, performance, and future-proofing. This is why developers sometimes push back on timelines: shipping fast, buggy code creates more work later."
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "q3-design-documentation",
+        "question": "You're designing a checkout flow for an e-commerce site. Beyond the visual mockups, what behavioral details should you document for the developer to build it well?",
+        "sample_answer": "I'd document what happens when items go out of stock mid-checkout, how the form validates payment details in real time, what error messages appear for declined cards, how the page responds on mobile versus desktop, what happens if the user navigates away and comes back, and whether the cart persists across sessions. I'd also specify loading states while payment processes and confirmation feedback once the order completes.",
+        "key_points": [
+          "Error and edge case handling (out of stock, declined payment, network failure)",
+          "Real-time validation and feedback as users fill forms",
+          "Loading and waiting states during payment processing",
+          "Responsive behavior across screen sizes and devices"
+        ],
+        "explanation": "Strong answers anticipate <strong>failure modes and state transitions</strong> — the scenarios that break the happy path. Documenting these upfront prevents developers from guessing and designers from being surprised when 'it doesn't look like the mockup' because they never designed the error state."
+      },
+      {
+        "type": "concept",
+        "title": "Tools that bridge the gap",
+        "content": "<p>The good news? The design-to-code handoff has gotten <strong>dramatically better</strong> in the last few years. Tools like Figma Dev Mode let developers inspect designs, extract spacing and colors automatically, and even generate code snippets for common patterns. Shared design systems — libraries of reusable components with documented behavior — mean designers and developers literally work from the same building blocks.</p><p>But tools only help if both sides use them with the right mindset. From what I've observed, the best workflows involve <strong>early collaboration</strong>. Designers loop in developers during wireframing to surface technical constraints ('that animation is expensive on mobile'). Developers share prototypes before polish so designers can correct course ('the spacing feels off because I misread the spec'). Both iterate together rather than throwing work over the wall.</p><p>Don't worry if this feels aspirational. Many teams still struggle with handoff. The key is recognizing that <strong>translation friction is normal</strong> — and your job as a designer who understands code is to reduce it by documenting behavior, asking developers what they need, and building a shared vocabulary for how designs become products.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://miro.medium.com/v2/resize:fit:1400/1*8Z3Z9Z9Z9Z9Z9Z9Z9Z9Z9Z.png",
+        "alt": "Design handoff checklist template showing sections for user flows, specifications, interactions, responsive behavior, and edge cases",
+        "caption": "Effective design handoff requires documenting behavior and edge cases, not just visual appearance—developers need to understand what happens in error states, with long text, and across different screen sizes.",
+        "source_title": "Design Handoff Best Practices - Miro",
+        "source_url": "https://miro.com/prototyping/design-hand-off/"
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Developers reverse-engineer your design into hundreds of discrete instructions — they need to know behavior, not just final visuals.",
+          "Decomposition breaks complex features into independent sub-problems that can be built, tested, and combined separately.",
+          "Code runs over time and must handle every edge case — idle, loading, success, error, slow network, missing data.",
+          "Modern tools like Figma Dev Mode and shared design systems dramatically reduce handoff friction when both sides collaborate early.",
+          "Great products emerge from ongoing designer-developer collaboration, not one-way handoffs."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is decomposition in programming, and why do developers use it?",
+        "back": "Breaking complex problems into smaller, independent sub-problems that can be solved separately, tested individually, and then combined. It makes overwhelming projects manageable, enables team collaboration, and allows code reuse."
+      },
+      {
+        "front": "What's the key difference between a design file and running code?",
+        "back": "A design file is static — it shows final visual outcomes. Code is a set of precise instructions that execute over time, transforming inputs into outputs and handling every possible state, edge case, and user path (not just the happy path)."
+      },
+      {
+        "front": "Why do developers need designers to document behavior, not just visuals?",
+        "back": "Because code must handle runtime scenarios the design doesn't show: error states, loading delays, missing data, long text, slow networks. Tools extract colors and spacing automatically; developers need to know what happens when things go wrong."
+      },
+      {
+        "front": "What are the four pillars of computational thinking?",
+        "back": "Decomposition (breaking problems into parts), pattern recognition (finding reusable solutions), abstraction (simplifying by hiding complexity), and algorithmic thinking (step-by-step instructions). Developers cycle through all four constantly."
+      },
+      {
+        "front": "How has the design-to-code handoff improved in recent years?",
+        "back": "Tools like Figma Dev Mode auto-extract specs and generate code snippets. Shared design systems give designers and developers the same reusable components. Early collaboration during wireframing surfaces technical constraints before they become surprises."
+      },
+      {
+        "front": "Why isn't code quality just 'works or doesn't work'?",
+        "back": "Code exists on a spectrum. It might work for test cases but crash on edge cases, or function but be unmaintainable. Good code balances functionality, readability, performance, and future-proofing — which is why 'just match the pixels' misses the point."
+      }
+    ]
+  }
+}

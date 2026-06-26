@@ -5,14 +5,15 @@ import { renderTopicView } from './components/topic-view.js?v=9';
 import { initSearch } from './search.js';
 import { initFlashcards } from './flashcards.js?v=2';
 import { initChat } from './chat.js';
-import { initAuth, getUser, onUserChange } from './auth.js?v=5';
+import { initAuth, getUser, onUserChange } from './auth.js?v=6';
 import { initSync } from './sync.js?v=2';
-import { openIntake, openIntakeForJob } from './intake.js?v=16';
+import { openIntake, openIntakeForJob } from './intake.js?v=18';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, getJob as getJobLazy } from './jobs.js';
 import { ensureSW, resumeMissing, cancelGeneration as swCancel, resumeFromCheckpoint as swResume, hasCheckpoint } from './sw-client.js';
-import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=2';
+import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, rehydrateCloudSubscriptions } from './cloud-gen-client.js?v=3';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js';
 import { initCourseSync, syncCoursesNow } from './course-sync.js?v=1';
+import { agentNameForStage } from './generator/agents.mjs';
 
 async function loadIcons() {
   try {
@@ -316,6 +317,44 @@ function initMobileMenu() {
   });
 }
 
+const WORKFLOW_STEPS = [
+  {
+    id: 'context',
+    title: 'Context',
+    actor: 'You + Learnable',
+    body: 'Add the topic, goal, starting point, links, notes, files, and constraints before the agent spends tokens.',
+    human: true
+  },
+  {
+    id: 'curriculum',
+    title: 'Curriculum',
+    actor: 'Curriculum Designer',
+    body: 'The agent proposes the modules, topic order, scope, and learning objectives.',
+    human: true
+  },
+  {
+    id: 'research',
+    title: 'Research',
+    actor: 'Researcher',
+    body: 'The agent gathers concepts, examples, misconceptions, and source direction for each module.',
+    human: true
+  },
+  {
+    id: 'lessons',
+    title: 'Lessons',
+    actor: 'Lesson Writer + Practice Designer',
+    body: 'The agent writes explanations, quizzes, exercises, flashcards, and practice loops.',
+    human: false
+  },
+  {
+    id: 'review',
+    title: 'Final Review',
+    actor: 'Reviewer',
+    body: 'The agent assembles the course, checks missing pieces, and saves it to your library.',
+    human: false
+  }
+];
+
 async function renderLibrary(container) {
   let library;
   try {
@@ -325,34 +364,27 @@ async function renderLibrary(container) {
     return;
   }
   const visible = library.courses.filter(c => !c.internal);
-
-  // Tag user-generated cards so the UI can mark them visually.
-  const cards = library.courses.map(c => ({ ...c }));
-
   const activeJobs = listActiveJobs();
+  const recent = visible.slice(0, 6);
 
   container.innerHTML = `
-    <div class="library">
-      <div class="library-hero">
-        <div class="library-eyebrow">Beta · Course Library</div>
-        <h1 class="library-title">Learn anything.</h1>
-        <p class="library-subtitle">Generated interactive courses on whatever you want to learn — with quizzes, flashcards, and an AI tutor that knows the lesson.</p>
-        <div class="library-cta">
-          <button class="library-cta-btn" id="generate-btn">+ Generate a new course</button>
-          <span class="library-cta-note">Runs in your browser with your Anthropic key. ~$1–3 of credit per course.</span>
-        </div>
-      </div>
+    <div class="agent-home">
+      <div class="agent-workflow-host">${courseWorkflowHTML(activeJobs)}</div>
 
       <div class="library-jobs-host">${jobsSectionHTML(activeJobs)}</div>
 
-      <div class="library-section">
-        <h2 class="library-section-title">Available courses</h2>
+      <div class="library-section agent-library-section">
+        <div class="agent-section-heading">
+          <h2 class="library-section-title">Recent courses</h2>
+          <button class="agent-secondary-btn" id="generate-btn">New course</button>
+        </div>
         <div class="library-grid">
-          ${visible.map(c => libraryCardHTML(c)).join('')}
+          ${recent.map(c => libraryCardHTML(c)).join('')}
         </div>
       </div>
     </div>`;
 
+  wireAgentWorkflow(container);
   container.querySelector('#generate-btn')?.addEventListener('click', openIntake);
   wireLibraryCards(container);
   wireJobsSection(container);
@@ -361,14 +393,145 @@ async function renderLibrary(container) {
   // (If a new course just finished saving, also refresh the library list.)
   onJobsChange(() => {
     const host = container.querySelector('.library-jobs-host');
-    if (!host) return;
     const newJobs = listActiveJobs();
-    host.innerHTML = jobsSectionHTML(newJobs);
+    const workflowHost = container.querySelector('.agent-workflow-host');
+    if (workflowHost) workflowHost.innerHTML = courseWorkflowHTML(newJobs);
+    wireAgentWorkflow(container);
+    if (host) host.innerHTML = jobsSectionHTML(newJobs);
     wireJobsSection(container);
     // If a job finished and added a course to localStorage, refresh the catalog too.
     // (Re-rendering only the catalog grid keeps things cheap.)
     refreshLibraryCatalog(container);
   });
+}
+
+function wireAgentWorkflow(container) {
+  container.querySelectorAll('[data-agent-action="open-intake"]').forEach(btn => {
+    btn.addEventListener('click', openIntake);
+  });
+  container.querySelectorAll('[data-agent-action="open-review"], [data-agent-action="open-job"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.jobId;
+      if (id) openIntakeForJob(id);
+    });
+  });
+}
+
+function courseWorkflowHTML(jobs = []) {
+  const state = workflowStateFromJobs(jobs);
+  return `
+    <section class="agent-workflow" aria-label="Course creation workflow">
+      <div class="agent-workflow-head">
+        <div>
+          <p class="agent-workflow-kicker">Course builder workflow</p>
+          <h1>Talk to the agent, then approve the important steps.</h1>
+        </div>
+        <button class="agent-primary-btn" data-agent-action="open-intake">New course</button>
+      </div>
+      <div class="agent-workflow-steps">
+        ${WORKFLOW_STEPS.map((step, index) => workflowStepHTML(step, index, state)).join('')}
+      </div>
+    </section>`;
+}
+
+function workflowStateFromJobs(jobs = []) {
+  const active = jobs.find(j => j.status === 'review_curriculum' || j.status === 'review_research')
+    || jobs.find(j => j.status === 'running' || j.status === 'cancelling')
+    || jobs.find(j => ['failed', 'interrupted', 'partial'].includes(j.status));
+
+  const state = {
+    activeId: 'context',
+    done: new Set(),
+    job: active || null,
+    actionStepId: 'context',
+    actionLabel: 'Add context',
+    action: 'open-intake'
+  };
+
+  if (!active) return state;
+
+  if (active.status === 'review_curriculum') {
+    state.activeId = 'curriculum';
+    state.done.add('context');
+    state.actionStepId = 'curriculum';
+    state.actionLabel = 'Open curriculum review';
+    state.action = 'open-review';
+  } else if (active.status === 'review_research') {
+    state.activeId = 'research';
+    state.done.add('context');
+    state.done.add('curriculum');
+    state.actionStepId = 'research';
+    state.actionLabel = 'Open research review';
+    state.action = 'open-review';
+  } else if (active.stage === 'research') {
+    state.activeId = 'research';
+    state.done.add('context');
+    state.done.add('curriculum');
+    state.actionStepId = 'research';
+    state.actionLabel = 'View progress';
+    state.action = 'open-job';
+  } else if (active.stage === 'topics') {
+    state.activeId = 'lessons';
+    state.done.add('context');
+    state.done.add('curriculum');
+    state.done.add('research');
+    state.actionStepId = 'lessons';
+    state.actionLabel = 'View progress';
+    state.action = 'open-job';
+  } else if (active.stage === 'assemble' || active.stage === 'done') {
+    state.activeId = 'review';
+    state.done.add('context');
+    state.done.add('curriculum');
+    state.done.add('research');
+    state.done.add('lessons');
+    state.actionStepId = 'review';
+    state.actionLabel = 'View progress';
+    state.action = 'open-job';
+  } else {
+    state.activeId = 'context';
+    state.actionStepId = 'context';
+    state.actionLabel = 'View progress';
+    state.action = 'open-job';
+  }
+
+  if (['failed', 'interrupted', 'partial'].includes(active.status)) {
+    state.actionLabel = active.status === 'partial' ? 'Open partial course' : 'Open issue';
+    state.action = 'open-job';
+  }
+
+  return state;
+}
+
+function workflowStepHTML(step, index, state) {
+  const isDone = state.done.has(step.id);
+  const isActive = state.activeId === step.id && !isDone;
+  const isActionStep = state.actionStepId === step.id;
+  const status = isDone ? 'Done' : isActive ? (step.human ? 'Needs input' : 'Working') : 'Next';
+  const cls = [
+    'agent-workflow-step',
+    isDone ? 'is-done' : '',
+    isActive ? 'is-active' : ''
+  ].filter(Boolean).join(' ');
+  const actionButton = isActionStep
+    ? `<button class="${isActive || step.id === 'context' ? 'agent-primary-btn' : 'agent-secondary-btn'}"
+        data-agent-action="${escapeHTML(state.action)}"
+        ${state.job?.id ? `data-job-id="${escapeHTML(state.job.id)}"` : ''}>${escapeHTML(state.actionLabel)}</button>`
+    : '';
+
+  return `
+    <article class="${cls}">
+      <div class="agent-workflow-step-top">
+        <span class="agent-workflow-index">${isDone ? '<svg width="14" height="14"><use href="#icon-check"/></svg>' : index + 1}</span>
+        <span class="agent-workflow-status">${escapeHTML(status)}</span>
+      </div>
+      <h2>${escapeHTML(step.title)}</h2>
+      <p>${escapeHTML(step.body)}</p>
+      <div class="agent-workflow-foot">
+        <span>${escapeHTML(step.actor)}</span>
+        ${step.human ? '<strong>Human checkpoint</strong>' : ''}
+      </div>
+      ${actionButton ? `<div class="agent-workflow-action">${actionButton}</div>` : ''}
+    </article>`;
 }
 
 function jobsSectionHTML(jobs) {
@@ -388,6 +551,7 @@ function jobCardHTML(j) {
   const isInterrupted = j.status === 'interrupted';
   const isPartial = j.status === 'partial';
   const isDone = j.status === 'completed';
+  const isReview = j.status === 'review_curriculum' || j.status === 'review_research';
   const canResume = hasCheckpoint(j);
 
   // Subtitle / progress label by state.
@@ -396,8 +560,15 @@ function jobCardHTML(j) {
   else if (isFailed) stageLabel = 'Failed';
   else if (isInterrupted) stageLabel = canResume ? 'Interrupted — resume to keep your progress' : 'Interrupted (page refresh or closed tab)';
   else if (isPartial) stageLabel = `${(j.totalTopics || 0) - (j.failedCount || 0)} of ${j.totalTopics || 0} topics done · ${j.failedCount || 0} failed`;
+  else if (isReview) stageLabel = j.status === 'review_curriculum' ? 'Waiting for curriculum review' : 'Waiting for research review';
   else if (isDone) stageLabel = 'Done';
-  else stageLabel = ({ intake: 'Designing outline', research: 'Researching', topics: `Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`, assemble: 'Finalising', done: 'Ready' }[j.stage] || 'Working');
+  else stageLabel = ({
+    intake: `${agentNameForStage('intake')} · Designing outline`,
+    research: `${agentNameForStage('research')} · Researching`,
+    topics: `${agentNameForStage('topics')} · Writing topics ${j.topicsDone}/${j.topicsTotal || '…'}`,
+    assemble: `${agentNameForStage('assemble')} · Finalising`,
+    done: 'Ready'
+  }[j.stage] || 'Working');
 
   const pct = isPartial
     ? Math.round(((j.totalTopics - j.failedCount) / Math.max(1, j.totalTopics)) * 100)
@@ -425,6 +596,10 @@ function jobCardHTML(j) {
     actionsHTML = `
       <button class="library-card-action" data-job-action="${retryAction}" data-job-id="${j.id}">${retryLabel}</button>
       ${(j.failures || []).length ? `<button class="library-card-action library-card-action--ghost" data-job-action="open" data-job-id="${j.id}">View errors</button>` : ''}
+      <button class="library-card-action library-card-action--danger" data-job-action="delete-job" data-job-id="${j.id}">Delete</button>`;
+  } else if (isReview) {
+    actionsHTML = `
+      <button class="library-card-action" data-job-action="open" data-job-id="${j.id}">Open review</button>
       <button class="library-card-action library-card-action--danger" data-job-action="delete-job" data-job-id="${j.id}">Delete</button>`;
   } else {
     // Running.
@@ -584,6 +759,13 @@ function setShellForLibrary() {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   }
+  const courseTutor = document.getElementById('chat-panel');
+  if (courseTutor) {
+    courseTutor.classList.remove('open');
+    courseTutor.style.display = 'none';
+  }
+  const selectionPopup = document.getElementById('selection-popup');
+  if (selectionPopup) selectionPopup.style.display = 'none';
   document.title = 'Learnable';
 }
 
@@ -596,6 +778,10 @@ function setShellForCourse() {
     const el = document.getElementById(id);
     if (el) el.style.display = '';
   }
+  const courseTutor = document.getElementById('chat-panel');
+  if (courseTutor) courseTutor.style.display = '';
+  const selectionPopup = document.getElementById('selection-popup');
+  if (selectionPopup) selectionPopup.style.display = '';
 }
 
 // SPA router state — tracks the current view so we know when to re-init chrome.

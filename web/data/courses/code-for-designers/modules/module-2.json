@@ -1,0 +1,593 @@
+{
+  "html-structure-basics": {
+    "id": "html-structure-basics",
+    "moduleId": "web-fundamentals",
+    "title": "Building Blocks: HTML Tags and Document Structure",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What HTML actually does (and why you care)",
+        "content": "<p>Here's the thing—when you design an interface, you're deciding what matters: this is a headline, this is a list, this is a button. HTML is exactly that decision, but in code. <strong>HTML tags are labels that tell browsers, screen readers, and search engines what each piece of your design means</strong>, not just how it looks.</p><p>Think of it like this: you can make text <em>look</em> big with CSS, but wrapping it in an <code>&lt;h1&gt;</code> tag says \"this is the main heading\"—browsers announce it to screen readers, search engines know it's important, and other developers instantly understand your intent. <strong>Semantic HTML uses meaningful tags that describe content purpose</strong> rather than just appearance.</p><p>From what I've seen, this is the gap most designers feel when they start coding. You already know <em>what</em> things are—headlines, navigation, articles. HTML just gives you the vocabulary to say it out loud.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-semantic-purpose",
+        "question": "You're building a blog post page. The designer wireframe shows a large text block at the top that reads \"5 Ways to Improve Your Design System.\" Which HTML tag best represents this element's purpose?",
+        "options": [
+          {
+            "id": "a",
+            "text": "<div class=\"big-title\">5 Ways to Improve Your Design System</div>"
+          },
+          {
+            "id": "b",
+            "text": "<h1>5 Ways to Improve Your Design System</h1>"
+          },
+          {
+            "id": "c",
+            "text": "<p style=\"font-size: 32px;\">5 Ways to Improve Your Design System</p>"
+          },
+          {
+            "id": "d",
+            "text": "<span class=\"headline\">5 Ways to Improve Your Design System</span>"
+          }
+        ],
+        "correct": "b",
+        "explanation": "The <h1> tag is correct because it tells browsers, screen readers, and search engines that this is the primary heading of the page. Options a, c, and d all focus on appearance (styling with classes or inline styles) rather than semantic meaning. While you can make any element look like a headline, only <h1> communicates its structural role in the document."
+      },
+      {
+        "type": "concept",
+        "title": "The anatomy of an HTML document",
+        "content": "<p>Every HTML page has a skeleton—<strong>a predictable structure that browsers expect</strong>. At the top, <code>&lt;!DOCTYPE html&gt;</code> tells the browser \"this is modern HTML, not some ancient format.\" Then <code>&lt;html&gt;</code> wraps everything, with <code>&lt;head&gt;</code> for metadata (page title, CSS links, character encoding) and <code>&lt;body&gt;</code> for what actually shows on screen.</p><p>Inside the body, you use <strong>semantic landmarks</strong> to organize content: <code>&lt;header&gt;</code> for site branding or page intro, <code>&lt;nav&gt;</code> for navigation menus, <code>&lt;main&gt;</code> for the primary content, <code>&lt;article&gt;</code> for self-contained pieces (like blog posts), <code>&lt;aside&gt;</code> for sidebars or related info, and <code>&lt;footer&gt;</code> for site-wide links or copyright. Rachel Andrew and Jen Simmons have both written extensively about how these landmarks aren't just for accessibility—they make your code readable and maintainable.</p><p>Don't worry if this feels like a lot of new tags at first. The trick is to <strong>start with one page and map your design sections onto these landmarks</strong>. What's the main content? That's <code>&lt;main&gt;</code>. Got a navigation menu? That's <code>&lt;nav&gt;</code>. You'll be surprised how quickly it clicks.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements/mdn-html-doc-structure.png",
+        "alt": "HTML document structure showing semantic elements like header, nav, main, article, aside, and footer",
+        "caption": "Semantic HTML structure uses meaningful elements to define page regions, making content accessible and maintainable.",
+        "source_title": "Semantic HTML - MDN",
+        "source_url": "https://developer.mozilla.org/en-US/docs/Glossary/Semantics"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Divs are not the enemy",
+        "content": "You'll hear people say \"don't use divs,\" but that's oversimplified. Semantic elements like <article> or <nav> are preferred when they fit the content's purpose. But divs are perfectly fine as generic containers when no semantic element matches—like wrapping a card layout or grouping elements for styling. The rule is: use semantic tags when they describe meaning, divs when you just need structure."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q2-semantic-tags",
+        "question": "Match each HTML element to its semantic purpose:",
+        "pairs": [
+          {
+            "left": "<nav>",
+            "right": "Primary navigation menu or table of contents"
+          },
+          {
+            "left": "<article>",
+            "right": "Self-contained content like a blog post or news story"
+          },
+          {
+            "left": "<aside>",
+            "right": "Sidebar, related links, or tangential information"
+          },
+          {
+            "left": "<main>",
+            "right": "The dominant content unique to this page"
+          }
+        ],
+        "explanation": "These semantic tags create landmarks that assistive technologies use for quick navigation. <nav> groups navigation links, <article> marks reusable standalone content, <aside> indicates supporting or related material, and <main> wraps the primary content area. Using them correctly improves both accessibility and code clarity."
+      },
+      {
+        "type": "concept",
+        "title": "Nesting, hierarchy, and the invisible box around everything",
+        "content": "<p>HTML elements nest inside each other like Russian dolls—<strong>every opening tag needs a closing tag, and the order matters</strong>. A paragraph <code>&lt;p&gt;</code> can sit inside an article <code>&lt;article&gt;</code>, which sits inside main <code>&lt;main&gt;</code>, which sits inside body <code>&lt;body&gt;</code>. Indent your code to show this nesting visually; it's how you (and other developers) stay sane.</p><p>Here's the part that trips up designers first: <strong>every HTML element is a rectangular box</strong>. Seriously. Even if it looks round or invisible, the browser treats it as a box. This is the foundation of layout—understanding that your beautiful design is just boxes inside boxes inside boxes, and CSS controls how those boxes size, space, and arrange themselves.</p><p>Estelle Weyl teaches this by having people inspect any website and hover over elements in browser dev tools—you'll see the box outlines appear. Try it. Open any page, right-click an element, choose \"Inspect,\" and mouse over the HTML in the inspector. Every headline, image, button, and paragraph lights up as a box. That's your mental model right there.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Use browser dev tools as your x-ray vision",
+        "content": "Right-click any element on any website and choose \"Inspect\" (Chrome, Firefox, Safari all have this). You'll see the HTML structure on the left and CSS styles on the right. Hover over tags in the inspector and watch the page highlight each box. This is how you learn fastest—reverse-engineering sites you admire."
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "q3-box-model",
+        "sentence": "Every HTML element is treated by the browser as a rectangular ___.",
+        "acceptable_answers": [
+          "box",
+          "Box",
+          "BOX"
+        ],
+        "explanation": "The browser renders every HTML element as a rectangular box, even if it appears round, invisible, or irregular. This box model is fundamental to how layout works in CSS—every element has content, padding, border, and margin forming nested rectangles. Understanding this shapes how you think about spacing, sizing, and positioning."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "HTML tags describe what content <em>is</em> (heading, navigation, article), not just how it looks—that's what makes it semantic.",
+          "Use landmarks like <header>, <nav>, <main>, <article>, and <footer> to structure pages in a way browsers, screen readers, and developers all understand.",
+          "Every HTML element is a rectangular box, and understanding nesting is how you build predictable layouts.",
+          "Divs are fine as generic containers when no semantic element fits—semantic HTML doesn't mean zero divs.",
+          "Browser dev tools (Inspect Element) are your best learning tool—use them to see the box structure of any site."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the difference between semantic HTML and styled HTML?",
+        "back": "Semantic HTML uses tags that describe content meaning (<nav>, <article>, <header>), while styled HTML focuses on appearance. Semantic tags help browsers, screen readers, search engines, and developers understand structure and purpose, not just visual presentation."
+      },
+      {
+        "front": "What are the main semantic landmark elements in HTML?",
+        "back": "<header> (site/page branding), <nav> (navigation menus), <main> (primary content), <article> (self-contained content), <aside> (sidebars/related info), and <footer> (site-wide links/copyright). These create navigable landmarks for assistive technologies."
+      },
+      {
+        "front": "Why does every HTML element render as a rectangular box?",
+        "back": "Browsers use the box model to calculate layout: every element has content, padding, border, and margin forming nested rectangles. Even round or invisible elements occupy rectangular space, which is fundamental to how CSS controls sizing and positioning."
+      },
+      {
+        "front": "When is it appropriate to use a <div> tag?",
+        "back": "Use <div> as a generic container when no semantic element describes the content's purpose—for example, wrapping elements for styling or layout grouping. Semantic tags are preferred when they match content meaning, but divs are not wrong when used appropriately."
+      },
+      {
+        "front": "What belongs in the <head> vs. <body> of an HTML document?",
+        "back": "The <head> contains metadata: page title, character encoding, CSS links, and scripts that don't display on the page. The <body> contains everything visible: text, images, navigation, and all content the user sees and interacts with."
+      },
+      {
+        "front": "How can you visualize the box model of any element on a webpage?",
+        "back": "Right-click the element and choose 'Inspect' to open browser dev tools. Hover over HTML tags in the inspector panel, and the browser highlights each element's box on the page, showing content, padding, border, and margin layers."
+      }
+    ]
+  },
+  "css-styling-101": {
+    "id": "css-styling-101",
+    "moduleId": "web-fundamentals",
+    "title": "Making It Beautiful: CSS Selectors, Properties, and the Box Model",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "What CSS Does (and Why It's Separate from HTML)",
+        "content": "<p>Here's the thing — HTML gives you the skeleton, the structure, the \"what\" of your page. CSS is where you control the \"how it looks.\" <strong>Separation of structure and style</strong> means you can completely redesign a site without touching the HTML, or rearrange your HTML without breaking the visual design. That's powerful.</p><p>CSS works through <strong>selectors</strong> (which elements to target), <strong>properties</strong> (what aspect to change — color, size, spacing), and <strong>values</strong> (the specific setting). Think of it like: \"Find all the paragraphs (selector), change their text color (property) to navy blue (value).\" Once you get this pattern, you can style anything.</p><p>From what I've seen, the biggest \"aha\" moment for designers learning CSS is realizing it's just a <strong>matching system</strong>. You're telling the browser: \"Hey, find these elements and apply these styles.\" No magic, just rules applied in order.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-css-purpose",
+        "question": "You've written HTML for a blog post with headings, paragraphs, and images. Now you want the headings to be larger and purple, and the paragraphs to have more space between lines. What's the best approach?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the HTML using different tags that have the visual appearance you want"
+          },
+          {
+            "id": "b",
+            "text": "Write CSS rules that select the heading and paragraph elements and set their size, color, and spacing properties"
+          },
+          {
+            "id": "c",
+            "text": "Add inline style attributes to every single heading and paragraph tag in the HTML"
+          },
+          {
+            "id": "d",
+            "text": "Use a different HTML version that supports color and spacing attributes"
+          }
+        ],
+        "correct": "b",
+        "explanation": "CSS is designed to separate structure (HTML) from presentation (styling). Writing CSS rules lets you target all headings and paragraphs at once, making changes easy and keeping your HTML clean. Inline styles work but don't scale, and HTML tags shouldn't change based on visual needs — that defeats the separation of concerns."
+      },
+      {
+        "type": "concept",
+        "title": "The Box Model: Every Element Is a Set of Nested Rectangles",
+        "content": "<p>Every single element on a web page — every heading, paragraph, image, button — is a <strong>rectangular box made of four layers</strong>: content, padding, border, and margin. Estelle Weyl has taught thousands of developers this, and it's the single most important mental model for understanding layout.</p><p>The <strong>content</strong> is your text or image. <strong>Padding</strong> is the breathing room inside the box, between content and border. The <strong>border</strong> wraps around the padding (you can make it visible or invisible). <strong>Margin</strong> is the space outside the border, pushing other elements away. Think of it like a picture frame: the artwork is content, the matting is padding, the frame itself is border, and the wall space between frames is margin.</p><p>Here's where it gets tricky: by default, when you set <code>width: 300px</code>, that's just the content width. Add 20px padding and a 5px border, and the box actually takes up 350px total (300 + 20 + 20 + 5 + 5). <strong>This surprises everyone at first.</strong> Most developers now use <code>box-sizing: border-box</code> globally, which makes width include padding and border — way more intuitive.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://www.w3schools.com/css/box-model.gif",
+        "alt": "CSS box model diagram showing content, padding, border, and margin layers",
+        "caption": "The CSS box model visualizes how every HTML element consists of four nested rectangles: content, padding, border, and margin.",
+        "source_title": "CSS Box Model - W3Schools",
+        "source_url": "https://www.w3schools.com/css/css_boxmodel.asp"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q2-box-model-width",
+        "statement": "When you set width: 300px on an element, the total space it occupies on the page is always exactly 300 pixels wide, regardless of padding or border.",
+        "correct": false,
+        "explanation": "By default (content-box), width applies only to the content area. Padding and border add to that, so a 300px width element with 20px padding and 5px border actually occupies 350px. Using box-sizing: border-box changes this behavior to include padding and border in the width, making sizing more predictable."
+      },
+      {
+        "type": "concept",
+        "title": "Selectors: How to Target the Right Elements",
+        "content": "<p>Selectors are how you tell CSS <strong>which elements get which styles</strong>. The simplest is the element selector — just the tag name. <code>p { color: navy; }</code> targets every paragraph. <code>h1 { font-size: 2rem; }</code> targets every top-level heading.</p><p>But you'll often want more precision. <strong>Class selectors</strong> (like <code>.button</code>) let you style any element with <code>class=\"button\"</code>, no matter the tag. <strong>ID selectors</strong> (like <code>#header</code>) target a single unique element. You can also combine them: <code>article p</code> means \"paragraphs inside articles,\" and <code>button.primary</code> means \"buttons with the class 'primary'.\"</p><p>From what I've observed, beginners often reach for IDs too quickly. Classes are more reusable and keep your specificity manageable. Sara Soueidan has written extensively about this — <strong>keep your selectors simple and your specificity low</strong>, or you'll end up in override wars where nothing works without <code>!important</code>.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Avoid the !important Trap",
+        "content": "If you find yourself adding !important to force a style to work, that's a red flag. It usually means your selectors have conflicting specificity levels. The fix isn't more !important — it's writing cleaner, more consistent selectors. Once you start sprinkling !important everywhere, your CSS becomes a tangled mess that's nearly impossible to maintain."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q3-selector-types",
+        "question": "Match each CSS selector to what it targets:",
+        "pairs": [
+          {
+            "left": "p",
+            "right": "All paragraph elements on the page"
+          },
+          {
+            "left": ".highlight",
+            "right": "Any element with class=\"highlight\""
+          },
+          {
+            "left": "#logo",
+            "right": "The single element with id=\"logo\""
+          },
+          {
+            "left": "nav a",
+            "right": "All links inside navigation elements"
+          }
+        ],
+        "explanation": "Element selectors target tags directly, class selectors (starting with a dot) can apply to multiple elements, ID selectors (starting with a hash) target one unique element, and descendant selectors use a space to target elements nested inside others. Combining these patterns gives you precise control over styling."
+      },
+      {
+        "type": "concept",
+        "title": "Common Properties: Color, Size, Spacing, and Typography",
+        "content": "<p>Once you can target elements, you need to know what to change. A handful of properties do most of the heavy lifting. <strong>Color and background-color</strong> control text and fill. <strong>Font-size, font-family, and font-weight</strong> handle typography. <strong>Margin and padding</strong> control spacing (outside and inside the box, respectively).</p><p>For sizing, ditch pixels for most things. Use <strong>rem units</strong> for font sizes and spacing — they scale with the user's browser settings, making your design more accessible. Use <strong>percentages or viewport units</strong> (vw, vh) for responsive widths. Fixed pixels don't respect user preferences or screen sizes, and that breaks on mobile.</p><p>Here's a real example: instead of <code>font-size: 16px;</code>, use <code>font-size: 1rem;</code> (which defaults to 16px but respects user zoom). For a button, instead of <code>width: 200px;</code>, try <code>padding: 0.75rem 1.5rem;</code> — the button grows naturally with its text, and it scales on different screens. <strong>Relative units make everything more forgiving.</strong></p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Start with a CSS Reset",
+        "content": "Browsers have different default styles — margins on headings, padding on lists, font sizes that vary. A CSS reset (or normalize.css) gives you a consistent baseline across all browsers, so you're not fighting mysterious spacing or sizing issues. Add one at the top of your stylesheet and build from there."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "CSS separates structure (HTML) from presentation — you target elements with selectors and apply properties with values.",
+          "Every element is a box with four layers: content, padding, border, and margin — understanding this model is essential for controlling layout.",
+          "By default, width and height apply only to content; use box-sizing: border-box to make them include padding and border for predictable sizing.",
+          "Use class selectors for reusable styles and keep specificity low to avoid override conflicts and !important abuse.",
+          "Prefer relative units (rem, %, vw) over fixed pixels for accessible, responsive designs that scale with user preferences and screen sizes."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What are the four layers of the CSS box model, from innermost to outermost?",
+        "back": "Content (the actual text or image), padding (space inside the box around content), border (the edge wrapping the box), and margin (space outside the box pushing other elements away)."
+      },
+      {
+        "front": "What's the difference between margin and padding in CSS?",
+        "back": "Padding is space inside the element's border, between the content and the edge. Margin is space outside the border, pushing other elements away. Padding affects the element's background area; margin does not."
+      },
+      {
+        "front": "Why should you use rem units instead of pixels for font sizes?",
+        "back": "Rem units scale with the user's browser font-size settings, making your design accessible for people who need larger text. Pixels are fixed and ignore user preferences, breaking accessibility."
+      },
+      {
+        "front": "What does box-sizing: border-box do?",
+        "back": "It makes the width and height properties include padding and border in the total size, instead of adding them on top. This makes element sizing predictable and easier to manage."
+      },
+      {
+        "front": "What's the correct syntax for a CSS rule?",
+        "back": "selector { property: value; } — the selector targets which elements, the property is what aspect to change (like color or font-size), and the value is the specific setting."
+      },
+      {
+        "front": "Why is overusing !important in CSS a problem?",
+        "back": "It indicates specificity conflicts and makes your CSS fragile and hard to maintain. Once you add !important, you often need even more to override it later. The fix is writing cleaner, more consistent selectors."
+      }
+    ]
+  },
+  "layouts-flexbox-grid": {
+    "id": "layouts-flexbox-grid",
+    "moduleId": "web-fundamentals",
+    "title": "Responsive Layouts with Flexbox and Grid",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Two layout systems, two jobs",
+        "content": "<p>Here's the thing — CSS gives you two powerful layout tools, and they're not competing. <strong>Flexbox is for one-dimensional layouts</strong> (think navigation bars, button groups, or a row of cards), while <strong>Grid is for two-dimensional layouts</strong> (entire page structures, dashboards, image galleries). From what I've seen, the confusion comes from thinking you have to pick one. You don't. They complement each other beautifully.</p><p>Flexbox excels at <strong>component-level alignment and distribution</strong>. Need to space three buttons evenly? Center a logo vertically? Make a card layout that wraps naturally? That's Flexbox territory. Grid, on the other hand, lets you <strong>define rows and columns simultaneously</strong>, placing elements into named areas like \"header,\" \"sidebar,\" and \"main.\" Rachel Andrew, a CSS Working Group member and author of <em>The New CSS Layout</em>, puts it well: Grid for macro layouts, Flexbox for micro arrangements.</p><p>The magic happens when you use both. You might build your overall page structure with Grid, then use Flexbox inside each grid area to align the actual content. <strong>Think of Grid as the page skeleton and Flexbox as the muscle tissue</strong> — each does work the other can't.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q1-when-flexbox-vs-grid",
+        "question": "You're building a blog post layout with a header, a two-column main section (sidebar + article), and a footer. Inside the header, you need to align a logo on the left and navigation links on the right. Which combination makes the most sense?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Use Grid for the overall page structure (header, sidebar, main, footer) and Flexbox inside the header to align logo and nav links"
+          },
+          {
+            "id": "b",
+            "text": "Use Flexbox for everything since it's simpler and can handle both page layout and header alignment"
+          },
+          {
+            "id": "c",
+            "text": "Use Grid for everything including the header alignment since Grid is more modern"
+          },
+          {
+            "id": "d",
+            "text": "Use Flexbox for the page structure and Grid inside the header for logo/nav alignment"
+          }
+        ],
+        "correct": "a",
+        "explanation": "Grid is perfect for the two-dimensional page structure (rows and columns together), while Flexbox is ideal for the one-dimensional header alignment (logo and links in a row). Option B treats Flexbox as a one-size-fits-all solution, which gets messy for complex layouts. Option C overthinks it—Grid can align things, but Flexbox is simpler for single-axis distribution. Option D reverses their strengths."
+      },
+      {
+        "type": "concept",
+        "title": "Flexbox fundamentals: alignment and distribution",
+        "content": "<p>Let's get practical. When you set <code>display: flex</code> on a container, its children become <strong>flex items that line up along a main axis</strong> (horizontal by default, but you can flip it to vertical with <code>flex-direction: column</code>). The real power comes from two properties: <strong><code>justify-content</code> controls spacing along the main axis</strong>, and <strong><code>align-items</code> controls alignment along the cross axis</strong>.</p><p>Here's a navigation bar example: you've got a logo, some menu links, and a login button. With <code>display: flex</code> and <code>justify-content: space-between</code>, the logo hugs the left edge, the login button hugs the right, and the menu links sit in between with automatic spacing. No manual margin calculations. If you want everything centered instead, <code>justify-content: center</code> does it in one line. <strong>Flexbox handles the math for you</strong>.</p><p>One thing that tripped me up early: <code>flex-wrap: wrap</code> lets items spill onto new lines when space runs out, which is perfect for responsive card layouts. Without it, Flexbox will shrink items to fit, which can look broken on small screens. Sara Soueidan, a front-end specialist known for deep CSS tutorials, emphasizes this — <strong>wrapping is what makes Flexbox truly responsive</strong> at the component level.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Quick alignment cheat",
+        "content": "Need to center something both horizontally and vertically? Put display: flex, justify-content: center, and align-items: center on the parent. That three-line combo centers the child in both directions — way cleaner than old-school absolute positioning tricks."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q2-flexbox-properties",
+        "question": "Match each Flexbox property to what it controls:",
+        "pairs": [
+          {
+            "left": "justify-content",
+            "right": "Spacing and alignment along the main axis (e.g., horizontal when flex-direction is row)"
+          },
+          {
+            "left": "align-items",
+            "right": "Alignment along the cross axis (e.g., vertical when flex-direction is row)"
+          },
+          {
+            "left": "flex-wrap",
+            "right": "Whether items should wrap onto new lines when space runs out"
+          },
+          {
+            "left": "flex-direction",
+            "right": "Whether the main axis runs horizontally (row) or vertically (column)"
+          }
+        ],
+        "explanation": "These four properties give you precise control over Flexbox layouts. justify-content and align-items work on perpendicular axes, flex-direction defines which axis is which, and flex-wrap determines whether items stay on one line or break into multiple rows/columns. Master these and you've got 90% of Flexbox covered."
+      },
+      {
+        "type": "concept",
+        "title": "CSS Grid: defining structure with rows and columns",
+        "content": "<p>Grid lets you <strong>declare a layout structure upfront</strong>, then place elements into it. The syntax can feel a bit verbose at first, but it's way more explicit than trying to hack a two-column layout with Flexbox or floats. You define <code>grid-template-columns</code> and <code>grid-template-rows</code>, then use <code>grid-template-areas</code> to name regions. It reads like a map of your page.</p><p>Here's a dashboard example from Jen Simmons' work (she's a Designer Advocate who created the Layout Land video series on modern CSS). You might write something like:<br><code>grid-template-areas:<br>\"header header\"<br>\"sidebar main\"<br>\"footer footer\";</code><br>Then you assign each element to an area: <code>grid-area: header;</code>, <code>grid-area: sidebar;</code>, and so on. <strong>The CSS literally looks like your layout</strong>, which makes it way easier to debug and hand off to other designers or engineers.</p><p>Grid also gives you the <code>fr</code> unit — a <strong>flexible fraction of available space</strong>. If you set <code>grid-template-columns: 1fr 3fr;</code>, you're saying \"sidebar gets one part, main content gets three parts,\" and it scales beautifully. Combine that with <code>repeat(auto-fit, minmax(250px, 1fr))</code> and you get responsive image galleries that automatically adjust columns based on screen width. No media queries required.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://css-tricks.com/wp-content/uploads/2018/11/00-basic-terminology.svg",
+        "alt": "CSS Grid terminology diagram showing grid lines, tracks, cells, and areas",
+        "caption": "CSS Grid introduces key concepts: grid lines define boundaries, tracks are rows/columns, cells are intersections, and areas are named regions.",
+        "source_title": "A Complete Guide to Grid - CSS-Tricks",
+        "source_url": "https://css-tricks.com/snippets/css/complete-guide-grid/"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Grid template areas are self-documenting",
+        "content": "When you use grid-template-areas, your CSS becomes a visual map of your layout. Six months later — or when a teammate opens the file — they can see exactly what goes where without hunting through positioning rules. It's one of those features that makes future-you grateful."
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "q3-grid-replaces-flexbox",
+        "statement": "CSS Grid is more modern and powerful than Flexbox, so once you learn Grid you should use it for all layouts instead of Flexbox.",
+        "correct": false,
+        "explanation": "This is a common misconception. Grid and Flexbox are complementary, not competitive. Grid excels at two-dimensional page structures (rows and columns together), while Flexbox is often simpler and better for one-dimensional component alignment (a row of buttons, a vertical menu). Most real projects use both: Grid for the overall skeleton, Flexbox for arranging content inside each grid area."
+      },
+      {
+        "type": "concept",
+        "title": "Making layouts responsive: relative units and mobile-first thinking",
+        "content": "<p>Here's where a lot of designer-coders hit a wall — they build a beautiful desktop layout with fixed pixel values, then try to scale it down for mobile. From what I've observed, <strong>starting with mobile designs and scaling up is way easier</strong> than removing complexity. Your base CSS targets small screens with simple, stacked layouts. Then you use <code>@media (min-width: 768px)</code> to add Grid columns, wider spacing, and side-by-side arrangements as the viewport grows.</p><p><strong>Relative units make this work</strong>. Instead of <code>width: 300px;</code>, you use <code>width: 100%;</code> or <code>max-width: 50rem;</code> (rem scales with the user's font size preference, which is critical for accessibility). Instead of <code>grid-template-columns: 200px 600px;</code>, you use <code>1fr 3fr</code> so the layout flexes. Estelle Weyl, a front-end engineer who's taught CSS to thousands of developers, emphasizes this — <strong>pixels are for borders and tiny details, not widths and spacing</strong>.</p><p>One trick I love: <code>grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));</code> creates a responsive grid that automatically adjusts the number of columns based on available space. No breakpoints needed. The layout just <em>works</em> at any screen size. That's the beauty of combining Grid with relative units — you're describing <strong>flexible rules, not fixed positions</strong>.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Don't rely on viewport width alone",
+        "content": "Using vw (viewport width) units for font sizes can cause text to become unreadable on very small or very large screens. Stick with rem for typography and spacing — it respects user preferences and scales predictably. Save vw for specific layout effects where you genuinely want something to track screen size."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Flexbox is for one-dimensional layouts (rows or columns); Grid is for two-dimensional layouts (rows and columns together).",
+          "Use Grid for overall page structure and Flexbox for aligning content inside each section — they complement each other.",
+          "Grid template areas let you name regions like \"header\" and \"sidebar,\" making your CSS read like a visual map.",
+          "Start with mobile layouts and scale up using media queries — adding complexity is easier than removing it.",
+          "Use relative units (rem, %, fr) instead of fixed pixels to create layouts that adapt to screen size and user preferences."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "When should you use Flexbox vs. CSS Grid?",
+        "back": "Use Flexbox for one-dimensional layouts (aligning items in a row or column, like navigation bars or button groups). Use Grid for two-dimensional layouts (defining rows and columns together, like overall page structures or dashboards). They complement each other — Grid for macro layout, Flexbox for micro alignment."
+      },
+      {
+        "front": "What do justify-content and align-items control in Flexbox?",
+        "back": "justify-content controls spacing and alignment along the main axis (horizontal if flex-direction is row). align-items controls alignment along the cross axis (vertical if flex-direction is row). Together they give you precise control over how flex items are positioned and distributed."
+      },
+      {
+        "front": "What are CSS Grid template areas and why are they useful?",
+        "back": "grid-template-areas lets you name regions of your layout (like \"header\", \"sidebar\", \"main\") and assign elements to them with grid-area. The CSS literally looks like your layout structure, making it easy to understand, maintain, and hand off to teammates."
+      },
+      {
+        "front": "Why start with mobile-first CSS instead of desktop-first?",
+        "back": "Mobile-first means writing base styles for small screens, then using min-width media queries to add complexity for larger screens. This is easier than starting with a complex desktop layout and trying to remove features for mobile — adding is simpler than subtracting."
+      },
+      {
+        "front": "What is the fr unit in CSS Grid?",
+        "back": "fr stands for 'flexible fraction' of available space. If you set grid-template-columns: 1fr 3fr, the first column gets one part and the second gets three parts of the leftover space. It scales proportionally, making responsive layouts easy without fixed pixel values."
+      },
+      {
+        "front": "Why use rem instead of px for widths and spacing?",
+        "back": "rem units scale with the user's font size preference, making layouts more accessible and responsive. Pixels are fixed and don't adapt to user settings or screen sizes. Save pixels for borders and tiny details; use rem, %, or fr for layout dimensions."
+      }
+    ]
+  },
+  "design-system-in-code": {
+    "id": "design-system-in-code",
+    "moduleId": "web-fundamentals",
+    "title": "Translating Your Design System into CSS",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "From design tokens to code",
+        "content": "<p>Here's the thing — you've already done the hard work in Figma or Sketch. You've defined your colors, spacing scale, typography hierarchy, and grid systems. <strong>Translating a design system into CSS means making those design decisions reusable and maintainable in code</strong>, not reinventing them.</p><p>The bridge between design and code is <strong>CSS custom properties</strong> (also called CSS variables). Instead of scattering color hex codes and font sizes throughout your stylesheet, you define them once in a central location and reference them everywhere. Change <code>--primary-color</code> in one place and every button, link, and icon updates instantly.</p><p>From what I've seen working with design teams, <strong>the designers who think in systems</strong> — not just individual screens — have the easiest time making this jump. If you've already documented your 8px spacing unit or your three heading sizes, you're 80% of the way there.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "q1-variables-benefit",
+        "question": "Imagine you have a design system with a primary color used across buttons, links, and icons. Explain how CSS custom properties (variables) would make maintaining this color easier than hardcoding the hex value everywhere.",
+        "sample_answer": "With CSS custom properties, you define the primary color once (e.g., --primary-color: #3B82F6) in the :root selector, then reference it throughout your stylesheet using var(--primary-color). If the brand color changes, you update one line instead of finding and replacing dozens of hardcoded hex values across buttons, links, and icons. This reduces errors, saves time, and ensures consistency across the entire codebase.",
+        "key_points": [
+          "Define the color once in a central location (:root or a variables file)",
+          "Reference it with var(--primary-color) wherever needed",
+          "Changing one value updates everywhere automatically",
+          "Prevents inconsistency and reduces maintenance burden"
+        ],
+        "explanation": "Strong answers recognize the central definition and propagation pattern — the key insight is that you change one source and all references update. Many beginners miss that this isn't just convenience; it's how you prevent drift between design and code over time."
+      },
+      {
+        "type": "concept",
+        "title": "Setting up your CSS variables",
+        "content": "<p>Start by creating a <strong>:root selector</strong> at the top of your CSS file. This is where you'll store all your design tokens as custom properties. The :root pseudo-class targets the document root (the <code>&lt;html&gt;</code> element), making these variables available everywhere in your stylesheet.</p><p>Define variables with two dashes: <code>--spacing-unit: 8px;</code> or <code>--heading-1: 2.5rem;</code>. Then reference them with <code>var(--spacing-unit)</code> wherever you need that value. <strong>Name variables by purpose, not by value</strong> — <code>--primary-color</code> is better than <code>--blue</code> because if your brand color changes to green, the name still makes sense.</p><p>I recommend starting with four categories: <strong>colors, typography, spacing, and breakpoints</strong>. These map directly to the design tokens you're already tracking in your design tool. Don't try to parameterize everything at once — begin with the values you use most often and expand as patterns emerge.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "content": "Use semantic naming for your variables. Instead of --color-1, --color-2, try --primary-color, --text-color, --surface-color. Your future self (and your team) will thank you when reading the code six months later."
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "q2-variable-naming",
+        "question": "You're defining CSS variables for a design system that currently uses a blue accent color. Which variable name is most maintainable if the brand color might change in the future?",
+        "options": [
+          {
+            "id": "a",
+            "text": "--blue"
+          },
+          {
+            "id": "b",
+            "text": "--accent-color"
+          },
+          {
+            "id": "c",
+            "text": "--color-primary-blue"
+          },
+          {
+            "id": "d",
+            "text": "--hex-3B82F6"
+          }
+        ],
+        "correct": "b",
+        "explanation": "Naming by purpose (--accent-color) is more maintainable than naming by value (--blue, --hex-3B82F6) because if the brand changes to green, the semantic name still makes sense. Option c is redundant — combining purpose and value locks you into the current color. Semantic naming lets your design system evolve without renaming variables across your entire codebase."
+      },
+      {
+        "type": "concept",
+        "title": "The box model and your spacing system",
+        "content": "<p>Every element you design in Figma has implicit spacing around it — <strong>CSS makes that spacing explicit</strong> through the box model. Understanding the box model is how you stop fighting with why your 300px-wide button is actually rendering at 350px.</p><p>The box model has four layers: <strong>content, padding, border, and margin</strong>. Content is the text or image itself. Padding is the breathing room inside the element (between content and border). Border wraps the padding. Margin is the space outside the border, pushing other elements away. By default, when you set <code>width: 300px</code>, that's just the content — padding and border add to the total.</p><p><strong>The fix most professionals use: <code>box-sizing: border-box;</code></strong> This changes the calculation so width and height include padding and border. Set it globally with <code>*, *::before, *::after { box-sizing: border-box; }</code> at the top of your stylesheet and your mental math will finally match what renders on screen.</p>"
+      },
+      {
+        "type": "image",
+        "src": "https://www.w3schools.com/css/box-model.gif",
+        "alt": "CSS box model diagram showing content, padding, border, and margin layers",
+        "caption": "The CSS box model visualizes how every HTML element consists of four nested rectangles: content, padding, border, and margin.",
+        "source_title": "CSS Box Model - W3Schools",
+        "source_url": "https://www.w3schools.com/css/css_boxmodel.asp"
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "content": "By default, width and height only apply to content — padding and border add extra size. This is the standard box model (content-box). Most designers expect border-box behavior where width includes padding and border. Set box-sizing: border-box globally to avoid surprises."
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "q3-box-model-layers",
+        "question": "Match each box model layer to its design system purpose:",
+        "pairs": [
+          {
+            "left": "Content",
+            "right": "The text, image, or child elements — the actual stuff you're designing"
+          },
+          {
+            "left": "Padding",
+            "right": "Internal spacing between content and edge — breathing room inside components"
+          },
+          {
+            "left": "Border",
+            "right": "Visual edge or outline — separates the element visually"
+          },
+          {
+            "left": "Margin",
+            "right": "External spacing between elements — pushes neighbors away"
+          }
+        ],
+        "explanation": "Each layer maps to a spacing decision in your design system. Padding controls internal white space (how much room inside a button around the label). Margin controls external spacing (gap between stacked cards). Border adds visual structure. Content is what you're spacing around. Understanding this separation helps you apply your spacing scale consistently."
+      },
+      {
+        "type": "concept",
+        "title": "Spacing scale with variables and relative units",
+        "content": "<p>Most design systems use a base spacing unit — often 4px or 8px — and multiply it for larger gaps. In CSS, <strong>store your base unit as a variable and build multiples from it</strong>. For example: <code>--spacing-1: 0.5rem;</code>, <code>--spacing-2: 1rem;</code>, <code>--spacing-3: 1.5rem;</code>.</p><p>Notice the <strong>rem units instead of pixels</strong>. One rem equals the root font size (usually 16px by default). Using rems means your spacing scales with user preferences — if someone increases their browser's default font size for readability, your spacing grows proportionally. It's more accessible and responsive than hardcoded pixels.</p><p>From what I've observed, designers who've already documented a spacing scale (like 8, 16, 24, 32, 48px) can map it directly to CSS variables. Just divide each value by 16 to convert to rems: 8px becomes 0.5rem, 16px becomes 1rem, 24px becomes 1.5rem. Then use <code>padding: var(--spacing-2);</code> or <code>margin-bottom: var(--spacing-3);</code> throughout your components.</p>"
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "content": "Relative units like rem and em respect user preferences for font size and zoom. Fixed pixels don't. Using rem for spacing and typography makes your design system accessible by default — it adapts to the user's needs without extra work from you."
+      },
+      {
+        "type": "concept",
+        "title": "Layout systems: Flexbox and Grid",
+        "content": "<p>Your design system probably has patterns for how components arrange themselves — navigation bars, card grids, two-column layouts. <strong>Flexbox and CSS Grid are the modern tools for translating those patterns into code</strong>. They complement each other: Flexbox for one-dimensional alignment (rows or columns), Grid for two-dimensional structures (rows and columns simultaneously).</p><p><strong>Flexbox is perfect for component-level layouts</strong> — a navigation bar with logo, menu links, and login button distributed horizontally. Set <code>display: flex;</code> on the container, then use <code>justify-content: space-between;</code> to push items apart or <code>align-items: center;</code> to vertically center them. It's how you get equal spacing without manual pixel nudging.</p><p><strong>CSS Grid handles macro page structure</strong> — defining header, sidebar, main content, and footer regions. You can name areas with <code>grid-template-areas</code> and assign elements to them, making the code read like your design mockup. Rachel Andrew and Jen Simmons have done extensive work showing how Grid brings print-quality layout control to the web. For designers, Grid is the closest CSS gets to your artboard.</p>"
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "CSS custom properties (variables) centralize design tokens so changing one value updates everywhere.",
+          "The box model separates content, padding, border, and margin — use border-box to make width/height include padding and border.",
+          "Use relative units like rem instead of pixels so your spacing and typography scale with user preferences.",
+          "Flexbox arranges items along one axis (rows or columns) — ideal for navigation, buttons, and component alignment.",
+          "CSS Grid creates two-dimensional layouts with named areas — perfect for overall page structure and dashboards."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What do CSS custom properties (variables) allow you to do in a design system?",
+        "back": "Define design tokens (colors, spacing, typography) once in a central location and reference them throughout your stylesheet. Changing one variable updates all instances automatically, maintaining consistency and reducing maintenance."
+      },
+      {
+        "front": "What are the four layers of the CSS box model, from inside to outside?",
+        "back": "Content, padding, border, margin. Content is the element's actual stuff; padding is internal spacing; border wraps the padding; margin is external spacing that pushes other elements away."
+      },
+      {
+        "front": "What does 'box-sizing: border-box;' do and why do most professionals use it?",
+        "back": "It makes width and height include padding and border (not just content), so a 300px-wide element stays 300px total even with padding. This matches designer expectations and prevents sizing surprises."
+      },
+      {
+        "front": "When should you use Flexbox versus CSS Grid for layout?",
+        "back": "Flexbox for one-dimensional layouts (arranging items in a row or column) like navigation bars and component alignment. CSS Grid for two-dimensional layouts (rows and columns together) like overall page structure and dashboards."
+      },
+      {
+        "front": "Why use rem units instead of pixels for spacing and typography?",
+        "back": "Rem units scale with the user's browser font size preferences, making your design accessible and responsive. Fixed pixels ignore user settings, while rems adapt automatically to their needs."
+      },
+      {
+        "front": "How should you name CSS variables for maintainability?",
+        "back": "Name by purpose, not value. Use --primary-color instead of --blue, so if the brand color changes, the semantic name still makes sense without renaming variables across your codebase."
+      }
+    ]
+  }
+}

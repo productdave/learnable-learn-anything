@@ -41,7 +41,7 @@ export function setApiKey(k) {
   localStorage.setItem(KEY_STORE, (k || '').trim());
 }
 
-export async function generateCourse(userBrief, onProgress = () => {}) {
+async function createGenerationContext(userBrief, onProgress = () => {}) {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('Anthropic API key not set');
 
@@ -62,17 +62,26 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   }
   const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
 
+  return { client, tone, pdfsForApi, pdfThumbs, enrichedBrief, extractedUrls };
+}
+
+export async function designCourseBrief(userBrief, onProgress = () => {}) {
+  const context = await createGenerationContext(userBrief, onProgress);
+
   // --- Stage 1: intake → course brief --------------------------------
   onProgress({ stage: 'intake' });
-  const brief = await runIntake(client, enrichedBrief, { pdfs: pdfsForApi });
+  const brief = await runIntake(context.client, context.enrichedBrief, { pdfs: context.pdfsForApi });
   onProgress({ stage: 'intake_done', brief });
+  return { brief, context };
+}
 
+export async function researchCourseBrief(brief, context, onProgress = () => {}) {
   // --- Stage 2: research per module, in parallel ---------------------
   onProgress({ stage: 'research', moduleCount: brief.modules.length });
   const researchResults = await Promise.all(
     brief.modules.map(async mod => {
       try {
-        const bundle = await runResearch(client, brief, mod, { pdfs: pdfsForApi, extracted_urls: extractedUrls });
+        const bundle = await runResearch(context.client, brief, mod, { pdfs: context.pdfsForApi, extracted_urls: context.extractedUrls });
         onProgress({ stage: 'research_module', moduleId: mod.id, status: 'ok' });
         return { mod, bundle };
       } catch (err) {
@@ -81,7 +90,10 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
       }
     })
   );
+  return researchResults;
+}
 
+export async function writeCourseFromResearch(brief, researchResults, context, onProgress = () => {}) {
   // --- Stage 3: topics, parallel-per-module --------------------------
   const total = brief.modules.reduce((n, m) => n + m.topics.length, 0);
   let done = 0;
@@ -90,7 +102,7 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   for (const { mod, bundle } of researchResults) {
     const chunk = await Promise.all(mod.topics.map(async topic => {
       try {
-        const content = await runTopic(client, brief, mod, topic, bundle, tone);
+        const content = await runTopic(context.client, brief, mod, topic, bundle, context.tone);
         done++;
         onProgress({ stage: 'topic_done', moduleId: mod.id, topicId: topic.id, done, total });
         return { moduleId: mod.id, topicId: topic.id, content };
@@ -105,7 +117,7 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
 
   // --- Stage 4: assemble in memory (no fs) ---------------------------
   onProgress({ stage: 'assemble' });
-  const course = assembleCourse(brief, topicResults, { pdfThumbs });
+  const course = assembleCourse(brief, topicResults, { pdfThumbs: context.pdfThumbs });
   // Keep brief + per-module research bundles around the result so the caller
   // can persist them — surgical retry of failed topics needs both to skip
   // Stage 1/2 on the rerun.
@@ -114,6 +126,12 @@ export async function generateCourse(userBrief, onProgress = () => {}) {
   );
   onProgress({ stage: 'done', course });
   return { course, brief, research: researchByModule };
+}
+
+export async function generateCourse(userBrief, onProgress = () => {}) {
+  const { brief, context } = await designCourseBrief(userBrief, onProgress);
+  const researchResults = await researchCourseBrief(brief, context, onProgress);
+  return writeCourseFromResearch(brief, researchResults, context, onProgress);
 }
 
 // In-memory assemble moved to assemble-browser.js so the service-worker

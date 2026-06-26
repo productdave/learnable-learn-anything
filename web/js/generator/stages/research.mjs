@@ -8,6 +8,7 @@
 // One call per module, in parallel.
 
 import { ResearchBundleSchema } from '../schema.mjs';
+import { agentSystemLines } from '../agents.mjs';
 
 const TOOL_NAME = 'submit_research_bundle';
 
@@ -97,7 +98,9 @@ const researchTool = {
   }
 };
 
-const SYSTEM = `You are a research assistant grounding a learning module in real-world material.
+const SYSTEM = `${agentSystemLines('researcher')}
+
+For the assigned module, ground the learning content in real-world material.
 
 For the assigned module, use the web_search tool aggressively to find:
 - The actual canonical concepts experts agree on
@@ -154,6 +157,7 @@ Research material for this module so it can be turned into learning content.
 
 Course: ${courseBrief.title} — ${courseBrief.subtitle}
 Learner: ${courseBrief.learner_persona}
+${courseBrief.human_feedback ? `\nHuman feedback to respect before researching:\n${courseBrief.human_feedback}\n` : ''}
 
 Module ${mod.number}: ${mod.title}
 Description: ${mod.description}

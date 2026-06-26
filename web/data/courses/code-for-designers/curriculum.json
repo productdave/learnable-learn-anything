@@ -1,0 +1,144 @@
+{
+  "title": "Code for Designers",
+  "subtitle": "Learn programming fundamentals and build your first website or app with confidence",
+  "modules": [
+    {
+      "id": "thinking-like-a-programmer",
+      "number": 1,
+      "title": "Thinking Like a Programmer",
+      "description": "Demystify how code works, learn the mental models engineers use, and understand the landscape of programming languages and tools.",
+      "icon": "brain",
+      "color": "#4338CA",
+      "topics": [
+        {
+          "id": "what-code-actually-does",
+          "title": "What Code Actually Does (and Doesn't Do)",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "how-engineers-think",
+          "title": "How Engineers Break Down Problems",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "languages-and-tools-map",
+          "title": "The Landscape: Languages, Frameworks, and When to Use What",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "design-to-code-workflow",
+          "title": "From Design File to Working Product",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "web-fundamentals",
+      "number": 2,
+      "title": "Web Fundamentals: HTML & CSS",
+      "description": "Build the structure and style of web pages using HTML and CSS—the foundation every designer-coder needs.",
+      "icon": "compass",
+      "color": "#D97706",
+      "topics": [
+        {
+          "id": "html-structure-basics",
+          "title": "Building Blocks: HTML Tags and Document Structure",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "css-styling-101",
+          "title": "Making It Beautiful: CSS Selectors, Properties, and the Box Model",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "layouts-flexbox-grid",
+          "title": "Responsive Layouts with Flexbox and Grid",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "design-system-in-code",
+          "title": "Translating Your Design System into CSS",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "drag-match"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "making-it-interactive",
+      "number": 3,
+      "title": "Making It Interactive: JavaScript Basics",
+      "description": "Add behavior and interactivity to your designs with JavaScript—learn variables, functions, events, and DOM manipulation.",
+      "icon": "lightbulb",
+      "color": "#059669",
+      "topics": [
+        {
+          "id": "javascript-fundamentals",
+          "title": "Variables, Data Types, and Basic Logic",
+          "quiz_plan": [
+            "fill-in-blank",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "functions-and-events",
+          "title": "Functions and Event Listeners: Making Things Happen on Click",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "dom-manipulation",
+          "title": "Changing the Page: DOM Selection and Manipulation",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "debugging-for-designers",
+          "title": "Debugging Basics and Browser Dev Tools",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    }
+  ]
+}
