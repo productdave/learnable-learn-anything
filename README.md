@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/readme-cover.png" width="100%" alt="Learnable turns any learning goal into a structured, adaptive course" />
+
 # Learnable
 
 **Generate a course on anything. Then learn it.**
