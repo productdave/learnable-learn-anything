@@ -4,77 +4,111 @@
 
 # Learnable
 
-**Generate a course on anything. Then learn it.**
+**Turn any goal into a course built around you—then learn it in the same place.**
 
-An adaptive learning prototype that turns a learner's goal and context into a structured, research-backed course — then keeps the learning tools in the same place.
+An AI course builder and learning workspace combining researched lessons, hands-on practice, progress tracking, and an AI tutor.
 
 </div>
 
-## The product bet
+## What it does
 
-Most online courses are built for an average learner who does not really exist. Learnable starts with **what you want to learn, why you need it, and what you already know**, then generates a course around that brief.
+Learnable starts with what you want to learn, why it matters, what you already know, and how deep you want to go. It designs a curriculum, researches each module, and turns the result into an interactive course you can study immediately.
 
-The goal is not another chat window that returns a long answer. The goal is a durable learning product with a course map, lessons, practice, progress, and an AI tutor that understands the material.
+Instead of returning another long AI answer, Learnable creates a durable learning path with modules, lessons, practice, review, search, and progress.
 
-## What the prototype includes
+## Key features
 
-- **Structured course generation** from a topic, learner level, goal, and constraints
-- **Staged research and writing** rather than a single one-shot prompt
-- **Resumable module generation** so a failed request does not lose completed work or repeat API spend
-- **A learning player** with topic navigation, progress, full-course search, and themes
-- **Practice tools** including flashcards and course-specific exercises
-- **Text-to-speech** for listening to lessons
-- **An AI tutor** for questions about the current topic
-- **Context ingestion** from pasted notes, URLs, and PDFs
-- **Optional accounts and sync** backed by Supabase
+- **Personalized curricula** based on your goal, starting point, and preferred depth
+- **Source-aware generation** from pasted notes, web pages, and up to five PDFs
+- **Live research** for current concepts, examples, and common misconceptions
+- **Human review gates** before research and lesson writing begin
+- **Structured lessons** with concepts, examples, takeaways, and relevant visuals
+- **Five quiz formats** plus optional applied exercises
+- **Spaced-repetition flashcards** for ongoing review
+- **Context-aware AI tutor** for the current topic or selected lesson text
+- **Text-to-speech** with voice, speed, seek, and playback controls
+- **Course-wide search, progress tracking, and light and dark themes**
+- **Retry and resume tools** that preserve completed work
+- **Optional cross-device sync** through Supabase magic-link authentication
 
-## How it works
+## How to use
 
-```text
-Learning goal
-    ↓
-Intake + course brief
-    ↓
-Module research
-    ↓
-Lessons + examples + practice
-    ↓
-Course player + tutor + progress
-```
+1. Select **New course**.
+2. Enter a topic or provide notes, URLs, or PDFs.
+3. Add your goal, starting point, and preferred depth.
+4. Add an Anthropic API key when prompted.
+5. Review the proposed curriculum and provide any corrections or extra context.
+6. Review the research direction before lesson writing begins.
+7. Open the completed course from your library.
+8. Work through lessons, answer quizzes, review flashcards, ask the tutor questions, and mark topics complete.
+9. Optionally sign in to sync generated courses and learning progress across devices.
 
-The generator writes each module independently. If generation stops midway, the `--resume` path checks what already exists and completes only the missing topics.
+Keep the browser tab open while the current human-review generation workflow is running.
 
-## Stack
+## Run locally
 
-- **Course generator:** Node.js, Anthropic SDK, Zod
-- **Learning experience:** vanilla JavaScript, HTML, and modular CSS
-- **Content tools:** Readability, Linkedom, PDF extraction
-- **Accounts and sync:** Supabase
-- **Hosting:** Vercel-compatible serverless functions
+### Requirements
 
-## Generate a course locally
+- Node.js 20+
+- npm
+- An Anthropic API key
 
-**Requirements:** Node.js 20+ and an Anthropic API key.
+Clone the repository and install both sets of dependencies:
 
 ```bash
-git clone https://github.com/deewang/learnable-learn-anything.git
+git clone https://github.com/productdave/learnable-learn-anything.git
 cd learnable-learn-anything
 npm install
+npm --prefix web install
+```
+
+Run the complete web app, including its serverless URL-extraction endpoint:
+
+```bash
+cd web
+npx vercel dev --listen 8765
+```
+
+Open [http://localhost:8765](http://localhost:8765). Learnable will ask for your Anthropic API key when you create your first course.
+
+Bundled courses and browser-local progress do not require a Supabase account. Authentication, cross-device sync, and cloud generation require a configured Supabase project and the corresponding Vercel environment variables.
+
+### CLI generator
+
+The repository also includes a resumable command-line course generator. From the repository root:
+
+```bash
 cp .env.example .env
 ```
 
-Add `ANTHROPIC_API_KEY` to `.env`, then run one of the example briefs:
+Add `ANTHROPIC_API_KEY` to `.env`, then generate an example course:
 
 ```bash
 npm run generate -- briefs/coffee.json --out output
 ```
 
-Resume an interrupted course without regenerating completed modules:
+Resume an interrupted course without regenerating completed topics:
 
 ```bash
-npm run generate -- --resume <course-id> --out output
+npm run generate -- --resume COURSE_ID --out output
 ```
 
-## Status
+## Tech stack
 
-Learnable is a **working product prototype**, not a production learning platform. The repository includes the current generator and learning interface as well as a more ambitious agentic product specification for future iterations.
+| Layer | Technology |
+|---|---|
+| Learning experience | Vanilla JavaScript modules, HTML, modular CSS |
+| Course generation | Node.js, Anthropic Messages API, Claude, Zod |
+| Research and source processing | Anthropic web search, Mozilla Readability, Linkedom, PDF.js |
+| Learning tools | Web Speech API, localStorage, service workers |
+| Accounts and data | Supabase Auth, Postgres, Storage, Realtime, row-level security |
+| Backend | Vercel-compatible Node.js serverless functions |
+| Hosting | Vercel |
+
+## Status and limitations
+
+Learnable is a working product prototype, not a production learning platform. It includes bundled example courses, browser-based course creation, and a separate resumable CLI generator.
+
+The current human-review workflow keeps its intermediate review state in the open browser tab, so refreshing before generation finishes can interrupt the run. Research is best-effort and can fall back to model knowledge when a source cannot be reached; the player does not yet present a complete source bibliography.
+
+Without an account, generated courses, progress, and the Anthropic key remain in that browser. In the current signed-in prototype, the key is also stored in the user's row-level-security-protected Supabase state so cloud generation can access it. Self-hosted sync requires additional Supabase configuration, and the repository does not currently include an automated test suite.
