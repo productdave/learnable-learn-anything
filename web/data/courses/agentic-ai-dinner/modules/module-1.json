@@ -1,0 +1,741 @@
+{
+  "define-a-useful-request": {
+    "id": "define-a-useful-request",
+    "moduleId": "dinner-foundations",
+    "title": "What does “help me order dinner” mean?",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Start with a tired, hungry person",
+        "content": "<p>It is 7:30 p.m. You want something spicy for under $25, including fees. The assistant returns twenty restaurant names. That is information, but you still have to do the comparison yourself. Your product should help someone reach a <strong>suitable decision with less effort</strong>.</p><p>This module is the first step toward a DoorDash ordering assistant. You will build the request-understanding stage. The examples use fictional information; recommendations and ordering come later.</p><p>First separate a <strong>hard constraint</strong> (a requirement), a <strong>preference</strong> (something to optimize), and an <strong>unknown</strong> (something to ask about or verify). “Must be under $25 total” is a constraint. “Thai would be nice” is a preference. An unstated delivery area is unknown.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/request-map-illustrated.png",
+        "alt": "A diner’s request branches into a wallet and receipt representing the $25 total constraint, a Thai noodle bowl representing a preference, and a map with a question mark representing the unknown delivery area.",
+        "caption": "Separate what must hold, what would be nice, and what is missing.",
+        "source_title": "Learnable · original illustration"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-categories",
+        "question": "Match each part of the request to its role.",
+        "pairs": [
+          {
+            "left": "Must cost less than $25 including fees",
+            "right": "Hard constraint"
+          },
+          {
+            "left": "Thai would be nice",
+            "right": "Preference"
+          },
+          {
+            "left": "Delivery area was not supplied",
+            "right": "Unknown"
+          }
+        ],
+        "explanation": "Constraints define acceptable results; preferences rank them; unknowns require clarification or reliable information."
+      },
+      {
+        "type": "concept",
+        "title": "A price is only useful if you know what it includes",
+        "content": "<p>A fictional meal costs $19. Delivery is $3, service fees are $2, and tax is $2. The total is already <strong>$26 before a tip</strong>. The menu price alone cannot establish that the order fits a $25 all-in budget.</p><p>Do not guess missing fees. Show which prices are known and which remain unverified. If a user says “under $25,” ask whether that includes fees, tax, and any tip rather than silently choosing an interpretation.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-budget",
+        "question": "Which response best handles a $25 all-in limit when delivery fees are unknown?",
+        "options": [
+          {
+            "id": "a",
+            "text": "This $23 meal is definitely within budget."
+          },
+          {
+            "id": "b",
+            "text": "The meal is $23; I need the remaining charges before confirming the total."
+          },
+          {
+            "id": "c",
+            "text": "Choose the cheapest photo on the menu."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Only the second response preserves the constraint without inventing a total. A cheap menu item can still lead to an over-budget order."
+      },
+      {
+        "type": "concept",
+        "title": "Define success before adding features",
+        "content": "<p>For this first module, measure <strong>request fidelity</strong>: did we preserve the stated requirements? Also check <strong>unsupported assumptions</strong>: did we invent a location, currency, or preference? Finally inspect <strong>question usefulness</strong>: did the follow-up remove a real obstacle?</p><p>A small test set is enough to begin: write five fictional requests and expected summaries. Count correct fields and invented fields. Later, you can measure time to a suitable decision with real users. A short interaction is useful only if it still respects their needs.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-success",
+        "question": "Name two ways to judge whether the request-understanding step helped the user.",
+        "sample_answer": "Check that the summary preserves the all-in budget and that the next question resolves a missing detail instead of asking something already answered.",
+        "key_points": [
+          "Preserves stated requirements",
+          "Asks a relevant unresolved question"
+        ],
+        "explanation": "Measure behavior tied to the task. Message count or enthusiastic wording alone does not show success."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-brief-practice",
+        "title": "Write your first product brief",
+        "goal": "Define one dinner problem precisely enough that another person could judge success.",
+        "durationMinutes": 25,
+        "equipment": [
+          "This lesson",
+          "A notes editor or the saved reflection below"
+        ],
+        "setup": "Read the worked example first. Use a fictional dinner request and keep the lesson open beside your notes.",
+        "steps": [
+          {
+            "title": "Describe the moment",
+            "instruction": "Write who is ordering, what they want, and why choosing is difficult.",
+            "cue": "One person, one situation",
+            "success": "Your description names a concrete dinner decision."
+          },
+          {
+            "title": "Sort the request",
+            "instruction": "Label two requirements, one preference, and one unknown in your example.",
+            "cue": "Keep unknowns visible",
+            "success": "You can justify each label using the request."
+          },
+          {
+            "title": "Make success observable",
+            "instruction": "Write three checks you could apply to the assistant’s summary.",
+            "cue": "What would I inspect?",
+            "success": "Each check can pass or fail on a real response."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example before inventing your own request."
+        ],
+        "progressions": [
+          "Change one requirement and explain which parts of the result should stay unchanged."
+        ],
+        "safetyStops": [
+          "If you cannot explain a term, revisit its concept section and try the example again.",
+          "If the output contradicts the request, record the mismatch before continuing."
+        ],
+        "readinessChecks": [
+          {
+            "id": "check-1",
+            "label": "I can separate constraints from preferences."
+          },
+          {
+            "id": "check-2",
+            "label": "I can spot an unsupported assumption."
+          },
+          {
+            "id": "check-3",
+            "label": "I can describe success without counting features."
+          }
+        ]
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-product-brief",
+        "title": "Save your product brief",
+        "prompt": "Write your fictional dinner request, its constraints, preferences, unknowns, and three observable success checks. Keep this brief: you will use it again in the final lesson.",
+        "hints": [
+          "Use the $25 example if you are stuck.",
+          "A check might be: preserves whether the budget includes fees."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Start with the decision the user needs to make.",
+          "Hard constraints define acceptable results; preferences help rank them.",
+          "An unstated fact remains unknown.",
+          "Judge request understanding by fidelity, assumptions, and useful questions."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a hard constraint?",
+        "back": "A requirement an acceptable result must satisfy."
+      },
+      {
+        "front": "What is a preference?",
+        "back": "A desirable quality used to rank acceptable options."
+      },
+      {
+        "front": "Why is a $23 menu price insufficient for a $25 all-in budget?",
+        "back": "Delivery, fees, tax, and any tip can push the total above the limit."
+      },
+      {
+        "front": "What is an unsupported assumption?",
+        "back": "A detail the assistant treats as known without evidence from the user or a reliable source."
+      },
+      {
+        "front": "What does request fidelity measure?",
+        "back": "Whether the assistant preserves what the user actually requested."
+      }
+    ]
+  },
+  "understand-model-context": {
+    "id": "understand-model-context",
+    "moduleId": "dinner-foundations",
+    "title": "What the model knows—and what it needs",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A confident answer is not a receipt",
+        "content": "<p>Imagine the assistant says, “Delivery is $2 and the restaurant is open.” Before trusting it, ask: <strong>where did those facts come from?</strong> If neither you nor a connected source supplied them, the response has not established they are current.</p><p>A <strong>large language model (LLM)</strong> learns patterns during training and generates responses from its available context. It can interpret “Thai would be nice” as a preference. That capability does not itself provide current restaurant availability.</p><p>Keep three things separate: <strong>instructions</strong> describe the task, <strong>user input</strong> describes the request, and <strong>external evidence</strong> supplies facts such as a current menu.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/context-map.svg",
+        "alt": "Instructions and user input enter the model. External menu information must be supplied through a separate source; a response alone does not verify availability.",
+        "caption": "Trace each claim back to the information that supports it.",
+        "source_title": "Learnable · original teaching diagram"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-confidence",
+        "statement": "A confident delivery estimate proves the assistant checked a live source.",
+        "correct": false,
+        "explanation": "Confidence is a property of the wording. Verification requires evidence from an appropriate source."
+      },
+      {
+        "type": "concept",
+        "title": "Tokens are pieces; context is the working space",
+        "content": "<p>Models process text as <strong>tokens</strong>, which may be whole words, parts of words, or punctuation. A token is not always a word. The <strong>context window</strong> limits the information processed in a request; the exact accounting depends on the model.</p><p>Think of context as the material available on a desk. The current request, relevant prior messages, instructions, and tool results may all occupy space. A long conversation does not guarantee that every earlier message remains available.</p><p>When shortening a dinner conversation, preserve <strong>active requirements and corrections</strong>. Keep “vegetarian” and “$25 including fees”; remove irrelevant small talk first. Summaries can also make mistakes, so inspect them. See <a href=\"https://platform.claude.com/docs/en/build-with-claude/context-windows\" target=\"_blank\" rel=\"noopener\">Anthropic’s context-window documentation</a> for a provider example.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-context",
+        "question": "Which information should survive when you shorten the conversation?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All greetings, even if the budget is lost."
+          },
+          {
+            "id": "b",
+            "text": "The current dietary requirements, budget, and corrections."
+          },
+          {
+            "id": "c",
+            "text": "Only the most recent restaurant name."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Preserve the facts that determine an acceptable result. The latest message may be a correction that relies on earlier requirements."
+      },
+      {
+        "type": "concept",
+        "title": "Tools provide a connection to the outside",
+        "content": "<p>An <strong>API</strong> is a defined way for software to request information or an action from other software. A tool makes a capability available to an assistant. The application must execute and check a tool request; naming a tool in a prompt does not connect it.</p><p>A future menu tool could supply prices and timestamps. For this module, label all restaurant examples as fictional. Do not claim that a working DoorDash integration exists.</p><p>This is a <strong>workflow</strong>: the application follows a defined sequence. We can add agent-directed choices when the problem needs them. This distinction follows <a href=\"https://www.anthropic.com/engineering/building-effective-agents\" target=\"_blank\" rel=\"noopener\">Anthropic’s foundational workflow guidance</a>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-sources",
+        "question": "Match the information to its appropriate source.",
+        "pairs": [
+          {
+            "left": "“I prefer spicy food”",
+            "right": "The user’s stated preference"
+          },
+          {
+            "left": "Current delivery charge",
+            "right": "A current connected service result"
+          },
+          {
+            "left": "“Ask about missing requirements”",
+            "right": "Application instructions"
+          }
+        ],
+        "explanation": "User preferences, operational rules, and current external facts have different origins. Keep those origins visible."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-evidence-practice",
+        "title": "Audit three assistant claims",
+        "goal": "Explain what evidence each claim would need before a user could rely on it.",
+        "durationMinutes": 25,
+        "equipment": [
+          "This lesson",
+          "A notes editor or the saved reflection below"
+        ],
+        "setup": "Read the worked example first. Use a fictional dinner request and keep the lesson open beside your notes.",
+        "steps": [
+          {
+            "title": "Write three claims",
+            "instruction": "Use one preference, one restaurant fact, and one instruction from this lesson.",
+            "cue": "Who said this?",
+            "success": "Each claim has a named source category."
+          },
+          {
+            "title": "Remove the live source",
+            "instruction": "Imagine the menu connection failed and rewrite the restaurant claim honestly.",
+            "cue": "Do not fill the gap with a guess",
+            "success": "Your rewritten response makes the missing information clear."
+          },
+          {
+            "title": "Preserve the essentials",
+            "instruction": "Summarize a dinner conversation in three sentences, including a correction.",
+            "cue": "Keep current constraints",
+            "success": "The summary retains the budget and latest preference."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example before inventing your own request."
+        ],
+        "progressions": [
+          "Change one requirement and explain which parts of the result should stay unchanged."
+        ],
+        "safetyStops": [
+          "If you cannot explain a term, revisit its concept section and try the example again.",
+          "If the output contradicts the request, record the mismatch before continuing."
+        ],
+        "readinessChecks": [
+          {
+            "id": "check-1",
+            "label": "I can explain a token without equating it to a word."
+          },
+          {
+            "id": "check-2",
+            "label": "I can distinguish a model response from verified evidence."
+          },
+          {
+            "id": "check-3",
+            "label": "I can preserve requirements when summarizing context."
+          }
+        ]
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-evidence-notes",
+        "title": "Save your evidence audit",
+        "prompt": "Record three claims, the source each needs, and a truthful fallback for a missing menu connection.",
+        "hints": [
+          "Try: “You said vegetarian.”",
+          "A fallback can say that delivery charges have not been checked."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Model confidence does not establish that a fact was verified.",
+          "Tokens are processing units, not a fixed synonym for words.",
+          "Preserve current requirements when managing limited context.",
+          "Tools need actual application connections and checked results."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a token?",
+        "back": "A piece of text the model processes; it can be a word, word fragment, or punctuation."
+      },
+      {
+        "front": "What is a context window?",
+        "back": "A model-specific limit on information processed in a request."
+      },
+      {
+        "front": "Does an LLM inherently know a live delivery charge?",
+        "back": "No. Current charges require an appropriate current source."
+      },
+      {
+        "front": "What does an API do?",
+        "back": "It defines how software requests information or actions from other software."
+      },
+      {
+        "front": "What distinguishes a workflow from an agent-directed process?",
+        "back": "A workflow follows predefined paths; an agent can choose its next steps dynamically."
+      }
+    ]
+  },
+  "structure-the-request": {
+    "id": "structure-the-request",
+    "moduleId": "dinner-foundations",
+    "title": "Turn a conversation into usable fields",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Give the application a labeled form",
+        "content": "<p>Humans understand many ways of saying the same thing. Software benefits from <strong>consistent field names and types</strong>. JSON is a text format for labeled values, like a form the application can read.</p><p>In JSON, text uses quotation marks, numbers do not, <strong>true</strong> and <strong>false</strong> represent yes and no, and <strong>null</strong> means a deliberately empty value. A list uses square brackets.</p><p>For “Something spicy under $25 including fees; Thai would be nice,” this is a possible structured interpretation. Currency and dietary restrictions remain unknown:<pre><code>{\n  &quot;cuisine_preferences&quot;: [\n    &quot;Thai&quot;\n  ],\n  &quot;spice_preference&quot;: &quot;spicy&quot;,\n  &quot;budget_amount&quot;: 25,\n  &quot;currency&quot;: null,\n  &quot;includes_fees&quot;: true,\n  &quot;dietary_restrictions&quot;: null,\n  &quot;delivery_area&quot;: null\n}</code></pre></p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/field-map.svg",
+        "alt": "The phrase Thai would be nice maps to cuisine preferences. Under $25 maps to budget amount. Unstated dietary restrictions map to null.",
+        "caption": "A structured response preserves evidence; it does not create missing facts.",
+        "source_title": "Learnable · original teaching diagram"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-fields",
+        "question": "Match each request detail to its field.",
+        "pairs": [
+          {
+            "left": "Thai would be nice",
+            "right": "cuisine_preferences"
+          },
+          {
+            "left": "Under $25",
+            "right": "budget_amount"
+          },
+          {
+            "left": "Including fees",
+            "right": "includes_fees"
+          }
+        ],
+        "explanation": "Consistent fields let the application compare and display values without interpreting a different prose format every time."
+      },
+      {
+        "type": "concept",
+        "title": "Unknown is different from none",
+        "content": "<p>If the user has not mentioned dietary restrictions, use <strong>null</strong>. If they explicitly say “I have no dietary restrictions,” an <strong>empty list</strong> can represent that answer in our format. These states mean different things.</p><p>Keep inference modest. A dollar sign alone does not tell us which dollar currency is intended. Nor does a preferred cuisine establish someone’s location. Ask when an unknown becomes necessary for the task.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-unknown",
+        "question": "The user never mentions dietary restrictions. What should our field contain?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An empty list, because silence means none."
+          },
+          {
+            "id": "b",
+            "text": "null, because the information is unknown."
+          },
+          {
+            "id": "c",
+            "text": "Vegetarian, because it is a reasonable default."
+          }
+        ],
+        "correct": "b",
+        "explanation": "null preserves missing information. An empty list would assert that no restrictions exist, which the user has not said."
+      },
+      {
+        "type": "concept",
+        "title": "Write a prompt the model can follow",
+        "content": "<p>A useful prompt states <strong>the task, input, rules, and output format</strong>. For example: “Extract dinner preferences from the supplied request. Preserve explicit requirements. Use null for unknown values. Return these seven fields as JSON. Do not recommend a restaurant or invent fees.”</p><p>Include a worked input and output if it helps explain the task. Keep instructions separate from the user’s request so quoted restaurant text does not silently become an application rule.</p><p>A schema defines expected fields and types. Provider structured-output features can constrain format, but your application must still check whether values make sense and match the request. See <a href=\"https://ai.google.dev/gemini-api/docs/structured-output\" target=\"_blank\" rel=\"noopener\">Google’s structured-output guidance</a>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-prompt",
+        "question": "Improve this instruction: “Fill in all dinner preferences, guessing anything missing.”",
+        "sample_answer": "Extract only supported preferences. Use null for unstated details, preserve the budget’s meaning, and return the agreed JSON fields.",
+        "key_points": [
+          "Do not invent missing details",
+          "Represent unknown values explicitly",
+          "Specify the output fields"
+        ],
+        "explanation": "A clear output contract helps software, while explicit unknowns protect the meaning of the user’s request."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-schema-practice",
+        "title": "Inspect and repair a response",
+        "goal": "Read a small JSON response and repair one unsupported assumption.",
+        "durationMinutes": 25,
+        "equipment": [
+          "This lesson",
+          "A notes editor or the saved reflection below"
+        ],
+        "setup": "Read the worked example first. Use a fictional dinner request and keep the lesson open beside your notes.",
+        "steps": [
+          {
+            "title": "Read the worked output",
+            "instruction": "Explain what each field means using the request above.",
+            "cue": "Point to the evidence",
+            "success": "You can connect every non-null value to the request."
+          },
+          {
+            "title": "Change one thing",
+            "instruction": "Change the request to “I have no dietary restrictions” and update only the relevant field.",
+            "cue": "Unknown versus answered",
+            "success": "The field changes from null to an empty list."
+          },
+          {
+            "title": "Write your extraction prompt",
+            "instruction": "Include the task, request, missing-value rule, and field list.",
+            "cue": "Make the contract visible",
+            "success": "A reader knows which fields to expect and when to use null."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example before inventing your own request."
+        ],
+        "progressions": [
+          "Change one requirement and explain which parts of the result should stay unchanged."
+        ],
+        "safetyStops": [
+          "If you cannot explain a term, revisit its concept section and try the example again.",
+          "If the output contradicts the request, record the mismatch before continuing."
+        ],
+        "readinessChecks": [
+          {
+            "id": "check-1",
+            "label": "I can explain null versus an empty list."
+          },
+          {
+            "id": "check-2",
+            "label": "I can match output values to user evidence."
+          },
+          {
+            "id": "check-3",
+            "label": "I can write a prompt with explicit rules and fields."
+          }
+        ]
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-extraction-prompt",
+        "title": "Save your first extraction prompt",
+        "prompt": "Write a reusable dinner preference extraction prompt. Include the seven field names shown above, the rule for unknown values, and one example request.",
+        "hints": [
+          "Include: never invent a currency, address, fee, or restriction.",
+          "Separate the instructions from the example request."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "JSON gives software a consistent set of labeled values.",
+          "Unknown and explicitly none need different representations.",
+          "A prompt should name the task, rules, input, and output format.",
+          "Correct structure does not guarantee correct meaning."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is JSON for?",
+        "back": "Representing structured values in a text format software can read."
+      },
+      {
+        "front": "What does null mean in our preference format?",
+        "back": "The value is unknown or not yet supplied."
+      },
+      {
+        "front": "When can dietary_restrictions be an empty list?",
+        "back": "When the user explicitly says there are no dietary restrictions."
+      },
+      {
+        "front": "What four parts belong in the extraction prompt?",
+        "back": "Task, input, rules, and output format."
+      },
+      {
+        "front": "Does schema-valid output guarantee a faithful interpretation?",
+        "back": "No. You must check values against the request and product rules."
+      }
+    ]
+  },
+  "build-the-conversation-loop": {
+    "id": "build-the-conversation-loop",
+    "moduleId": "dinner-foundations",
+    "title": "Build, inspect, and improve the first loop",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Choose the next useful question",
+        "content": "<p>Once you have a draft summary, ask what blocks the next step. If the delivery area is missing, ask for an area before pretending to compare local restaurants. If the user has already supplied it, avoid asking again.</p><p>Use a small sequence: <strong>read → extract → validate → clarify → update</strong>. A correction updates the relevant field while preserving earlier requirements. “Actually vegetarian” should not erase the budget.</p><p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/request-lab.html\" target=\"_blank\" rel=\"noopener\"><strong>Dinner Request Lab</strong></a> beside this lesson. It uses explicitly labeled sample responses, so you can inspect the workflow without an API key. It does not call a model or place an order.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/loop-map.svg",
+        "alt": "Five steps: read the request, extract fields, validate structure, clarify missing details, and update the summary.",
+        "caption": "This first workflow makes each step visible before live tools are added.",
+        "source_title": "Learnable · original teaching diagram"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-next-question",
+        "question": "The user gave their budget and dietary needs but no delivery area. What should come next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask the same budget question again."
+          },
+          {
+            "id": "b",
+            "text": "Ask which area they want delivery to."
+          },
+          {
+            "id": "c",
+            "text": "Claim a nearby restaurant delivers to them."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Ask for an unresolved detail that matters to the next step. Do not invent location or repeat answered questions."
+      },
+      {
+        "type": "concept",
+        "title": "Check structure and meaning separately",
+        "content": "<p>The lab has an editable JSON box. Delete a comma and validate: the application should explain that the format cannot be read. Restore it, then change the budget to 250. The format may pass even though the meaning is wrong for a $25 request.</p><p>This is the difference between <strong>structural validation</strong> and <strong>semantic checking</strong>. Structural checks catch missing fields or wrong types. Comparing the output with the original request catches a well-formed but incorrect interpretation.</p><p>An honest recovery message explains what failed and gives the user a way to retry. Avoid showing a stale “success” summary after the current response fails validation.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-validity",
+        "statement": "Valid JSON guarantees that the assistant correctly understood the user’s budget.",
+        "correct": false,
+        "explanation": "A value can have the correct type and still be wrong. The number 250 is valid JSON but contradicts a $25 request."
+      },
+      {
+        "type": "concept",
+        "title": "Make one change and observe the result",
+        "content": "<p>In the lab, load the worked example, validate it, and read the suggested clarification. Enter a fictional area using the follow-up field and update the summary. Then load the vegetarian correction case and confirm the $25 budget survives.</p><p>For the guided build, save the lab page to your computer and open its source in a text editor. HTML defines the page; CSS styles it; JavaScript supplies behavior. Search for <strong>nextQuestion</strong>. Change the wording of the delivery-area question, save, and refresh. The question should change without altering the budget.</p><p>Keep a baseline before using AI-assisted coding. Ask your coding assistant: “Explain nextQuestion line by line, then change only its delivery-area wording. Preserve the rest of the behavior and show me how to verify it.” Inspect the change yourself.</p><p>Extra model calls can add waiting time and cost. Begin with the smallest working loop and measure it before adding more steps. In this local simulation, the displayed validation duration is browser processing time, not model latency. A live extraction model and DoorDash connection are later course milestones.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-recovery",
+        "question": "What should happen when the extraction response cannot be parsed?",
+        "sample_answer": "Hide the invalid summary, explain that the response format could not be read, retain the editable input, and offer a repair or retry path.",
+        "key_points": [
+          "Do not present invalid output as success",
+          "Keep the user’s work available",
+          "Offer an actionable recovery"
+        ],
+        "explanation": "Good recovery preserves user effort and makes the current state clear."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-build-practice",
+        "title": "Run your first conversation loop",
+        "goal": "Demonstrate a request, a clarification, a correction, and recovery from a broken response.",
+        "durationMinutes": 25,
+        "equipment": [
+          "This lesson",
+          "A notes editor or the saved reflection below"
+        ],
+        "setup": "Read the worked example first. Use a fictional dinner request and keep the lesson open beside your notes.",
+        "steps": [
+          {
+            "title": "Run the worked case",
+            "instruction": "Open the Dinner Request Lab link above, load the worked case, and validate its sample JSON.",
+            "cue": "Trace each field",
+            "success": "The summary matches the fictional request."
+          },
+          {
+            "title": "Answer the question",
+            "instruction": "Enter a fictional delivery area in the follow-up field and apply it.",
+            "cue": "Update one field",
+            "success": "The area updates and the budget remains unchanged."
+          },
+          {
+            "title": "Break and repair",
+            "instruction": "Delete a comma, validate, then restore the JSON and validate again.",
+            "cue": "Check the failure state",
+            "success": "Invalid output is hidden and the message tells you how to repair it."
+          },
+          {
+            "title": "Catch a meaning error",
+            "instruction": "Change 25 to 250 and explain why a format pass is not sufficient.",
+            "cue": "Compare with the request",
+            "success": "You identify and repair the unsupported budget."
+          },
+          {
+            "title": "Modify the starter",
+            "instruction": "Save the lab HTML, edit nextQuestion wording in a text editor, and refresh your local copy.",
+            "cue": "One change at a time",
+            "success": "Your revised wording appears with the original budget preserved."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example before inventing your own request."
+        ],
+        "progressions": [
+          "Change one requirement and explain which parts of the result should stay unchanged."
+        ],
+        "safetyStops": [
+          "If you cannot explain a term, revisit its concept section and try the example again.",
+          "If the output contradicts the request, record the mismatch before continuing."
+        ],
+        "readinessChecks": [
+          {
+            "id": "check-1",
+            "label": "I can run and explain each step of the loop."
+          },
+          {
+            "id": "check-2",
+            "label": "I can preserve the budget through a correction."
+          },
+          {
+            "id": "check-3",
+            "label": "I can distinguish format errors from meaning errors."
+          },
+          {
+            "id": "check-4",
+            "label": "I can change one line and verify its effect."
+          }
+        ]
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-build-review",
+        "title": "Save your module check-in",
+        "prompt": "Record your five test outcomes, one bug or mismatch you found, the wording you changed, and why you prioritized that follow-up question. Finish with: what can I explain independently, and what do I want to revisit?",
+        "hints": [
+          "Test: worked request, vegetarian correction, vague request, dinner for two, and a malformed response.",
+          "Success means you can explain the behavior, not just click through the steps."
+        ]
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Before Module 2",
+        "content": "If a check-in is still “With help,” repeat that worked example. Next, open Module 2 to ground recommendations in menu information."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Start with a small, inspectable workflow.",
+          "Clarify missing details without erasing earlier constraints.",
+          "Validate both response structure and meaning.",
+          "Practice a failure and its recovery before adding live services."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is the first conversation loop?",
+        "back": "Read, extract, validate, clarify, and update."
+      },
+      {
+        "front": "What should a correction preserve?",
+        "back": "All earlier requirements that the user has not changed."
+      },
+      {
+        "front": "What is structural validation?",
+        "back": "Checking whether data can be read and has the expected fields and types."
+      },
+      {
+        "front": "What is semantic checking?",
+        "back": "Checking whether values make sense and match the user’s request."
+      },
+      {
+        "front": "What does the Dinner Request Lab simulate?",
+        "back": "Sample extraction responses and the surrounding validation and clarification workflow; it makes no model or DoorDash calls."
+      }
+    ]
+  }
+}

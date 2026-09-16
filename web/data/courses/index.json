@@ -1,6 +1,20 @@
 {
   "courses": [
     {
+      "id": "agentic-ai-dinner",
+      "title": "Agentic AI Foundations for Product Builders",
+      "subtitle": "Six modules · Build AI product judgment with illustrated lessons, practical labs, and a dinner-assistant prototype.",
+      "modules": 6,
+      "topics": 24,
+      "accentColor": "#0F766E",
+      "emoji": "🍜",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
+      "visibility": "public"
+    },
+    {
       "id": "code-for-designers",
       "title": "Code for Designers",
       "subtitle": "Learn programming fundamentals and build your first website or app with confidence",

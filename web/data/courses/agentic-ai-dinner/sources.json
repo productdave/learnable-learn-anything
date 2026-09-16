@@ -1,0 +1,75 @@
+{
+  "reviewed": "2026-09-15",
+  "sources": [
+    {
+      "title": "Building effective agents",
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "use": "Foundational distinction between workflows and agents; simple designs first."
+    },
+    {
+      "title": "Context windows",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+      "use": "Token and context-window concepts; no fixed model limits taught."
+    },
+    {
+      "title": "Structured outputs",
+      "url": "https://ai.google.dev/gemini-api/docs/structured-output",
+      "use": "Structured data and the need to validate meaning."
+    },
+    {
+      "title": "Contextual retrieval",
+      "url": "https://www.anthropic.com/engineering/contextual-retrieval",
+      "module": 2
+    },
+    {
+      "title": "LangGraph workflows and agents",
+      "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
+      "module": 3
+    },
+    {
+      "title": "MCP architecture",
+      "url": "https://modelcontextprotocol.io/docs/learn/architecture",
+      "module": 3
+    },
+    {
+      "title": "A2A overview",
+      "url": "https://a2a-protocol.org/latest/topics/what-is-a2a/",
+      "module": 3
+    },
+    {
+      "title": "LoRA",
+      "url": "https://huggingface.co/docs/peft/developer_guides/lora",
+      "module": 4
+    },
+    {
+      "title": "Quantization",
+      "url": "https://huggingface.co/docs/peft/developer_guides/quantization",
+      "module": 4
+    },
+    {
+      "title": "Ollama quickstart",
+      "url": "https://docs.ollama.com/quickstart",
+      "module": 4
+    },
+    {
+      "title": "Agent evaluations",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "module": 5
+    },
+    {
+      "title": "Prompt injection",
+      "url": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "module": 6
+    },
+    {
+      "title": "Marketplace access",
+      "url": "https://developer.doordash.com/en-US/docs/marketplace/faq/getting_started/",
+      "module": 6
+    },
+    {
+      "title": "Developer services",
+      "url": "https://developer.doordash.com/en-US/docs/welcome/",
+      "module": 6
+    }
+  ]
+}

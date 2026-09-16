@@ -1,0 +1,710 @@
+{
+  "define-tool-contracts": {
+    "id": "define-tool-contracts",
+    "moduleId": "tool-workflows",
+    "title": "Give each tool a clear contract",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A tool name is not an integration",
+        "content": "<p>Your assistant wants to search a menu. Give it a narrow capability such as <strong>search_menu</strong>, with a query, dietary requirement, and budget. Define what comes back: item IDs, source IDs, and bounded price information.</p><p>A <strong>tool contract</strong> describes inputs, outputs, errors, and side effects. Searching reads data. Drafting a cart changes a proposal. Submitting an order changes the world. Keep these capabilities separate so the application can enforce different permissions.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/workflows-illustrated.png",
+        "alt": "A menu search leads to a draft basket and a human review.",
+        "caption": "Keep searching, drafting, and approving as distinct steps.",
+        "source_title": "Learnable · original illustration"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-define-tool-contracts-choice",
+        "question": "Which tool design best separates risk?",
+        "options": [
+          {
+            "id": "a",
+            "text": "One do_everything tool with unrestricted text."
+          },
+          {
+            "id": "b",
+            "text": "Separate menu search, draft creation, and order submission contracts."
+          },
+          {
+            "id": "c",
+            "text": "Allow search_menu to submit an order if it seems helpful."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Separate contracts expose different side effects and let the application enforce appropriate checks."
+      },
+      {
+        "type": "concept",
+        "title": "Validate before and after execution",
+        "content": "<p>A model might supply a string where a number is expected, an unknown item ID, or an unsupported option. Validate tool arguments in code before execution. Validate results before treating them as evidence.</p><p>In the Workflow Lab, the draft contains one real fixture item ID and a quantity. Selecting an unavailable item must fail. A request to a nonexistent tool should not be guessed into a different action. Return an explicit error and let the workflow decide what to do next.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-define-tool-contracts-match",
+        "question": "Match the failure to the recovery.",
+        "pairs": [
+          {
+            "left": "Unknown item ID",
+            "right": "Ask for or select a valid identifier"
+          },
+          {
+            "left": "Temporary read timeout",
+            "right": "Retry within a bounded policy"
+          },
+          {
+            "left": "Forbidden action",
+            "right": "Stop and explain the permission boundary"
+          }
+        ],
+        "explanation": "Errors are not interchangeable. Retrying a forbidden action does not grant permission."
+      },
+      {
+        "type": "concept",
+        "title": "Design errors as part of the interface",
+        "content": "<p>Distinguish invalid input, temporary unavailability, and a forbidden action. They need different recovery paths: ask for a correction, retry within a limit, or stop.</p><p>Write a small contract before introducing a framework. <a href=\"https://docs.langchain.com/oss/python/langgraph/workflows-agents\" target=\"_blank\" rel=\"noopener\">LangGraph’s workflow guide</a> illustrates orchestration patterns, but the product still owns argument validation and action boundaries.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-define-tool-contracts-reason",
+        "question": "Name three things a draft-cart tool contract should specify.",
+        "sample_answer": "Specify valid item IDs and quantities, the returned cart version and total, and errors such as unavailable items. State that it creates a draft and does not purchase anything.",
+        "key_points": [
+          "Validate inputs and outputs",
+          "State side effects explicitly"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-define-tool-contracts-practice",
+        "title": "Try it: Give each tool a clear contract",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Inspect a draft",
+            "instruction": "Select an available item in the Workflow Lab and create a draft.",
+            "cue": "Read the item ID",
+            "success": "The result identifies an exact fixture item."
+          },
+          {
+            "title": "Trigger an error",
+            "instruction": "Select the unavailable fixture and try drafting it.",
+            "cue": "Do not silently substitute",
+            "success": "The lab reports the item is unavailable."
+          },
+          {
+            "title": "Write the contract",
+            "instruction": "Describe inputs, outputs, and errors for a future menu-search tool.",
+            "cue": "Keep capabilities narrow",
+            "success": "The contract distinguishes reading from purchasing."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#workflow\" target=\"_blank\" rel=\"noopener\"><strong>Workflow Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-define-tool-contracts-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Name three things a draft-cart tool contract should specify.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Define tool behavior before wiring it into a model.",
+          "Validate both arguments and returned results.",
+          "Separate read-only tools from consequential actions."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a tool contract?",
+        "back": "A definition of inputs, outputs, errors, and side effects."
+      },
+      {
+        "front": "Who validates tool arguments?",
+        "back": "Application code, even when the model produced them."
+      },
+      {
+        "front": "Is a tool name a real connection?",
+        "back": "No; executable integration code and access are required."
+      },
+      {
+        "front": "Why separate draft and submit?",
+        "back": "They have different consequences and permission requirements."
+      },
+      {
+        "front": "Should a forbidden action be retried?",
+        "back": "No; stop or obtain appropriate authorization through the product flow."
+      }
+    ]
+  },
+  "track-workflow-state": {
+    "id": "track-workflow-state",
+    "moduleId": "tool-workflows",
+    "title": "Track what happened and what comes next",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The chat transcript is not your order database",
+        "content": "<p>“Actually, make that two bowls” changes the proposal. The application needs an explicit <strong>state</strong>: the current item, quantity, total, version, and approval status. A conversation can explain intent, but it should not be the only record of an actionable cart.</p><p>Use named stages: empty, draft, reviewed, and simulated submission. Restrict the transitions between them. An invalid transition should fail with a useful explanation rather than guessing what the user meant.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-track-workflow-state-choice",
+        "question": "The quantity changes after approval. What should the application do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the old approval because the item is unchanged."
+          },
+          {
+            "id": "b",
+            "text": "Create a new version and require review again."
+          },
+          {
+            "id": "c",
+            "text": "Submit first and explain the difference later."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Approval must apply to the exact current proposal, including quantity and total."
+      },
+      {
+        "type": "concept",
+        "title": "Every meaningful edit changes the version",
+        "content": "<p>If a user approves cart version 2 and then changes the quantity, the cart becomes version 3. The old approval must not apply. Versioning connects a decision to the precise proposal that was reviewed.</p><p>The Workflow Lab increments a version and clears approval whenever you create a new draft. Try changing quantity after approval. The submit step should require review again. This is an invariant: an important condition that must remain true through every path.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "dinner-track-workflow-state-blank",
+        "sentence": "A named condition that must stay true across workflow paths is an ___.",
+        "acceptable_answers": [
+          "invariant",
+          "Invariant"
+        ],
+        "explanation": "Approval matching the current cart version is one useful invariant."
+      },
+      {
+        "type": "concept",
+        "title": "Map the workflow before adding autonomy",
+        "content": "<p>A state diagram gives product and engineering a shared picture: which paths are allowed, where errors land, and when a person is needed. LangGraph represents workflows using nodes and edges, with persistence options; a small plain-code state machine can teach the same fundamentals.</p><p>An agent can later choose among allowed next steps. It should not gain permission to skip required checks just because it chose the next tool dynamically.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-track-workflow-state-reason",
+        "question": "What state should be stored outside the free-form conversation?",
+        "sample_answer": "Store the exact item ID, quantity, current total, cart version, stage, and the version approved by the user.",
+        "key_points": [
+          "Structured current proposal",
+          "Approval bound to its version"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-track-workflow-state-practice",
+        "title": "Try it: Track what happened and what comes next",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Create and review",
+            "instruction": "Draft one bowl and approve that exact version in the lab.",
+            "cue": "Approval has a target",
+            "success": "You can identify the version being reviewed."
+          },
+          {
+            "title": "Change the quantity",
+            "instruction": "Draft two bowls and inspect approval status.",
+            "cue": "A new proposal needs review",
+            "success": "The previous approval is cleared."
+          },
+          {
+            "title": "Draw the allowed path",
+            "instruction": "Write the stages and one forbidden transition in your reflection.",
+            "cue": "State over guesswork",
+            "success": "The diagram prevents submission without current approval."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#workflow\" target=\"_blank\" rel=\"noopener\"><strong>Workflow Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-track-workflow-state-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "What state should be stored outside the free-form conversation?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Store actionable state explicitly.",
+          "Invalidate approval when the proposal changes.",
+          "Use a workflow diagram to expose forbidden transitions."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is workflow state?",
+        "back": "Structured information describing the current situation and allowed next steps."
+      },
+      {
+        "front": "What is an invariant?",
+        "back": "A condition that must remain true across relevant execution paths."
+      },
+      {
+        "front": "Why version a cart?",
+        "back": "To bind approval and actions to an exact proposal."
+      },
+      {
+        "front": "What are graph nodes and edges?",
+        "back": "Steps and the transitions connecting them."
+      },
+      {
+        "front": "Does autonomy remove state checks?",
+        "back": "No; dynamic choices still operate within application boundaries."
+      }
+    ]
+  },
+  "recover-tool-failures": {
+    "id": "recover-tool-failures",
+    "moduleId": "tool-workflows",
+    "title": "Recover without repeating costly actions",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A timeout does not tell you what happened",
+        "content": "<p>A read request can time out before returning data. A write request can time out after the external service acted. These are different problems. Repeating an order blindly can create a duplicate even if the first response never arrived.</p><p>For a read, use a small retry limit and surface failure when it is exhausted. For a consequential write, reconcile status before retrying. An <strong>idempotency key</strong> can help a supporting service recognize repeated attempts at the same logical operation.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-recover-tool-failures-choice",
+        "question": "A purchase request timed out after being sent. What is the safest next step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send a new purchase immediately with a new identifier."
+          },
+          {
+            "id": "b",
+            "text": "Check its status and use the same logical operation identifier for supported recovery."
+          },
+          {
+            "id": "c",
+            "text": "Assume it failed and erase the cart."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A timeout is ambiguous. Reconciliation and supported deduplication prevent blindly repeating a consequential action."
+      },
+      {
+        "type": "concept",
+        "title": "Put boundaries around recovery",
+        "content": "<p>A useful retry policy names which failures qualify, the maximum attempts, and what happens next. Temporary network errors may qualify; invalid quantities do not. Infinite retries turn uncertainty into cost and poor experience.</p><p>The lab simulates a timeout after a submission was accepted. Retrying the same unchanged submission returns the stored simulation receipt rather than creating a second one. It models deduplication in memory; a real backend must persist it and follow the provider’s guarantees.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-recover-tool-failures-claim",
+        "statement": "An idempotency key is useful only if the receiving service actually implements the relevant deduplication behavior.",
+        "correct": true,
+        "explanation": "A random string alone provides no guarantee. The service and your application must enforce the intended semantics."
+      },
+      {
+        "type": "concept",
+        "title": "Tell the user the state you actually know",
+        "content": "<p>“I could not confirm the result yet” is different from “The order failed.” Avoid announcing success or failure without evidence. Provide a recoverable status, retain the proposal, and identify the next check.</p><p>Try the timeout scenario and count the receipts. Your product goal is not merely fewer error banners; it is preserving the user’s intent without duplicate actions. Keep a trace of the attempt and reconciliation result.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-recover-tool-failures-reason",
+        "question": "Write the user-facing message for an uncertain submission result.",
+        "sample_answer": "The request was sent, but I have not confirmed its result. I am checking that attempt before trying again so we do not create a duplicate.",
+        "key_points": [
+          "State uncertainty honestly",
+          "Avoid blind duplicate actions"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-recover-tool-failures-practice",
+        "title": "Try it: Recover without repeating costly actions",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Inject the timeout",
+            "instruction": "In the Workflow Lab, enable the simulated timeout and submit an approved draft.",
+            "cue": "Sent is not confirmed",
+            "success": "The trace records an accepted-but-unconfirmed attempt."
+          },
+          {
+            "title": "Retry the same attempt",
+            "instruction": "Use the same draft and submit again without changing it.",
+            "cue": "One logical operation",
+            "success": "The receipt count remains one."
+          },
+          {
+            "title": "Explain the limit",
+            "instruction": "Record why an in-memory lab cannot guarantee production deduplication.",
+            "cue": "Persistence matters",
+            "success": "You identify the need for durable provider-backed status."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#workflow\" target=\"_blank\" rel=\"noopener\"><strong>Workflow Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-recover-tool-failures-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Write the user-facing message for an uncertain submission result.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Treat uncertain writes differently from failed reads.",
+          "Bound retries and reconcile ambiguous outcomes.",
+          "Test duplicate prevention, not just successful responses."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What does a timeout prove?",
+        "back": "Only that a response was not received in time, not that the action did not happen."
+      },
+      {
+        "front": "What is an idempotency key for?",
+        "back": "Identifying retries of the same logical operation when the service supports deduplication."
+      },
+      {
+        "front": "Should invalid input be retried unchanged?",
+        "back": "No; correct the input first."
+      },
+      {
+        "front": "What should bound retries?",
+        "back": "Allowed error types, an attempt limit, and a fallback."
+      },
+      {
+        "front": "Why reconcile a write?",
+        "back": "To determine its outcome before risking a duplicate action."
+      }
+    ]
+  },
+  "choose-orchestration": {
+    "id": "choose-orchestration",
+    "moduleId": "tool-workflows",
+    "title": "Choose frameworks and protocols deliberately",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "More agents means more coordination",
+        "content": "<p>A dinner assistant may need a few predictable steps, not a team of agents debating dinner. Start by asking what decision genuinely needs model judgment. Keep price arithmetic, eligibility, and permission enforcement in ordinary code.</p><p><strong>LangChain</strong> supplies components for model applications; <strong>LangGraph</strong> focuses on stateful orchestration. Evaluate a framework against the workflow’s needs: persistence, inspection, recovery, and maintainability. A framework name is not an architecture explanation.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-choose-orchestration-choice",
+        "question": "Which task should stay deterministic in this prototype?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Calculating the total and enforcing the approval version."
+          },
+          {
+            "id": "b",
+            "text": "Interpreting every ambiguous phrase with hand-written guesses."
+          },
+          {
+            "id": "c",
+            "text": "Choosing the wording of every user explanation."
+          }
+        ],
+        "correct": "a",
+        "explanation": "Arithmetic and required permission checks should not depend on a model’s discretionary reasoning."
+      },
+      {
+        "type": "concept",
+        "title": "MCP and A2A solve different connection problems",
+        "content": "<p><strong>Model Context Protocol (MCP)</strong> standardizes how applications connect to capabilities such as tools and resources. <strong>Agent2Agent (A2A)</strong> supports communication and task collaboration between agents. Neither automatically grants access to a restaurant platform.</p><p>Think of MCP as a common connector shape and A2A as a way for independent agent systems to exchange work. Read the <a href=\"https://modelcontextprotocol.io/docs/learn/architecture\" target=\"_blank\" rel=\"noopener\">MCP architecture overview</a> and <a href=\"https://a2a-protocol.org/latest/topics/what-is-a2a/\" target=\"_blank\" rel=\"noopener\">A2A overview</a> for the protocol boundaries.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-choose-orchestration-match",
+        "question": "Match each component to its role.",
+        "pairs": [
+          {
+            "left": "MCP",
+            "right": "A standard connection to tools and resources"
+          },
+          {
+            "left": "A2A",
+            "right": "Communication and task collaboration between agents"
+          },
+          {
+            "left": "Workflow state machine",
+            "right": "Allowed steps and transitions for this application"
+          }
+        ],
+        "explanation": "Protocols and orchestration have distinct responsibilities; none supplies platform access by itself."
+      },
+      {
+        "type": "concept",
+        "title": "Write an architecture decision you can defend",
+        "content": "<p>For our first prototype: a small workflow, narrow tools, explicit state, and no live checkout connection. Add multiple agents only if a measured problem benefits from independent specialized work enough to justify extra messages, latency, and failure paths.</p><p>In your checkpoint, explain one component you would add next and what evidence would justify it. “Everyone uses it” is not evidence. A recurring recovery problem or a requirement for durable resumable tasks is a concrete reason to evaluate orchestration support.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-choose-orchestration-reason",
+        "question": "Would you add multiple agents to this dinner prototype now? Explain a criterion.",
+        "sample_answer": "I would keep one workflow until tests reveal independent subtasks that benefit from specialized agents. I would compare quality gains against added cost, latency, and recovery complexity.",
+        "key_points": [
+          "Use measured need",
+          "Include coordination costs"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-choose-orchestration-practice",
+        "title": "Try it: Choose frameworks and protocols deliberately",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Trace the current workflow",
+            "instruction": "Run a normal draft and review path in the Workflow Lab.",
+            "cue": "Name each responsibility",
+            "success": "You can separate model interpretation from deterministic checks."
+          },
+          {
+            "title": "Propose one architecture change",
+            "instruction": "Choose persistence, a protocol connection, or a specialized agent and describe the need.",
+            "cue": "Problem before tool",
+            "success": "Your choice solves an observed limitation."
+          },
+          {
+            "title": "Save the decision",
+            "instruction": "Write the simpler alternative and the evidence that would change your mind.",
+            "cue": "Make the tradeoff reviewable",
+            "success": "A teammate can assess the decision."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#workflow\" target=\"_blank\" rel=\"noopener\"><strong>Workflow Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-choose-orchestration-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Would you add multiple agents to this dinner prototype now? Explain a criterion.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Keep deterministic guarantees in application code.",
+          "Choose protocols for a real integration need.",
+          "Add orchestration complexity only when evidence supports it."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What does MCP standardize?",
+        "back": "Connections between applications and capabilities such as tools and resources."
+      },
+      {
+        "front": "What does A2A support?",
+        "back": "Communication and task collaboration between agent systems."
+      },
+      {
+        "front": "Does MCP grant DoorDash access?",
+        "back": "No; platform access and authorization are separate."
+      },
+      {
+        "front": "When should a framework help?",
+        "back": "When its capabilities address concrete workflow needs."
+      },
+      {
+        "front": "What does a multi-agent design add?",
+        "back": "Potential specialization plus coordination cost and more failure paths."
+      }
+    ]
+  }
+}

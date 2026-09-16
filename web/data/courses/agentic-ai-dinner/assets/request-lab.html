@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
+<title>Dinner Request Lab · Learnable</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#18302d;background:#f3f8f6;line-height:1.6}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}main{max-width:1060px;margin:auto;padding:32px 24px 80px}a{color:#096b5b}h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:12px 0}h2{font-size:21px;margin:0 0 14px}.eyebrow{font-size:12px;letter-spacing:.12em;font-weight:750;color:#0f766e}.intro{max-width:700px}.badge{background:#def3eb;border-radius:8px;padding:12px 16px;margin:24px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.card{background:white;border:1px solid #d3e3db;border-radius:16px;padding:24px;margin-bottom:24px}label{display:block;font-weight:650;margin:12px 0 6px}textarea,input,select{width:100%;border:1px solid #96b6ab;border-radius:8px;padding:12px;font:inherit;background:#fff;color:#18302d}textarea{resize:vertical}#json{font:14px/1.6 ui-monospace,monospace;min-height:310px}button,.button{display:inline-block;border:0;border-radius:8px;padding:11px 17px;font:600 15px system-ui;background:#0f766e;color:white;cursor:pointer;text-decoration:none;margin:12px 8px 4px 0}button.secondary{background:#e3efeb;color:#134e4a}button:disabled{opacity:.5;cursor:not-allowed}:focus-visible{outline:3px solid #e0a329;outline-offset:3px}#status{padding:12px;border-radius:8px;margin-top:12px;background:#f1f5f9}#status.error{background:#fff0ec;color:#9c2b14}#status.success{background:#e2f5ea;color:#175637}dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}dt{font-weight:650}dd{margin:0;overflow-wrap:anywhere}pre{white-space:pre-wrap;font:13px/1.6 ui-monospace,monospace;background:#f3f8f6;padding:16px;border-radius:8px}.muted{color:#526d64;font-size:14px}#question{font-size:18px;font-weight:650}li{margin:10px 0}@media(max-width:720px){.grid{grid-template-columns:1fr}main{padding:24px 16px}.card{padding:18px}dl{grid-template-columns:1fr}dd{margin-bottom:6px}}
+</style></head>
+<body><main>
+<a href="/index.html?course=agentic-ai-dinner#/dinner-foundations/build-the-conversation-loop">← Back to Module 1</a>
+<p class="eyebrow">LEARNABLE / MODULE 1 / GUIDED BUILD</p><h1>Your first dinner conversation loop</h1>
+<p class="intro">Load an example, inspect its fields, and answer a follow-up. Then break something on purpose and repair it. You are learning to explain what the application does.</p>
+<div class="badge"><strong>Practice simulation.</strong> These are authored sample responses, not AI-generated results. This page makes no model or DoorDash calls, stores no personal information, and cannot place an order.</div>
+<div class="grid"><section class="card"><h2>1. Inspect a sample response</h2>
+<label for="case">Choose a worked case</label><select id="case"><option value="worked">Spicy dinner under $25</option><option value="correction">Correction: make it vegetarian</option><option value="vague">Vague: whatever you think</option><option value="two">Dinner for two, $20 each</option><option value="broken">Broken response: missing comma</option></select>
+<button id="load">Load sample</button>
+<label for="request">User request</label><textarea id="request" rows="3" readonly></textarea>
+<label for="json">Sample extraction response · editable JSON</label><textarea id="json" spellcheck="false" aria-describedby="edit-help"></textarea>
+<p id="edit-help" class="muted">Edit a value to test meaning. Delete a comma to test format. Loading a sample replaces the current practice edits.</p><button id="validate">Validate & inspect</button><div id="status" role="status" aria-live="polite">Load a sample to begin.</div>
+</section><div><section class="card"><h2>2. Read what the app understood</h2><p id="empty" class="muted">A summary appears only after structural validation succeeds.</p><dl id="summary" hidden></dl><p id="meaning" hidden class="muted"><strong>Now check meaning:</strong> compare every value with the original request. The format check cannot establish that the extraction is faithful.</p></section>
+<section class="card"><h2>3. Answer one useful question</h2><p id="question">Validate the sample first.</p><label id="answer-label" for="answer">Your fictional answer</label><input id="answer" disabled placeholder="Validate a sample first"><button id="apply" disabled>Apply clarification</button><p id="answer-help" class="muted">For dietary restrictions, enter “none” only when explicitly intended. Budget amounts must be positive numbers; fee answers must be yes or no.</p></section></div></div>
+<section class="card"><h2>4. Make it yours</h2><ol><li>Load the worked case and validate. Enter a fictional delivery area. Confirm the budget stays at 25.</li><li>Change 25 to 250. Validate again. Explain why a format pass is insufficient, then repair the value.</li><li>Load the broken case. Repair the missing comma and validate again.</li><li>Download this starter. Open it in a text editor and search for <code>nextQuestion</code>. Change the delivery-area question wording. Save and open your copy in a browser.</li><li>Return to Learnable and save your test results and check-in.</li></ol><button id="download" class="secondary">Download editable starter</button><p class="muted">The starter is a single HTML file. No installation, credentials, or paid service is required. For help, ask your coding assistant to explain the nextQuestion function before changing it.</p></section>
+<details class="card"><summary><strong>Extraction prompt for a later live-model experiment</strong></summary><pre>Task: extract dinner preferences from the supplied request.
+Rules: preserve explicit requirements and corrections. Do not guess missing details.
+Use null for unknown values; use [] for dietary restrictions only if the user explicitly says none.
+Do not invent restaurant availability, prices, currency, or location.
+Return these JSON fields:
+cuisine_preferences: list of strings or null
+spice_preference: string or null
+budget_amount: positive number or null
+currency: string or null
+includes_fees: boolean or null
+dietary_restrictions: list of strings or null
+delivery_area: string or null
+If the request specifies party size or a per-person budget, preserve those separately as party_size and budget_basis.
+Input: [place the user request here]</pre><p class="muted">Prompting alone is not validation. A live version will need a model connection, server-held credentials, response checks, and measured behavior.</p></details>
+</main>
+<script>
+// This starter deliberately uses sample responses: the extraction step is simulated.
+// Read the small workflow before adding a live model in a later module.
+const $ = id => document.getElementById(id);
+const blank = { cuisine_preferences:null, spice_preference:null, budget_amount:null, currency:null, includes_fees:null, dietary_restrictions:null, delivery_area:null };
+const worked = {...blank,cuisine_preferences:['Thai'],spice_preference:'spicy',budget_amount:25,includes_fees:true};
+const cases = {
+ worked:{request:'Something spicy under $25 including fees. Thai would be nice.',data:worked},
+ correction:{request:'Earlier: Something spicy under $25 including fees. Thai would be nice.\nNow: Actually, make it vegetarian.',data:{...worked,dietary_restrictions:['vegetarian']}},
+ vague:{request:'Whatever you think.',data:blank},
+ two:{request:'Dinner for two, $20 each before fees, in USD.',data:{...blank,budget_amount:20,currency:'USD',includes_fees:false,party_size:2,budget_basis:'per_person'}},
+ broken:{request:'Something spicy under $25 including fees. Thai would be nice.',data:worked}
+};
+let current = null;
+let pending = null;
+function clearResult(){ current=null; pending=null; $('summary').replaceChildren(); $('summary').hidden=true; $('meaning').hidden=true; $('empty').hidden=false; $('question').textContent='Validate the sample first.'; $('answer').disabled=true; $('apply').disabled=true; $('answer').value=''; }
+function status(message,kind=''){ $('status').textContent=message; $('status').className=kind; }
+function loadSample(){ const item=cases[$('case').value]; $('request').value=item.request; $('json').value=JSON.stringify(item.data,null,2); if($('case').value==='broken') $('json').value=$('json').value.replace('],',']'); clearResult(); status('Sample loaded. Compare it with the request, then validate.'); }
+function checkStructure(data){
+ if(!data || typeof data!=='object' || Array.isArray(data)) throw Error('Use a JSON object with labeled fields.');
+ for(const field of Object.keys(blank)) if(!Object.hasOwn(data,field)) throw Error('Missing field: '+field+'. Add it, using null if unknown.');
+ for(const field of ['cuisine_preferences','dietary_restrictions']) if(data[field]!==null && (!Array.isArray(data[field]) || !data[field].every(x=>typeof x==='string' && x.trim()))) throw Error(field+' must be a list of non-empty strings or null.');
+ for(const field of ['spice_preference','currency','delivery_area']) if(data[field]!==null && (typeof data[field]!=='string'||!data[field].trim())) throw Error(field+' must be a non-empty string or null.');
+ if(data.budget_amount!==null && (typeof data.budget_amount!=='number'||!Number.isFinite(data.budget_amount)||data.budget_amount<=0)) throw Error('budget_amount must be a positive number or null.');
+ if(data.includes_fees!==null && typeof data.includes_fees!=='boolean') throw Error('includes_fees must be true, false, or null.');
+ if(Object.hasOwn(data,'party_size') && (!Number.isInteger(data.party_size)||data.party_size<1)) throw Error('party_size must be a positive whole number.');
+ if(Object.hasOwn(data,'budget_basis') && !['per_person','total'].includes(data.budget_basis)) throw Error('budget_basis must be per_person or total.');
+ const allowed=[...Object.keys(blank),'party_size','budget_basis'];
+ for(const key of Object.keys(data)) if(!allowed.includes(key)) throw Error('Unrecognized field: '+key+'. Update the contract deliberately before adding fields.');
+}
+// Try changing the delivery-area question below. Keep the field name unchanged.
+function nextQuestion(data){
+ if(data.delivery_area===null) return {field:'delivery_area',text:'Which area would you like delivery to?'};
+ if(data.dietary_restrictions===null) return {field:'dietary_restrictions',text:'Are there any dietary restrictions to account for?'};
+ if(data.budget_amount===null) return {field:'budget_amount',text:'What budget amount should we use?'};
+ if(data.currency===null) return {field:'currency',text:'Which currency is that budget in?'};
+ if(data.includes_fees===null) return {field:'includes_fees',text:'Should the budget include fees, tax, and any tip? (yes/no)'};
+ return null;
+}
+function paint(data){
+ $('summary').replaceChildren();
+ for(const [key,value] of Object.entries(data)){ const dt=document.createElement('dt'); const dd=document.createElement('dd'); dt.textContent=key.replaceAll('_',' '); dd.textContent=value===null?'Unknown':Array.isArray(value)?(value.length?value.join(', '):'Explicitly none'):String(value); $('summary').append(dt,dd); }
+ $('summary').hidden=false; $('empty').hidden=true; $('meaning').hidden=false;
+ pending=nextQuestion(data); $('question').textContent=pending?pending.text:'Core request fields are filled. Review their meaning before any future menu search.';
+ $('answer').disabled=!pending; $('apply').disabled=!pending; $('answer').value=''; $('answer').placeholder=pending?'Use fictional information':'Core fields filled';
+}
+function validate(){ clearResult(); const start=performance.now(); try{ let data; try{data=JSON.parse($('json').value);}catch{throw Error('The JSON could not be read. Check commas, quotation marks, and brackets, then try again.');} checkStructure(data); current=data; paint(current); status('Structure passed. Check meaning against the request. Local validation: '+(performance.now()-start).toFixed(1)+' ms (not model latency).','success'); }catch(error){status(error.message,'error');} }
+function applyClarification(){
+ if(!current||!pending)return;
+ const text=$('answer').value.trim(); if(!text){status('Enter a fictional answer first.','error');return;}
+ let value=text;
+ if(pending.field==='dietary_restrictions') value=/^none$/i.test(text)?[]:text.split(',').map(x=>x.trim()).filter(Boolean);
+ if(pending.field==='budget_amount'){value=Number(text);if(!Number.isFinite(value)||value<=0){status('Enter a positive budget number, such as 25.','error');return;}}
+ if(pending.field==='includes_fees'){if(!/^(yes|no)$/i.test(text)){status('Use yes or no so the fee setting is unambiguous.','error');return;}value=/^yes$/i.test(text);}
+ const field=pending.field; const updated={...current,[field]:value};
+ try{checkStructure(updated);}catch(error){status(error.message,'error');return;}
+ current=updated; $('json').value=JSON.stringify(current,null,2); $('request').value+='\nClarification ('+field+'): '+text; paint(current); status('Clarification applied. Inspect the other fields to confirm they were preserved.','success');
+}
+$('load').addEventListener('click',loadSample);
+$('validate').addEventListener('click',validate);
+$('apply').addEventListener('click',applyClarification);
+$('json').addEventListener('input',()=>{clearResult();status('Response changed. Validate again to refresh the summary.');});
+$('download').addEventListener('click',()=>{const a=document.createElement('a');const u=URL.createObjectURL(new Blob(['<!doctype html>\n'+document.documentElement.outerHTML],{type:'text/html'}));a.href=u;a.download='dinner-request-lab.html';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);});
+loadSample();
+</script></body></html>

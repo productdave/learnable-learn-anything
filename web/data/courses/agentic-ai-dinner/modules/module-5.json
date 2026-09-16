@@ -1,0 +1,707 @@
+{
+  "create-evaluation-set": {
+    "id": "create-evaluation-set",
+    "moduleId": "evaluation-debugging",
+    "title": "Turn user promises into test cases",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A demo is one success; an evaluation tests a promise",
+        "content": "<p>Your assistant worked once. Now test whether it consistently respects the budget, preserves corrections, excludes unavailable dishes, and waits for approval. Each promise needs a case that could expose a failure.</p><p>A <strong>golden dataset</strong> is a curated collection of inputs and expected outcomes. It need not start large. Include ordinary requests, edge cases, and failures. Keep the expected outcome separate from what the current implementation happens to do.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/evaluation-illustrated.png",
+        "alt": "A checklist and trace reveal which assistant behavior needs improvement.",
+        "caption": "Test the outcome, trace the failure, and improve one thing.",
+        "source_title": "Learnable · original illustration"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-create-evaluation-set-choice",
+        "question": "Which is the strongest budget test?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The answer sounds economical."
+          },
+          {
+            "id": "b",
+            "text": "Every returned sample total is strictly below the stated cap."
+          },
+          {
+            "id": "c",
+            "text": "The assistant says the word budget."
+          }
+        ],
+        "correct": "b",
+        "explanation": "The test directly checks the promised constraint."
+      },
+      {
+        "type": "concept",
+        "title": "Specify outcomes rather than one exact sentence",
+        "content": "<p>For a no-result case, acceptable behavior is an empty shortlist with an explanation. It need not use one fixed sentence. For totals, exact arithmetic is appropriate. Choose the comparison based on the behavior.</p><p>The Evaluation Lab runs executable checks on the same core used by retrieval and workflow. It reports each case and an aggregate pass count. These are deterministic component checks, not evidence that an unconnected language model is reliable.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-create-evaluation-set-match",
+        "question": "Match each case to the promise it tests.",
+        "pairs": [
+          {
+            "left": "Unavailable item with a high relevance score",
+            "right": "Availability beats ranking"
+          },
+          {
+            "left": "Submit without approval",
+            "right": "Approval gate is enforced"
+          },
+          {
+            "left": "Change quantity after approval",
+            "right": "Changed proposals invalidate approval"
+          }
+        ],
+        "explanation": "Choose a case capable of breaking the specific promise."
+      },
+      {
+        "type": "concept",
+        "title": "Write cases before editing the solution",
+        "content": "<p>Create a $25 strict-boundary case, a vegetarian filter case, and an unapproved-submission case. Predict each result before running the lab. If the implementation fails, preserve the test while investigating the cause.</p><p><a href=\"https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents\" target=\"_blank\" rel=\"noopener\">Anthropic’s evaluation guide</a> emphasizes evaluating agent behavior beyond a single plausible final answer. Our small project follows that principle with explicit outcomes and traces.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-create-evaluation-set-reason",
+        "question": "Write an expected result for a search where nothing qualifies.",
+        "sample_answer": "Return no eligible items, explain the relevant exclusions, and ask before changing a constraint. Do not invent a matching result.",
+        "key_points": [
+          "Empty result is valid",
+          "Constraints are not silently changed"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-create-evaluation-set-practice",
+        "title": "Try it: Turn user promises into test cases",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Predict the checks",
+            "instruction": "Read the Evaluation Lab case names before running them.",
+            "cue": "Expected before actual",
+            "success": "You can explain what each case protects."
+          },
+          {
+            "title": "Run the suite",
+            "instruction": "Execute the baseline tests and inspect individual results.",
+            "cue": "Do not stop at the total",
+            "success": "You know which behavior each pass represents."
+          },
+          {
+            "title": "Add a case on paper",
+            "instruction": "Write an input and expected outcome absent from the fixture suite.",
+            "cue": "Coverage has gaps",
+            "success": "The new case targets a concrete promise."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#evaluation\" target=\"_blank\" rel=\"noopener\"><strong>Evaluation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-create-evaluation-set-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Write an expected result for a search where nothing qualifies.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Convert user promises into falsifiable cases.",
+          "Use expected outcomes independent of the implementation.",
+          "State what the test suite does and does not cover."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a golden dataset?",
+        "back": "Curated inputs and expected outcomes for evaluation."
+      },
+      {
+        "front": "Is exact wording always the right test?",
+        "back": "No; test the behavior or facts unless wording itself is the requirement."
+      },
+      {
+        "front": "What should an empty result test protect?",
+        "back": "Honesty and preservation of constraints."
+      },
+      {
+        "front": "Does the lab test a live LLM?",
+        "back": "No; it tests the deterministic sample-data core."
+      },
+      {
+        "front": "Why predict before running?",
+        "back": "To avoid treating current implementation behavior as the specification."
+      }
+    ]
+  },
+  "choose-evaluation-graders": {
+    "id": "choose-evaluation-graders",
+    "moduleId": "evaluation-debugging",
+    "title": "Use code, rubrics, and model judges appropriately",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Different claims need different graders",
+        "content": "<p>Use code to check totals, allowed transitions, and whether an unavailable item slipped through. Use a rubric for a subjective property such as whether an explanation makes the tradeoff understandable.</p><p>A <strong>grader</strong> is the mechanism that assesses a result. Human review can establish example judgments. A model judge can help assess open-ended outputs, but its decisions also need checking. Do not replace exact arithmetic with another model’s opinion.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-choose-evaluation-graders-choice",
+        "question": "Which grader should verify the sum of integer price components?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deterministic arithmetic code."
+          },
+          {
+            "id": "b",
+            "text": "A prose-quality model judge."
+          },
+          {
+            "id": "c",
+            "text": "A popularity vote."
+          }
+        ],
+        "correct": "a",
+        "explanation": "Exact numeric requirements should use exact checks."
+      },
+      {
+        "type": "concept",
+        "title": "A rubric needs observable anchors",
+        "content": "<p>For explanation quality, define 0: unsupported or misleading; 1: accurate but misses the main tradeoff; 2: accurate, sourced, and explains the relevant tradeoff. Supply examples at each level so graders share an interpretation.</p><p>If you use a model judge, compare its judgments with human-labeled cases and inspect disagreements. Watch for irrelevant preferences such as rewarding verbosity. Evaluate the judge on the task rather than assuming a model name makes it reliable.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-choose-evaluation-graders-match",
+        "question": "Match the criterion to a suitable grading approach.",
+        "pairs": [
+          {
+            "left": "Final total is correct",
+            "right": "Deterministic calculation"
+          },
+          {
+            "left": "Explanation makes a tradeoff clear",
+            "right": "Anchored rubric with review"
+          },
+          {
+            "left": "Judge agrees with trusted labels",
+            "right": "Judge calibration set"
+          }
+        ],
+        "explanation": "Choose the mechanism that can actually observe the criterion."
+      },
+      {
+        "type": "concept",
+        "title": "Keep critical failures separate from style scores",
+        "content": "<p>An elegant explanation cannot compensate for submitting without approval. Report critical gates separately from average quality. The lab shows a gate failure explicitly instead of hiding it inside a composite score.</p><p>In your reflection, grade two fictional recommendations using the rubric. Record the evidence for each score. If your interpretation changes, revise the rubric and regrade the same examples.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-choose-evaluation-graders-reason",
+        "question": "Why should approval failures stay outside an average style score?",
+        "sample_answer": "They violate a required permission boundary. A high explanation score must not cancel out an unauthorized action, so approval is a separate release gate.",
+        "key_points": [
+          "Critical gate is separate",
+          "Style cannot compensate for unauthorized action"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-choose-evaluation-graders-practice",
+        "title": "Try it: Use code, rubrics, and model judges appropriately",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Score two explanations",
+            "instruction": "Write one supported recommendation and one misleading one, then apply the 0–2 rubric.",
+            "cue": "Cite evidence for the score",
+            "success": "You can point to the text behind each judgment."
+          },
+          {
+            "title": "Check a critical failure",
+            "instruction": "Run the approval-gate bug scenario in the Evaluation Lab.",
+            "cue": "A gate cannot average away",
+            "success": "The failure is visible even if other cases pass."
+          },
+          {
+            "title": "Improve the rubric",
+            "instruction": "Add an example resolving one likely grading disagreement.",
+            "cue": "Make judgment repeatable",
+            "success": "Another reviewer could use your anchor."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#evaluation\" target=\"_blank\" rel=\"noopener\"><strong>Evaluation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-choose-evaluation-graders-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Why should approval failures stay outside an average style score?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Use exact checks for exact requirements.",
+          "Calibrate subjective graders with examples.",
+          "Do not average away permission or constraint failures."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a grader?",
+        "back": "A method for assessing an outcome."
+      },
+      {
+        "front": "When is deterministic grading appropriate?",
+        "back": "When a requirement can be checked exactly in code."
+      },
+      {
+        "front": "What makes a rubric useful?",
+        "back": "Observable criteria and anchored examples."
+      },
+      {
+        "front": "Does a model judge need evaluation?",
+        "back": "Yes; compare it with trusted labels and inspect disagreements."
+      },
+      {
+        "front": "Why separate critical gates?",
+        "back": "Averages can hide failures that should block release."
+      }
+    ]
+  },
+  "inspect-execution-traces": {
+    "id": "inspect-execution-traces",
+    "moduleId": "evaluation-debugging",
+    "title": "Find the first wrong step in a trace",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The final answer shows the symptom",
+        "content": "<p>A recommendation exceeds the budget. Was the budget extracted incorrectly, did fees go missing, or did a filter fail? A <strong>trace</strong> records the meaningful execution steps so you can find the first divergence.</p><p>For this project, inspect the input constraints, candidate IDs, exclusions, draft version, approval, and submission status. You need observable operations and outcomes, not hidden model reasoning.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-inspect-execution-traces-choice",
+        "question": "A final answer is over budget. What is the most useful next step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite its tone immediately."
+          },
+          {
+            "id": "b",
+            "text": "Inspect extraction, price components, and filtering to locate the first error."
+          },
+          {
+            "id": "c",
+            "text": "Increase the number of agents."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Trace the failure to its originating component before changing unrelated behavior."
+      },
+      {
+        "type": "concept",
+        "title": "Log enough to debug without collecting everything",
+        "content": "<p>A useful event includes a request or run ID, step name, outcome, duration, and safe metadata. Avoid recording credentials, payment details, or unnecessary personal information. Redaction and retention choices belong in the design.</p><p>The Workflow Lab records in-memory events for the fixture run. It does not send telemetry. Use the sequence to explain whether a failure happened before a draft, during approval, or after simulated acceptance.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-inspect-execution-traces-claim",
+        "statement": "A useful application trace requires saving every private input and the model’s hidden reasoning.",
+        "correct": false,
+        "explanation": "Log observable steps and safe metadata needed for diagnosis; minimize sensitive information."
+      },
+      {
+        "type": "concept",
+        "title": "Change the earliest faulty component",
+        "content": "<p>If the price calculation omitted delivery, changing the recommendation wording will not repair the total. Reproduce the failure, locate the earliest incorrect value, fix that component, and rerun the original case.</p><p>A useful bug report contains the request, expected outcome, relevant trace events, actual outcome, and a narrow hypothesis. That is more actionable than “the agent is bad.”</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-inspect-execution-traces-reason",
+        "question": "Write a concise bug hypothesis for missing delivery fees.",
+        "sample_answer": "The quote step appears to sum only item prices. I will compare the recorded components with the final total and add a case where delivery pushes the order over budget.",
+        "key_points": [
+          "Locate a specific component",
+          "Use a reproducing case"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-inspect-execution-traces-practice",
+        "title": "Try it: Find the first wrong step in a trace",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Create a trace",
+            "instruction": "Run a draft, approval, and simulated timeout in the Workflow Lab.",
+            "cue": "Read the sequence",
+            "success": "You can locate the uncertain-outcome event."
+          },
+          {
+            "title": "Find the first divergence",
+            "instruction": "Run the fee-omission scenario in the Evaluation Lab.",
+            "cue": "Cause before symptom",
+            "success": "You identify the calculation error rather than the wording."
+          },
+          {
+            "title": "Save a bug report",
+            "instruction": "Record expected behavior, actual behavior, evidence, and one hypothesis.",
+            "cue": "Make it reproducible",
+            "success": "Another learner could reproduce the issue."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#evaluation\" target=\"_blank\" rel=\"noopener\"><strong>Evaluation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-inspect-execution-traces-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Write a concise bug hypothesis for missing delivery fees.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Use traces to locate the cause behind the final symptom.",
+          "Record useful safe metadata rather than everything.",
+          "Fix the earliest faulty component and rerun the case."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a trace?",
+        "back": "A record of meaningful execution steps and outcomes."
+      },
+      {
+        "front": "What is the first divergence?",
+        "back": "The earliest point where actual behavior departs from the expected path."
+      },
+      {
+        "front": "What should logs avoid?",
+        "back": "Credentials and unnecessary sensitive details."
+      },
+      {
+        "front": "Does debugging require hidden chain-of-thought?",
+        "back": "No; observable inputs, outputs, and tool events can support diagnosis."
+      },
+      {
+        "front": "What should a fix rerun?",
+        "back": "The reproducing case and relevant regression checks."
+      }
+    ]
+  },
+  "set-release-gates": {
+    "id": "set-release-gates",
+    "moduleId": "evaluation-debugging",
+    "title": "Decide whether an improvement is ready to ship",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A better average can hide a worse product",
+        "content": "<p>Imagine a change makes most answers faster but occasionally removes a dietary constraint. Report quality by important case categories, not just one average. A change is acceptable only if it satisfies the critical requirements.</p><p>Track task success, constraint violations, recovery behavior, latency, and cost separately. For live systems, percentile latency can reveal slow experiences hidden by the mean. The local lab timing is component execution time, not network or model latency.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-set-release-gates-choice",
+        "question": "Nine tests pass and the approval gate fails. What should your decision be?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Release because 90% is good enough."
+          },
+          {
+            "id": "b",
+            "text": "Block release until the critical permission failure is fixed."
+          },
+          {
+            "id": "c",
+            "text": "Hide the failing case from the average."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A critical permission requirement is a gate, not a compensable preference."
+      },
+      {
+        "type": "concept",
+        "title": "Compare a baseline with a controlled change",
+        "content": "<p>The Evaluation Lab offers baseline, omitted-fee bug, and missing-approval bug variants. The same cases run against each variant. Your job is to explain which promise each failure breaks.</p><p>A small fixture suite is a starting point, not proof of universal safety. Define additional representative requests and repeated live-model trials before relying on stochastic behavior. A passing test can only cover what it actually exercised.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-set-release-gates-claim",
+        "statement": "Passing a small deterministic fixture suite proves that a live model will handle every future request correctly.",
+        "correct": false,
+        "explanation": "The suite covers specific deterministic behaviors. Live-model variability and unseen cases require separate evaluation."
+      },
+      {
+        "type": "concept",
+        "title": "Write a release decision with a rollback condition",
+        "content": "<p>For this prototype, require all critical fixture checks to pass and document remaining live-integration gaps. In a real rollout, start small, monitor the same important behaviors, and define a condition that pauses or rolls back the release.</p><p>Your module artifact is an evaluation report: baseline results, one intentionally broken variant, root cause, and a release decision. Export the lab report and save your interpretation in Learnable.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-set-release-gates-reason",
+        "question": "State a rollout stop condition for the dinner assistant.",
+        "sample_answer": "Pause consequential actions if any submission occurs without approval of the current cart version, then inspect the trace and restore the last verified behavior.",
+        "key_points": [
+          "Observable stop condition",
+          "Contain the affected action"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-set-release-gates-practice",
+        "title": "Try it: Decide whether an improvement is ready to ship",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Compare variants",
+            "instruction": "Run baseline and both bug variants in the Evaluation Lab.",
+            "cue": "Same cases, different code",
+            "success": "You can name the failing promise in each variant."
+          },
+          {
+            "title": "Export evidence",
+            "instruction": "Download the report and distinguish fixture timing from model latency.",
+            "cue": "Label the measurement",
+            "success": "The report does not overclaim its scope."
+          },
+          {
+            "title": "Write go/no-go",
+            "instruction": "State which gates passed, what remains untested, and one stop condition.",
+            "cue": "Decision with limits",
+            "success": "Your conclusion follows from the evidence."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#evaluation\" target=\"_blank\" rel=\"noopener\"><strong>Evaluation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-set-release-gates-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "State a rollout stop condition for the dinner assistant.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Separate critical gates from average quality.",
+          "Compare changes on the same test set.",
+          "Record untested gaps and an observable stop condition."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "Why report critical categories separately?",
+        "back": "An average can hide an unacceptable failure."
+      },
+      {
+        "front": "What is a release gate?",
+        "back": "A required condition that must pass before release."
+      },
+      {
+        "front": "What is a rollback condition?",
+        "back": "An observable trigger to restore or pause behavior."
+      },
+      {
+        "front": "What does a fixture test prove?",
+        "back": "Only the specific behavior it exercises under its assumptions."
+      },
+      {
+        "front": "What makes a fair before/after comparison?",
+        "back": "The same cases and criteria with a controlled change."
+      }
+    ]
+  }
+}
