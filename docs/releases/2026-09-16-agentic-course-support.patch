@@ -1,3 +1,97 @@
+--- /dev/null
++++ b/data/courses/catalog-dinner-release.json
+@@ -0,0 +1,91 @@
++{
++  "courses": [
++    {
++      "id": "agentic-ai-dinner",
++      "title": "Agentic AI Foundations for Product Builders",
++      "subtitle": "Six modules · Build AI product judgment with illustrated lessons, practical labs, and a dinner-assistant prototype.",
++      "modules": 6,
++      "topics": 24,
++      "accentColor": "#0F766E",
++      "emoji": "🍜",
++      "publicAuthor": {
++        "displayName": "David Wang",
++        "avatarUrl": ""
++      },
++      "visibility": "public"
++    },
++    {
++      "id": "multi-agent-workflow-systems",
++      "title": "Multi-Agent Workflow Systems",
++      "subtitle": "Build intelligent agent teams that plan, execute, orchestrate, and swarm to automate complex business workflows",
++      "modules": 6,
++      "topics": 28,
++      "accentColor": "#4338CA",
++      "emoji": "🤖"
++    },
++    {
++      "id": "ai-product-evals-rubrics",
++      "title": "Evals & Rubrics for AI PMs",
++      "subtitle": "Build rigorous evaluation frameworks for AI products and ace your PM interviews",
++      "modules": 3,
++      "topics": 12,
++      "accentColor": "#4338CA",
++      "emoji": "📊"
++    },
++    {
++      "id": "little-swimmer",
++      "title": "Little Swimmer",
++      "subtitle": "A parent-led, safety-first pathway from happy splashing to calm short swims.",
++      "modules": 4,
++      "topics": 12,
++      "accentColor": "#0891B2",
++      "emoji": "🏊‍♀️"
++    },
++    {
++      "id": "code-for-designers",
++      "title": "Code for Designers",
++      "subtitle": "Learn programming fundamentals and build your first website or app with confidence",
++      "modules": 3,
++      "topics": 12,
++      "accentColor": "#4338CA",
++      "emoji": "💻"
++    },
++    {
++      "id": "ai-annotation-platform-pm",
++      "title": "AI Annotation Platform PM",
++      "subtitle": "Walk into a director-level PM interview sounding like you built the annotation engine behind frontier AI models.",
++      "modules": 7,
++      "topics": 31,
++      "accentColor": "#E11D48",
++      "icon": "briefcase"
++    },
++    {
++      "id": "pour-over-coffee",
++      "title": "Pour-Over Coffee Mastery",
++      "subtitle": "Brew café-quality pour-over coffee at home using your V60 and gooseneck kettle.",
++      "modules": 1,
++      "topics": 5,
++      "accentColor": "#D97706",
++      "icon": "target"
++    },
++    {
++      "id": "game-theory",
++      "title": "Strategic Edge",
++      "subtitle": "Game theory for the decisions that actually matter.",
++      "modules": 6,
++      "topics": 24,
++      "accentColor": "#4338CA",
++      "icon": "scale"
++    },
++    {
++      "id": "quiz-demo",
++      "title": "Quiz Variants Demo",
++      "subtitle": "All 5 question formats the generator can produce, side by side.",
++      "modules": 1,
++      "topics": 1,
++      "accentColor": "#8B5CF6",
++      "icon": "settings",
++      "internal": true
++    }
++  ]
++}
 --- a/index.html
 +++ b/index.html
 @@ -11,7 +11,7 @@
@@ -5,7 +99,7 @@
    <link rel="stylesheet" href="styles/tokens.css?v=1">
    <link rel="stylesheet" href="styles/base.css?v=1">
 -  <link rel="stylesheet" href="styles/components.css?v=21">
-+  <link rel="stylesheet" href="styles/components.css?v=dinner-release-1">
++  <link rel="stylesheet" href="styles/components.css?v=dinner-release-2">
    <link rel="stylesheet" href="styles/learnable.css?v=7">
    <link rel="stylesheet" href="styles/themes.css?v=1">
  
@@ -14,7 +108,7 @@
    </div>
  
 -  <script type="module" src="js/app.js?v=125"></script>
-+  <script type="module" src="js/app.js?v=dinner-release-1"></script>
++  <script type="module" src="js/app.js?v=dinner-release-2"></script>
  </body>
  </html>
 --- a/js/app.js
@@ -34,21 +128,21 @@
 -import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, rehydrateCloudSubscriptions, markStaleCloudJobs, markCloudCredentialsReady, deleteCloudGeneration, clearCloudGenerationSubscriptions, pullSavedCloudCourseForJob, hasSavedRequestRestartIntent } from './cloud-gen-client.js?v=79';
 -import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js?v=2';
 -import { courseCanSyncToAccount, initCourseSync, syncCoursesNow } from './course-sync.js?v=23';
-+import { normalizePublicAuthor } from './public-author.js?v=dinner-release-1';
-+import { store } from './store.js?v=dinner-release-1';
-+import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js?v=dinner-release-1';
-+import { renderSidebar } from './components/sidebar.js?v=dinner-release-1';
-+import { renderTopicView } from './components/topic-view.js?v=dinner-release-1';
-+import { initSearch } from './search.js?v=dinner-release-1';
-+import { initFlashcards } from './flashcards.js?v=dinner-release-1';
-+import { initChat } from './chat.js?v=dinner-release-1';
-+import { initAuth, getUser, onUserChange, openAccount } from './auth.js?v=dinner-release-1';
-+import { initSync } from './sync.js?v=dinner-release-1';
-+import { openIntake, openIntakeForJob, openIntakeWithDraft } from './intake.js?v=dinner-release-1';
-+import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, removeCloudJobs, updateJob, getJob as getJobLazy } from './jobs.js?v=dinner-release-1';
-+import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, rehydrateCloudSubscriptions, markStaleCloudJobs, markCloudCredentialsReady, deleteCloudGeneration, clearCloudGenerationSubscriptions, pullSavedCloudCourseForJob, hasSavedRequestRestartIntent } from './cloud-gen-client.js?v=dinner-release-1';
-+import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js?v=dinner-release-1';
-+import { courseCanSyncToAccount, initCourseSync, syncCoursesNow } from './course-sync.js?v=dinner-release-1';
++import { normalizePublicAuthor } from './public-author.js?v=dinner-release-2';
++import { store } from './store.js?v=dinner-release-2';
++import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js?v=dinner-release-2';
++import { renderSidebar } from './components/sidebar.js?v=dinner-release-2';
++import { renderTopicView } from './components/topic-view.js?v=dinner-release-2';
++import { initSearch } from './search.js?v=dinner-release-2';
++import { initFlashcards } from './flashcards.js?v=dinner-release-2';
++import { initChat } from './chat.js?v=dinner-release-2';
++import { initAuth, getUser, onUserChange, openAccount } from './auth.js?v=dinner-release-2';
++import { initSync } from './sync.js?v=dinner-release-2';
++import { openIntake, openIntakeForJob, openIntakeWithDraft } from './intake.js?v=dinner-release-2';
++import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, removeCloudJobs, updateJob, getJob as getJobLazy } from './jobs.js?v=dinner-release-2';
++import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, rehydrateCloudSubscriptions, markStaleCloudJobs, markCloudCredentialsReady, deleteCloudGeneration, clearCloudGenerationSubscriptions, pullSavedCloudCourseForJob, hasSavedRequestRestartIntent } from './cloud-gen-client.js?v=dinner-release-2';
++import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged } from './user-courses.js?v=dinner-release-2';
++import { courseCanSyncToAccount, initCourseSync, syncCoursesNow } from './course-sync.js?v=dinner-release-2';
  import { agentNameForStage } from './generator/agents.mjs';
  
  let cloudGenerationRefresh = null;
@@ -68,8 +162,8 @@
  
 -import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 -import { API_KEY_PROVIDERS, getProviderKey, maskKey, setProviderKey } from './api-keys.js?v=1';
-+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=dinner-release-1';
-+import { API_KEY_PROVIDERS, getProviderKey, maskKey, setProviderKey } from './api-keys.js?v=dinner-release-1';
++import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=dinner-release-2';
++import { API_KEY_PROVIDERS, getProviderKey, maskKey, setProviderKey } from './api-keys.js?v=dinner-release-2';
  
  let client = null;
  let currentUser = null;
@@ -78,7 +172,7 @@
      body.querySelectorAll('[data-key-clear]').forEach(btn => btn.addEventListener('click', async () => {
        setProviderKey(btn.dataset.keyClear, '');
 -      const { kickSync } = await import('./sync.js?v=19');
-+      const { kickSync } = await import('./sync.js?v=dinner-release-1');
++      const { kickSync } = await import('./sync.js?v=dinner-release-2');
        kickSync();
        openAccount({ intent, jobId });
      }));
@@ -87,7 +181,7 @@
        if (!val) return;
        setProviderKey(provider, val);
 -      const { flushSync } = await import('./sync.js?v=19');
-+      const { flushSync } = await import('./sync.js?v=dinner-release-1');
++      const { flushSync } = await import('./sync.js?v=dinner-release-2');
        let synced = false;
        try { await flushSync(); synced = true; }
        catch { /* account modal can retry via the Courses panel */ }
@@ -96,7 +190,7 @@
    const host = body.querySelector('[data-cloud-sync-body]');
    if (!host) return;
 -  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=23');
-+  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=dinner-release-1');
++  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=dinner-release-2');
  
    function render(status) {
      const cloudCount = status.lastPullCloudCount;
@@ -105,8 +199,8 @@
 @@ -1,5 +1,5 @@
 -import { getCourseConfig } from './course-loader.js?v=4';
 -import { kickSync } from './sync.js?v=19';
-+import { getCourseConfig } from './course-loader.js?v=dinner-release-1';
-+import { kickSync } from './sync.js?v=dinner-release-1';
++import { getCourseConfig } from './course-loader.js?v=dinner-release-2';
++import { kickSync } from './sync.js?v=dinner-release-2';
  
  const MODEL = 'claude-haiku-4-5-20251001';
  const API_URL = 'https://api.anthropic.com/v1/messages';
@@ -121,11 +215,11 @@
 -import { invalidateCourseCache } from './course-loader.js?v=4';
 -import { courseCanSyncToAccount, coursePayloadForAccount, courseRemoteTimestamp, hasLocalChangesSinceSync, shouldInstallRemoteCourse, syncCoursesNow } from './course-sync.js?v=23';
 -import { _installCourseFromRemote, _readAllCourses, _removeCourseLocalSilent } from './user-courses.js?v=2';
-+import { updateJob, getJob, ensureJob, removeJob, listCloudJobMirrors } from './jobs.js?v=dinner-release-1';
-+import { sb, getUser } from './auth.js?v=dinner-release-1';
-+import { invalidateCourseCache } from './course-loader.js?v=dinner-release-1';
-+import { courseCanSyncToAccount, coursePayloadForAccount, courseRemoteTimestamp, hasLocalChangesSinceSync, shouldInstallRemoteCourse, syncCoursesNow } from './course-sync.js?v=dinner-release-1';
-+import { _installCourseFromRemote, _readAllCourses, _removeCourseLocalSilent } from './user-courses.js?v=dinner-release-1';
++import { updateJob, getJob, ensureJob, removeJob, listCloudJobMirrors } from './jobs.js?v=dinner-release-2';
++import { sb, getUser } from './auth.js?v=dinner-release-2';
++import { invalidateCourseCache } from './course-loader.js?v=dinner-release-2';
++import { courseCanSyncToAccount, coursePayloadForAccount, courseRemoteTimestamp, hasLocalChangesSinceSync, shouldInstallRemoteCourse, syncCoursesNow } from './course-sync.js?v=dinner-release-2';
++import { _installCourseFromRemote, _readAllCourses, _removeCourseLocalSilent } from './user-courses.js?v=dinner-release-2';
  import { agentMessage } from './generator/agents.mjs';
  
  const STORAGE_BUCKET = 'course-uploads';
@@ -133,14 +227,14 @@
 +++ b/js/components/exercise.js
 @@ -1,4 +1,4 @@
 -import { store } from '../store.js?v=1';
-+import { store } from '../store.js?v=dinner-release-1';
++import { store } from '../store.js?v=dinner-release-2';
  
  export function renderExercise(section) {
    const saved = store.getExerciseDraft(section.id);
 --- /dev/null
 +++ b/js/components/practice.js
 @@ -0,0 +1,190 @@
-+import { store } from '../store.js?v=dinner-release-1';
++import { store } from '../store.js?v=dinner-release-2';
 +
 +const SKILL_STATES = [
 +  ['not_started', 'Not yet'],
@@ -334,7 +428,7 @@
 +++ b/js/components/quiz.js
 @@ -1,4 +1,4 @@
 -import { store } from '../store.js?v=1';
-+import { store } from '../store.js?v=dinner-release-1';
++import { store } from '../store.js?v=dinner-release-2';
  
  export function renderQuiz(section) {
    switch (section.variant) {
@@ -343,8 +437,8 @@
 @@ -1,5 +1,5 @@
 -import { store } from '../store.js?v=1';
 -import { getCurriculum } from '../course-loader.js?v=4';
-+import { store } from '../store.js?v=dinner-release-1';
-+import { getCurriculum } from '../course-loader.js?v=dinner-release-1';
++import { store } from '../store.js?v=dinner-release-2';
++import { getCurriculum } from '../course-loader.js?v=dinner-release-2';
  
  function progressRingSVG(progress, color, size = 32) {
    const r = (size - 4) / 2;
@@ -355,11 +449,11 @@
 -import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=4';
 -import { logEvent } from '../sync.js?v=19';
 -import { getUserCourse, saveUserCourse } from '../user-courses.js?v=2';
-+import { renderPractice, initPracticeInteractivity } from './practice.js?v=dinner-release-1';
-+import { store } from '../store.js?v=dinner-release-1';
-+import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=dinner-release-1';
-+import { logEvent } from '../sync.js?v=dinner-release-1';
-+import { getUserCourse, saveUserCourse } from '../user-courses.js?v=dinner-release-1';
++import { renderPractice, initPracticeInteractivity } from './practice.js?v=dinner-release-2';
++import { store } from '../store.js?v=dinner-release-2';
++import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=dinner-release-2';
++import { logEvent } from '../sync.js?v=dinner-release-2';
++import { getUserCourse, saveUserCourse } from '../user-courses.js?v=dinner-release-2';
  
  // Module-level context for the topic currently being rendered — used by
  // quiz event handlers (which live in init helpers and don't see render-scope).
@@ -373,12 +467,12 @@
 -import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js';
 -import { renderSimulator, initSimulatorInteractivity } from './simulator.js';
 -import { ttsBarHTML, initTTS } from '../tts.js?v=4';
-+import { renderQuiz } from './quiz.js?v=dinner-release-1';
-+import { renderExercise, initExerciseInteractivity } from './exercise.js?v=dinner-release-1';
-+import { renderDiagram } from './diagram.js?v=dinner-release-1';
-+import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js?v=dinner-release-1';
-+import { renderSimulator, initSimulatorInteractivity } from './simulator.js?v=dinner-release-1';
-+import { ttsBarHTML, initTTS } from '../tts.js?v=dinner-release-1';
++import { renderQuiz } from './quiz.js?v=dinner-release-2';
++import { renderExercise, initExerciseInteractivity } from './exercise.js?v=dinner-release-2';
++import { renderDiagram } from './diagram.js?v=dinner-release-2';
++import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js?v=dinner-release-2';
++import { renderSimulator, initSimulatorInteractivity } from './simulator.js?v=dinner-release-2';
++import { ttsBarHTML, initTTS } from '../tts.js?v=dinner-release-2';
  
  function renderSection(section, index) {
    switch (section.type) {
@@ -405,7 +499,7 @@
  // function) without any consumer code changing.
  
 -import { listUserCourses, getUserCourse } from './user-courses.js?v=2';
-+import { listUserCourses, getUserCourse } from './user-courses.js?v=dinner-release-1';
++import { listUserCourses, getUserCourse } from './user-courses.js?v=dinner-release-2';
  
  /** Fallback emoji for user-generated courses created before Stage 1 picked one. */
  function deriveEmoji(title = '') {
@@ -414,7 +508,7 @@
   */
  export async function loadLibrary() {
 -  const resp = await fetch('data/courses/index.json');
-+  const resp = await fetch('data/courses/index.json', { cache: 'no-cache' });
++  const resp = await fetch('data/courses/catalog-dinner-release.json', { cache: 'no-cache' });
    const bundled = resp.ok ? await resp.json() : { courses: [] };
    // User-generated courses (localStorage) come first, freshly-made on top.
    const user = listUserCourses().map(c => {
@@ -445,14 +539,14 @@
  //     uploaded yet").
  
 -import { sb, getUser, onUserChange } from './auth.js?v=26';
-+import { sb, getUser, onUserChange } from './auth.js?v=dinner-release-1';
++import { sb, getUser, onUserChange } from './auth.js?v=dinner-release-2';
  import {
    _readAllCourses,
    _onCoursesChanged,
    _installCourseFromRemote,
    _removeCourseLocalSilent
 -} from './user-courses.js?v=2';
-+} from './user-courses.js?v=dinner-release-1';
++} from './user-courses.js?v=dinner-release-2';
  
  const PUSH_DEBOUNCE_MS = 1200;
  const DELETE_RETRY_MS = 5000;
@@ -462,9 +556,9 @@
 -import { store } from './store.js?v=1';
 -import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js?v=4';
 -import { logEvent } from './sync.js?v=19';
-+import { store } from './store.js?v=dinner-release-1';
-+import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js?v=dinner-release-1';
-+import { logEvent } from './sync.js?v=dinner-release-1';
++import { store } from './store.js?v=dinner-release-2';
++import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js?v=dinner-release-2';
++import { logEvent } from './sync.js?v=dinner-release-2';
  
  const capitalizeFirst = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
  
@@ -475,7 +569,7 @@
  // The slot name is legacy from the original app. Keep it so existing saved
  // keys migrate without ceremony.
 -import { getAnthropicKey, setAnthropicKey } from '../api-keys.js?v=1';
-+import { getAnthropicKey, setAnthropicKey } from '../api-keys.js?v=dinner-release-1';
++import { getAnthropicKey, setAnthropicKey } from '../api-keys.js?v=dinner-release-2';
  
  export function hasApiKey() {
    return !!getAnthropicKey();
@@ -490,20 +584,20 @@
 -import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js?v=3';
 -import { cloudGenAvailable, requireCloudBackendReady, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, restartCloudGenerationWithSources, reattachCloudGeneration, submitCloudReview, deleteCloudGeneration, hasSavedRequestRestartIntent, reviewPendingForAction } from './cloud-gen-client.js?v=79';
 -import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
-+} from './generator/index.js?v=dinner-release-1';
-+import { flushSync, kickSync, pullSyncNow } from './sync.js?v=dinner-release-1';
-+import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js?v=dinner-release-1';
-+import { cloudGenAvailable, requireCloudBackendReady, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, restartCloudGenerationWithSources, reattachCloudGeneration, submitCloudReview, deleteCloudGeneration, hasSavedRequestRestartIntent, reviewPendingForAction } from './cloud-gen-client.js?v=dinner-release-1';
-+import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=dinner-release-1';
++} from './generator/index.js?v=dinner-release-2';
++import { flushSync, kickSync, pullSyncNow } from './sync.js?v=dinner-release-2';
++import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js?v=dinner-release-2';
++import { cloudGenAvailable, requireCloudBackendReady, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, restartCloudGenerationWithSources, reattachCloudGeneration, submitCloudReview, deleteCloudGeneration, hasSavedRequestRestartIntent, reviewPendingForAction } from './cloud-gen-client.js?v=dinner-release-2';
++import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=dinner-release-2';
  import { COURSE_AGENT_SEQUENCE, agentMessage, agentNameForStage } from './generator/agents.mjs';
 -import { getUser, onUserChange, openAccount } from './auth.js?v=26';
 -import { courseCanSyncToAccount } from './course-sync.js?v=23';
 -import { invalidateCourseCache } from './course-loader.js?v=4';
 -import { getUserCourse, removeUserCourse } from './user-courses.js?v=2';
-+import { getUser, onUserChange, openAccount } from './auth.js?v=dinner-release-1';
-+import { courseCanSyncToAccount } from './course-sync.js?v=dinner-release-1';
-+import { invalidateCourseCache } from './course-loader.js?v=dinner-release-1';
-+import { getUserCourse, removeUserCourse } from './user-courses.js?v=dinner-release-1';
++import { getUser, onUserChange, openAccount } from './auth.js?v=dinner-release-2';
++import { courseCanSyncToAccount } from './course-sync.js?v=dinner-release-2';
++import { invalidateCourseCache } from './course-loader.js?v=dinner-release-2';
++import { getUserCourse, removeUserCourse } from './user-courses.js?v=dinner-release-2';
  
  let modal = null;
  let unsubJob = null;        // currently-rendered job's listener
@@ -540,7 +634,7 @@
 +++ b/js/search.js
 @@ -1,4 +1,4 @@
 -import { loadAllModules } from './course-loader.js?v=4';
-+import { loadAllModules } from './course-loader.js?v=dinner-release-1';
++import { loadAllModules } from './course-loader.js?v=dinner-release-2';
  
  let searchIndex = [];
  let isInitialized = false;
@@ -610,9 +704,9 @@
 -import { sb, getUser, onUserChange } from './auth.js?v=26';
 -import { clearAllProviderKeys, getAllProviderKeys, LEGACY_ANTHROPIC_KEY_STORE, setAllProviderKeys } from './api-keys.js?v=1';
 -import { store } from './store.js?v=1';
-+import { sb, getUser, onUserChange } from './auth.js?v=dinner-release-1';
-+import { clearAllProviderKeys, getAllProviderKeys, LEGACY_ANTHROPIC_KEY_STORE, setAllProviderKeys } from './api-keys.js?v=dinner-release-1';
-+import { store } from './store.js?v=dinner-release-1';
++import { sb, getUser, onUserChange } from './auth.js?v=dinner-release-2';
++import { clearAllProviderKeys, getAllProviderKeys, LEGACY_ANTHROPIC_KEY_STORE, setAllProviderKeys } from './api-keys.js?v=dinner-release-2';
++import { store } from './store.js?v=dinner-release-2';
  
  const SYNC_KEYS = ['progress', 'quizAnswers', 'exerciseDrafts', 'flashcardState'];
  const API_KEY_STORE = LEGACY_ANTHROPIC_KEY_STORE; // legacy Anthropic slot, kept for existing testers

@@ -3,7 +3,8 @@
 - Course commit: `964efc7`
 - Creator: David Wang
 - Previous production deployment: `dpl_EbCfcoPE6yATBgT6Jm5HnnLaWnfk`
-- New deployment: `dpl_GFpMT3jxjtN8fwhoT1x9oiVXLrc8`
+- Preview deployment: `dpl_GFpMT3jxjtN8fwhoT1x9oiVXLrc8`
+- Production deployment: `dpl_AfMynr2dL98jEe9PDumEyvYwEr3Q`
 - Public URL: https://learnable-tau.vercel.app/?course=agentic-ai-dinner
 
 ## Release construction
@@ -22,3 +23,9 @@ Vercel rejected the baseline’s five-minute cron on the current Hobby plan. The
 - Vercel build succeeded; preview was promoted using the existing project.
 
 Ordering exercises remain simulations. No database migration was applied.
+
+The public catalog endpoint continued serving stale content after promotion. The final build uses `catalog-dinner-release.json`, refreshes module versions again, and disables the build cache for this deployment. Three already-public courses absent from the older source manifest were preserved by fetching their public JSON and referenced assets.
+
+The cached `js/course-loader.js` response persisted despite query version changes. Final packaging copies the patched `js/` tree to `js-dinner-release/` and points the HTML entry script there, giving the entire shared module graph a fresh physical URL. Preserve the original tree for older open clients.
+
+Final production verification: the homepage shows the course with “By David Wang”; all six modules returned HTTP 200 and contain 24 topics; the lab ZIP returned HTTP 200; the course opens from its public catalog card.
