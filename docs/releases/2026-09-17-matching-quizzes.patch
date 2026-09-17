@@ -1,0 +1,495 @@
+--- a/index.html
++++ b/index.html
+@@ -11,7 +11,7 @@
+   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="styles/tokens.css?v=1">
+   <link rel="stylesheet" href="styles/base.css?v=1">
+-  <link rel="stylesheet" href="styles/components.css?v=dinner-release-2">
++  <link rel="stylesheet" href="styles/components-matching-release.css?v=matching-release-1">
+   <link rel="stylesheet" href="styles/learnable.css?v=7">
+   <link rel="stylesheet" href="styles/themes.css?v=1">
+ 
+@@ -125,6 +125,6 @@
+     </div>
+   </div>
+ 
+-  <script type="module" src="js-dinner-release/app.js?v=dinner-release-2"></script>
++  <script type="module" src="js-matching-release/app.js?v=matching-release-1"></script>
+ </body>
+ </html>
+--- a/js-matching-release/app.js
++++ b/js-matching-release/app.js
+@@ -2,7 +2,7 @@
+ import { store } from './store.js?v=dinner-release-2';
+ import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js?v=dinner-release-2';
+ import { renderSidebar } from './components/sidebar.js?v=dinner-release-2';
+-import { renderTopicView } from './components/topic-view.js?v=dinner-release-2';
++import { renderTopicView } from './components/topic-view.js?v=matching-release-1';
+ import { initSearch } from './search.js?v=dinner-release-2';
+ import { initFlashcards } from './flashcards.js?v=dinner-release-2';
+ import { initChat } from './chat.js?v=dinner-release-2';
+--- a/js-matching-release/components/quiz.js
++++ b/js-matching-release/components/quiz.js
+@@ -1,9 +1,10 @@
++import { renderMatchQuiz } from './match-quiz.js?v=1';
+ import { store } from '../store.js?v=dinner-release-2';
+ 
+ export function renderQuiz(section) {
+   switch (section.variant) {
+     case 'multiple-choice': return renderMultipleChoice(section);
+-    case 'drag-match': return renderDragMatch(section);
++    case 'drag-match': return renderMatchQuiz(section);
+     case 'true-false': return renderTrueFalse(section);
+     case 'fill-in-blank': return renderFillInBlank(section);
+     case 'short-answer': return renderShortAnswer(section);
+@@ -114,40 +115,3 @@
+       </div>
+     </div>`;
+ }
+-
+-function renderDragMatch(section) {
+-  const shuffledRight = [...section.pairs].sort(() => Math.random() - 0.5);
+-  const correctPairs = {};
+-  section.pairs.forEach(p => { correctPairs[p.left] = p.right; });
+-
+-  return `
+-    <div class="quiz-block drag-match" data-quiz-id="${section.id}" data-variant="drag-match" data-correct-pairs='${JSON.stringify(correctPairs)}'>
+-      <div class="quiz-header">
+-        <span class="quiz-badge">Match</span>
+-      </div>
+-      <p class="quiz-question">${section.question}</p>
+-      <p class="quiz-hint-text">Click a term on the left, then click its match on the right. Or drag and drop.</p>
+-      <div class="drag-match-container">
+-        <div class="drag-match-column">
+-          ${section.pairs.map(p => `
+-            <div class="drag-left-item" data-left="${p.left}" draggable="true">
+-              ${p.left}
+-            </div>
+-          `).join('')}
+-        </div>
+-        <div class="drag-match-column">
+-          ${shuffledRight.map(p => `
+-            <div class="drag-right-item" data-right="${p.right}">
+-              ${p.right}
+-            </div>
+-          `).join('')}
+-        </div>
+-      </div>
+-      <div class="quiz-actions">
+-        <button class="quiz-check-btn" disabled>Check Matches</button>
+-      </div>
+-      <div class="quiz-explanation" style="display:none">
+-        <div class="quiz-explanation-content">${section.explanation || 'Great job matching the concepts!'}</div>
+-      </div>
+-    </div>`;
+-}
+--- a/js-matching-release/components/topic-view.js
++++ b/js-matching-release/components/topic-view.js
+@@ -1,3 +1,4 @@
++import { initMatchQuiz } from './match-quiz.js?v=1';
+ import { renderPractice, initPracticeInteractivity } from './practice.js?v=dinner-release-2';
+ import { store } from '../store.js?v=dinner-release-2';
+ import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=dinner-release-2';
+@@ -15,7 +16,7 @@
+     topic_title: currentCtx.topicTitle
+   } : {};
+ }
+-import { renderQuiz } from './quiz.js?v=dinner-release-2';
++import { renderQuiz } from './quiz.js?v=matching-release-1';
+ import { renderExercise, initExerciseInteractivity } from './exercise.js?v=dinner-release-2';
+ import { renderDiagram } from './diagram.js?v=dinner-release-2';
+ import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matrix.js?v=dinner-release-2';
+@@ -553,133 +554,11 @@
+ }
+ 
+ function initDragMatch(quizEl, quizId, saved) {
+-  const leftItems = quizEl.querySelectorAll('.drag-left-item');
+-  const rightItems = quizEl.querySelectorAll('.drag-right-item');
+-  const checkBtn = quizEl.querySelector('.quiz-check-btn');
+-  let pairs = saved?.pairs || {};
+-  let selectedLeft = null;
+-
+-  if (saved?.pairs && saved.checked) {
+-    showDragResult(quizEl, saved.pairs, quizEl.dataset.correctPairs);
+-    return;
+-  }
+-
+-  leftItems.forEach(item => {
+-    item.addEventListener('click', () => {
+-      if (quizEl.classList.contains('answered')) return;
+-      leftItems.forEach(i => i.classList.remove('selecting'));
+-      item.classList.add('selecting');
+-      selectedLeft = item.dataset.left;
+-    });
+-  });
+-
+-  rightItems.forEach(item => {
+-    item.addEventListener('click', () => {
+-      if (quizEl.classList.contains('answered') || !selectedLeft) return;
+-      Object.entries(pairs).forEach(([l, r]) => {
+-        if (l === selectedLeft || r === item.dataset.right) {
+-          delete pairs[l];
+-          quizEl.querySelector(`[data-left="${l}"]`)?.classList.remove('paired');
+-          quizEl.querySelector(`[data-right="${r}"]`)?.classList.remove('paired');
+-        }
+-      });
+-
+-      pairs[selectedLeft] = item.dataset.right;
+-      quizEl.querySelector(`[data-left="${selectedLeft}"]`).classList.add('paired');
+-      item.classList.add('paired');
+-
+-      const pairIndex = Object.keys(pairs).indexOf(selectedLeft);
+-      const colors = getCourseConfig().moduleColorAccents || ['#4338CA', '#D97706', '#059669', '#8B5CF6', '#0EA5E9'];
+-      const color = colors[pairIndex % colors.length];
+-      quizEl.querySelector(`[data-left="${selectedLeft}"]`).style.borderLeftColor = color;
+-      item.style.borderLeftColor = color;
+-
+-      leftItems.forEach(i => i.classList.remove('selecting'));
+-      selectedLeft = null;
+-
+-      if (checkBtn && Object.keys(pairs).length === leftItems.length) {
+-        checkBtn.disabled = false;
+-      }
+-    });
+-  });
+-
+-  leftItems.forEach(item => {
+-    item.setAttribute('draggable', 'true');
+-    item.addEventListener('dragstart', (e) => {
+-      e.dataTransfer.setData('text/plain', item.dataset.left);
+-      item.classList.add('dragging');
+-    });
+-    item.addEventListener('dragend', () => {
+-      item.classList.remove('dragging');
+-    });
+-  });
+-
+-  rightItems.forEach(item => {
+-    item.addEventListener('dragover', (e) => {
+-      e.preventDefault();
+-      item.classList.add('drag-over');
+-    });
+-    item.addEventListener('dragleave', () => {
+-      item.classList.remove('drag-over');
+-    });
+-    item.addEventListener('drop', (e) => {
+-      e.preventDefault();
+-      item.classList.remove('drag-over');
+-      const leftVal = e.dataTransfer.getData('text/plain');
+-      if (quizEl.classList.contains('answered')) return;
+-
+-      Object.entries(pairs).forEach(([l, r]) => {
+-        if (l === leftVal || r === item.dataset.right) {
+-          delete pairs[l];
+-          quizEl.querySelector(`[data-left="${l}"]`)?.classList.remove('paired');
+-          quizEl.querySelector(`[data-right="${r}"]`)?.classList.remove('paired');
+-        }
+-      });
+-
+-      pairs[leftVal] = item.dataset.right;
+-      quizEl.querySelector(`[data-left="${leftVal}"]`).classList.add('paired');
+-      item.classList.add('paired');
+-
+-      const pairIndex = Object.keys(pairs).indexOf(leftVal);
+-      const colors = getCourseConfig().moduleColorAccents || ['#4338CA', '#D97706', '#059669', '#8B5CF6', '#0EA5E9'];
+-      const color = colors[pairIndex % colors.length];
+-      quizEl.querySelector(`[data-left="${leftVal}"]`).style.borderLeftColor = color;
+-      item.style.borderLeftColor = color;
+-
+-      if (checkBtn && Object.keys(pairs).length === leftItems.length) {
+-        checkBtn.disabled = false;
+-      }
+-    });
+-  });
+-
+-  if (checkBtn) {
+-    checkBtn.addEventListener('click', () => {
+-      const correctPairs = JSON.parse(quizEl.dataset.correctPairs || '{}');
+-      store.saveQuizAnswer(quizId, { pairs, checked: true });
+-      logEvent('quiz_answered', { ...evtCtx(), quiz_id: quizId, variant: 'drag-match' });
+-      showDragResult(quizEl, pairs, correctPairs);
+-    });
+-  }
+-}
+-
+-function showDragResult(quizEl, pairs, correctPairsStr) {
+-  const correctPairs = typeof correctPairsStr === 'string' ? JSON.parse(correctPairsStr) : correctPairsStr;
+-  quizEl.classList.add('answered');
+-
+-  Object.entries(pairs).forEach(([left, right]) => {
+-    const leftEl = quizEl.querySelector(`[data-left="${left}"]`);
+-    const rightEl = quizEl.querySelector(`[data-right="${right}"]`);
+-    if (correctPairs[left] === right) {
+-      leftEl?.classList.add('correct');
+-      rightEl?.classList.add('correct');
+-    } else {
+-      leftEl?.classList.add('incorrect');
+-      rightEl?.classList.add('incorrect');
+-    }
+-  });
+-
+-  const checkBtn = quizEl.querySelector('.quiz-check-btn');
+-  if (checkBtn) checkBtn.style.display = 'none';
+-  const explanation = quizEl.querySelector('.quiz-explanation');
+-  if (explanation) explanation.style.display = '';
+-}
++  const context = evtCtx();
++  initMatchQuiz(quizEl, {
++    saved,
++    isCurrent: () => quizEl.isConnected,
++    save: answer => store.saveQuizAnswer(quizId, answer),
++    onCheck: () => logEvent('quiz_answered', { ...context, quiz_id: quizId, variant: 'drag-match' })
++  });
++}
+--- a/styles/components-matching-release.css
++++ b/styles/components-matching-release.css
+@@ -675,78 +675,44 @@
+   color: var(--text-secondary);
+ }
+ 
+-/* Drag and Match */
+-.drag-match-container {
+-  display: grid;
+-  grid-template-columns: 1fr 1fr;
+-  gap: var(--space-4);
+-  margin-bottom: var(--space-4);
+-}
+-
++/* Matching connections: colours inherit the website palette. */
++.match-board { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1.3fr); isolation: isolate; margin-bottom: var(--space-4); }
++.match-column { display: grid; grid-auto-rows: 1fr; gap: var(--space-3); z-index: 1; }
++.match-right { grid-column: 3; }
++.match-card { position: relative; min-width: 0; min-height: 88px; padding: var(--space-3) var(--space-4); text-align: left; font: inherit; font-size: var(--text-sm); line-height: var(--leading-normal); color: var(--text-primary); background: var(--bg-secondary); border: 1px solid var(--border-secondary); border-radius: var(--radius-md); cursor: pointer; overflow-wrap: anywhere; }
++.match-card.is-linked { border-color: var(--match-color); }
++.match-card[aria-pressed="true"] { outline: 2px solid var(--color-indigo); outline-offset: 3px; background: color-mix(in srgb, var(--color-indigo) 10%, var(--bg-primary)); }
++.match-card:focus-visible { outline: 3px solid var(--text-primary); outline-offset: 3px; }
++.match-dot { position: absolute; top: calc(50% - 9px); width: 18px; height: 18px; border: 2px solid var(--match-color, var(--color-indigo)); border-radius: var(--radius-full); background: var(--bg-primary); touch-action: none; cursor: crosshair; }
++.match-dot::after { content: ''; position: absolute; inset: -13px; }
++.match-left .match-dot { right: -10px; }
++.match-right .match-dot { left: -10px; }
++.match-card.is-linked .match-dot { background: var(--match-color); }
++.match-pair-label { display: block; margin-bottom: var(--space-1); font-size: var(--text-xs); color: var(--text-secondary); }
++.match-card.is-linked .match-pair-label { color: var(--match-color); }
++.match-feedback { display: block; margin-top: var(--space-2); }
++.match-feedback:empty { display: none; }
++.match-feedback.is-incorrect { color: var(--color-error); font-weight: var(--weight-semibold); }
++.match-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
++.match-line { fill: none; stroke: var(--match-color); stroke-width: 2.5; }
++.match-line.is-pending { stroke-dasharray: 5 5; }
++.match-count, .match-status { font-size: var(--text-sm); color: var(--text-secondary); }
++.match-status { margin-top: var(--space-3); }
++.match-color-indigo { --match-color: var(--color-indigo); }
++.match-color-amber { --match-color: var(--color-amber); }
++.match-color-purple { --match-color: var(--color-purple); }
++.match-color-emerald { --match-color: var(--color-emerald); }
++.match-color-sky { --match-color: var(--color-sky); }
++.match-color-rose { --match-color: var(--color-rose); }
++[data-theme="dark"] .match-color-indigo { --match-color: var(--color-indigo-light); }
++[data-theme="dark"] .match-color-amber { --match-color: var(--color-amber-light); }
++[data-theme="dark"] .match-color-purple { --match-color: var(--color-purple-light); }
++[data-theme="dark"] .match-color-emerald { --match-color: var(--color-emerald-light); }
++[data-theme="dark"] .match-color-sky { --match-color: var(--color-sky-light); }
++[data-theme="dark"] .match-color-rose { --match-color: var(--color-rose-light); }
+ @media (max-width: 600px) {
+-  .drag-match-container {
+-    grid-template-columns: 1fr;
+-  }
+-}
+-
+-.drag-match-column {
+-  display: flex;
+-  flex-direction: column;
+-  gap: var(--space-2);
+-}
+-
+-.drag-left-item, .drag-right-item {
+-  padding: var(--space-3) var(--space-4);
+-  background: var(--bg-secondary);
+-  border: 2px solid var(--border-primary);
+-  border-left: 4px solid var(--border-primary);
+-  border-radius: var(--radius-md);
+-  font-size: var(--text-sm);
+-  cursor: pointer;
+-  transition: all var(--transition-fast);
+-  user-select: none;
+-}
+-
+-.drag-left-item {
+-  cursor: grab;
+-}
+-
+-.drag-left-item:active {
+-  cursor: grabbing;
+-}
+-
+-.drag-left-item:hover, .drag-right-item:hover {
+-  border-color: var(--color-indigo);
+-}
+-
+-.drag-left-item.selecting {
+-  border-color: var(--color-indigo);
+-  background: color-mix(in srgb, var(--color-indigo) 8%, transparent);
+-  box-shadow: var(--shadow-sm);
+-}
+-
+-.drag-left-item.paired, .drag-right-item.paired {
+-  background: color-mix(in srgb, var(--color-indigo) 5%, transparent);
+-}
+-
+-.drag-left-item.dragging {
+-  opacity: 0.5;
+-}
+-
+-.drag-right-item.drag-over {
+-  border-color: var(--color-indigo);
+-  background: color-mix(in srgb, var(--color-indigo) 10%, transparent);
+-  box-shadow: var(--shadow-sm);
+-}
+-
+-.drag-left-item.correct, .drag-right-item.correct {
+-  border-color: var(--color-success);
+-  background: var(--color-success-bg);
+-}
+-
+-.drag-left-item.incorrect, .drag-right-item.incorrect {
+-  border-color: var(--color-error);
+-  background: var(--color-error-bg);
++  .match-board { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1.2fr); }
++  .match-card { padding: var(--space-3) var(--space-2); }
+ }
+ 
+ /* ============================================
+--- /dev/null
++++ b/js-matching-release/components/match-quiz.js
+@@ -0,0 +1,131 @@
++// Shared by bundled, account-saved, and generated courses. Saved answers retain
++// the original { pairs: { [leftText]: rightText }, checked } storage contract.
++const palette = ['indigo', 'amber', 'purple', 'emerald', 'sky', 'rose'];
++const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
++
++export function renderMatchQuiz(section) {
++  const right = section.pairs.map((_, i) => i);
++  for (let i = right.length - 1; i > 0; i--) {
++    const j = Math.floor(Math.random() * (i + 1));
++    [right[i], right[j]] = [right[j], right[i]];
++  }
++  const card = (i, side) => `<button type="button" class="match-card" data-side="${side}" data-index="${i}" aria-pressed="false"><span class="match-pair-label"></span><span class="match-text">${escape(section.pairs[i][side])}</span><span class="match-dot" aria-hidden="true"></span><span class="match-feedback"></span></button>`;
++  return `<div class="quiz-block drag-match" data-quiz-id="${escape(section.id)}" data-variant="drag-match" data-match-pairs="${escape(JSON.stringify(section.pairs))}">
++    <div class="quiz-header"><span class="quiz-badge">Match</span></div>
++    <p class="quiz-question">${escape(section.question)}</p>
++    <p class="quiz-hint-text">Click a term, then its match. Or drag from a dot to draw a line. Select a card again to change its match.</p>
++    <div class="match-board"><svg class="match-lines" aria-hidden="true"></svg><div class="match-column match-left">${section.pairs.map((_, i) => card(i, 'left')).join('')}</div><div class="match-column match-right">${right.map(i => card(i, 'right')).join('')}</div></div>
++    <div class="quiz-actions"><button type="button" class="quiz-check-btn">Check Matches</button><span class="match-count"></span></div>
++    <p class="match-status" role="status" aria-live="polite">Choose a term to start.</p>
++    <div class="quiz-explanation" style="display:none"><div class="quiz-explanation-content">${section.explanation || 'Great job matching the concepts!'}</div></div>
++  </div>`;
++}
++
++export function initMatchQuiz(root, { saved, isCurrent = () => true, save = () => {}, onCheck = () => {} } = {}) {
++  const data = JSON.parse(root.dataset.matchPairs);
++  const board = root.querySelector('.match-board'), svg = root.querySelector('.match-lines');
++  const status = root.querySelector('.match-status'), cards = [...root.querySelectorAll('.match-card')];
++  const pairs = new Map(), used = new Set();
++  // Validate old progress against current content; repeated right labels use an
++  // unused occurrence, and grading accepts equivalent labels.
++  data.forEach((p, i) => {
++    const text = saved?.pairs?.[p.left];
++    const j = data.findIndex((other, k) => other.right === text && !used.has(k));
++    if (j >= 0) { pairs.set(i, j); used.add(j); }
++  });
++  let checked = !!saved?.checked && pairs.size === data.length;
++  let active = null, drag = null, suppressClick = false, disposed = false;
++  const cardFor = (side, i) => cards.find(c => c.dataset.side === side && Number(c.dataset.index) === i);
++  const correct = i => data[pairs.get(i)]?.right === data[i].right;
++  const announce = message => { status.textContent = message; };
++  const persist = () => {
++    if (!isCurrent()) return;
++    save({ pairs: Object.fromEntries([...pairs].map(([i,j]) => [data[i].left, data[j].right])), checked });
++  };
++  const point = (side, i) => {
++    const r = cardFor(side,i).querySelector('.match-dot').getBoundingClientRect(), b = board.getBoundingClientRect();
++    return { x:r.left+r.width/2-b.left, y:r.top+r.height/2-b.top };
++  };
++  const line = (a,b,i,pending=false) => {
++    const p = document.createElementNS('http://www.w3.org/2000/svg','path'), mid=(a.x+b.x)/2;
++    p.setAttribute('d',`M ${a.x} ${a.y} C ${mid} ${a.y}, ${mid} ${b.y}, ${b.x} ${b.y}`);
++    p.setAttribute('class', `match-line match-color-${palette[i % palette.length]}${pending ? ' is-pending' : ''}`);
++    svg.append(p);
++  };
++  function draw() {
++    if (disposed) return;
++    svg.replaceChildren();
++    pairs.forEach((j,i) => line(point('left',i),point('right',j),i));
++    if (drag) {
++      const b=board.getBoundingClientRect();
++      line(point(drag.side,drag.index),{x:drag.x-b.left,y:drag.y-b.top},drag.index,true);
++    }
++  }
++  function render() {
++    cards.forEach(card => {
++      const side=card.dataset.side, i=Number(card.dataset.index);
++      const left=side==='left'?i:[...pairs].find(([,j])=>j===i)?.[0];
++      const linked=left!==undefined && pairs.has(left);
++      const partner=linked?(side==='left'?data[pairs.get(left)].right:data[left].left):null;
++      card.className=`match-card${linked ? ' is-linked match-color-'+palette[left % palette.length] : ''}`;
++      card.setAttribute('aria-pressed',String(active?.side===side&&active.index===i));
++      card.setAttribute('aria-label',data[i][side]+(linked?`. Pair ${left+1}. Matched with ${partner}.`:'. Not matched.')+(checked&&linked?(correct(left)?' Correct.':' Try another match.'):''));
++      card.querySelector('.match-pair-label').textContent=linked?`Pair ${left+1}`:side==='left'?`Term ${i+1}`:'Description';
++      const feedback=card.querySelector('.match-feedback');
++      feedback.textContent=checked&&side==='left'?(correct(i)?'✓ Correct':'↻ Try another match'):'';
++      feedback.classList.toggle('is-incorrect',checked&&side==='left'&&!correct(i));
++    });
++    root.querySelector('.match-count').textContent=`${pairs.size} of ${data.length} connected`;
++    root.querySelector('.quiz-explanation').style.display=checked&&[...pairs.keys()].every(correct)?'':'none';
++    draw();
++  }
++  function result() {
++    const n=[...pairs.keys()].filter(correct).length;
++    announce(n===data.length?'All matches correct.':`${n} of ${data.length} correct. Select a term, then another description to change its match.`);
++  }
++  function connect(i,j) {
++    if (!isCurrent()) return;
++    const displaced=[...pairs].find(([k,v])=>k!==i&&v===j)?.[0];
++    if(displaced!==undefined)pairs.delete(displaced);
++    pairs.set(i,j);active=null;checked=false;render();persist();
++    announce(`${data[i].left} connected to ${data[j].right}.${displaced!==undefined?' '+data[displaced].left+' now needs a new match.':''}`);
++  }
++  const events = new AbortController();
++  cards.forEach(card => {
++    const side=card.dataset.side,index=Number(card.dataset.index),dot=card.querySelector('.match-dot');
++    card.addEventListener('click',e=>{
++      if((suppressClick&&e.detail!==0)||!isCurrent())return;
++      if(active&&active.side!==side){connect(side==='left'?index:active.index,side==='right'?index:active.index);return;}
++      active=active?.side===side&&active.index===index?null:{side,index};render();
++      announce(active?`Now choose the matching ${side==='left'?'description':'term'}.`:'Selection cleared.');
++    },{signal:events.signal});
++    dot.addEventListener('pointerdown',e=>{
++      if(!isCurrent()||e.button!==0)return;
++      e.preventDefault();root.dataset.engaged='true';active={side,index};drag={side,index,x:e.clientX,y:e.clientY};dot.setPointerCapture(e.pointerId);render();
++    },{signal:events.signal});
++    dot.addEventListener('pointermove',e=>{if(drag){drag.x=e.clientX;drag.y=e.clientY;draw();}},{signal:events.signal});
++    dot.addEventListener('pointerup',e=>{
++      if(!drag)return;
++      const origin=drag;drag=null;suppressClick=true;setTimeout(()=>suppressClick=false,0);
++      const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.match-card');
++      if(target&&root.contains(target)&&target.dataset.side!==origin.side){
++        connect(origin.side==='left'?origin.index:Number(target.dataset.index),origin.side==='right'?origin.index:Number(target.dataset.index));
++      }else{render();announce('Choose the matching card, or drag its dot to the other column.');}
++    },{signal:events.signal});
++    dot.addEventListener('pointercancel',()=>{drag=null;active=null;render();announce('Connection cancelled. Choose a term to continue.');},{signal:events.signal});
++  });
++  root.addEventListener('keydown',e=>{if(e.key==='Escape'){drag=null;active=null;render();announce('Selection cleared.');}},{signal:events.signal});
++  root.querySelector('.quiz-check-btn').addEventListener('click',()=>{
++    if(!isCurrent())return;
++    if(pairs.size<data.length){announce(`Connect all terms before checking. ${data.length-pairs.size} still need a match.`);return;}
++    checked=true;render();result();persist();onCheck();
++  },{signal:events.signal});
++  const resize=new ResizeObserver(draw);resize.observe(board);
++  // Navigation and account refresh both replace lesson DOM. Release observers
++  // and handlers when this particular quiz leaves the document.
++  const removal=new MutationObserver(()=>{if(!root.isConnected)cleanup();});
++  removal.observe(document.body,{childList:true,subtree:true});
++  function cleanup(){disposed=true;resize.disconnect();removal.disconnect();events.abort();}
++  render();if(checked)result();
++  return cleanup;
++}
