@@ -1,0 +1,271 @@
+{
+  "pool-safety-agreement": {
+    "id": "pool-safety-agreement",
+    "moduleId": "foundations",
+    "title": "The Pool Safety Agreement",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Swimming is one layer—not a force field",
+        "content": "<p>Drowning can happen quickly and quietly. The <a href=\"https://www.cdc.gov/drowning/prevention/summer-swim-safety.html\" target=\"_blank\" rel=\"noopener\">CDC</a> says an adult should give close, constant attention and remain within arm's reach of a young child in or near water, even when a lifeguard is present. Swim lessons can reduce risk, but the <a href=\"https://www.healthychildren.org/English/safety-prevention/at-play/Pages/Swim-Lessons.aspx\" target=\"_blank\" rel=\"noopener\">American Academy of Pediatrics</a> is explicit: lessons do not make a child “drown-proof.”</p><p>Your first teaching job is therefore predictable behavior: ask permission, enter together, keep one responsible adult watching, and leave the water together.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/01-arm-reach-supervision.png",
+        "alt": "Parent standing within arm's reach of a four-year-old at a pool wall while a lifeguard watches the area",
+        "caption": "The teaching triangle: a focused parent within reach, a stable wall, and a lifeguarded pool."
+      },
+      {
+        "type": "practice",
+        "id": "s01-safety-agreement",
+        "title": "Practice the same safe routine every visit",
+        "goal": "Your child asks permission, waits for your signal, identifies the wall and lifeguard, and exits with you.",
+        "durationMinutes": 15,
+        "equipment": ["Well-fitting swimsuit", "Towel and warm layer", "Drinking water"],
+        "setup": "Choose a lifeguarded shallow area beside steps or a ladder. Put your phone away and name the adult who is the water watcher.",
+        "steps": [
+          {
+            "title": "Ask, wait, enter together",
+            "instruction": "Stand outside the water. Have your child ask permission, wait for eye contact and a clear yes, then walk with you to the steps.",
+            "cue": "Ask first. Wait for my yes.",
+            "repetitions": "3 playful pretend entries, then 1 real entry",
+            "success": "She pauses without stepping toward the water until you answer."
+          },
+          {
+            "title": "Find the helpers and exits",
+            "instruction": "Together, point to the lifeguard, the nearest steps or ladder, and a reachable section of wall.",
+            "cue": "Show me your helper and your way out.",
+            "repetitions": "Find each landmark twice",
+            "success": "She can point to a lifeguard and a safe exit without guessing."
+          },
+          {
+            "title": "End together",
+            "instruction": "Use one consistent phrase, climb out together, count heads, collect toys, and move fully away from the pool edge.",
+            "cue": "Swim time is finished. We leave together.",
+            "repetitions": "1 calm exit",
+            "success": "She exits when asked and stays beside you away from the edge."
+          }
+        ],
+        "regressions": ["Practice the permission routine at home using a blue towel as the pretend pool.", "Keep the first visit on the deck if the environment feels overwhelming."],
+        "progressions": ["Let her lead the safety scan and explain each landmark.", "Repeat the routine at a different lifeguarded pool without changing the rules."],
+        "safetyStops": ["Stop if no lifeguard is on duty or the pool rules do not allow parent instruction.", "Do not enter if you cannot provide undistracted, within-reach supervision.", "Leave the water for thunder, pool closure, illness, shivering, or distress."],
+        "readinessChecks": [
+          { "id": "asks-permission", "label": "Asks and waits for permission before approaching the water" },
+          { "id": "finds-exit", "label": "Can identify the lifeguard, wall, and nearest safe exit" },
+          { "id": "exits-together", "label": "Leaves the water calmly with the parent" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "s01-supervision",
+        "question": "Your child has completed several swim sessions and a lifeguard is present. What supervision is appropriate?",
+        "options": [
+          { "id": "a", "text": "Watch from a pool chair" },
+          { "id": "b", "text": "Stay within arm's reach and give constant attention" },
+          { "id": "c", "text": "Check every few minutes" },
+          { "id": "d", "text": "Let the lifeguard supervise her" }
+        ],
+        "correct": "b",
+        "explanation": "Skills and lifeguards add protection but do not replace a focused adult within reach of a young child."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Parent prerequisite",
+        "content": "Lead in-water practice only if you can stand securely, support your child, and respond calmly. Take a recognized parent water-safety and CPR course, and use a certified swim instructor for skills you cannot demonstrate safely."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Permission, focused supervision, safe access, lifeguards, and swimming skill work together as layers.",
+          "A four-year-old remains within arm's reach throughout this course.",
+          "Advance by calm, repeatable behavior—not by finishing a timer."
+        ]
+      }
+    ],
+    "flashcards": [
+      { "front": "Does completing swim lessons make a child drown-proof?", "back": "No. Lessons are one protective layer; close, constant supervision and safe access remain essential." },
+      { "front": "What does the water watcher do?", "back": "Gives the child undistracted, close, constant attention and avoids phones, reading, alcohol, and other distractions." },
+      { "front": "What should a child do before approaching water?", "back": "Ask a responsible adult for permission and wait for a clear yes." }
+    ]
+  },
+  "bubbles-and-face": {
+    "id": "bubbles-and-face",
+    "moduleId": "foundations",
+    "title": "Bubbles and a Happy Face",
+    "estimatedMinutes": 17,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Exhale into the water; never hold on for a contest",
+        "content": "<p>Comfort with water on the face and controlled exhalation are foundations for floating and swimming. Keep every submersion voluntary. Model a relaxed breath in above water, then a gentle hum or bubbles with lips in the water. Never use breath-holding contests, repeated rapid breathing, or surprise dunking.</p><p>A successful repetition ends with your child calm and wanting another turn. If she wipes her face, coughs, grabs tightly, or says no, make the activity easier.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/02-bubbles-face.png",
+        "alt": "Parent and child at eye level blowing gentle bubbles at the pool surface",
+        "caption": "Start with lips only, then let the child choose when to add nose and eyes."
+      },
+      {
+        "type": "practice",
+        "id": "s02-bubbles",
+        "title": "Bubble ladder",
+        "goal": "Your child calmly exhales with lips, then nose and eyes in the water by her own choice.",
+        "durationMinutes": 15,
+        "equipment": ["Floating toy or ping-pong ball", "Cup for gentle pouring", "Pool steps or shallow ledge"],
+        "setup": "Face each other on a stable step. Keep one hand ready at her torso and make the first goal simply touching lips to water.",
+        "steps": [
+          {
+            "title": "Move the toy with bubbles",
+            "instruction": "Model blowing across the surface, then with lips touching the water. Take turns moving a floating toy.",
+            "cue": "Smell the flower, hum into the water.",
+            "repetitions": "4–6 relaxed turns",
+            "success": "A visible stream of bubbles appears without a hurried inhale."
+          },
+          {
+            "title": "Choose the next rung",
+            "instruction": "Offer chin, lips and nose, or eyes under water as choices. Accept the easiest choice and never push her head down.",
+            "cue": "You choose: chin, nose, or eyes.",
+            "repetitions": "3 successful choices",
+            "success": "She initiates the movement and resurfaces calm."
+          },
+          {
+            "title": "Finish with an easy win",
+            "instruction": "Return to the easiest bubble she enjoyed, celebrate calm control, and take a normal breathing break.",
+            "cue": "One favorite bubble, then a rest.",
+            "repetitions": "1–2 easy turns",
+            "success": "Breathing returns to normal immediately and she remains relaxed."
+          }
+        ],
+        "regressions": ["Blow a cotton ball across a table before entering the pool.", "Pour water over shoulders and the back of the head while keeping the face dry."],
+        "progressions": ["Retrieve a toy from a very shallow step with eyes open.", "Exhale continuously during a two-second supported glide."],
+        "safetyStops": ["Stop for repeated coughing, gasping, breathing difficulty, panic, or refusal.", "Never force the face underwater or block access to the surface.", "Do not practice rapid breathing or prolonged underwater breath-holding."],
+        "readinessChecks": [
+          { "id": "lip-bubbles", "label": "Blows a steady stream of bubbles with lips in the water" },
+          { "id": "chosen-submersion", "label": "Chooses to submerge nose and eyes without being pushed" },
+          { "id": "calm-recovery", "label": "Returns to normal breathing calmly after each attempt" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "s02-force",
+        "statement": "A quick surprise dunk can help a water-happy child get used to submersion faster.",
+        "correct": false,
+        "explanation": "Submersion should be voluntary and predictable. Surprise dunking can create fear and teaches neither breath control nor safe decision-making."
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Use choices without pressure",
+        "content": "Offer two safe options—“lips or nose?”—and treat either as success. Control is especially powerful for a preschool learner."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Breath in above water; gently exhale in the water.",
+          "The child chooses the depth and timing of every submersion.",
+          "Calm recovery matters more than how deep or long she goes."
+        ]
+      }
+    ],
+    "flashcards": [
+      { "front": "What is the basic breathing pattern for early swimming?", "back": "Breathe in above water and gently, continuously exhale into the water." },
+      { "front": "Who initiates a preschooler's submersion?", "back": "The child. The parent offers predictable choices and never pushes or surprises." },
+      { "front": "What is a good success signal after bubbles?", "back": "The child resurfaces calm, returns to normal breathing, and is comfortable continuing." }
+    ]
+  },
+  "enter-exit-and-wall": {
+    "id": "enter-exit-and-wall",
+    "moduleId": "foundations",
+    "title": "Enter, Exit, and Hold the Wall",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The wall is home base",
+        "content": "<p>Safe entry and exit are core aquatic skills. Begin with steps or a seated swivel entry—never a dive. Immediately connect every entry to a wall hold, sideways movement along the wall, and a practiced exit.</p><p>The goal is not a dramatic jump. It is orientation: after entering, your child knows where support is and how to leave the water.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/03-entry-exit-wall.png",
+        "alt": "Three-panel illustration of a child using pool steps, holding the wall, and climbing out with elbows and knee",
+        "caption": "Enter predictably, establish a secure wall hold, then practice an independent exit."
+      },
+      {
+        "type": "practice",
+        "id": "s03-entry-exit",
+        "title": "Wall is home",
+        "goal": "Your child enters safely, secures two hands on the wall, moves along it, and climbs out with minimal help.",
+        "durationMinutes": 18,
+        "equipment": ["Pool steps or low edge", "One floating target toy"],
+        "setup": "Choose a clear wall section near a shallow exit. You stand in the water facing your child, within reach and never directly underneath her feet.",
+        "steps": [
+          {
+            "title": "Seated swivel entry",
+            "instruction": "Sit at the edge, place both hands to one side, turn onto the tummy, and lower into your waiting support before taking the wall.",
+            "cue": "Hands, turn, tummy, wall.",
+            "repetitions": "3 entries",
+            "success": "She enters without jumping forward and immediately reaches for the wall."
+          },
+          {
+            "title": "Monkey walk",
+            "instruction": "With both hands on the edge, move sideways toward a toy while you shadow her torso without lifting.",
+            "cue": "Hand, hand—wall is home.",
+            "repetitions": "Travel 1–2 metres each direction",
+            "success": "She maintains a two-hand hold and moves without panic."
+          },
+          {
+            "title": "Elbow, elbow, tummy, knee",
+            "instruction": "Help her press both elbows onto the deck, bring her tummy to the edge, then swing one knee up and crawl away from the edge.",
+            "cue": "Elbow, elbow, tummy, knee.",
+            "repetitions": "3 exits with decreasing help",
+            "success": "She completes the sequence without you pulling her by the arms."
+          }
+        ],
+        "regressions": ["Use steps for both entry and exit.", "Support at the hips during the exit while she performs the arm and knee sequence."],
+        "progressions": ["Start one arm's length from the wall and make a supported reach to it.", "Move along the wall to the nearest steps before exiting."],
+        "safetyStops": ["Do not jump or dive into shallow, crowded, or unclear water.", "Stop if hands are slipping, the wall is too high, or the exit area is obstructed.", "Keep your body within immediate reach throughout every entry."],
+        "readinessChecks": [
+          { "id": "safe-entry", "label": "Uses a controlled step or seated swivel entry" },
+          { "id": "two-hand-wall", "label": "Takes and maintains a secure two-hand wall hold" },
+          { "id": "independent-exit", "label": "Uses elbows, tummy, and knee to climb out" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "s03-sequence",
+        "question": "Match each wall skill to its purpose.",
+        "pairs": [
+          { "left": "Seated swivel", "right": "Controlled entry without a forward leap" },
+          { "left": "Two-hand wall hold", "right": "Stable home base at the pool edge" },
+          { "left": "Monkey walk", "right": "Move toward a safer exit while holding support" },
+          { "left": "Elbow, elbow, tummy, knee", "right": "Climb out without being pulled by the arms" }
+        ],
+        "explanation": "Every part of the sequence helps the child orient to support and leave the water safely."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "No diving in this course",
+        "content": "A four-year-old practicing these sessions enters by steps, a seated swivel, or a carefully supported feet-first jump only in a pool area where the lifeguard and posted rules allow it."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Connect every entry to a wall hold and every session to a practiced exit.",
+          "Never pull a child out by the hands or arms.",
+          "The wall should become an automatic place of support."
+        ]
+      }
+    ],
+    "flashcards": [
+      { "front": "What is “home base” for a beginner swimmer?", "back": "A secure section of pool wall or steps that the child can hold and use to exit." },
+      { "front": "What is the exit cue?", "back": "Elbow, elbow, tummy, knee—press up, bring the tummy to the edge, then swing a knee onto the deck." },
+      { "front": "Why practice moving sideways along the wall?", "back": "It teaches the child to stay connected to support while moving toward steps or another safe exit." }
+    ]
+  }
+}

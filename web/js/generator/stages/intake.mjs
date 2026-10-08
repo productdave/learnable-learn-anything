@@ -4,8 +4,10 @@
 // that decides scope, module breakdown, and topic titles. Single Haiku call,
 // forced JSON output via tool use.
 
-import { CourseBriefSchema, QUIZ_VARIANTS } from '../schema.mjs';
+import { courseBriefSchemaFor, QUIZ_VARIANTS } from '../schema.mjs';
+import { componentPolicy, retainComponentChoices } from '../component-policy.mjs';
 import { agentSystemLines } from '../agents.mjs';
+import { modelForTask } from '../../../api/_lib/ai-models.mjs';
 
 const TOOL_NAME = 'submit_course_brief';
 
@@ -126,6 +128,13 @@ QUIZ PLANNING per topic — this is critical:
 Submit your answer by calling the submit_course_brief tool. Do not write a long preamble.`;
 
 export async function runIntake(client, userBrief, opts = {}) {
+  const policy = componentPolicy(userBrief);
+  const tool = structuredClone(briefTool);
+  if (!policy.quizzes) {
+    const plan = tool.input_schema.properties.modules.items.properties.topics.items.properties.quiz_plan;
+    plan.minItems = 0; plan.maxItems = 0; plan.description = 'Quizzes are not selected. Return an empty array.';
+  }
+  const system = policy.quizzes ? SYSTEM : SYSTEM.slice(0, SYSTEM.indexOf('QUIZ PLANNING')) + '\nQuizzes are not selected. Every topic must have quiz_plan: []. Do not design quizzes or assessment activities. Submit the outline using the brief tool.';
   const urls = (userBrief.source_urls || []).filter(Boolean);
   const pdfs = (opts.pdfs || userBrief.pdfs || []).filter(p => p && p.base64);
   const extracted = (userBrief.extracted_urls || []).filter(e => e && e.textContent);
@@ -157,9 +166,17 @@ export async function runIntake(client, userBrief, opts = {}) {
 Design a course based on this learner request:
 
 Topic: ${userBrief.topic || '(derive from source material below)'}
+Audience: ${userBrief.audience || '(unspecified)'}
+Real-world constraints: ${userBrief.context || '(unspecified)'}
+Learning approach: ${userBrief.learning_approach || '(unspecified)'}
 Goal: ${userBrief.goal || '(unspecified)'}
 Starting point: ${userBrief.starting_point || '(unspecified)'}
 Depth preference: ${userBrief.depth || 'Solid foundation'}
+Course experience preference: ${policy.explicit
+  ? `Selected components: ${policy.components.join(', ')}. Quizzes ${policy.quizzes ? 'included' : 'not included'}; flashcards ${policy.flashcards ? 'included' : 'not included'}. Practice activities ${policy.practice ? 'included: plan an achievable application task in every lesson' : 'not included'}; checklists ${policy.checklists ? 'included: plan useful preparation or review checks in every lesson' : 'not included'}. Do not add unselected tools.`
+  : userBrief.experience === 'hands_on_interactive'
+  ? 'Hands-on interactive — every practical topic should be designed around doing, with a structured practice checklist, observable readiness checks, purposeful instructional visuals when available, and varied quizzes.'
+  : 'Standard — lessons, varied quizzes, and flashcards.'}
 Time budget: ${userBrief.time_budget || '(unspecified)'}
 ${sourcesBlock}
 Decide the right scope (single_module / mini_course / full_course), break the subject into modules, and propose 4-6 topic titles per module. Submit via the tool.`;
@@ -175,13 +192,14 @@ Decide the right scope (single_module / mini_course / full_course), break the su
   ];
 
   const resp = await client.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
+    model: opts.model || modelForTask('curriculum'),
     max_tokens: 4096,
-    system: SYSTEM,
-    tools: [briefTool],
+    system,
+    tools: [tool],
     tool_choice: { type: 'tool', name: TOOL_NAME },
     messages: [{ role: 'user', content }]
   });
+  opts.onUsage?.(resp.usage, { task: 'curriculum' });
 
   const toolUse = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
   if (!toolUse) throw new Error('Stage 1: model did not call the brief tool');
@@ -193,18 +211,26 @@ Decide the right scope (single_module / mini_course / full_course), break the su
   if (raw?.modules) {
     for (const mod of raw.modules) {
       for (const topic of mod.topics || []) {
-        topic.quiz_plan = normaliseQuizPlan(topic.quiz_plan);
+        topic.quiz_plan = policy.quizzes ? normaliseQuizPlan(topic.quiz_plan) : [];
       }
     }
   }
 
-  const parsed = CourseBriefSchema.parse(raw);
+  const parsed = courseBriefSchemaFor(userBrief).parse(raw);
   // Carry the learner-provided source material through for later stages
   // (Zod's strip behaviour drops unknown keys, so re-attach after parse).
   if (userBrief.source_text) parsed.source_text = userBrief.source_text;
   if (userBrief.source_urls && userBrief.source_urls.length) parsed.source_urls = userBrief.source_urls;
   if (extracted.length) parsed.extracted_urls = extracted;
-  return parsed;
+  // Constraints belong to every request, not only account-backed setup records.
+  const setupContext = Object.fromEntries(
+    ['audience', 'goal', 'starting_point', 'context', 'learning_approach', 'depth', 'time_budget']
+      .filter(key => typeof userBrief[key] === 'string' && userBrief[key].trim())
+      .map(key => [key, userBrief[key]])
+  );
+  if (Object.keys(setupContext).length) parsed.setup_context = setupContext;
+  parsed.experience = userBrief.experience || 'standard';
+  return retainComponentChoices(parsed, userBrief);
 }
 
 // Default priority order for padding short or empty quiz_plans.

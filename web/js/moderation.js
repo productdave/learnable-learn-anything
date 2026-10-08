@@ -1,0 +1,67 @@
+import {getUser,onUserChange,openAccount} from './auth.js?v=33';
+import {escapeHome as esc} from './home-model.js?v=7';
+import {createModerationClient} from './moderation-client.js?v=3';
+import {publicPreviewSectionHTML} from './public-course-preview.js?v=7';
+import {mountSharedImages} from './shared-course-images.js?v=3';
+
+export const REPORTS_URL='?moderation=reports';
+const reasons={unsafe:'Unsafe instruction',privacy:'Privacy concern',rights:'Content rights',misleading:'Misleading content',other:'Other concern'};
+const actionLabels={dismiss:'Close without removing',remove:'Remove from Community',restore:'Allow publishing again'};
+const time=value=>new Date(value).toLocaleString();
+
+export function mountModeration(host,{reportId='',client=createModerationClient(),getIdentity=getUser,watchIdentity=onUserChange}={}) {
+  const owner=getIdentity()?.id,events=new AbortController();let disposed=false,ticket=0,busy=false,error='',notice='',state=null,reports=[],cursor=null,filter='open',note='',confirm=null,dialog=null,lastDecision=null,retryAppend=false,disposeImages=()=>{};
+  const valid=()=>!disposed&&getIdentity()?.id===owner;
+  const unwatch=watchIdentity(()=>{if(!disposed&&!valid()){state=null;reports=[];note='';closeConfirm();disposeImages();host.innerHTML='<div class="home-empty"><h1>Account changed</h1><p>Reopen report review with an assigned moderator account.</p></div>';}});
+  function closeConfirm(){dialog?.close();dialog?.remove();dialog=null;confirm=null;}
+  function showConfirm(action) {
+    if(busy||!state?.publication)return;
+    note=host.querySelector('[data-decision-note]')?.value||note;
+    if(note.trim().length<10){error='Write a decision note of 10–2,000 characters first.';paint();host.querySelector('[data-decision-note]')?.focus();return;}
+    confirm=action;dialog=document.createElement('dialog');dialog.className='course-editor moderation-confirm';dialog.setAttribute('aria-labelledby','moderation-confirm-title');
+    dialog.innerHTML=`<header><h2 id="moderation-confirm-title">${esc(actionLabels[action])}?</h2></header><p><strong>${esc(state.publication.title||state.report.evidence?.title||'Reported course')}</strong></p><p>${action==='remove'?'This stops future public course and image access and restricts republishing. The creator’s private course remains saved. Copies already downloaded cannot be recalled.':action==='restore'?'This lifts the publishing restriction but keeps the course unpublished. The creator must review and publish it again.':'This closes only this report. The public course is unchanged. This is not an accuracy or safety certification.'}</p><p>Your note is recorded in the moderators-only audit. Leaving after confirmation does not cancel a submitted decision.</p><p data-confirm-error role="alert"></p><footer class="moderation-actions"><button type="button" data-confirm-cancel>Cancel</button><button type="button" class="home-button" data-confirm-action>Confirm ${action==='remove'?'removal':action==='restore'?'permission change':'close'}</button></footer>`;
+    dialog.addEventListener('cancel',e=>{e.preventDefault();if(!busy)closeConfirm();});
+    dialog.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const buttons=[...dialog.querySelectorAll('button:not([disabled])')];if(!buttons.length){e.preventDefault();return;}const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+    dialog.querySelector('[data-confirm-cancel]').onclick=()=>{if(!busy){closeConfirm();host.querySelector('[data-decision="'+action+'"]')?.focus();}};
+    dialog.querySelector('[data-confirm-action]').onclick=decide;document.body.append(dialog);dialog.showModal();dialog.querySelector('[data-confirm-cancel]').focus();
+  }
+  async function decide() {
+    if(busy||!valid()||!confirm)return;
+    const body={reportId,action:confirm,revision:state.report.revision,version:state.publication.version,note:note.trim(),confirm:true};
+    const same=lastDecision&&JSON.stringify({...lastDecision,operationId:undefined})===JSON.stringify(body);
+    lastDecision={...body,operationId:same?lastDecision.operationId:crypto.randomUUID()};
+    busy=true;dialog.querySelectorAll('button').forEach(b=>b.disabled=true);dialog.querySelector('[data-confirm-error]').textContent='Recording decision…';
+    try{const result=await client.decide(lastDecision);if(!valid())return;const action=confirm;closeConfirm();note='';state=null;lastDecision=null;notice=result.replayed?'This decision was already recorded. Showing current case status.':action==='remove'?'Public access removed. The private course was not changed.':action==='restore'?'Publishing permission restored. The course is still unpublished.':'Report closed without changing public access.';busy=false;await load();host.querySelector('[data-review-message]')?.focus();}
+    catch(e){if(!valid())return;if(['auth','forbidden'].includes(e.code)){closeConfirm();state=null;reports=[];note='';error=e.message;busy=false;paint();return;}if(e.code==='conflict'){closeConfirm();error=e.message;lastDecision=null;busy=false;paint();return;}dialog.querySelector('[data-confirm-error]').textContent=e.message;dialog.querySelectorAll('button').forEach(b=>b.disabled=false);dialog.querySelector('[data-confirm-action]').textContent='Retry same decision';}
+    finally{if(valid())busy=false;}
+  }
+  function paint() {
+    if(!valid())return;disposeImages();
+    host.innerHTML=`<div class="home-experience moderation-workspace"><a class="home-back" href="${reportId?REPORTS_URL:'/'}">← ${reportId?'Reports':'Home'}</a><header class="moderation-heading"><div><span class="home-eyebrow">Assigned moderators only</span><h1>${reportId?'Review report':'Course reports'}</h1><p>Review public evidence before deciding. A report is not proof of a violation.</p></div><button type="button" class="home-button home-button--secondary" data-review-refresh ${busy?'disabled':''}>Refresh</button></header>${busy?'<p role="status">Loading report review…</p>':''}${notice?`<p class="home-notice" role="status" tabindex="-1" data-review-message>${esc(notice)}</p>`:''}${error?`<div class="home-notice home-notice--warning" role="alert"><p>${esc(error)}</p><button type="button" class="home-button home-button--secondary" data-review-refresh ${busy?'disabled':''}>Try again</button>${!owner?'<button type="button" class="home-button" data-review-account>Account</button>':''}</div>`:''}<div data-review-body></div></div>`;
+    const body=host.querySelector('[data-review-body]');
+    if(reportId){
+      if(!state)return;
+      const r=state.report,p=state.publication,evidence=r.evidence;
+      body.innerHTML=`<section class="moderation-card"><span class="home-status">${r.status==='open'?'Open report':'Reviewed report'}</span><h2>${esc(evidence?.title||p?.title||'Course no longer available')}</h2><p><strong>${esc(reasons[r.reason]||'Reported concern')}</strong> · Received ${esc(time(r.created_at))}</p><p class="moderation-report">${esc(r.detail)}</p><p>${r.reported_version?`Reported public version ${r.reported_version}.`:'Reported version unknown (legacy report).'} ${p?`Current publication version ${p.version} · ${p.moderation_removed?'Public sharing restricted':p.status==='published'?'Published':'Unpublished'}.`:'Publication no longer exists.'}</p>${p&&r.reported_version&&p.version!==r.reported_version?'<p class="home-notice">The publication changed after this report. The evidence below is the reported version, not the current version.</p>':''}${p?.status==='published'?`<a class="home-button home-button--secondary" href="?course=public-${esc(p.id)}" target="_blank" rel="noopener">Open current public course ↗</a>`:''}</section>
+      <details class="moderation-card public-preview-lesson" data-review-evidence><summary>Review captured public course</summary>${evidence?`<p>Public byline: ${esc(evidence.publicAuthor?.displayName||'Not listed')}. Read-only evidence; no learning progress changes.</p>${evidence.modules.map(m=>`<details><summary>${esc(m.title)}</summary>${m.topics.map(t=>`<section><h3>${esc(t.title)}</h3>${t.sections.map(publicPreviewSectionHTML).join('')}${t.flashcards.length?`<details><summary>Flashcards and answers</summary>${t.flashcards.map(c=>`<p><strong>${esc(c.front)}</strong></p><p>${esc(c.back)}</p>`).join('')}</details>`:''}</section>`).join('')}</details>`).join('')}`:'<p>No captured evidence exists for this historical report. Review the current public version if available, and do not treat it as proof of the original version.</p>'}</details>
+      ${p?`<section class="moderation-card"><h2>Record a decision</h2><label class="editor-field"><span>Decision note (moderators only)</span><textarea data-decision-note rows="4" minlength="10" maxlength="2000" ${busy?'disabled':''}>${esc(note)}</textarea><small>10–2,000 characters. Avoid unnecessary personal details. Not saved until you confirm a decision.</small></label><div class="moderation-actions">${r.status==='open'?`<button type="button" class="home-button home-button--secondary" data-decision="dismiss" ${busy?'disabled':''}>Close without removing</button>${!p.moderation_removed?`<button type="button" class="home-button home-button--secondary moderation-danger" data-decision="remove" ${busy?'disabled':''}>Remove from Community</button>`:''}`:''}${p.moderation_removed?`<button type="button" class="home-button home-button--secondary" data-decision="restore" ${busy?'disabled':''}>Allow publishing again</button>`:''}</div>${r.status==='closed'&&!p.moderation_removed?'<p>This report is closed. No public-access action is pending.</p>':''}</section>`:''}
+      <section class="moderation-card"><h2>Decision history</h2>${state.audit.length?`<ol>${state.audit.map(a=>`<li><strong>${esc(actionLabels[a.action])}</strong> · ${esc(time(a.created_at))}<p class="moderation-report">${esc(a.note)}</p></li>`).join('')}</ol>`:'<p>No decisions recorded for this report.</p>'}</section>`;
+      if(r.status==='closed'&&!p?.moderation_removed)body.querySelector('[data-decision-note]')?.closest('section').remove();
+      const disclosure=body.querySelector('[data-review-evidence]');let imagesMounted=false;
+      disclosure.addEventListener('toggle',()=>{if(disclosure.open&&!imagesMounted){imagesMounted=true;disposeImages=mountSharedImages(disclosure,{loadImage:async id=>{try{return await client.image(reportId,id);}catch(e){if(['auth','forbidden'].includes(e.code)&&valid()){state=null;note='';error=e.message;paint();}throw e;}},isCurrent:valid});}});
+    }else{
+      body.innerHTML=`<label class="moderation-filter">Report status<select data-review-filter ${busy?'disabled':''}><option value="open" ${filter==='open'?'selected':''}>Open</option><option value="closed" ${filter==='closed'?'selected':''}>Reviewed</option></select></label><p role="status">${reports.length} reports shown${cursor?' · More available':''}</p><div class="moderation-list">${reports.map(r=>`<article class="moderation-card"><span class="home-status">${esc(reasons[r.reason]||'Concern')}</span><h2><a href="${REPORTS_URL}&amp;report=${esc(r.id)}">${esc(r.title||'Reported course (legacy evidence)')} →</a></h2><p>Received ${esc(time(r.created_at))}${r.reported_version?' · Public version '+r.reported_version:' · Version unknown'}</p><p class="moderation-report">${esc(r.detail)}</p><a class="home-button home-button--secondary" href="${REPORTS_URL}&amp;report=${esc(r.id)}">Review report</a></article>`).join('')}</div>${!busy&&!error&&!reports.length?'<div class="home-empty"><h2>No reports here</h2><p>No cases match this report status.</p></div>':''}${cursor?`<button type="button" class="home-button home-button--secondary" data-review-more ${busy?'disabled':''}>Load more reports</button>`:''}`;
+    }
+  }
+  async function load(append=false) {
+    if(!valid()||busy)return;retryAppend=append;const version=++ticket;busy=true;error='';paint();
+    try{const result=reportId?await client.detail(reportId):await client.list(filter,append?cursor:null);if(!valid()||version!==ticket)return;if(reportId)state=result;else{reports=append?[...reports,...result.reports.filter(r=>!reports.some(old=>old.id===r.id))]:result.reports;cursor=result.nextCursor;}}
+    catch(e){if(!valid()||version!==ticket)return;error=e.message;if(['auth','forbidden','disabled'].includes(e.code)){state=null;reports=[];cursor=null;note='';}}
+    finally{if(valid()&&version===ticket){busy=false;paint();}}
+  }
+  host.addEventListener('click',e=>{const refresh=e.target.closest('[data-review-refresh]');if(refresh)load(refresh.textContent==='Try again'?retryAppend:false);if(e.target.closest('[data-review-more]'))load(true);if(e.target.closest('[data-review-account]'))openAccount();const action=e.target.closest('[data-decision]')?.dataset.decision;if(action)showConfirm(action);},{signal:events.signal});
+  host.addEventListener('input',e=>{if(e.target.matches('[data-decision-note]'))note=e.target.value;},{signal:events.signal});
+  host.addEventListener('change',e=>{if(e.target.matches('[data-review-filter]')){filter=e.target.value;reports=[];cursor=null;load();}},{signal:events.signal});
+  document.title='Course reports | Learnable';paint();load();
+  return {dispose(){disposed=true;ticket++;events.abort();unwatch();closeConfirm();disposeImages();state=null;reports=[];note='';},refresh:load};
+}

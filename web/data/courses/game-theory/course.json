@@ -1,5 +1,9 @@
 {
   "id": "game-theory",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
   "schemaVersion": 1,
   "name": "Strategic Edge",
   "title": "Strategic Edge",

@@ -1,5 +1,5 @@
-import { getCourseConfig } from './course-loader.js';
-import { kickSync } from './sync.js?v=2';
+import { getCourseConfig } from './course-loader.js?v=8';
+import { kickSync } from './sync.js?v=27';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const API_URL = 'https://api.anthropic.com/v1/messages';
@@ -138,7 +138,7 @@ async function streamMessage(userContent) {
   }
 
   state.streaming = false;
-  if (inputEl) { inputEl.disabled = false; inputEl.focus(); }
+  if (inputEl) { inputEl.disabled = false; if (state.open) inputEl.focus(); }
   if (sendBtn) sendBtn.disabled = false;
 }
 
@@ -185,11 +185,14 @@ function showKeyPrompt() {
 
   const el = document.createElement('div');
   el.className = 'chat-key-prompt';
+  const keyHelp = document.body.dataset.experience === 'workspace'
+    ? 'Stored in this browser and synced to your account when signed in. Separate from your secure course-creation connection. Tutor replies use your Anthropic credits.'
+    : 'Saved to your account so the tutor and cloud course-generation agents can use it across devices.';
   el.innerHTML = `
-    <div class="chat-key-prompt-title">Anthropic API Key</div>
-    <p>Stored locally in your browser. Sent directly to Anthropic — never anywhere else.</p>
+    <div class="chat-key-prompt-title"><label for="chat-anthropic-key">Anthropic API Key</label></div>
+    <p id="chat-key-help">${keyHelp}</p>
     <div class="chat-key-row">
-      <input type="password" class="chat-key-input" placeholder="sk-ant-api03-..." spellcheck="false" autocomplete="off"/>
+      <input id="chat-anthropic-key" type="password" class="chat-key-input" aria-describedby="chat-key-help" placeholder="sk-ant-api03-..." spellcheck="false" autocomplete="off"/>
       <button class="chat-key-save">Save</button>
     </div>
     <a href="https://console.anthropic.com/" target="_blank" rel="noopener" class="chat-key-link">Get a key at console.anthropic.com</a>
@@ -212,7 +215,7 @@ function showKeyPrompt() {
     if (e.key === 'Enter') el.querySelector('.chat-key-save').click();
     input.classList.remove('error');
   });
-  setTimeout(() => input.focus(), 50);
+  setTimeout(() => { if (state.open && input.isConnected) input.focus(); }, 50);
 }
 
 function updateKeyBtn() {
@@ -230,6 +233,9 @@ function openPanel(context, topicTitle, moduleName) {
   state.messages = [];
   state.open = true;
 
+  panel.removeAttribute('inert');
+  panel.setAttribute('aria-hidden', 'false');
+  document.getElementById('chat-trigger')?.setAttribute('aria-expanded', 'true');
   panel.classList.add('open');
   renderMessages();
 
@@ -244,9 +250,16 @@ function openPanel(context, topicTitle, moduleName) {
   }
 }
 
-function closePanel() {
+export function closeChat({ restoreFocus = true } = {}) {
   state.open = false;
+  if (!panel) return;
+  const trigger = document.getElementById('chat-trigger');
+  // This is a nonmodal panel: restore only focus it owns, not background focus.
+  if (restoreFocus && panel.contains(document.activeElement)) trigger?.focus({ preventScroll: true });
   panel.classList.remove('open');
+  panel.setAttribute('inert', '');
+  panel.setAttribute('aria-hidden', 'true');
+  trigger?.setAttribute('aria-expanded', 'false');
 }
 
 function getTopicInfo() {
@@ -265,7 +278,9 @@ export function initChat() {
   inputEl = panel.querySelector('.chat-input');
   sendBtn = panel.querySelector('.chat-send-btn');
 
-  panel.querySelector('.chat-close-btn')?.addEventListener('click', closePanel);
+  document.getElementById('chat-trigger')?.setAttribute('aria-controls', panel.id);
+  closeChat({ restoreFocus: false });
+  panel.querySelector('.chat-close-btn')?.addEventListener('click', () => closeChat());
 
   panel.querySelector('.chat-new-btn')?.addEventListener('click', () => {
     state.messages = [];
@@ -277,7 +292,7 @@ export function initChat() {
   panel.querySelector('.chat-settings-btn')?.addEventListener('click', showKeyPrompt);
 
   document.getElementById('chat-trigger')?.addEventListener('click', () => {
-    if (state.open) { closePanel(); return; }
+    if (state.open) { closeChat(); return; }
     const info = getTopicInfo();
     openPanel('', info.topicTitle, info.moduleName);
   });
@@ -334,6 +349,6 @@ export function initChat() {
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && state.open) closePanel();
+    if (e.key === 'Escape' && state.open) closeChat();
   });
 }

@@ -1,7 +1,64 @@
 {
   "courses": [
     {
+      "id": "agentic-ai-dinner",
+      "title": "Agentic AI Foundations for Product Builders",
+      "subtitle": "Six modules · Build AI product judgment with illustrated lessons, practical labs, and a dinner-assistant prototype.",
+      "modules": 6,
+      "topics": 24,
+      "accentColor": "#0F766E",
+      "emoji": "🍜",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "multi-agent-workflow-systems",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
+      "title": "Multi-Agent Workflow Systems",
+      "subtitle": "Build intelligent agent teams that plan, execute, orchestrate, and swarm to automate complex business workflows",
+      "modules": 6,
+      "topics": 28,
+      "accentColor": "#4338CA",
+      "emoji": "🤖"
+    },
+    {
+      "id": "ai-product-evals-rubrics",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
+      "title": "Evals & Rubrics for AI PMs",
+      "subtitle": "Build rigorous evaluation frameworks for AI products and ace your PM interviews",
+      "modules": 3,
+      "topics": 12,
+      "accentColor": "#4338CA",
+      "emoji": "📊"
+    },
+    {
+      "id": "little-swimmer",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
+      "title": "Little Swimmer",
+      "subtitle": "A parent-led, safety-first pathway from happy splashing to calm short swims.",
+      "modules": 4,
+      "topics": 12,
+      "accentColor": "#0891B2",
+      "emoji": "🏊‍♀️"
+    },
+    {
       "id": "code-for-designers",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
       "title": "Code for Designers",
       "subtitle": "Learn programming fundamentals and build your first website or app with confidence",
       "modules": 3,
@@ -11,6 +68,10 @@
     },
     {
       "id": "ai-annotation-platform-pm",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
       "title": "AI Annotation Platform PM",
       "subtitle": "Walk into a director-level PM interview sounding like you built the annotation engine behind frontier AI models.",
       "modules": 7,
@@ -20,6 +81,10 @@
     },
     {
       "id": "pour-over-coffee",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
       "title": "Pour-Over Coffee Mastery",
       "subtitle": "Brew café-quality pour-over coffee at home using your V60 and gooseneck kettle.",
       "modules": 1,
@@ -29,6 +94,10 @@
     },
     {
       "id": "game-theory",
+      "publicAuthor": {
+        "displayName": "David Wang",
+        "avatarUrl": ""
+      },
       "title": "Strategic Edge",
       "subtitle": "Game theory for the decisions that actually matter.",
       "modules": 6,

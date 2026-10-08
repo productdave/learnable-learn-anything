@@ -1,0 +1,41 @@
+async page => {
+  const checks=[],out='output/playwright/hosted-account-auth-browser-C8aBw6';
+  const check=(ok,label)=>{if(!ok)throw Error(label);checks.push(label);};
+  await page.getByRole('heading',{name:'Review your course setup',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Retry account originals',exact:true}).click();
+  await page.getByText('The missing originals are still unavailable. Retry later or reattach your own copies.',{exact:true}).waitFor();
+  check(await page.getByRole('button',{name:'Retry account originals',exact:true}).isEnabled(),'Failed download retry remains actionable');
+  await page.getByRole('button',{name:'Retry account originals',exact:true}).scrollIntoViewIfNeeded();
+  await page.screenshot({path:out+'/file-download-failure-390.png'});
+  await page.getByRole('button',{name:'Create course →',exact:true}).click();
+  await page.getByRole('heading',{name:'Make it fit your real world',exact:true}).waitFor();
+  check(page.url().includes('step=context'),'Missing original sends Create back to Context instead of saving or generating');
+  await page.getByRole('button',{name:'Files 1',exact:true}).click();
+  const file=page.locator('.source-file').filter({hasText:'hosted-source-recovery.txt'});
+  const id=await file.getAttribute('data-source-id');
+  check(await file.getByText('Reattach needed',{exact:true}).isVisible(),'Filename and missing-file status survive failed download');
+  await file.scrollIntoViewIfNeeded();
+  await page.screenshot({path:out+'/file-reattach-needed-390.png'});
+  await file.getByRole('button',{name:'Reattach file',exact:true}).evaluate(button=>{
+    document.querySelector('[data-reattach-input]').click=()=>{};button.click();
+  });
+  await page.locator('[data-reattach-input]').setInputFiles('/Users/davidwang/Learnable/scripts/fixtures/hosted-source-recovery.txt');
+  await file.getByText('Attached',{exact:true}).waitFor();
+  check(await file.getAttribute('data-source-id')===id&&await page.locator('.source-file').count()===1,'Reattachment repairs the same source without creating a duplicate');
+  check(await page.getByRole('button',{name:'Retry account originals',exact:true}).isHidden(),'Missing-original warning clears after reattachment');
+  await file.scrollIntoViewIfNeeded();
+  check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Reattached file UI fits 390px');
+  await page.screenshot({path:out+'/file-reattached-390.png'});
+  await page.getByRole('button',{name:'Plain notes 1',exact:true}).click();
+  check(await page.getByRole('textbox',{name:'Notes, transcript or raw text',exact:true}).inputValue()==='Keep this exact raw text in the original browser. Compare two window-light photographs.','Download failure and reattachment preserve exact note text');
+  await page.getByRole('button',{name:'Links 1',exact:true}).click();
+  check(await page.getByRole('textbox',{name:'Website URL',exact:true}).inputValue()==='https://example.com/cross-browser-photography','Download failure and reattachment preserve exact link');
+  await page.getByRole('button',{name:'Review setup →',exact:true}).click();
+  await page.getByText('Your setup is complete',{exact:true}).waitFor();
+  check(await page.getByText('1 note · 1 link · 1 file',{exact:true}).isVisible(),'Review returns to complete with no missing or duplicate sources');
+  await page.unrouteAll({behavior:'wait'});
+  await page.getByRole('button',{name:'Create course →',exact:true}).click();
+  await page.getByText('Course generation isn’t enabled on this server yet. Your request is saved.',{exact:true}).waitFor();
+  check(true,'Explicit Create reconfirms the saved request without paid generation');
+  return {passed:true,checks,downloadFaultInjected:true,sourceReattachedByPicker:true,physicalDevice:false,emailSent:false};
+}

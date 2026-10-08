@@ -1,0 +1,707 @@
+{
+  "diagnose-before-adapting": {
+    "id": "diagnose-before-adapting",
+    "moduleId": "model-adaptation",
+    "title": "Choose the fix that matches the failure",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Do not train a model to memorize tonight’s menu",
+        "content": "<p>Your assistant writes too much, misses a newly added dish, and forgets the user’s current budget. Those are three different failures. A single “better model” decision can hide the actual cause.</p><p>Use <strong>prompting</strong> for task instructions and examples, <strong>retrieval</strong> for relevant external information, and explicit <strong>state</strong> for current user choices. Consider fine-tuning when a repeated behavior remains deficient after a sound baseline and you have suitable examples.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/adaptation-illustrated.png",
+        "alt": "Instructions, retrieval, and model adaptation are different tools for improving an assistant.",
+        "caption": "Choose the intervention that addresses the observed failure.",
+        "source_title": "Learnable · original illustration"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-diagnose-before-adapting-choice",
+        "question": "The assistant misses a menu item added today. What should you inspect first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The data source and retrieval freshness."
+          },
+          {
+            "id": "b",
+            "text": "The number of fine-tuning epochs."
+          },
+          {
+            "id": "c",
+            "text": "The color of the chat interface."
+          }
+        ],
+        "correct": "a",
+        "explanation": "A changing fact requires an up-to-date source and a retrieval path that finds it."
+      },
+      {
+        "type": "concept",
+        "title": "Separate changing facts from repeatable behavior",
+        "content": "<p>A daily price change belongs in a source of current data. A consistent output convention might be improved through instructions, examples, structured output, or eventually training. An incorrect total belongs in arithmetic code.</p><p>Fine-tuning changes learned behavior through examples; it does not create a live connection to a menu. Before investing, write down the failure frequency, the target behavior, the available data, and how you will measure improvement.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-diagnose-before-adapting-match",
+        "question": "Match the failure to the first intervention.",
+        "pairs": [
+          {
+            "left": "Current price is missing",
+            "right": "Refresh or connect the data source"
+          },
+          {
+            "left": "Budget arithmetic is wrong",
+            "right": "Fix deterministic calculation"
+          },
+          {
+            "left": "Answer format is inconsistent",
+            "right": "Clarify format instructions and validation"
+          }
+        ],
+        "explanation": "Pick a fix based on the component that failed, not the most sophisticated technique available."
+      },
+      {
+        "type": "concept",
+        "title": "Make an intervention memo",
+        "content": "<p>The Adaptation Lab presents specific failures. Choose an intervention and inspect the rationale, including why attractive alternatives miss the cause. This is decision practice, not a model benchmark.</p><p>Your memo should name a baseline, one change, an evaluation set, and a stop condition. For example: try two concise examples, then compare held-out requests. Escalate only if the measured shortfall remains important.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-diagnose-before-adapting-reason",
+        "question": "What evidence would justify investigating fine-tuning?",
+        "sample_answer": "A repeated, important behavior gap remains after a prompt and validation baseline, representative examples are available, and a held-out evaluation can measure whether training improves it.",
+        "key_points": [
+          "Establish a baseline",
+          "Have suitable data and a measurable gap"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-diagnose-before-adapting-practice",
+        "title": "Try it: Choose the fix that matches the failure",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Choose a scenario",
+            "instruction": "Open the Adaptation Lab and predict the best intervention before revealing feedback.",
+            "cue": "Diagnose the component",
+            "success": "Your choice identifies the cause of the failure."
+          },
+          {
+            "title": "Compare an alternative",
+            "instruction": "Explain why a second intervention would not solve the same problem.",
+            "cue": "Avoid technique shopping",
+            "success": "Your explanation refers to data or behavior."
+          },
+          {
+            "title": "Write the smallest experiment",
+            "instruction": "Specify one change and the cases used to judge it.",
+            "cue": "Baseline before escalation",
+            "success": "The experiment has a measurable result."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#adaptation\" target=\"_blank\" rel=\"noopener\"><strong>Adaptation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-diagnose-before-adapting-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "What evidence would justify investigating fine-tuning?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Diagnose the failing component before choosing a technique.",
+          "Keep changing facts in retrievable sources.",
+          "Require a measurable behavior gap before training."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is prompting suited to?",
+        "back": "Task instructions, examples, and response guidance."
+      },
+      {
+        "front": "What is retrieval suited to?",
+        "back": "Supplying relevant external information."
+      },
+      {
+        "front": "What is explicit state for?",
+        "back": "Preserving the application’s current facts and choices."
+      },
+      {
+        "front": "Does fine-tuning fetch live prices?",
+        "back": "No; current facts need a source connection."
+      },
+      {
+        "front": "What should precede adaptation?",
+        "back": "A measured baseline and a diagnosis of the failure."
+      }
+    ]
+  },
+  "prepare-training-examples": {
+    "id": "prepare-training-examples",
+    "moduleId": "model-adaptation",
+    "title": "Build examples that teach the intended behavior",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Examples teach both your intent and your mistakes",
+        "content": "<p>Suppose half your examples interpret “under $25” as item price and half as all-in cost. Training on both without a rule does not resolve the ambiguity; it teaches conflicting conventions. Define the desired behavior before collecting more data.</p><p>Each example needs an input, an expected output, and enough context to understand why the output is correct. Include corrections, unknowns, and edge cases rather than only perfect requests.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-prepare-training-examples-choice",
+        "question": "Two almost identical versions of one conversation are in training and test. What is the concern?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The test may overstate generalization because of leakage."
+          },
+          {
+            "id": "b",
+            "text": "The test is automatically more representative."
+          },
+          {
+            "id": "c",
+            "text": "The model must fail because duplicates are impossible."
+          }
+        ],
+        "correct": "a",
+        "explanation": "Related examples can make held-out results look stronger than performance on genuinely new situations."
+      },
+      {
+        "type": "concept",
+        "title": "Keep evaluation examples outside training",
+        "content": "<p>A <strong>training set</strong> teaches the behavior. A <strong>validation set</strong> helps choose settings. A final <strong>test set</strong> estimates performance on held-out examples. Near-duplicate conversations across these sets can create misleading confidence.</p><p>Split related examples together, such as variations of the same conversation. Remove unnecessary personal information and use authorized data. For this course, create fictional requests and keep your own final test cases out of prompt examples as well.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-prepare-training-examples-match",
+        "question": "Match each dataset to its role.",
+        "pairs": [
+          {
+            "left": "Training set",
+            "right": "Teach the behavior"
+          },
+          {
+            "left": "Validation set",
+            "right": "Compare development choices"
+          },
+          {
+            "left": "Final test set",
+            "right": "Assess held-out performance"
+          }
+        ],
+        "explanation": "Preserve a final set that was not repeatedly used to tune the system."
+      },
+      {
+        "type": "concept",
+        "title": "Review the label before blaming the model",
+        "content": "<p>Take “No meat, but fish is okay.” Labeling it vegetarian loses the exception. A reviewer should preserve what was actually said, or ask for clarification when the format cannot represent it.</p><p>Write three examples in your reflection, then have a second pass challenge them. Are the expected fields supported? Do they encode the budget basis? Do they distinguish unknown from none? Label quality is a product decision before it is a training input.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-prepare-training-examples-reason",
+        "question": "Write a useful edge-case training example for the dinner assistant.",
+        "sample_answer": "Input: Dinner for two, $20 each before fees. Expected: party size two, budget amount twenty, basis per person, and includes_fees false. Do not silently interpret the budget as twenty total.",
+        "key_points": [
+          "Preserve the budget basis",
+          "Use only supported values"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-prepare-training-examples-practice",
+        "title": "Try it: Build examples that teach the intended behavior",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Write three pairs",
+            "instruction": "Create a normal request, a correction, and a budget ambiguity with expected fields.",
+            "cue": "Show the intended behavior",
+            "success": "Each output is supported by its input."
+          },
+          {
+            "title": "Audit consistency",
+            "instruction": "Check whether unknowns and budget basis are handled the same way.",
+            "cue": "Labels are specifications",
+            "success": "You repair any contradictory examples."
+          },
+          {
+            "title": "Reserve a test case",
+            "instruction": "Write a fourth case and keep it out of your prompt examples.",
+            "cue": "Protect the test",
+            "success": "You can explain what is held out."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#adaptation\" target=\"_blank\" rel=\"noopener\"><strong>Adaptation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-prepare-training-examples-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Write a useful edge-case training example for the dinner assistant.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Treat labels as a behavioral specification.",
+          "Separate training and evaluation cases.",
+          "Include ambiguity and corrections, not just easy requests."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "Why can more examples hurt?",
+        "back": "More inconsistent labels can teach conflicting behavior."
+      },
+      {
+        "front": "What is data leakage?",
+        "back": "Information from evaluation cases influencing training or development unfairly."
+      },
+      {
+        "front": "Why group related conversations in one split?",
+        "back": "To reduce near-duplicate leakage across sets."
+      },
+      {
+        "front": "What belongs in an example?",
+        "back": "Input, expected output, and relevant context."
+      },
+      {
+        "front": "Why use fictional examples here?",
+        "back": "They let you practice without exposing unnecessary personal information."
+      }
+    ]
+  },
+  "understand-lora": {
+    "id": "understand-lora",
+    "moduleId": "model-adaptation",
+    "title": "Understand what LoRA and QLoRA change",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A small adjustment can be easier than rebuilding everything",
+        "content": "<p>Full fine-tuning updates model weights broadly. <strong>LoRA</strong> trains smaller adapter matrices while keeping the base weights frozen. Think of an adapter as a learned adjustment applied alongside the existing model, not a database of current restaurant facts.</p><p>This can reduce the trainable parameter count, but suitability still depends on the model, task, data, and resources. It is not a guarantee of higher quality. <a href=\"https://huggingface.co/docs/peft/developer_guides/lora\" target=\"_blank\" rel=\"noopener\">Hugging Face’s LoRA reference</a> describes the method and configuration.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-understand-lora-choice",
+        "question": "What does LoRA primarily change during training?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Small adapter parameters while base weights stay frozen."
+          },
+          {
+            "id": "b",
+            "text": "The live restaurant inventory."
+          },
+          {
+            "id": "c",
+            "text": "Only the application’s CSS."
+          }
+        ],
+        "correct": "a",
+        "explanation": "LoRA learns parameter-efficient adjustments; it does not supply live operational data."
+      },
+      {
+        "type": "concept",
+        "title": "QLoRA adds a memory-saving representation",
+        "content": "<p><strong>Quantization</strong> represents weights with fewer bits. QLoRA combines a quantized base model with trainable low-rank adapters to reduce memory requirements during adaptation. It does not eliminate compute needs or evaluation.</p><p>Keep three questions separate: what is trainable, how base weights are represented, and how the result performs. A smaller memory footprint and a better task score are different claims. See <a href=\"https://huggingface.co/docs/peft/developer_guides/quantization\" target=\"_blank\" rel=\"noopener\">the quantization guide</a>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-understand-lora-claim",
+        "statement": "Lower memory use from quantization guarantees better task quality.",
+        "correct": false,
+        "explanation": "Resource efficiency and task quality must be measured separately."
+      },
+      {
+        "type": "concept",
+        "title": "Decide whether an experiment is worth running",
+        "content": "<p>Our dinner prototype has no demonstrated training requirement yet. The exercise is to estimate the decision, not to download a large model blindly. Name the repeated behavior you want to improve and the examples needed to teach it.</p><p>In the Adaptation Lab, compare the recurring-format scenario with the stale-menu scenario. Only the former might lead toward fine-tuning after simpler baselines. Record quality, memory, latency, and maintenance as separate evaluation dimensions.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-understand-lora-reason",
+        "question": "Would you use QLoRA to fix a stale price? Why?",
+        "sample_answer": "No. I would repair the current data path. QLoRA adapts model behavior with a quantized base and adapters; it does not make a historical price current.",
+        "key_points": [
+          "Match technique to failure",
+          "Separate behavior from live facts"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-understand-lora-practice",
+        "title": "Try it: Understand what LoRA and QLoRA change",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Explain the parts",
+            "instruction": "Write base model, adapter, and quantization in your own words.",
+            "cue": "One role per part",
+            "success": "You do not describe adapters as a live database."
+          },
+          {
+            "title": "Choose a justified use",
+            "instruction": "Use the Adaptation Lab to compare a behavior gap with a stale fact.",
+            "cue": "Training has a purpose",
+            "success": "You select the relevant failure type."
+          },
+          {
+            "title": "Set an experiment gate",
+            "instruction": "Specify the quality gap and resource budget that would justify training.",
+            "cue": "Measure separate dimensions",
+            "success": "Your gate includes quality and cost."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#adaptation\" target=\"_blank\" rel=\"noopener\"><strong>Adaptation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-understand-lora-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Would you use QLoRA to fix a stale price? Why?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "LoRA changes a small set of learned parameters.",
+          "QLoRA uses quantization to reduce resource requirements.",
+          "Measure behavior and resource tradeoffs independently."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What does LoRA train?",
+        "back": "Low-rank adapter parameters with the base model frozen."
+      },
+      {
+        "front": "What does quantization reduce?",
+        "back": "The precision and storage requirements of weight representation."
+      },
+      {
+        "front": "What does QLoRA combine?",
+        "back": "A quantized base model and trainable low-rank adapters."
+      },
+      {
+        "front": "Does adaptation replace retrieval?",
+        "back": "No; external changing information still needs retrieval or tools."
+      },
+      {
+        "front": "What proves adaptation helped?",
+        "back": "Improved held-out task behavior within acceptable resource costs."
+      }
+    ]
+  },
+  "compare-local-models": {
+    "id": "compare-local-models",
+    "moduleId": "model-adaptation",
+    "title": "Compare a local model with your baseline",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Local execution changes the tradeoff",
+        "content": "<p>A local model can run on your own machine, but capacity, speed, and operational responsibilities depend on your hardware and the model. “Local” is a deployment choice, not a quality score. Check whether the full path stays local, including logs and optional cloud features.</p><p><strong>Ollama</strong> provides tooling to run models and an API. Its <a href=\"https://docs.ollama.com/quickstart\" target=\"_blank\" rel=\"noopener\">official quickstart</a> describes setup. Choose a model that fits your machine rather than treating a model name in a lesson as permanently current.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-compare-local-models-choice",
+        "question": "What makes a fair local-model comparison?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Different requests for each model and guessed latency."
+          },
+          {
+            "id": "b",
+            "text": "The same held-out cases with measured quality and timing."
+          },
+          {
+            "id": "c",
+            "text": "Choosing the largest download automatically."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A controlled comparison holds the task constant and records real outcomes."
+      },
+      {
+        "type": "concept",
+        "title": "Use the same cases and record actual measurements",
+        "content": "<p>The optional local-model runner in the lab bundle calls a local Ollama endpoint after you install and select a model. It sends one fictional dinner request and reports the actual elapsed time plus the response. It does not invent benchmark numbers or install software for you.</p><p>Run the same held-out requests with each candidate. Track field fidelity, invalid output, latency, and resource constraints. A fast response that changes the budget is not a successful optimization.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-compare-local-models-claim",
+        "statement": "A local deployment automatically proves that all application data stays on the device.",
+        "correct": false,
+        "explanation": "The surrounding application may still use remote services, logs, or optional cloud capabilities. Inspect the full data flow."
+      },
+      {
+        "type": "concept",
+        "title": "Keep the live-model extension optional and concrete",
+        "content": "<p>Download the lab bundle, follow LIVE-MODEL.md, and use the provided command with your installed model name. If you are not ready to install a model, complete the decision memo using the clearly labeled scenario lab instead. Do not report simulated outcomes as measured model results.</p><p>Your final memo names the chosen deployment path, evidence, and remaining gaps. A beginner can make a sound product decision before becoming a model-training specialist.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-compare-local-models-reason",
+        "question": "What would make you reject a faster model for this task?",
+        "sample_answer": "I would reject it if it loses budget or dietary constraints on the held-out cases, even if average latency is lower. I would also record malformed outputs and hardware limitations.",
+        "key_points": [
+          "Quality is a gate",
+          "Use measured comparable cases"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-compare-local-models-practice",
+        "title": "Try it: Compare a local model with your baseline",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Read the extension guide",
+            "instruction": "Open LIVE-MODEL.md from the lab bundle and identify prerequisites.",
+            "cue": "Understand before installing",
+            "success": "You know which service must be running locally."
+          },
+          {
+            "title": "Run or plan a controlled test",
+            "instruction": "Use the optional runner with an installed model, or document the exact cases and measurements you would collect.",
+            "cue": "Do not invent measurements",
+            "success": "Results are labeled measured or planned."
+          },
+          {
+            "title": "Write the model decision",
+            "instruction": "Compare quality, speed, privacy path, and maintenance in a short memo.",
+            "cue": "Explain the tradeoff",
+            "success": "Your recommendation names evidence and gaps."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#adaptation\" target=\"_blank\" rel=\"noopener\"><strong>Adaptation Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-compare-local-models-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "What would make you reject a faster model for this task?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Choose deployment based on evidence and constraints.",
+          "Compare candidates on the same requests.",
+          "Clearly label planned, simulated, and measured results."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What does local execution determine?",
+        "back": "Where inference runs, subject to the full application’s data flow."
+      },
+      {
+        "front": "What does Ollama provide?",
+        "back": "Tools and an API for running supported models."
+      },
+      {
+        "front": "What should stay constant in a comparison?",
+        "back": "The held-out requests and evaluation criteria."
+      },
+      {
+        "front": "Can simulated timing be reported as model latency?",
+        "back": "No; measure the actual model call."
+      },
+      {
+        "front": "What is a useful model decision?",
+        "back": "A choice justified by measured task quality and practical constraints."
+      }
+    ]
+  }
+}

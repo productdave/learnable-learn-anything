@@ -1,9 +1,11 @@
-import { store } from '../store.js';
+import { renderMatchQuiz } from './match-quiz.js?v=2';
+import { store } from '../store.js?v=5';
+const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 export function renderQuiz(section) {
   switch (section.variant) {
     case 'multiple-choice': return renderMultipleChoice(section);
-    case 'drag-match': return renderDragMatch(section);
+    case 'drag-match': return renderMatchQuiz(section);
     case 'true-false': return renderTrueFalse(section);
     case 'fill-in-blank': return renderFillInBlank(section);
     case 'short-answer': return renderShortAnswer(section);
@@ -13,11 +15,11 @@ export function renderQuiz(section) {
 
 function renderTrueFalse(section) {
   return `
-    <div class="quiz-block" data-quiz-id="${section.id}" data-variant="true-false" data-correct="${section.correct}">
+    <div class="quiz-block" data-quiz-id="${esc(section.id)}" data-variant="true-false" data-correct="${esc(section.correct)}">
       <div class="quiz-header">
         <span class="quiz-badge">True or False</span>
       </div>
-      <p class="quiz-question quiz-tf-statement">${section.statement}</p>
+      <p class="quiz-question quiz-tf-statement">${esc(section.statement)}</p>
       <div class="quiz-tf-options">
         <button class="quiz-tf-btn" data-option="true">
           <span class="quiz-tf-letter">T</span>
@@ -33,8 +35,10 @@ function renderTrueFalse(section) {
       <div class="quiz-actions">
         <button class="quiz-check-btn" disabled>Check Answer</button>
       </div>
-      <div class="quiz-explanation" style="display:none">
-        <div class="quiz-explanation-content">${section.explanation || ''}</div>
+      <div class="quiz-explanation" tabindex="-1" role="group" aria-label="Answer feedback" style="display:none">
+        <p class="quiz-result-message"></p>
+        <div class="quiz-explanation-content">${esc(section.explanation || '')}</div>
+        <button class="quiz-retry-btn" type="button" style="display:none">Try Again</button>
       </div>
     </div>`;
 }
@@ -46,43 +50,44 @@ function renderFillInBlank(section) {
   const after = parts.slice(1).join('___') || '';
 
   return `
-    <div class="quiz-block" data-quiz-id="${section.id}" data-variant="fill-in-blank"
-         data-acceptable='${JSON.stringify(section.acceptable_answers)}'>
+    <div class="quiz-block" data-quiz-id="${esc(section.id)}" data-variant="fill-in-blank"
+         data-acceptable='${esc(JSON.stringify(section.acceptable_answers))}'>
       <div class="quiz-header">
         <span class="quiz-badge">Fill in the Blank</span>
       </div>
       <p class="quiz-fib-sentence">
-        <span class="quiz-fib-before">${before}</span>
-        <input type="text" class="quiz-fib-input" placeholder="…" autocomplete="off" spellcheck="false"/>
-        <span class="quiz-fib-after">${after}</span>
+        <span class="quiz-fib-before">${esc(before)}</span>
+        <input type="text" class="quiz-fib-input" aria-label="${esc(`Fill in the blank: ${section.sentence.replace('___', '[blank]')}`)}" placeholder="…" autocomplete="off" spellcheck="false"/>
+        <span class="quiz-fib-after">${esc(after)}</span>
       </p>
       <div class="quiz-actions">
         <button class="quiz-check-btn" disabled>Check Answer</button>
       </div>
-      <div class="quiz-explanation" style="display:none">
+      <div class="quiz-explanation" tabindex="-1" role="group" aria-label="Answer feedback" style="display:none">
         <div class="quiz-fib-correct"></div>
-        <div class="quiz-explanation-content">${section.explanation || ''}</div>
+        <div class="quiz-explanation-content">${esc(section.explanation || '')}</div>
+        <button class="quiz-retry-btn" type="button" style="display:none">Try Again</button>
       </div>
     </div>`;
 }
 
 function renderShortAnswer(section) {
-  const keyPoints = (section.key_points || []).map(p => `<li>${p}</li>`).join('');
+  const keyPoints = (section.key_points || []).map(p => `<li>${esc(p)}</li>`).join('');
   return `
-    <div class="quiz-block" data-quiz-id="${section.id}" data-variant="short-answer">
+    <div class="quiz-block" data-quiz-id="${esc(section.id)}" data-variant="short-answer">
       <div class="quiz-header">
         <span class="quiz-badge">Open-Ended</span>
       </div>
-      <p class="quiz-question">${section.question}</p>
-      <textarea class="quiz-sa-input" rows="5" placeholder="Write your answer here. There's no single right answer — you'll compare against a sample."></textarea>
+      <p class="quiz-question">${esc(section.question)}</p>
+      <textarea class="quiz-sa-input" aria-label="${esc(section.question)}" rows="5" placeholder="Write your answer here. There's no single right answer — you'll compare against a sample."></textarea>
       <div class="quiz-actions">
         <button class="quiz-check-btn" disabled>Reveal Sample Answer</button>
       </div>
-      <div class="quiz-explanation quiz-sa-reveal" style="display:none">
+      <div class="quiz-explanation quiz-sa-reveal" tabindex="-1" role="group" aria-label="Sample answer and review points" style="display:none">
         <div class="quiz-sa-label">Sample answer</div>
-        <div class="quiz-sa-sample">${section.sample_answer || ''}</div>
+        <div class="quiz-sa-sample">${esc(section.sample_answer || '')}</div>
         ${keyPoints ? `<div class="quiz-sa-label">Did your answer cover these?</div><ul class="quiz-sa-keypoints">${keyPoints}</ul>` : ''}
-        ${section.explanation ? `<div class="quiz-explanation-content">${section.explanation}</div>` : ''}
+        ${section.explanation ? `<div class="quiz-explanation-content">${esc(section.explanation)}</div>` : ''}
       </div>
     </div>`;
 }
@@ -91,63 +96,27 @@ function renderMultipleChoice(section) {
   const saved = store.getQuizAnswer(section.id);
 
   return `
-    <div class="quiz-block" data-quiz-id="${section.id}" data-variant="multiple-choice" data-correct="${section.correct}">
+    <div class="quiz-block" data-quiz-id="${esc(section.id)}" data-variant="multiple-choice" data-correct="${esc(section.correct)}">
       <div class="quiz-header">
         <span class="quiz-badge">Quiz</span>
       </div>
-      <p class="quiz-question">${section.question}</p>
+      <p class="quiz-question">${esc(section.question)}</p>
       <div class="quiz-options">
         ${section.options.map(opt => `
-          <button class="quiz-option" data-option="${opt.id}">
-            <span class="quiz-option-letter">${opt.id.toUpperCase()}</span>
-            <span class="quiz-option-text">${opt.text}</span>
+          <button class="quiz-option" data-option="${esc(opt.id)}">
+            <span class="quiz-option-letter">${esc(opt.id.toUpperCase())}</span>
+            <span class="quiz-option-text">${esc(opt.text)}</span>
             <span class="quiz-option-icon"></span>
           </button>
         `).join('')}
       </div>
       <div class="quiz-actions">
         <button class="quiz-check-btn" disabled>Check Answer</button>
-        <button class="quiz-retry-btn" style="display:none" onclick="this.closest('.quiz-block').classList.remove('answered');this.closest('.quiz-block').querySelectorAll('.quiz-option').forEach(o=>{o.classList.remove('selected','correct','incorrect')});this.style.display='none';this.previousElementSibling.style.display='';this.previousElementSibling.disabled=true;this.closest('.quiz-block').querySelector('.quiz-explanation').style.display='none'">Try Again</button>
       </div>
-      <div class="quiz-explanation" style="display:none">
-        <div class="quiz-explanation-content">${section.explanation || ''}</div>
-      </div>
-    </div>`;
-}
-
-function renderDragMatch(section) {
-  const shuffledRight = [...section.pairs].sort(() => Math.random() - 0.5);
-  const correctPairs = {};
-  section.pairs.forEach(p => { correctPairs[p.left] = p.right; });
-
-  return `
-    <div class="quiz-block drag-match" data-quiz-id="${section.id}" data-variant="drag-match" data-correct-pairs='${JSON.stringify(correctPairs)}'>
-      <div class="quiz-header">
-        <span class="quiz-badge">Match</span>
-      </div>
-      <p class="quiz-question">${section.question}</p>
-      <p class="quiz-hint-text">Click a term on the left, then click its match on the right. Or drag and drop.</p>
-      <div class="drag-match-container">
-        <div class="drag-match-column">
-          ${section.pairs.map(p => `
-            <div class="drag-left-item" data-left="${p.left}" draggable="true">
-              ${p.left}
-            </div>
-          `).join('')}
-        </div>
-        <div class="drag-match-column">
-          ${shuffledRight.map(p => `
-            <div class="drag-right-item" data-right="${p.right}">
-              ${p.right}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      <div class="quiz-actions">
-        <button class="quiz-check-btn" disabled>Check Matches</button>
-      </div>
-      <div class="quiz-explanation" style="display:none">
-        <div class="quiz-explanation-content">${section.explanation || 'Great job matching the concepts!'}</div>
+      <div class="quiz-explanation" tabindex="-1" role="group" aria-label="Answer feedback" style="display:none">
+        <p class="quiz-result-message"></p>
+        <div class="quiz-explanation-content">${esc(section.explanation || '')}</div>
+        <button class="quiz-retry-btn" type="button" style="display:none">Try Again</button>
       </div>
     </div>`;
 }

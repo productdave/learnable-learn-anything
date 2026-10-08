@@ -1,5 +1,9 @@
 {
   "id": "ai-annotation-platform-pm",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
   "schemaVersion": 1,
   "name": "AI Annotation Platform Product Management",
   "title": "AI Annotation Platform Product Management",

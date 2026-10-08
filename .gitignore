@@ -1,6 +1,22 @@
 node_modules/
 .env
 .env.local
+.env.*.local
 output/
 *.log
 .DS_Store
+.gstack/
+.playwright-cli/
+
+# Local credentials, linked deployment metadata and generated/private material.
+.env.*
+!.env.example
+!.env.*.example
+.vercel/
+.supabase/
+supabase/.temp/
+supabase/.branches/
+tmp/
+customer feedback/
+# One-off encoded browser backup; not application source.
+/web/import-courses.js

@@ -1,0 +1,29 @@
+{
+  "id": "ai-product-evals-rubrics",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
+  "schemaVersion": 1,
+  "name": "Evals & Rubrics for AI PMs",
+  "title": "Evals & Rubrics for AI PMs",
+  "subtitle": "Build rigorous evaluation frameworks for AI products and ace your PM interviews",
+  "eyebrow": "Generated course",
+  "storageKeyPrefix": "ai-product-evals-rubrics",
+  "documentTitle": "Evals & Rubrics for AI PMs | Learnable",
+  "searchPlaceholder": "Search topics in Evals & Rubrics for AI PMs…",
+  "chatPlaceholder": "Ask about evals & rubrics for ai pms… (Enter to send)",
+  "chatAssistantName": "AI Learning Assistant",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question below.",
+  "chatSystemPrompt": "You are a learning assistant embedded in an interactive course called \"Evals & Rubrics for AI PMs\". The course is for: Product manager with AI/LLM knowledge who needs to master evals and rubrics to ship reliable AI products and succeed in interviews.. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "completionMessage": "great work building your knowledge",
+  "dashboardCTA": "Each module builds on the one before. Start with \"What Evals Are and Why They Matter\" and work your way through.",
+  "moduleColorAccents": [
+    "#4338CA",
+    "#D97706",
+    "#059669",
+    "#8B5CF6",
+    "#0EA5E9"
+  ]
+}

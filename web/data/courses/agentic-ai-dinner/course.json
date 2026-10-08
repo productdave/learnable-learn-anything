@@ -1,0 +1,32 @@
+{
+  "id": "agentic-ai-dinner",
+  "name": "Agentic AI Foundations for Product Builders",
+  "emoji": "🍜",
+  "title": "Agentic AI Foundations for Product Builders",
+  "eyebrow": "BUILD & UNDERSTAND · 6 MODULES",
+  "subtitle": "Build product judgment and a dinner-assistant prototype through short lessons, illustrated examples, quizzes, and hands-on labs.",
+  "dashboardCTA": "Start with Module 1 and build one capability at a time. Plan 4–6 hours per module, including practice and your saved check-ins.",
+  "documentTitle": "Agentic AI Foundations for Product Builders | Learnable",
+  "schemaVersion": 1,
+  "chatPlaceholder": "Ask about your dinner assistant…",
+  "chatWelcomeBody": "Ask about a concept, a quiz explanation, or a step in the guided build.",
+  "chatSystemPrompt": "You are a beginner-friendly tutor for Agentic AI Foundations for Product Builders. Teach one concept at a time and connect product decisions to the dinner-assistant project. Six modules cover foundations, retrieval, workflows, model adaptation, evaluation, and safety. Browser labs use fictional sample data and deterministic logic. The optional Ollama runner performs local-model extraction when configured. No live DoorDash order integration exists. Never claim a real order was placed. Ask learners to predict outcomes before explaining them.",
+  "storageKeyPrefix": "agentic-ai-dinner",
+  "chatAssistantName": "AI Learning Assistant",
+  "completionMessage": "you can now explain and demonstrate an agentic product workflow",
+  "searchPlaceholder": "Search dinner assistant lessons…",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "moduleColorAccents": [
+    "#0F766E",
+    "#2563EB",
+    "#7C3AED",
+    "#D97706",
+    "#DB2777",
+    "#059669"
+  ],
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
+  "visibility": "public"
+}

@@ -1,0 +1,272 @@
+{
+  "jump-turn-grab": {
+    "id": "jump-turn-grab",
+    "moduleId": "independent-sequences",
+    "title": "Jump, Surface, Turn, Grab",
+    "estimatedMinutes": 20,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A feet-first entry should end at support",
+        "content": "<p>The YMCA's Safety Around Water program uses a jump–push–turn–grab sequence to help children orient after an unexpected entry. In this course, practice only a controlled feet-first jump where pool rules allow it, the water is deep enough for feet-first entry, and you are already in the water within reach.</p><p>Begin with hands connected and shrink your help gradually. The target is the wall—not jumping farther.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/09-jump-turn-grab.png",
+        "alt": "Four-panel sequence of a child making a feet-first pool entry, surfacing, turning, and taking the wall while a parent stays beside her",
+        "caption": "The entry is only the beginning: surface, orient, and finish with two hands on support."
+      },
+      {
+        "type": "practice",
+        "id": "s10-jump-turn-grab",
+        "title": "Feet first, turn home",
+        "goal": "Your child makes an allowed feet-first entry, returns to the surface, turns, and takes a two-hand wall hold.",
+        "durationMinutes": 18,
+        "equipment": ["Pool section approved for feet-first entry", "Bright wall target"],
+        "setup": "Confirm posted rules and water depth with the lifeguard. You enter first and remain between the child and open water, within reach of the entry point.",
+        "steps": [
+          {
+            "title": "Sit, slide, turn",
+            "instruction": "Start with a seated entry. Maintain hand contact, help her surface, then cue an immediate turn back to the wall.",
+            "cue": "Up, turn, two hands.",
+            "repetitions": "3 seated sequences",
+            "success": "She begins turning toward the wall as soon as her face clears."
+          },
+          {
+            "title": "Supported feet-first jump",
+            "instruction": "If allowed and calm, hold both hands for a small feet-first jump. Guide upward support without pulling her toward you.",
+            "cue": "Feet first. Bubbles. Turn home.",
+            "repetitions": "3 jumps",
+            "success": "She surfaces, exhales, and orients without panic."
+          },
+          {
+            "title": "Lighten one connection",
+            "instruction": "Progress to one-hand support, then a shadowed jump only after several consistent sequences and with the wall immediately reachable.",
+            "cue": "I am beside you. Find the wall.",
+            "repetitions": "Only 1–2 attempts at the newest level",
+            "success": "She completes the same turn and grab as help decreases."
+          }
+        ],
+        "regressions": ["Return to the seated swivel entry.", "Keep two-hand contact through the entire sequence."],
+        "progressions": ["Begin a half-step farther from the wall only if the lifeguard approves and the child is consistent.", "After grabbing, monkey-walk to the nearest exit."],
+        "safetyStops": ["Do not practice where jumping is prohibited, water depth is uncertain, or the area is crowded.", "Never throw, drop, or surprise the child into water.", "Stop for delayed surfacing, coughing, fear, or failure to orient."],
+        "readinessChecks": [
+          { "id": "allowed-entry", "label": "Makes a controlled, feet-first entry only after permission" },
+          { "id": "surface-turn", "label": "Surfaces and begins turning toward the wall" },
+          { "id": "secure-grab", "label": "Finishes with a secure two-hand wall hold" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "s10-focus",
+        "question": "What is the main learning goal of jump–surface–turn–grab?",
+        "options": [
+          { "id": "a", "text": "Jump as far as possible" },
+          { "id": "b", "text": "Stay underwater longer" },
+          { "id": "c", "text": "Orient after entry and return to stable support" },
+          { "id": "d", "text": "Practice diving technique" }
+        ],
+        "correct": "c",
+        "explanation": "The sequence builds orientation and a return to support. Distance and underwater time are not goals."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Never manufacture an emergency",
+        "content": "Do not use clothes, blind entries, unexpected pushes, or deep water to make the drill feel realistic. Those variations belong only in qualified programs with appropriate controls."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Check rules and depth before any feet-first entry.", "Keep the parent in the water and within reach.", "Judge success by the turn and wall grab, not the jump."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What follows a feet-first jump in this sequence?", "back": "Return to the surface, turn toward the wall, and take a secure two-hand hold." },
+      { "front": "What must be checked before practicing a jump?", "back": "Posted rules, sufficient water depth, a clear area, lifeguard approval, and immediate parent reach." },
+      { "front": "Should a parent surprise a child with an entry to make it realistic?", "back": "No. Never throw, push, drop, or surprise a child into water." }
+    ]
+  },
+  "swim-float-swim": {
+    "id": "swim-float-swim",
+    "moduleId": "independent-sequences",
+    "title": "Swim, Float, Swim",
+    "estimatedMinutes": 20,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Connect movement to a breathing option",
+        "content": "<p>Swim–float–swim links short forward travel with a face-up rest. The YMCA teaches this as a foundational safety sequence. For a four-year-old, keep each swim segment only a few movements long and provide head or upper-back support during the float until it is consistently independent.</p><p>A float is useful only when the face stays clear and breathing settles. If rolling onto the back increases distress, return to the wall and revisit Stage 2.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/10-swim-float-swim.png",
+        "alt": "Three-panel sequence of a child swimming briefly, rolling to a face-up float, then swimming to the wall while a parent shadows beside her",
+        "caption": "Short travel plus a calm face-up pause gives the child more than one way to reach support."
+      },
+      {
+        "type": "practice",
+        "id": "s11-swim-float-swim",
+        "title": "Move, sky, move",
+        "goal": "Your child swims a few movements, rolls to a supported face-up float, then returns forward and reaches the wall.",
+        "durationMinutes": 18,
+        "equipment": ["Clear path ending at the wall", "Bright wall target"],
+        "setup": "Set a total path shorter than two body lengths. Stand alongside the entire route with one hand ready at the head and upper torso.",
+        "steps": [
+          {
+            "title": "Swim to the sky cue",
+            "instruction": "Begin at your hands or the wall. Ask for two arm pulls with bubbles and kicks, then give the roll cue before breath urgency.",
+            "cue": "Reach, pull—now find the sky.",
+            "repetitions": "3 swim-to-float transitions",
+            "success": "She starts the roll while movement remains controlled."
+          },
+          {
+            "title": "Rest face-up",
+            "instruction": "Support the head and upper back as needed. Wait for one or two normal breaths, not a fixed duration.",
+            "cue": "Quiet star. Breathe.",
+            "repetitions": "1–2 breaths each time",
+            "success": "Her face stays clear and breathing settles."
+          },
+          {
+            "title": "Return and reach the wall",
+            "instruction": "Cue a shoulder-led roll toward the visible target, bubbles on face entry, then two or three movements to a two-hand wall hold.",
+            "cue": "Look at the wall, roll, bubbles, go.",
+            "repetitions": "3 complete sequences",
+            "success": "She connects both transitions and finishes at stable support."
+          }
+        ],
+        "regressions": ["Practice swim-to-wall and back-float-to-upright as separate skills.", "Keep full head and torso support during both rolls."],
+        "progressions": ["Reduce float support only after the face remains reliably clear.", "Add one movement to a swim segment without extending the total path beyond immediate reach."],
+        "safetyStops": ["Stop if the face is not reliably clear on the back.", "Shorten the first swim segment if the child reaches the float breathless.", "Never use the sequence to justify greater distance from adult supervision."],
+        "readinessChecks": [
+          { "id": "swim-to-float", "label": "Moves from a short swim into a calm supported back float" },
+          { "id": "settled-breath", "label": "Keeps the face clear and takes calm breaths on the back" },
+          { "id": "float-to-wall", "label": "Rolls forward and reaches the wall with controlled movement" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "s11-distance",
+        "statement": "Once swim–float–swim works, it is safe for the parent to supervise from farther away.",
+        "correct": false,
+        "explanation": "A new skill never reduces the need for close, constant supervision or the parent's position within immediate reach."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Options build competence",
+        "content": "The value of this sequence is not distance. It is the child's growing ability to change position, breathe, reorient, and continue to support."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Cue the float before breath urgency.", "Wait for settled breathing, not a stopwatch target.", "End every sequence at a wall or secure adult support."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What is the purpose of the float in swim–float–swim?", "back": "To create a face-up breathing option before continuing toward support." },
+      { "front": "When should the parent cue the roll to the back?", "back": "While movement is still controlled, before the child becomes breathless or frantic." },
+      { "front": "What should end every complete sequence?", "back": "A secure wall hold or immediate adult support." }
+    ]
+  },
+  "family-skill-check": {
+    "id": "family-skill-check",
+    "moduleId": "independent-sequences",
+    "title": "Family Skill Check & Next Steps",
+    "estimatedMinutes": 25,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Completion is not certification",
+        "content": "<p>Water competency combines water smarts, swimming skills, and knowing how to help safely. The American Red Cross benchmark eventually includes surfacing after an over-head entry, floating or treading for one minute, turning, swimming 25 yards, and exiting. This course does not certify those abilities.</p><p>Your useful final check is narrower: which skills can your child perform calmly and repeatedly today, in this pool, while you remain within reach? Skills can change with fatigue, temperature, clothing, depth, waves, or a new environment.</p>"
+      },
+      {
+        "type": "practice",
+        "id": "s12-family-check",
+        "title": "Calm skills circuit",
+        "goal": "Observe the child's current skills without prompting past her ability, record the support she needs, and choose the next professional learning step.",
+        "durationMinutes": 20,
+        "equipment": ["This course's saved skill tracker", "Towel and warm layer", "Contact details for a certified local program"],
+        "setup": "Use the same lifeguarded pool and familiar shallow area. Tell the lifeguard you are reviewing basic skills and keep the circuit within immediate reach.",
+        "steps": [
+          {
+            "title": "Safety and wall circuit",
+            "instruction": "Ask permission, enter safely, take the wall, move toward the nearest exit, and climb out. Record the help needed without repeating a failed item.",
+            "cue": "Show me your safe pool routine.",
+            "repetitions": "1 calm circuit",
+            "success": "The sequence is predictable and controlled."
+          },
+          {
+            "title": "Float and recovery circuit",
+            "instruction": "Review one back float, one front-float-to-feet recovery, and one turn to the wall using the least support that remains calm.",
+            "cue": "Show me your sky, feet, and wall choices.",
+            "repetitions": "1–2 attempts per skill",
+            "success": "She can change position and return to support without distress."
+          },
+          {
+            "title": "Short travel circuit",
+            "instruction": "Choose either a glide-to-wall, a few coordinated movements, or swim–float–swim. Use the easiest version that remains reliable.",
+            "cue": "Pick your calm way to the wall.",
+            "repetitions": "2 successful trips maximum",
+            "success": "She finishes with control and has energy left."
+          },
+          {
+            "title": "Choose the next teacher",
+            "instruction": "Show the saved tracker to a certified instructor. Ask for an assessment of breathing, balance, recovery, and the appropriate preschool class level.",
+            "cue": "We keep learning with a swim teacher.",
+            "repetitions": "Schedule or identify one next step",
+            "success": "A qualified instructor—not the app—guides the next progression."
+          }
+        ],
+        "regressions": ["Review only the safety routine and one favorite skill.", "Use full support and record “with help” honestly."],
+        "progressions": ["Ask a certified instructor to observe the circuit.", "Continue formal lessons toward recognized water-competency benchmarks."],
+        "safetyStops": ["Do not test a skill in deeper, colder, crowded, or open water.", "Stop after one unsuccessful attempt rather than coaching through fatigue.", "For breathing trouble, persistent coughing, unusual sleepiness, confusion, or other concerning symptoms after a water incident, alert the lifeguard and seek urgent medical help."],
+        "readinessChecks": [
+          { "id": "safety-routine", "label": "Completes the permission, entry, wall, exit, and leave-together routine" },
+          { "id": "position-options", "label": "Can float, recover, rotate, and orient with recorded support" },
+          { "id": "short-travel", "label": "Travels a short distance and finishes at stable support" },
+          { "id": "professional-next-step", "label": "Has a certified-instructor assessment or class as the next step" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "s12-environments",
+        "question": "Match each observation to the right conclusion.",
+        "pairs": [
+          { "left": "Skill works once", "right": "Keep practicing with the same support" },
+          { "left": "Skill works calmly on several visits", "right": "Record consistency and ask about the next progression" },
+          { "left": "Skill fails when cold or tired", "right": "Stop and treat conditions as part of competence" },
+          { "left": "Course is complete", "right": "Continue supervision and professional learning" }
+        ],
+        "explanation": "Competence is contextual and repeatable. A checkbox or one success does not remove risk."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Pool skill does not transfer automatically",
+        "content": "Do not repeat this circuit in a lake, river, ocean, moving water, cold water, or while wearing clothes. Use a properly fitted U.S. Coast Guard-approved life jacket around natural water and follow local safety rules."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "The best graduation is a good handoff",
+        "content": "Bring the tracker's honest “with help” and “consistent” ratings to a certified preschool aquatics instructor. That information makes the next lesson safer and more useful."
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Record the support required, not just whether a task happened.",
+          "Treat environment, health, temperature, and fatigue as part of ability.",
+          "Keep every protection layer after the course ends.",
+          "Continue with qualified instruction toward recognized water competency."
+        ]
+      }
+    ],
+    "flashcards": [
+      { "front": "Does this 12-session course certify water competency?", "back": "No. It records parent-observed practice skills and supports a handoff to qualified instruction." },
+      { "front": "Why might a pool skill fail in another setting?", "back": "Depth, cold, waves, current, clothing, fatigue, and unfamiliar surroundings change the task." },
+      { "front": "What is the best next step after this course?", "back": "Share the saved tracker with a certified preschool aquatics instructor and continue supervised lessons." }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const source = readFileSync('web/js/setup-create.js', 'utf8');
+assert.ok(source.includes("'learnable-provider-connection-changed'"), 'Create must react when Account changes its shared connection');
+assert.ok(source.includes('event.detail?.owner !== session.owner'), 'connection refresh is owner-scoped');
+assert.ok(source.includes('current.connectionDirty = true') && source.includes('current.check = null'), 'invalidate stale readiness before refreshing');
+assert.ok(source.includes('connectionEvents?.abort()'), 'dispose listener when leaving the creation screen');
+assert.ok(source.includes("document.querySelector('dialog[open]')"), 'background refresh must not steal modal focus');
+const refresh = source.slice(source.indexOf('function refreshConnection('), source.indexOf('async function check('));
+assert.ok(!refresh.includes('client.start') && !refresh.includes('accountClient.save'), 'connection refresh cannot start generation or rewrite setup');
+console.log('6 Account/Create refresh contracts passed; interaction tested separately in browser.');

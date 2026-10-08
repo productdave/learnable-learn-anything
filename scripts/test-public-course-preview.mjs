@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import { projectPublicCourse, publicPreviewLink } from '../web/api/_lib/public-course-preview.mjs';
+import { createPublicPreviewHandler } from '../web/api/courses/public-preview.js';
+import { createPublicPreviewClient } from '../web/js/public-preview-client.js';
+import { publicAuthorForPreview } from '../web/js/public-course-preview.js';
+import { publicPreviewFixture } from './fixtures/public-preview.mjs';
+let checks=0;const check=(v,m)=>{assert.ok(v,m);checks++;};
+const course=publicPreviewFixture(),before=JSON.stringify(course),preview=projectPublicCourse(course),serialized=JSON.stringify(preview);
+check(JSON.stringify(course)===before,'projection never changes saved course');
+check(preview.counts.lessons===3&&preview.counts.withheldImages===1,'counts are actual saved lessons and withheld image');
+for(const value of ['PRIVATE-','private-owner','asset_id','12345678-1234','chatSystemPrompt','_progressId','_tokenUsage','_refinementProposal','_research'])check(!serialized.includes(value),'private data excluded: '+value);
+check(preview.modules[0].topics[0].sections.some(s=>s.type==='practice'),'practice is included');
+check(preview.modules[0].topics[0].sections.some(s=>s.type==='checklist'),'checklists included');
+check(preview.modules[0].topics[0].sections.filter(s=>s.type==='quiz').length===3,'quiz questions and answers included');
+check(preview.modules[0].topics[0].flashcards.length===4,'flashcards included without tracking');
+check(preview.publicAuthor===null,'no private identity fallback');
+let fixture=structuredClone(course);fixture.publicAuthor={displayName:'Public Teacher',avatarUrl:'https://example.com/avatar.png',email:'private@example.com'};
+check(JSON.stringify(projectPublicCourse(fixture).publicAuthor)===JSON.stringify({displayName:'Public Teacher',avatarUrl:''}),'explicit public name only, avatar held back');
+for(const value of ['', 'private@example.com','x'.repeat(81)])check(publicAuthorForPreview(value)===null,'invalid trial byline refused');
+check(publicAuthorForPreview('Public Teacher').displayName==='Public Teacher','explicit trial public name supported');
+for(const href of ['javascript:alert(1)','data:text/html,private','file:///secret','http://example.com','https://u:p@example.com','https://example.com?token=secret','https://example.com#secret','https://127.0.0.1/private','https://localhost/','https://home.local/','https://example.com/storage/v1/object/private/a','//example.com','https://example.com/api/key','https://example.com/private/a'])check(!publicPreviewLink(href),'unsafe or credential-bearing link withheld: '+href);
+check(publicPreviewLink('https://example.com/guide')==='https://example.com/guide','simple public HTTPS reference supported');
+fixture=structuredClone(course);const section=fixture.modules[1]['lesson-1'].sections[0];
+section.content='<p class="PRIVATE-CLASS" onclick="alert(1)">A useful paragraph explaining window light clearly.</p><script>PRIVATE-SCRIPT</script><img src="https://example.com/private"><a href="https://example.com?token=PRIVATE-URL">Read this</a><a href="https://example.com/guide">Guide</a><iframe srcdoc="PRIVATE-FRAME"></iframe>';
+let result=projectPublicCourse(fixture),html=result.modules[0].topics[0].sections[0].content;
+check(!/onclick|PRIVATE-|<script|<img|<iframe|class=/.test(html),'active markup, attributes and private links absent');
+check(html.includes('A useful paragraph')&&html.includes('https://example.com/guide')&&html.includes('noopener noreferrer'),'safe content and public links preserved');
+check(result.issues.some(i=>i.code==='formatting'),'modified content visibly flagged');
+section.content='This text accidentally includes sk-proj-synthetic-private-12345678901234567890 and needs review.';
+result=projectPublicCourse(fixture);check(!JSON.stringify(result).includes('sk-proj-')&&result.issues.some(i=>i.code==='private-text'),'credentials redacted and flagged in lesson content');
+for(const image of [{type:'image',src:'data:image/png;base64,PRIVATE-DATA'}, {type:'image',src:'https://example.com/a.png?signature=PRIVATE'}, {type:'image',ref_kind:'pdf',file_index:0,page:1,source_title:'PRIVATE-FILENAME'}]){
+  fixture=structuredClone(course);fixture.modules[1]['lesson-1'].sections.push(image);
+  check(!JSON.stringify(projectPublicCourse(fixture)).includes('PRIVATE'),'all image shapes held back without private references');
+}
+fixture=structuredClone(course);delete fixture.modules[1]['lesson-2'];check(projectPublicCourse(fixture).counts.missing===1,'partial saved course preview reports missing lesson');
+fixture=structuredClone(course);fixture.modules[1]['lesson-1'].sections.push({type:'simulator',private:'PRIVATE-CONTENT'});check(projectPublicCourse(fixture).issues.some(i=>i.code==='unsupported'),'unsupported legacy section not silently omitted');
+fixture=structuredClone(course);fixture.curriculum.modules.push(fixture.curriculum.modules[0]);assert.throws(()=>projectPublicCourse(fixture),e=>e.code==='incomplete');checks++;
+assert.throws(()=>projectPublicCourse({}),e=>e.code==='incomplete');checks++;
+
+let owner='a',enabled=true,failure=false;
+const filters={},db={from(table){check(table==='user_courses','API reads only saved course table');const query={select(){return query;},eq(k,v){filters[k]=v;return query;},async maybeSingle(){return failure?{error:new Error('PRIVATE-DATABASE')}:{data:filters.owner_id==='a'&&filters.id===course.config.id?{payload:course,updated_at:'2026-09-17T00:00:00Z'}:null};}};return query;}};
+const handler=createPublicPreviewHandler({enabled:()=>enabled,authenticate:async()=>{if(!owner)throw Object.assign(new Error('PRIVATE-AUTH'),{statusCode:401});return {user:{id:owner},client:db};}});
+async function request(method='GET',id=course.config.id){const res={headers:{},setHeader(k,v){this.headers[k]=v;},status(code){this.code=code;return this;},json(data){this.data=data;return this;}};await handler({method,url:'/api/courses/public-preview?courseId='+encodeURIComponent(id)},res);check(res.headers['Cache-Control']==='private, no-store','private response never cached');return res;}
+check((await request()).data.preview.title===preview.title,'owner can preview projected content');
+owner='b';check((await request()).code===404,'other account denied');owner=null;check((await request()).code===401,'guest denied');owner='a';
+for(const method of ['POST','PUT','DELETE'])check((await request(method)).code===405,'preview has no write method');
+check((await request('GET','../bad')).code===400,'invalid course ID denied');
+failure=true;const unavailable=await request();check(unavailable.code===503&&!JSON.stringify(unavailable).includes('PRIVATE-DATABASE'),'safe failed read');failure=false;
+enabled=false;check((await request()).code===503,'disabled route stays closed');enabled=true;
+check(JSON.stringify(course)===before,'all API paths leave original unchanged');
+
+let identity={id:'a'},sessionOwner='a',body={preview},calls=[],fetchError=false;
+const client=createPublicPreviewClient({getIdentity:()=>identity,getClient:async()=>({auth:{getSession:async()=>({data:{session:{user:{id:sessionOwner},access_token:'qa-session'}}})}}),fetcher:async(url,options)=>{calls.push({url,options});if(fetchError)throw new Error('offline');return {ok:true,json:async()=>{if(body.switch)identity={id:'b'};return body;}};}});
+await client.load('a',course.config.id);check(calls[0].options.method==='GET'&&calls[0].options.cache==='no-store'&&!calls[0].options.body,'client only makes authenticated reads');
+check(calls[0].options.headers.Authorization==='Bearer qa-session','correct session used');
+identity={id:'b'};await assert.rejects(client.load('a',course.config.id),e=>e.code==='account');checks++;identity={id:'a'};
+sessionOwner='b';await assert.rejects(client.load('a',course.config.id),e=>e.code==='account');checks++;sessionOwner='a';
+fetchError=true;await assert.rejects(client.load('a',course.config.id),e=>e.code==='unavailable');checks++;fetchError=false;
+body={switch:true,preview};await assert.rejects(client.load('a',course.config.id),e=>e.code==='account');checks++;
+console.log(`Public publishing preview: ${checks} projection/API/client checks passed; no writes or provider calls.`);

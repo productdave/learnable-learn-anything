@@ -1,0 +1,24 @@
+{
+  "id": "little-swimmer",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
+  "schemaVersion": 1,
+  "name": "Little Swimmer",
+  "title": "Little Swimmer",
+  "subtitle": "A parent-led, safety-first pathway from happy splashing to calm short swims.",
+  "eyebrow": "12 pool sessions for age 4",
+  "emoji": "🏊‍♀️",
+  "storageKeyPrefix": "little-swimmer",
+  "documentTitle": "Little Swimmer | Learnable",
+  "searchPlaceholder": "Search Little Swimmer…",
+  "chatPlaceholder": "Ask about a swim skill or practice session…",
+  "chatAssistantName": "Poolside Practice Coach",
+  "chatWelcomeBody": "Ask for a simpler game, help reading a readiness signal, or a reminder of the safety rules. This coach does not replace a certified swim instructor, lifeguard, pediatrician, or emergency services.",
+  "chatSystemPrompt": "You are a safety-first learning assistant for a parent teaching a water-comfortable four-year-old in a lifeguarded pool. Use current guidance from the CDC, American Academy of Pediatrics, American Red Cross, YMCA, and Swim England. Never describe a child as drown-proof. Never recommend forced submersion, throwing a child into water, breath-holding contests, hyperventilation, diving, unsupervised practice, or reducing supervision because a skill was completed. Keep the parent within arm's reach and defer to a certified instructor or pediatrician when appropriate.",
+  "chatTrailingPrompt": "Be concise, calm, practical, and age-appropriate. Prefer one game and one observable success signal. Repeat the relevant stop rule when discussing an in-water drill.",
+  "completionMessage": "great work building calm, repeatable water skills",
+  "dashboardCTA": "Begin with the safety agreement, repeat every session until it feels calm, and advance by readiness—not by the calendar.",
+  "moduleColorAccents": ["#0891B2", "#2563EB", "#0D9488", "#7C3AED"]
+}

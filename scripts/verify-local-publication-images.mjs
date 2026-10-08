@@ -1,0 +1,71 @@
+// Real local Auth/API/Postgres/private Storage. Synthetic image bytes, no paid calls.
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import {createClient} from '@supabase/supabase-js';
+import {loadPreviewConfig,createPreviewServer} from './dev-setup-server.mjs';
+import {publicPreviewFixture} from './fixtures/public-preview.mjs';
+import {seedAcceptedPublicationImage,cleanupPublicationImageFixtures} from './fixtures/publication-image.mjs';
+import {stagePublicationImages,PUBLICATION_IMAGE_BUCKET,publicPNG,readPublicationImage} from '../web/api/_lib/publication-images.mjs';
+import {imageAssetStore,imageAssetPath,IMAGE_BUCKET} from '../web/api/_lib/image-request-store.mjs';
+const config=await loadPreviewConfig(new URL('../.env.preview.local',import.meta.url));assert.equal(config.mode,'local');assert.equal(config.url,'http://127.0.0.1:54321');
+Object.assign(process.env,{SUPABASE_URL:config.url,SUPABASE_ANON_KEY:config.publicKey,SUPABASE_SECRET_KEY:config.secretKey,LEARNABLE_SELF_PUBLISH:'1',LEARNABLE_PUBLIC_IMAGES:'1',LEARNABLE_SETUP_GENERATION:'1'});
+const admin=createClient(config.url,config.secretKey,{auth:{persistSession:false,autoRefreshToken:false}}),accounts=[],staged=new Set();
+let server,checks=0,fault=false,revokeDuringRead=null;const check=(value,label)=>{assert.ok(value,label);checks++;};
+try {
+ for(let i=0;i<2;i++){const a={email:`publication-image-${randomUUID()}@example.test`,password:randomUUID()+'Aa9!'};const made=await admin.auth.admin.createUser({...a,email_confirm:true});assert.ok(!made.error);a.id=made.data.user.id;accounts.push(a);a.client=createClient(config.url,config.publicKey,{auth:{persistSession:false,autoRefreshToken:false}});const signed=await a.client.auth.signInWithPassword(a);assert.ok(!signed.error);a.token=signed.data.session.access_token;}
+ const course=publicPreviewFixture();course.config.id='public-image-qa-'+randomUUID();course.createdByUserId=accounts[0].id;course.modules[1]['lesson-1'].sections=course.modules[1]['lesson-1'].sections.filter(s=>s.type!=='image');
+ assert.ok(!(await admin.from('user_courses').insert({id:course.config.id,owner_id:accounts[0].id,payload:course})).error);
+ const image=await seedAcceptedPublicationImage(admin,accounts[0].id,course.config.id);
+ // A newer unaccepted candidate must not hide the currently saved accepted image.
+ await seedAcceptedPublicationImage(admin,accounts[0].id,course.config.id,{expectedRequestId:image.id,accept:false});
+ const original=(await admin.from('user_courses').select('payload,updated_at').eq('owner_id',accounts[0].id).eq('id',course.config.id).single()).data;
+ const {createPublishHandler}=await import('../web/api/courses/publish.js');
+ const routes={};for(const route of ['public-preview','community','public-image'])routes['/api/courses/'+route]=(await import('../web/api/courses/'+route+'.js')).default;
+ const {createPublicImageHandler}=await import('../web/api/courses/public-image.js');
+ routes['/api/courses/public-image']=createPublicImageHandler({readImage:async(db,metadata)=>{const bytes=await readPublicationImage(db,metadata);if(revokeDuringRead){const revoke=revokeDuringRead;revokeDuringRead=null;await revoke();}return bytes;}});
+ routes['/api/courses/publish']=createPublishHandler({stageImages:async(db,entries)=>{for(const e of entries)staged.add(e.metadata.id+'.png');await stagePublicationImages(db,entries);if(fault)throw new Error('Synthetic post-copy failure');}});
+ server=createPreviewServer({config,extraHandlers:routes});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin=`http://127.0.0.1:${server.address().port}`;
+ const call=async(path,account=null,body=null)=>{const r=await fetch(origin+path,{method:body?'POST':'GET',headers:{...(account?{Authorization:'Bearer '+account.token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const type=r.headers.get('content-type');return{status:r.status,cache:r.headers.get('cache-control'),body:type?.includes('image/png')?Buffer.from(await r.arrayBuffer()):await r.json()};};
+ const owner=accounts[0],path='/api/courses/publish?courseId='+course.config.id,previewPath='/api/courses/public-preview?courseId='+course.config.id;
+ const preview=(await call(previewPath,owner)).body,previewImage=preview.preview.modules[0].topics[0].sections.find(s=>s.type==='image');
+ check(previewImage&&!JSON.stringify(preview).includes(image.id),'owner preview uses opaque locator, not private asset ID');
+ const locator=previewPath+'&imageId='+previewImage.public_image.id+'&reviewToken='+preview.reviewToken;
+ check((await call(locator)).status===401,'guest cannot read preview bytes');check((await call(locator,accounts[1])).status===404,'wrong account cannot read preview bytes');
+ check((await call(locator,owner)).body.equals(publicPNG(await imageAssetStore(admin).read(image)).bytes),'owner preview shows the metadata-free accepted image');
+ check((await call(locator.replace(preview.reviewToken,'stale'),owner)).status===409,'stale image preview denied');
+ const state=(await call(path,owner)).body;check(!state.blockers.length&&state.imageCount===1,'non-current but accepted referenced image eligible');
+ let request={courseId:course.config.id,action:'publish',version:0,reviewToken:state.reviewToken,operationId:randomUUID(),authorName:'Image QA Teacher',confirmReviewed:true,confirmRights:true};
+ check((await call(path,owner,request)).status===400,'image-specific consent required');request.confirmImages=true;
+ const results=await Promise.all([call(path,owner,request),call(path,owner,request)]);check(results.every(r=>r.status===200),'concurrent publish stages and commits safely');
+ const pub=results[0].body.publication,publicPath='/api/courses/community?courseId='+pub.id;
+ check((await call(path,owner,request)).body.replayed,'same operation resolves lost response');
+ const publicCourse=(await call(publicPath)).body.course,publicImage=publicCourse.modules[1]['lesson-1'].sections.find(s=>s.type==='image');
+ check(!JSON.stringify(publicCourse).includes(image.id)&&!JSON.stringify(publicCourse).includes(owner.id)&&!JSON.stringify(publicCourse).includes('PRIVATE-'),'public payload never exposes private identifiers or prompts');
+ const fetched=await call(publicImage.src);check(fetched.status===200&&fetched.body.equals(publicPNG(await imageAssetStore(admin).read(image)).bytes)&&fetched.cache==='no-store','guest receives exact reviewed PNG through no-store gate');
+ check(!fetched.body.includes(Buffer.from('PRIVATE-PNG-METADATA')),'hidden PNG metadata never shared');
+ const objectId=new URL(publicImage.src,origin).searchParams.get('imageId');
+ check((await accounts[1].client.storage.from(PUBLICATION_IMAGE_BUCKET).download(objectId+'.png')).error,'direct authenticated bucket read denied');
+ const direct=await fetch(config.url+'/storage/v1/object/public/'+PUBLICATION_IMAGE_BUCKET+'/'+objectId+'.png');check(!direct.ok,'public bucket URL cannot bypass gate');
+ check((await call(publicImage.src.replace(objectId,'f'.repeat(64)))).status===404,'arbitrary image ID denied');
+ fault=true;const update={...request,operationId:randomUUID(),version:1};check((await call(path,owner,update)).status===503,'post-copy failure reported without publishing');
+ check((await call(publicImage.src)).status===200&&(await call(path,owner)).body.publication.version===1,'failed update preserves old live image/version');
+ const stagedId=[...staged].find(p=>p!==objectId+'.png').slice(0,-4);check((await call(publicImage.src.replace(objectId,stagedId))).status===404,'uncommitted staging copy cannot be read publicly');
+ fault=false;const updated=await call(path,owner,update);check(updated.status===200&&updated.body.publication.version===2,'same failed operation retries verified copies');
+ const next=(await call(publicPath)).body.course.modules[1]['lesson-1'].sections.find(s=>s.type==='image');
+ check((await call(publicImage.src)).status===404&&(await call(next.src)).status===200,'update revokes superseded image URL');
+ // Corrupted original cannot be republished; existing verified public copy survives.
+ const bytes=(await imageAssetStore(admin).read(image)).bytes;
+ await admin.storage.from(IMAGE_BUCKET).update(imageAssetPath(image),Buffer.alloc(bytes.length),{contentType:'image/png'});
+ check((await call(path,owner,{...request,version:2,operationId:randomUUID()})).status===503,'tampered private image blocked');
+ check((await call(next.src)).status===200,'public copy does not depend on mutable private original');
+ await admin.storage.from(IMAGE_BUCKET).update(imageAssetPath(image),bytes,{contentType:'image/png'});
+ const nextId=new URL(next.src,origin).searchParams.get('imageId');await admin.storage.from(PUBLICATION_IMAGE_BUCKET).update(nextId+'.png',Buffer.alloc(bytes.length),{contentType:'image/png'});
+ check((await call(next.src)).status===503,'tampered shared bytes never served');await admin.storage.from(PUBLICATION_IMAGE_BUCKET).update(nextId+'.png',publicPNG(await imageAssetStore(admin).read(image)).bytes,{contentType:'image/png'});
+ revokeDuringRead=async()=>{const end=await call(path,owner,{courseId:course.config.id,action:'unpublish',version:2,operationId:randomUUID(),confirmUnpublish:true});check(end.body.publication.status==='unpublished','unpublish succeeds');};
+ check((await call(next.src)).status===404,'unpublish during binary read revokes the in-flight response');
+ check((await call(next.src)).status===404&&(await call(publicPath)).status===404,'unpublish revokes course and image reads');
+ check((await call(path,owner,request)).status===409,'stale publish cannot resurrect images');
+ assert.deepEqual((await admin.from('user_courses').select('payload,updated_at').eq('id',course.config.id).eq('owner_id',owner.id).single()).data,original);checks++;
+ check((await imageAssetStore(admin).read(image)).bytes.equals(bytes),'private originals retained');
+ console.log(`Public course images: ${checks} real local Auth/API/Storage checks passed. No paid image calls.`);
+}finally{if(server)await new Promise(resolve=>server.close(resolve));for(const a of accounts){await cleanupPublicationImageFixtures(admin,a.id,a===accounts[0]?[...staged]:[]);assert.ok(!(await admin.auth.admin.deleteUser(a.id)).error);}console.log('Removed only disposable image-publication QA accounts, courses and exact synthetic storage objects.');}

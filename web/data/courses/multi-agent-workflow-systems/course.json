@@ -1,0 +1,30 @@
+{
+  "id": "multi-agent-workflow-systems",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
+  "name": "Multi-Agent Workflow Systems",
+  "emoji": "🤖",
+  "title": "Multi-Agent Workflow Systems",
+  "eyebrow": "Generated course",
+  "subtitle": "Build intelligent agent teams that plan, execute, orchestrate, and swarm to automate complex business workflows",
+  "dashboardCTA": "Each module builds on the one before. Start with \"Agent Fundamentals & Architecture\" and work your way through.",
+  "documentTitle": "Multi-Agent Workflow Systems | Learnable",
+  "schemaVersion": 1,
+  "chatPlaceholder": "Ask about multi-agent workflow systems… (Enter to send)",
+  "chatWelcomeBody": "Highlight any text in the lesson to ask the AI about it, or type a question below.",
+  "chatSystemPrompt": "You are a learning assistant embedded in an interactive course called \"Multi-Agent Workflow Systems\". The course is for: Developer or technical founder who understands basic LLM concepts and wants to build production-ready multi-agent systems that handle real business workflows like inquiry management and service booking.. Your tone is casual, direct, and practical. Think smart friend at a coffee shop, not a professor at a lectern. Use short paragraphs and concrete examples from real life. Keep the ego low — say \"from what I've seen\" rather than making absolute claims.",
+  "storageKeyPrefix": "multi-agent-workflow-systems",
+  "chatAssistantName": "AI Learning Assistant",
+  "completionMessage": "great work building your knowledge",
+  "searchPlaceholder": "Search topics in Multi-Agent Workflow Systems…",
+  "chatTrailingPrompt": "Be concise (150-250 words per response unless asked for more). Focus on practical application, not abstract theory. Use real-world examples. Write in plain paragraphs or short bullet lists. No filler phrases.",
+  "moduleColorAccents": [
+    "#4338CA",
+    "#D97706",
+    "#059669",
+    "#8B5CF6",
+    "#0EA5E9"
+  ]
+}

@@ -1,0 +1,318 @@
+{
+  "title": "Multi-Agent Workflow Systems",
+  "modules": [
+    {
+      "id": "agent-fundamentals",
+      "icon": "brain",
+      "color": "#4338CA",
+      "title": "Agent Fundamentals & Architecture",
+      "number": 1,
+      "topics": [
+        {
+          "id": "agents-vs-llms",
+          "title": "What Makes an Agent an Agent",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "agent-loop-anatomy",
+          "title": "The Agent Loop: Perceive, Reason, Act, Reflect",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "planning-strategies",
+          "title": "Planning Strategies: ReAct, Plan-and-Execute, Tree-of-Thought",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "tool-calling-function-execution",
+          "title": "Tool Calling and Function Execution Patterns",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Understand what makes an agent different from a simple LLM call, explore the anatomy of autonomous agents, and learn the core patterns for planning, tool use, and memory."
+    },
+    {
+      "id": "frameworks-and-tools",
+      "icon": "settings",
+      "color": "#D97706",
+      "title": "Current Frameworks & Tooling",
+      "number": 2,
+      "topics": [
+        {
+          "id": "agent-framework-landscape",
+          "title": "The Current Agent Framework Landscape",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "langgraph-autogen-crewai",
+          "title": "Comparing LangGraph, AutoGen, and CrewAI",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "orchestration-platforms",
+          "title": "Orchestration Platforms: When to Use What",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "model-selection-agents",
+          "title": "Model Selection for Agent Workloads",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "observability-debugging",
+          "title": "Observability and Debugging Tools for Agents",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Survey the leading agent frameworks, orchestration platforms, and model providers available today, and learn how to evaluate them for your workflow needs."
+    },
+    {
+      "id": "planning-execution-agents",
+      "icon": "target",
+      "color": "#059669",
+      "title": "Planning & Execution Agents",
+      "number": 3,
+      "topics": [
+        {
+          "id": "planner-agent-design",
+          "title": "Designing a Planner Agent: Decomposition and Sequencing",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "executor-agent-design",
+          "title": "Designing an Executor Agent: Task Fulfillment and Output Generation",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "state-management-handoffs",
+          "title": "State Management and Agent Handoffs",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "error-handling-retry",
+          "title": "Error Handling and Retry Logic Between Agents",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Build specialized agents: one that decomposes tasks and creates plans, and another that executes steps and produces outputs. Learn handoff patterns and state management."
+    },
+    {
+      "id": "orchestration-learning",
+      "icon": "compass",
+      "color": "#0EA5E9",
+      "title": "Orchestration & Inter-Agent Learning",
+      "number": 4,
+      "topics": [
+        {
+          "id": "orchestrator-role",
+          "title": "The Orchestrator Role: Routing, Coordination, and Supervision",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "inter-agent-communication",
+          "title": "Inter-Agent Communication Protocols",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "shared-memory-context",
+          "title": "Shared Memory and Context Propagation",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "learning-from-feedback",
+          "title": "Learning from Agent Feedback and Outcomes",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "true-false"
+          ]
+        },
+        {
+          "id": "adaptive-orchestration",
+          "title": "Adaptive Orchestration: Dynamic Routing and Replanning",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Create a master orchestrator agent that coordinates other agents, routes tasks, and learns from outcomes. Explore communication protocols and shared memory architectures."
+    },
+    {
+      "id": "swarm-patterns",
+      "icon": "repeat",
+      "color": "#E11D48",
+      "title": "Agent Swarms & Dynamic Sub-Agent Spawning",
+      "number": 5,
+      "topics": [
+        {
+          "id": "swarm-architecture",
+          "title": "Swarm Architecture: Controller, Workers, and Aggregation",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "dynamic-agent-spawning",
+          "title": "Dynamic Agent Spawning and Lifecycle Management",
+          "quiz_plan": [
+            "multiple-choice",
+            "short-answer",
+            "true-false"
+          ]
+        },
+        {
+          "id": "parallel-delegation",
+          "title": "Parallel Task Delegation and Work Distribution",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "result-aggregation-consensus",
+          "title": "Result Aggregation and Consensus Mechanisms",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "feedback-loops-swarms",
+          "title": "Feedback Loops: Sub-Agent Learning and Iteration",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Implement swarm intelligence patterns where a controller spawns multiple sub-agents, delegates work in parallel, and aggregates results with collective feedback."
+    },
+    {
+      "id": "production-workflow",
+      "icon": "briefcase",
+      "color": "#8B5CF6",
+      "title": "Building a Production Workflow",
+      "number": 6,
+      "topics": [
+        {
+          "id": "workflow-design",
+          "title": "Designing the Inquiry-to-Response Workflow",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "integration-apis-tools",
+          "title": "Integrating External APIs and Business Tools",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "human-in-loop",
+          "title": "Human-in-the-Loop: Escalation and Approval Gates",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "monitoring-performance",
+          "title": "Monitoring Agent Performance and Workflow Health",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "deployment-scaling",
+          "title": "Deployment Patterns and Scaling Multi-Agent Systems",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ],
+      "description": "Integrate everything into a real-world multi-agent system for small business automation—handling inbound inquiries, bookings, purchases, team notifications, and customer responses."
+    }
+  ],
+  "subtitle": "Build intelligent agent teams that plan, execute, orchestrate, and swarm to automate complex business workflows"
+}

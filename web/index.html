@@ -5,18 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learnable</title>
   <meta name="description" content="Generate a course on anything. Then learn it.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/tokens.css?v=1">
   <link rel="stylesheet" href="styles/base.css?v=1">
-  <link rel="stylesheet" href="styles/components.css?v=14">
+  <link rel="stylesheet" href="styles/components.css?v=30">
   <link rel="stylesheet" href="styles/learnable.css?v=7">
   <link rel="stylesheet" href="styles/themes.css?v=1">
+  <link rel="stylesheet" href="styles/home.css?v=28">
+  <link rel="stylesheet" href="styles/course-editor.css?v=3">
+  <link rel="stylesheet" href="styles/course-images.css?v=2">
+  <link rel="stylesheet" href="styles/public-course-preview.css?v=4">
 
   <!-- Importmap so generator/schema.mjs can use bare `import { z } from 'zod'`.
-       Same file runs in the browser/SW (resolved here) and in Vercel functions
-       (resolved via node_modules). -->
+       The same schema modules run in the browser and in Vercel functions. -->
   <script type="importmap">
   {
     "imports": {
@@ -26,6 +30,7 @@
   </script>
 </head>
 <body>
+  <a class="home-skip-link" href="#content">Skip to content</a>
   <div id="icons" style="display:none"></div>
   <div id="app" class="app">
     <header class="app-header">
@@ -55,9 +60,12 @@
         <button class="header-btn" id="flashcard-trigger" aria-label="Flashcards" title="Flashcard Review">
           <svg width="20" height="20"><use href="#icon-cards"/></svg>
         </button>
-        <button class="header-btn" id="chat-trigger" aria-label="AI Tutor" title="AI Learning Assistant">
-          <svg width="20" height="20"><use href="#icon-sparkle"/></svg>
-        </button>
+        <!-- Deferred from the first pilot. Template contents are not live controls. -->
+        <template id="deferred-tutor-trigger">
+          <button class="header-btn" id="chat-trigger" aria-label="AI Tutor" title="AI Learning Assistant">
+            <svg width="20" height="20"><use href="#icon-sparkle"/></svg>
+          </button>
+        </template>
         <button class="header-btn" id="theme-toggle" aria-label="Toggle theme">
           <svg width="20" height="20" class="theme-icon-light"><use href="#icon-moon"/></svg>
           <svg width="20" height="20" class="theme-icon-dark" style="display:none"><use href="#icon-sun"/></svg>
@@ -69,7 +77,7 @@
       <div class="sidebar-overlay" id="sidebar-overlay"></div>
       <aside class="app-sidebar" id="sidebar"></aside>
       <main class="app-main">
-        <div class="app-main-inner" id="content"></div>
+        <div class="app-main-inner" id="content" tabindex="-1"></div>
       </main>
     </div>
   </div>
@@ -89,6 +97,8 @@
   <!-- Flashcard overlay -->
   <div class="flashcard-overlay" id="flashcard-overlay" style="display:none"></div>
 
+  <!-- Preserve Tutor for later without initialising it or exposing Ask AI. -->
+  <template id="deferred-tutor-panel">
   <!-- Selection popup -->
   <div id="selection-popup">
     <svg width="13" height="13"><use href="#icon-sparkle"/></svg>
@@ -96,7 +106,7 @@
   </div>
 
   <!-- Chat panel -->
-  <div id="chat-panel">
+  <div id="chat-panel" role="region" aria-label="AI Learning Assistant" aria-hidden="true" inert>
     <div class="chat-header">
       <div class="chat-header-title">
         <svg width="16" height="16"><use href="#icon-sparkle"/></svg>
@@ -125,6 +135,8 @@
     </div>
   </div>
 
-  <script type="module" src="js/app.js?v=35"></script>
+  </template>
+
+  <script type="module" src="js/app.js?v=179"></script>
 </body>
 </html>

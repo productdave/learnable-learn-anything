@@ -5,13 +5,16 @@
   "type": "module",
   "description": "Static frontend + serverless functions for Learnable. Vercel deploy root.",
   "dependencies": {
-    "@mozilla/readability": "^0.5.0",
+    "@mozilla/readability": "^0.6.0",
     "@supabase/supabase-js": "^2.45.0",
     "@vercel/functions": "^3.7.0",
     "linkedom": "^0.18.5",
+    "mammoth": "1.12.3",
+    "pdfjs-dist": "6.3.289",
+    "yauzl": "3.4.0",
     "zod": "^3.23.8"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.13.0"
   }
 }

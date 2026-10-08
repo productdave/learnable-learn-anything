@@ -1,5 +1,6 @@
-import { store } from '../store.js';
-import { getCurriculum } from '../course-loader.js';
+import { store } from '../store.js?v=5';
+import { getCurriculum } from '../course-loader.js?v=8';
+const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function progressRingSVG(progress, color, size = 32) {
   const r = (size - 4) / 2;
@@ -23,7 +24,8 @@ export function renderSidebar(container) {
   const state = store.get();
   const currentHash = window.location.hash.slice(2) || '';
   const [currentModule] = currentHash.split('/');
-  const overallProgress = store.getOverallProgress(curriculum.modules);
+  const modules = Array.isArray(curriculum.modules) ? curriculum.modules : [];
+  const overallProgress = store.getOverallProgress(modules);
 
   let html = `
     <div class="sidebar-header">
@@ -37,25 +39,26 @@ export function renderSidebar(container) {
     </div>
     <nav class="sidebar-nav" aria-label="Modules">`;
 
-  for (const mod of curriculum.modules) {
+  for (const mod of modules) {
+    const topics = Array.isArray(mod.topics) ? mod.topics : [];
     const isExpanded = currentModule === mod.id;
-    const progress = store.getModuleProgress(mod.id, mod.topics.length);
+    const progress = store.getModuleProgress(mod.id, topics.length);
 
     html += `
       <div class="sidebar-module ${isExpanded ? 'expanded' : ''}">
         <button class="sidebar-module-header" data-module="${mod.id}" aria-expanded="${isExpanded}">
           <div class="sidebar-module-left">
-            ${progressRingSVG(progress, mod.color)}
+              ${progressRingSVG(progress, mod.color || 'var(--primary)')}
             <div>
               <span class="sidebar-module-number">Module ${mod.number}</span>
-              <span class="sidebar-module-title">${mod.title}</span>
+              <span class="sidebar-module-title">${esc(mod.title)}</span>
             </div>
           </div>
           <svg width="16" height="16" class="sidebar-chevron"><use href="#icon-chevron-right"/></svg>
         </button>
         <div class="sidebar-topics" ${isExpanded ? '' : 'style="display:none"'}>`;
 
-    for (const topic of mod.topics) {
+    for (const topic of topics) {
       const isActive = currentHash === `${mod.id}/${topic.id}`;
       const isCompleted = store.isTopicCompleted(mod.id, topic.id);
 
@@ -64,7 +67,7 @@ export function renderSidebar(container) {
             <span class="sidebar-topic-indicator">
               ${isCompleted ? '<svg width="14" height="14"><use href="#icon-check"/></svg>' : '<span class="sidebar-topic-dot"></span>'}
             </span>
-            <span class="sidebar-topic-title">${topic.title}</span>
+            <span class="sidebar-topic-title">${esc(topic.title)}</span>
           </a>`;
     }
 

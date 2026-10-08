@@ -1,0 +1,67 @@
+import assert from 'node:assert/strict';
+import {parseHTML} from 'linkedom';
+import {listingQuery,listCommunity} from '../web/api/_lib/community-listing.mjs';
+import {createCommunityHandler} from '../web/api/courses/community.js';
+import {createCommunityCatalog} from '../web/js/community-catalog.js';
+import {mountCommunityBrowser} from '../web/js/community-browser.js';
+import {homeCourseHTML,createHomeController} from '../web/js/home.js';
+let checks=0;const check=(v,label)=>{assert.ok(v,label);checks++;};
+const time='2026-09-17T12:00:00.123456+00:00',id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+check(listingQuery(new URLSearchParams('q= Hello ')).q==='Hello','trim query');
+for(const value of ['q='+encodeURIComponent('x'.repeat(121)),'q=a&q=b','q=%00','cursor=%%%','cursor=e30','cursor=a&cursor=b']){assert.throws(()=>listingQuery(new URLSearchParams(value)));checks++;}
+const calls=[],rows=Array.from({length:13},(_,i)=>({id:i===11?id:`00000000-0000-0000-0000-${String(i).padStart(12,'0')}`,updated_at:time,title:'Course '+i,author:{displayName:'Teacher'},moduleCount:'2',lessons:'6'}));
+const db={from(table){calls.push(['from',table]);const q={then(resolve){return Promise.resolve({data:rows}).then(resolve);}};for(const m of ['select','eq','lte','order','limit','or','ilike'])q[m]=(...args)=>{calls.push([m,...args]);return q;};return q;}};
+const result=await listCommunity(db,new URLSearchParams('q='+encodeURIComponent('100%_\\')));
+check(result.courses.length===12&&result.nextCursor,'12 plus one lookahead');
+check(result.courses.every(c=>!Object.hasOwn(c,'updated_at')&&!Object.hasOwn(c,'owner_id')),'no private metadata');
+check(calls.some(c=>c[0]==='limit'&&c[1]===13),'bounded database result');
+check(calls.some(c=>c[0]==='eq'&&c[1]==='status'&&c[2]==='published'),'only current public snapshots');
+check(calls.filter(c=>c[0]==='order').map(c=>c[1]).join(',')==='updated_at,id','stable tie-break ordering');
+check(calls.some(c=>c[0]==='ilike'&&c[2]==='%100\\%\\_\\\\%'),'wildcards/backslash are literal');
+const parsed=listingQuery(new URLSearchParams({q:'100%_\\',cursor:result.nextCursor}));check(parsed.after.at===time&&parsed.after.id===id,'microsecond cursor survives round trip');
+assert.throws(()=>listingQuery(new URLSearchParams({q:'changed',cursor:result.nextCursor})));checks++;
+await listCommunity(db,new URLSearchParams({q:'100%_\\',cursor:result.nextCursor}));check(calls.some(c=>c[0]==='or'&&c[1].includes(`id.lt.${id}`)),'keyset filter contains validated values only');
+const raw=JSON.parse(Buffer.from(result.nextCursor,'base64url'));for(const patch of [{id:'bad),status.eq.unpublished'},{at:'now()'},{anchor:'2999-01-01T00:00:00Z'},{v:2}]){assert.throws(()=>listingQuery(new URLSearchParams({q:'100%_\\',cursor:Buffer.from(JSON.stringify({...raw,...patch})).toString('base64url')})));checks++;}
+const handler=createCommunityHandler({enabled:()=>true,admin:()=>db,authenticate:()=>{throw new Error('must not authenticate browsing');}});
+const call=async url=>{let status,body;const headers={};await handler({method:'GET',url},{setHeader:(k,v)=>headers[k]=v,status(n){status=n;return this;},json(v){body=v;}});return{status,body,headers};};
+check((await call('/api/courses/community')).status===200,'guest listing requires no login');
+check((await call('/api/courses/community?cursor=e30')).status===400,'invalid cursor gets actionable 400');
+check((await call('/api/courses/community')).headers['Cache-Control']==='no-store','public access not cached');
+
+let requests=[],liveBody={courses:[{id:'public-one',title:'Live'}],nextCursor:null},fail=false;
+const bundled=[{id:'starter',title:'Starter',publicAuthor:{displayName:'Exact Author'}},{id:'private',visibility:'private'},{id:'internal',internal:true},{id:'owner',user:true},{id:'starter',title:'Duplicate'}];
+const fetcher=async(url,options)=>{requests.push({url,options});if(fail)throw new Error('network');return {ok:true,json:async()=>url.startsWith('/api')?liveBody:{courses:bundled}};};
+const client=createCommunityCatalog({fetcher,enabled:true});
+let page=await client();check(page.courses.length===1&&page.nextCursor.kind==='bundled','live first, bundled tail remains reachable');
+page=await client({cursor:page.nextCursor});check(page.courses.length===1&&page.courses[0].id==='starter'&&page.nextCursor===null,'bundled private/internal/duplicates omitted');
+liveBody={courses:[],nextCursor:null};page=await client({q:'exact author'});check(page.courses[0].id==='starter','author search in bundled catalog');
+liveBody={courses:[{id:'one'}],nextCursor:'opaque'};page=await client({q:'A & B'});check(page.nextCursor.kind==='live'&&requests.at(-1).url.includes('q=A+%26+B'),'query URL encoded');
+await client({q:'A & B',cursor:page.nextCursor});check(requests.at(-1).url.includes('cursor=opaque'),'cursor sent to full database search');
+await assert.rejects(client({q:'other',cursor:page.nextCursor}));checks++;
+const controller=new AbortController();await client({signal:controller.signal});check(requests.at(-1).options.signal===controller.signal,'request cancellation forwarded');
+fail=true;await assert.rejects(client());checks++;fail=false;
+requests=[];await createCommunityCatalog({fetcher,enabled:false})();check(requests.length===1&&!requests[0].url.startsWith('/api'),'hosted gate off uses only bundled courses');
+liveBody={courses:[],nextCursor:undefined};await assert.rejects(client());checks++;
+await assert.rejects(client({q:'x'.repeat(121)}));checks++;
+
+const {window,document}=parseHTML('<html><head></head><body><main></main></body></html>');Object.assign(globalThis,{window,document});Object.defineProperty(globalThis,'navigator',{value:{onLine:true},configurable:true});
+let pending=[],seen=[];const host=document.querySelector('main');
+const browser=mountCommunityBrowser(host,{loadPage:opts=>{seen.push(opts);return new Promise((resolve,reject)=>pending.push({resolve,reject}));},renderCourse:c=>homeCourseHTML(c),wireCourses:()=>{}});
+let running=browser.refresh();check(host.textContent.includes('Loading Community Courses')&&!host.textContent.includes('No community courses'),'loading not empty');
+pending.shift().resolve({courses:[{id:'one',title:'First'}],nextCursor:'page2'});await running;
+check(host.querySelectorAll('.home-course').length===1&&!host.querySelector('[data-community-more]').hidden,'first page + load action');
+host.querySelector('[data-community-more]').click();check(host.querySelectorAll('.home-course').length===1&&host.querySelector('[data-community-more]').disabled,'next load preserves cards and blocks duplicates');
+pending.shift().reject(new Error('failure'));await new Promise(r=>setTimeout(r,0));check(host.textContent.includes('Couldn’t load more')&&host.querySelectorAll('.home-course').length===1,'error keeps loaded cards');
+host.querySelector('[data-community-retry]').click();check(seen.at(-1).cursor==='page2','retry uses unchanged cursor');
+pending.shift().resolve({courses:[{id:'one',title:'Duplicate'},{id:'two',title:'Second'}],nextCursor:null});await new Promise(r=>setTimeout(r,0));check(host.querySelectorAll('.home-course').length===2&&host.textContent.includes('reached the end'),'dedupe and honest end');
+navigator.onLine=false;await browser.refresh();check(host.querySelectorAll('.home-course').length===2&&host.textContent.includes('offline'),'offline refresh keeps loaded cards');navigator.onLine=true;
+browser.search('older');await new Promise(r=>setTimeout(r,320));const old=pending.shift();browser.search('newer');await new Promise(r=>setTimeout(r,320));pending.shift().resolve({courses:[{id:'new',title:'New answer'}],nextCursor:null});await new Promise(r=>setTimeout(r,0));old.resolve({courses:[{id:'old',title:'Old answer'}],nextCursor:null});await new Promise(r=>setTimeout(r,0));check(host.textContent.includes('New answer')&&!host.textContent.includes('Old answer'),'late search ignored');
+running=browser.refresh();pending.shift().resolve({courses:[],nextCursor:null});await running;check(host.textContent.includes('No matching community courses')&&host.querySelector('[data-community-clear]'),'empty search recovery');
+running=browser.refresh();const late=pending.shift();browser.dispose();late.resolve({courses:[{id:'late',title:'After disposal'}],nextCursor:null});await running;check(!host.textContent.includes('After disposal'),'unmounted view ignores reply');
+
+globalThis.location=new URL('https://example.test/?experience=workspace&filter=mine');globalThis.history={replaceState(){},pushState(){}};
+let options,catalogReads=0;
+const home=createHomeController({getUser:()=>null,listJobs:()=>[],loadLibrary:async opts=>{options=opts;return{courses:[]};},loadCommunityPage:async()=>{catalogReads++;return{courses:[],nextCursor:null};},onJobsChange:()=>()=>{},wireCourses:()=>{},canDelete:()=>false});
+await home.render(host);check(options.includePublic===false&&catalogReads===0,'Your Courses does not request public catalog');home.dispose();
+location=new URL('https://example.test/?experience=workspace');await home.render(host);check(catalogReads===1,'Community uses dedicated paging controller');home.dispose();
+console.log(`Community discovery: ${checks} API, cursor, client, controller and navigation checks passed.`);

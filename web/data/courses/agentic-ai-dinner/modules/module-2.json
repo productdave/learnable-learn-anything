@@ -1,0 +1,710 @@
+{
+  "choose-the-right-source": {
+    "id": "choose-the-right-source",
+    "moduleId": "grounded-recommendations",
+    "title": "Choose the right source for each claim",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Your assistant knows your tastes—but not tonight’s menu",
+        "content": "<p>You have a clear request from Module 1. Now imagine the assistant suggests a dish that was removed last week. The missing capability is <strong>grounding</strong>: connecting a claim to information that supports it.</p><p><strong>Retrieval-augmented generation (RAG)</strong> means retrieving relevant material and supplying it to a model before it answers. In our project, a menu description can support what a dish contains. A live quote is needed for the current total. A cached description cannot establish either availability or the final price.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/agentic-ai-dinner/assets/retrieval-illustrated.png",
+        "alt": "Menu cards are filtered before a source and freshness check.",
+        "caption": "Find relevant evidence, filter constraints, then verify what is current.",
+        "source_title": "Learnable · original illustration"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-choose-the-right-source-choice",
+        "question": "A cached menu lists a dish at $16. What can you safely conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The final delivered total is $16."
+          },
+          {
+            "id": "b",
+            "text": "The cached source lists a $16 item price; current charges need checking."
+          },
+          {
+            "id": "c",
+            "text": "The dish must still be available."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A description supports a bounded historical claim, not current stock or a final checkout quote."
+      },
+      {
+        "type": "concept",
+        "title": "Give evidence an address and a date",
+        "content": "<p>Attach a <strong>source identifier</strong>, an item identifier, and a checked time to evidence. “Menu A, item tofu-bowl, checked at 18:05” is more inspectable than “I read it somewhere.” A timestamp helps you reason about freshness; it is not a guarantee.</p><p>Separate relatively stable descriptions from fast-changing stock and charges. Our lab uses fictional, fixed records and marks stale ones. In a real product, define how long each source may be reused and recheck before a consequential action.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-choose-the-right-source-match",
+        "question": "Match each claim to its best evidence.",
+        "pairs": [
+          {
+            "left": "User prefers vegetarian meals",
+            "right": "The user’s current preference"
+          },
+          {
+            "left": "Dish description",
+            "right": "A named menu item record"
+          },
+          {
+            "left": "Current final charge",
+            "right": "A current checkout quote"
+          }
+        ],
+        "explanation": "Different claims require different sources; one generic context dump cannot replace them."
+      },
+      {
+        "type": "concept",
+        "title": "Make uncertainty visible in the recommendation",
+        "content": "<p>A useful recommendation can say: “This menu describes a tofu bowl at $16. I have not verified the current checkout total.” That is a narrower and more useful claim than “This will definitely arrive for $20.”</p><p>The Retrieval Lab implements filtering and ranking over sample data. It does not run an embedding model or a generative model. You will inspect which record supports each result before adding those components. <a href=\"https://www.anthropic.com/engineering/contextual-retrieval\" target=\"_blank\" rel=\"noopener\">Background: retrieving context with its meaning intact</a>.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-choose-the-right-source-reason",
+        "question": "Write a recommendation when the menu is known but the final charge is not.",
+        "sample_answer": "The menu describes a tofu bowl for $16. It matches the stated preference, but I need a current fee and availability check before confirming it fits the all-in budget.",
+        "key_points": [
+          "Name the supporting evidence",
+          "Keep unknown charges explicit"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-choose-the-right-source-practice",
+        "title": "Try it: Choose the right source for each claim",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Inspect a source",
+            "instruction": "Open the Retrieval Lab and read the source and freshness labels on two menu items.",
+            "cue": "What supports this?",
+            "success": "You can identify the record behind a displayed item."
+          },
+          {
+            "title": "Make a record stale",
+            "instruction": "Enable the stale-source scenario and run the search again.",
+            "cue": "Freshness changes confidence",
+            "success": "You explain why the stale item is excluded."
+          },
+          {
+            "title": "Write a bounded claim",
+            "instruction": "Describe one returned item without promising an unverified delivery outcome.",
+            "cue": "Evidence before confidence",
+            "success": "Your wording separates sample facts from live unknowns."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#retrieval\" target=\"_blank\" rel=\"noopener\"><strong>Retrieval Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-choose-the-right-source-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Write a recommendation when the menu is known but the final charge is not.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Match each claim to the source that can support it.",
+          "Retain source IDs and freshness information.",
+          "Separate menu descriptions from current operational facts."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is grounding?",
+        "back": "Connecting a claim to supporting information."
+      },
+      {
+        "front": "What does RAG add?",
+        "back": "Relevant retrieved material to the model’s input before answering."
+      },
+      {
+        "front": "Does a cached menu prove availability?",
+        "back": "No; availability needs an appropriate current check."
+      },
+      {
+        "front": "Why retain source IDs?",
+        "back": "So a recommendation can be traced to its evidence."
+      },
+      {
+        "front": "Does a timestamp guarantee accuracy?",
+        "back": "No; it helps evaluate freshness and provenance."
+      }
+    ]
+  },
+  "chunk-and-retrieve": {
+    "id": "chunk-and-retrieve",
+    "moduleId": "grounded-recommendations",
+    "title": "Keep meaning intact when you retrieve",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A useful sentence can become misleading when cut apart",
+        "content": "<p>Suppose a menu says “Peanut noodles: contains peanuts. Tofu rice bowl: no peanut ingredient listed; shared kitchen.” A poor split can separate a dish name from its warning. <strong>Chunking</strong> divides documents into searchable pieces while preserving enough context to understand each piece.</p><p>For this small menu, use one complete item record as a chunk: name, description, tags, source, and freshness. Do not join a warning to a different dish just because it is nearby in the source.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-chunk-and-retrieve-choice",
+        "question": "How should you chunk a small menu for this prototype?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Cut every 20 characters, even through item names."
+          },
+          {
+            "id": "b",
+            "text": "Keep each item with its description, metadata, and caveats."
+          },
+          {
+            "id": "c",
+            "text": "Merge every restaurant into a single paragraph."
+          }
+        ],
+        "correct": "b",
+        "explanation": "An item-level record preserves the meaning needed to interpret a candidate."
+      },
+      {
+        "type": "concept",
+        "title": "Similarity finds candidates, not truth",
+        "content": "<p>An <strong>embedding</strong> represents text as numbers that can be compared for semantic similarity. Keyword search matches terms; semantic retrieval can connect related wording. Neither proves that a dish satisfies a dietary requirement.</p><p><strong>Hybrid retrieval</strong> combines lexical and semantic signals. A <strong>reranker</strong> reorders retrieved candidates using another relevance assessment. Add either when measured misses justify the extra complexity. The lab’s transparent keyword score gives us an inspectable baseline, not a disguised embedding model.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "drag-match",
+        "id": "dinner-chunk-and-retrieve-match",
+        "question": "Match the retrieval component to its job.",
+        "pairs": [
+          {
+            "left": "Embedding",
+            "right": "Represent text for semantic comparison"
+          },
+          {
+            "left": "Keyword search",
+            "right": "Match terms in the record"
+          },
+          {
+            "left": "Reranker",
+            "right": "Reorder a candidate set by relevance"
+          }
+        ],
+        "explanation": "Retrieval components choose evidence; constraint checks still decide whether it is suitable."
+      },
+      {
+        "type": "concept",
+        "title": "Inspect retrieval before blaming the answer",
+        "content": "<p>If the right item never reached the answer stage, rewriting the answer prompt may not fix the problem. Inspect the query, candidate records, exclusions, and final context.</p><p>Try “tofu” versus “plant based” in the lab. A keyword mismatch is an observable limitation. You can add a small synonym rule as a learning exercise, then discuss when semantic retrieval would generalize better. Keep the dietary filter independent of the relevance score.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-chunk-and-retrieve-reason",
+        "question": "The answer omitted the right tofu dish. What do you inspect first?",
+        "sample_answer": "Check whether the item was retrieved, whether its record preserved the relevant description, and whether a filter excluded it correctly before changing the answer prompt.",
+        "key_points": [
+          "Inspect retrieved candidates",
+          "Separate retrieval from answer generation"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-chunk-and-retrieve-practice",
+        "title": "Try it: Keep meaning intact when you retrieve",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Compare queries",
+            "instruction": "Search tofu and plant based separately in the Retrieval Lab.",
+            "cue": "Predict candidate differences",
+            "success": "You identify a query the simple scorer handles poorly."
+          },
+          {
+            "title": "Inspect a complete record",
+            "instruction": "Read the item’s description and metadata together.",
+            "cue": "Keep the caveat attached",
+            "success": "You can explain why splitting the record could mislead."
+          },
+          {
+            "title": "Propose one improvement",
+            "instruction": "Write a synonym rule or semantic retrieval hypothesis and a test for it.",
+            "cue": "Measure a specific miss",
+            "success": "Your proposed test distinguishes before and after."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#retrieval\" target=\"_blank\" rel=\"noopener\"><strong>Retrieval Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-chunk-and-retrieve-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "The answer omitted the right tofu dish. What do you inspect first?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Preserve item identity and caveats when chunking.",
+          "Similarity is a candidate signal, not proof.",
+          "Diagnose retrieval misses before rewriting generation prompts."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is a chunk?",
+        "back": "A searchable piece of source material with enough context to interpret it."
+      },
+      {
+        "front": "What does an embedding represent?",
+        "back": "Text as numerical features for semantic comparison."
+      },
+      {
+        "front": "What is hybrid retrieval?",
+        "back": "Combining lexical and semantic retrieval signals."
+      },
+      {
+        "front": "What does a reranker do?",
+        "back": "Reorders an already retrieved candidate set."
+      },
+      {
+        "front": "Does relevance establish suitability?",
+        "back": "No; hard constraints need separate checks."
+      }
+    ]
+  },
+  "filter-before-ranking": {
+    "id": "filter-before-ranking",
+    "moduleId": "grounded-recommendations",
+    "title": "Filter constraints before ranking preferences",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "The best-looking result may be unacceptable",
+        "content": "<p>A spicy chicken bowl may match the query better than a tofu bowl. If vegetarian is a hard requirement, the chicken bowl should never win. Separate <strong>eligibility</strong> from <strong>ranking</strong>.</p><p>For our fictional dataset, first exclude unavailable, stale, non-matching dietary, or over-budget items. Then rank eligible items using query relevance. A preference score must not buy its way past a hard constraint.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-filter-before-ranking-choice",
+        "question": "A non-vegetarian dish has the highest relevance score. What should happen?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It wins because relevance summarizes everything."
+          },
+          {
+            "id": "b",
+            "text": "It is excluded before eligible dishes are ranked."
+          },
+          {
+            "id": "c",
+            "text": "It is shown as vegetarian with a warning afterward."
+          }
+        ],
+        "correct": "b",
+        "explanation": "Hard requirements define eligibility; ranking only compares candidates that pass."
+      },
+      {
+        "type": "concept",
+        "title": "Calculate a total with explicit assumptions",
+        "content": "<p>The lab adds item price, delivery, fees, tax, and the chosen tip in <strong>integer cents</strong>. That avoids simple decimal rounding surprises and makes the calculation easy to audit. These values are training fixtures, not current charges.</p><p>The user’s “under $25” means strictly less than 2500 cents. “At most $25” would permit equality. Preserve that distinction rather than changing it silently. Unknown charges cannot be treated as zero in a real checkout calculation.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "dinner-filter-before-ranking-blank",
+        "sentence": "For a strict “under $25” limit, the total must be less than ___ cents.",
+        "acceptable_answers": [
+          "2500",
+          "2,500"
+        ],
+        "explanation": "There are 100 cents in a dollar. Equality does not satisfy the word under."
+      },
+      {
+        "type": "concept",
+        "title": "Explain why an item was excluded",
+        "content": "<p>The lab lists exclusions as well as results. “Outside the budget” and “unavailable” point to different next actions. When nothing qualifies, ask whether a preference can change; do not silently relax a hard requirement.</p><p>Dietary tags in a sample dataset are not a guarantee about real preparation or cross-contact. If a user reports an allergy, avoid inferring safety from a missing ingredient and require appropriate verification before presenting a safe-food claim.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-filter-before-ranking-reason",
+        "question": "No sample item satisfies the current constraints. How should the assistant respond?",
+        "sample_answer": "Explain that no current candidate qualifies, show the limiting constraint, and ask whether the user wants to change a preference or revise the budget. Do not alter it without consent.",
+        "key_points": [
+          "Explain no-result behavior",
+          "Do not silently relax requirements"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-filter-before-ranking-practice",
+        "title": "Try it: Filter constraints before ranking preferences",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Set a strict budget",
+            "instruction": "Search with a $25 limit and inspect each returned total in the lab.",
+            "cue": "Read the whole total",
+            "success": "Every eligible total is strictly below the cap."
+          },
+          {
+            "title": "Tighten the constraint",
+            "instruction": "Lower the budget until no item qualifies.",
+            "cue": "Empty is a valid result",
+            "success": "The lab explains exclusions rather than inventing a match."
+          },
+          {
+            "title": "Test a preference change",
+            "instruction": "Change the query while keeping the budget fixed.",
+            "cue": "Eligibility stays firm",
+            "success": "Ranking changes without admitting ineligible items."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#retrieval\" target=\"_blank\" rel=\"noopener\"><strong>Retrieval Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-filter-before-ranking-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "No sample item satisfies the current constraints. How should the assistant respond?",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Filter hard constraints before scoring preferences.",
+          "Make all price components and boundary conditions explicit.",
+          "Treat an empty eligible set as a reason to clarify."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What is eligibility?",
+        "back": "Whether a candidate satisfies required conditions."
+      },
+      {
+        "front": "What is ranking?",
+        "back": "Ordering eligible candidates by desirable qualities."
+      },
+      {
+        "front": "Why use integer cents?",
+        "back": "To make monetary arithmetic precise for the fixture calculations."
+      },
+      {
+        "front": "Can unknown fees count as zero?",
+        "back": "No; missing charges must be resolved before claiming a final total."
+      },
+      {
+        "front": "Does vegetarian metadata prove allergy safety?",
+        "back": "No. Ingredients and preparation need appropriate verification."
+      }
+    ]
+  },
+  "build-grounded-shortlist": {
+    "id": "build-grounded-shortlist",
+    "moduleId": "grounded-recommendations",
+    "title": "Build a shortlist with inspectable evidence",
+    "estimatedMinutes": 45,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Turn a list into a defensible recommendation",
+        "content": "<p>A useful shortlist needs more than three names. For each item, show why it fits, the sample total, and the supporting source. If two choices are close, explain the tradeoff: a better cuisine match versus a lower total.</p><p>Start with a deterministic explanation derived from the filtered record. Later, a model can improve wording while remaining bounded by the same evidence. Never let polished prose add an unsupported delivery promise.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "dinner-build-grounded-shortlist-choice",
+        "question": "What belongs beside a recommended item?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A confident adjective and a stock photo."
+          },
+          {
+            "id": "b",
+            "text": "Its source, explicit total assumptions, and reason it fits."
+          },
+          {
+            "id": "c",
+            "text": "A promise that every dietary need is guaranteed."
+          }
+        ],
+        "correct": "b",
+        "explanation": "A recommendation should be inspectable and limited to what its evidence supports."
+      },
+      {
+        "type": "concept",
+        "title": "Change one behavior in the starter",
+        "content": "<p>Open the lab bundle and find <strong>searchMenu</strong> in builder-core.mjs. Read the eligibility checks before the scoring function. Predict what happens when you change a search weight, then run the lab again.</p><p>Keep a counterexample: a highly relevant unavailable dish. If that dish appears after your change, you changed more than ranking. Restore the boundary check and rerun the case. A successful code edit should preserve earlier guarantees.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "dinner-build-grounded-shortlist-claim",
+        "statement": "Changing ranking weights should allow an unavailable item to become eligible.",
+        "correct": false,
+        "explanation": "Ranking weights should only reorder already eligible candidates."
+      },
+      {
+        "type": "concept",
+        "title": "Carry the shortlist into the next module",
+        "content": "<p>Choose an eligible item, then open the Workflow Lab. The project now has two separate stages: obtaining defensible candidates and drafting a cart. This separation makes errors easier to locate.</p><p>Your completion artifact is a three-case evidence log: one successful search, one empty result, and one excluded stale record. Include both expected and actual behavior. These become regression cases in Module 5.</p>"
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "dinner-build-grounded-shortlist-reason",
+        "question": "Describe a regression test for your shortlist edit.",
+        "sample_answer": "Include an unavailable item with the strongest keyword match. After changing ranking weights, assert that it remains excluded while eligible items may change order.",
+        "key_points": [
+          "Preserve eligibility",
+          "Use a counterexample that could expose a bug"
+        ],
+        "explanation": "Compare your reasoning with the sample. A different wording is fine if it preserves the decision and the evidence behind it."
+      },
+      {
+        "type": "practice",
+        "context": "learning",
+        "id": "dinner-build-grounded-shortlist-practice",
+        "title": "Try it: Build a shortlist with inspectable evidence",
+        "goal": "Apply the lesson to your dinner assistant and explain the result using observable evidence.",
+        "durationMinutes": 25,
+        "equipment": [
+          "The worked example above",
+          "The module lab linked below",
+          "Your saved reflection"
+        ],
+        "setup": "Predict the outcome before running the exercise. Keep your fictional request and earlier constraints visible.",
+        "steps": [
+          {
+            "title": "Run three cases",
+            "instruction": "Use a normal query, a too-low budget, and the stale-source scenario.",
+            "cue": "Record expected and actual",
+            "success": "You have evidence for success and failure paths."
+          },
+          {
+            "title": "Edit one weight",
+            "instruction": "In a local copy, change the query score in searchMenu and rerun your cases.",
+            "cue": "Small reversible edit",
+            "success": "Ordering can change while eligibility remains intact."
+          },
+          {
+            "title": "Write your handoff",
+            "instruction": "Save one selected item ID, its source, and its sample total for Module 3.",
+            "cue": "Pass structured evidence",
+            "success": "The next stage can identify the exact item."
+          }
+        ],
+        "regressions": [
+          "Repeat the worked example with one input changed. Explain the change aloud before editing code."
+        ],
+        "progressions": [
+          "Invent an edge case that would break your first solution, then write its expected behavior."
+        ],
+        "safetyStops": [
+          "If a result differs from your prediction, inspect the inputs and the first failing step before changing the prompt.",
+          "Use fictional data and a local copy for experiments."
+        ],
+        "readinessChecks": [
+          {
+            "id": "explain",
+            "label": "I can explain the key decision in this lesson."
+          },
+          {
+            "id": "demonstrate",
+            "label": "I can demonstrate the expected behavior in the exercise."
+          },
+          {
+            "id": "recover",
+            "label": "I can explain a failure and a sensible recovery."
+          }
+        ]
+      },
+      {
+        "type": "concept",
+        "title": "Build checkpoint",
+        "content": "<p>Open the <a href=\"data/courses/agentic-ai-dinner/assets/builder-lab.html#retrieval\" target=\"_blank\" rel=\"noopener\"><strong>Retrieval Lab</strong></a> and follow the practice above. Each lab explains its inputs, its actual logic, and its limits. Save your observations below; your check-ins and reflection remain in Learnable.</p><p>For an AI-assisted code change, download the lab bundle from the lab page. Ask your coding assistant to explain the relevant function first, change one behavior, and add one test that could fail. Compare the result with your prediction.</p>"
+      },
+      {
+        "type": "exercise",
+        "id": "dinner-build-grounded-shortlist-reflection",
+        "title": "Save your experiment and check-in",
+        "prompt": "Record your prediction, what you tried, what happened, and the evidence for your conclusion. Name one thing you can now do independently and one uncertainty to revisit.",
+        "hints": [
+          "Describe a regression test for your shortlist edit.",
+          "Include the input, expected behavior, actual result, and the smallest next change."
+        ]
+      },
+      {
+        "type": "takeaway",
+        "points": [
+          "Show evidence beside the recommendation.",
+          "Make one measurable change at a time.",
+          "Carry stable item identifiers into the cart workflow."
+        ]
+      }
+    ],
+    "flashcards": [
+      {
+        "front": "What makes a shortlist inspectable?",
+        "back": "Item IDs, sources, price assumptions, and reasons for eligibility."
+      },
+      {
+        "front": "What should a ranking edit preserve?",
+        "back": "Hard-constraint filtering."
+      },
+      {
+        "front": "What is a regression case?",
+        "back": "A previously checked behavior rerun to detect a new failure."
+      },
+      {
+        "front": "Why separate retrieval from drafting?",
+        "back": "It makes responsibilities and failure locations clearer."
+      },
+      {
+        "front": "What should happen when evidence is insufficient?",
+        "back": "Narrow the claim or ask for the missing information."
+      }
+    ]
+  }
+}

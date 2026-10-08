@@ -1,0 +1,58 @@
+{
+  "title": "Little Swimmer",
+  "subtitle": "A parent-led, safety-first pathway from happy splashing to calm short swims.",
+  "modules": [
+    {
+      "id": "foundations",
+      "number": 1,
+      "title": "Foundations",
+      "description": "Build the rules, breath control, entries, exits, and wall habits that every later skill depends on.",
+      "icon": "alert-triangle",
+      "color": "#0891B2",
+      "topics": [
+        { "id": "pool-safety-agreement", "title": "The Pool Safety Agreement" },
+        { "id": "bubbles-and-face", "title": "Bubbles and a Happy Face" },
+        { "id": "enter-exit-and-wall", "title": "Enter, Exit, and Hold the Wall" }
+      ]
+    },
+    {
+      "id": "float-and-recover",
+      "number": 2,
+      "title": "Float & Recover",
+      "description": "Learn buoyancy, balance, returning to standing, rolling, and finding the wall.",
+      "icon": "repeat",
+      "color": "#2563EB",
+      "topics": [
+        { "id": "supported-back-float", "title": "A Calm Supported Back Float" },
+        { "id": "front-float-to-feet", "title": "Front Float to Feet" },
+        { "id": "roll-turn-and-wall", "title": "Roll, Turn, and Find the Wall" }
+      ]
+    },
+    {
+      "id": "move-through-water",
+      "number": 3,
+      "title": "Move Through Water",
+      "description": "Turn balanced shapes into glides, kicks, and short coordinated swims.",
+      "icon": "arrow-right",
+      "color": "#0D9488",
+      "topics": [
+        { "id": "push-and-glide", "title": "Push and Glide Like a Rocket" },
+        { "id": "flutter-kicks", "title": "Small, Steady Flutter Kicks" },
+        { "id": "arms-and-breathing", "title": "Add Arms and Breathing" }
+      ]
+    },
+    {
+      "id": "independent-sequences",
+      "number": 4,
+      "title": "Independent Sequences",
+      "description": "Connect practiced skills into short, calm safety sequences and choose the next learning step.",
+      "icon": "target",
+      "color": "#7C3AED",
+      "topics": [
+        { "id": "jump-turn-grab", "title": "Jump, Surface, Turn, Grab" },
+        { "id": "swim-float-swim", "title": "Swim, Float, Swim" },
+        { "id": "family-skill-check", "title": "Family Skill Check & Next Steps" }
+      ]
+    }
+  ]
+}

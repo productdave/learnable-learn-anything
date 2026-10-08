@@ -1,0 +1,144 @@
+{
+  "title": "Evals & Rubrics for AI PMs",
+  "subtitle": "Build rigorous evaluation frameworks for AI products and ace your PM interviews",
+  "modules": [
+    {
+      "id": "what-are-evals",
+      "number": 1,
+      "title": "What Evals Are and Why They Matter",
+      "description": "Learn the fundamental mental models for AI product evaluation, why traditional QA doesn't work for LLMs, and how evals tie to product quality and user trust.",
+      "icon": "compass",
+      "color": "#4338CA",
+      "topics": [
+        {
+          "id": "evals-vs-traditional-qa",
+          "title": "Why Traditional QA Fails for AI Products",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "eval-types-taxonomy",
+          "title": "The Taxonomy of Evals: Unit, Integration, Regression, and Adversarial",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "when-to-run-evals",
+          "title": "When to Run Evals: Development, Pre-Release, and Production Monitoring",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "eval-coverage-strategy",
+          "title": "Coverage Strategy: Happy Paths, Edge Cases, and Failure Modes",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "building-rubrics",
+      "number": 2,
+      "title": "Designing Rubrics That Work",
+      "description": "Master the art of writing concrete scoring criteria, from binary pass/fail to nuanced multi-dimensional rubrics that capture what good looks like.",
+      "icon": "scale",
+      "color": "#D97706",
+      "topics": [
+        {
+          "id": "rubric-fundamentals",
+          "title": "Anatomy of a Good Rubric: Criteria, Scales, and Examples",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "fill-in-blank"
+          ]
+        },
+        {
+          "id": "rubric-dimensions",
+          "title": "Choosing Rubric Dimensions: Accuracy, Helpfulness, Safety, Tone",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "scoring-scales",
+          "title": "Binary vs. Likert vs. Custom Scales: When to Use Each",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "rubric-examples-walkthrough",
+          "title": "Real Rubric Examples: Customer Support, Code Generation, Summarization",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "true-false"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementing-evals",
+      "number": 3,
+      "title": "Building and Running Eval Workflows",
+      "description": "Go from theory to practice: assemble eval datasets, choose human vs. LLM-as-judge, interpret results, and integrate evals into your product development cycle.",
+      "icon": "settings",
+      "color": "#059669",
+      "topics": [
+        {
+          "id": "building-eval-datasets",
+          "title": "Creating Eval Datasets: Sourcing, Labeling, and Versioning",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "true-false"
+          ]
+        },
+        {
+          "id": "human-vs-llm-judges",
+          "title": "Human Graders vs. LLM-as-Judge: Trade-offs and When to Use Each",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "true-false"
+          ]
+        },
+        {
+          "id": "interpreting-eval-results",
+          "title": "Reading Eval Results: Aggregate Scores, Distributions, and Regressions",
+          "quiz_plan": [
+            "multiple-choice",
+            "fill-in-blank",
+            "true-false"
+          ]
+        },
+        {
+          "id": "evals-in-pm-interviews",
+          "title": "Communicating Evals in Interviews: Frameworks and Examples",
+          "quiz_plan": [
+            "short-answer",
+            "multiple-choice",
+            "drag-match"
+          ]
+        }
+      ]
+    }
+  ]
+}

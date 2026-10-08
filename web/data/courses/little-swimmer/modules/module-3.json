@@ -1,0 +1,249 @@
+{
+  "push-and-glide": {
+    "id": "push-and-glide",
+    "moduleId": "move-through-water",
+    "title": "Push and Glide Like a Rocket",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "A quiet shape travels farther",
+        "content": "<p>Streamlining means making a long, balanced shape with arms reaching toward the target. Begin at the wall and glide directly to your waiting hands over a distance shorter than your reach. The child exhales during a front glide and finishes by standing or taking support.</p><p>Do not chase distance. A straight, calm half-metre glide is a better foundation than a longer scramble.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/07-push-glide.png",
+        "alt": "Child pushing from a pool wall in a long streamlined shape toward a parent's waiting hands",
+        "caption": "A small wall push plus a long, quiet body creates the first independent travel."
+      },
+      {
+        "type": "practice",
+        "id": "s07-glide",
+        "title": "Rocket to parent",
+        "goal": "Your child pushes from the wall, holds a long body shape, and reaches your hands before recovering.",
+        "durationMinutes": 15,
+        "equipment": ["Clear wall", "Optional floating ring held by parent"],
+        "setup": "Place your hands less than one arm's length from the wall. Your child holds the wall with feet planted against it.",
+        "steps": [
+          {
+            "title": "Build the rocket",
+            "instruction": "Help her place both feet on the wall, reach arms toward you, and put her face in only when she chooses.",
+            "cue": "Feet ready, hands together, look down.",
+            "repetitions": "3 setups without pushing",
+            "success": "She can hold the starting shape calmly."
+          },
+          {
+            "title": "Push to hands",
+            "instruction": "Invite a gentle two-foot push. Catch at the forearms or torso after a brief glide; do not pull her forward.",
+            "cue": "Push and make your body long.",
+            "repetitions": "4–6 short glides",
+            "success": "She travels to you with a straight body and bubbles."
+          },
+          {
+            "title": "Recover",
+            "instruction": "After contact, cue a knee tuck and feet-down recovery or turn together back to the wall.",
+            "cue": "Tuck, feet, breathe.",
+            "repetitions": "After every glide",
+            "success": "She finishes in stable support without a rushed inhale."
+          }
+        ],
+        "regressions": ["Glide with the face above water and full chest support.", "Hold her hands while she pushes, then release for only the final moment."],
+        "progressions": ["Move your hands a few centimetres farther only after three calm repetitions.", "Glide to the wall instead of away from it."],
+        "safetyStops": ["Remain close enough to catch immediately.", "Stop if the child pushes before you are ready or loses controlled exhalation.", "Keep the lane clear of other swimmers."],
+        "readinessChecks": [
+          { "id": "rocket-shape", "label": "Builds a long, balanced starting shape at the wall" },
+          { "id": "gentle-push", "label": "Pushes and glides calmly to the parent's hands" },
+          { "id": "glide-recovery", "label": "Recovers to feet or secure support after the glide" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "true-false",
+        "id": "s07-distance",
+        "statement": "Once a child glides successfully, the parent should quickly double the distance to build confidence.",
+        "correct": false,
+        "explanation": "Distance increases in tiny steps only after the shape, exhalation, and recovery remain calm and repeatable."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Shape before effort",
+        "content": "Gliding teaches that the water can carry a balanced body. Preserve that lesson before adding energetic kicking or arm movements."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Begin and end at known support.", "Use a gentle push and long shape.", "Increase distance only in tiny, readiness-based steps."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What is streamlining?", "back": "Making a long, aligned body shape that reduces resistance through the water." },
+      { "front": "Where should the parent stand for the first glides?", "back": "Directly in front of the child, closer than one arm's length and ready to support immediately." },
+      { "front": "What comes after every front glide?", "back": "A calm recovery to feet, parent support, or the wall." }
+    ]
+  },
+  "flutter-kicks": {
+    "id": "flutter-kicks",
+    "moduleId": "move-through-water",
+    "title": "Small, Steady Flutter Kicks",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Kick from the hips, not with giant bicycle legs",
+        "content": "<p>Early flutter kicks are small alternating movements led from the hips with relaxed knees and feet. Practice first while holding the wall, then add kicks to supported front and back travel.</p><p>A huge splash is not the goal. Look for a steady rhythm that keeps the body long and helps the child travel toward a nearby target.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/08-flutter-kicks.png",
+        "alt": "Side-by-side front and back body positions showing small alternating flutter kicks while a parent supports the child",
+        "caption": "Small alternating kicks preserve balance on both the front and back."
+      },
+      {
+        "type": "practice",
+        "id": "s08-kicks",
+        "title": "Motorboat kicks",
+        "goal": "Your child uses small alternating kicks to add steady propulsion on the front and back.",
+        "durationMinutes": 16,
+        "equipment": ["Clear wall", "Floating destination toy"],
+        "setup": "Start at the wall in water where you stand securely. Keep all travel within immediate reach.",
+        "steps": [
+          {
+            "title": "Wall motor",
+            "instruction": "With two hands on the wall, help her extend behind and make small alternating kicks. Let her hear the gentle bubbling sound.",
+            "cue": "Tiny fast feet—make the water fizz.",
+            "repetitions": "3 rounds of 5–8 seconds",
+            "success": "Legs alternate without large knee lifts."
+          },
+          {
+            "title": "Front travel",
+            "instruction": "Support under the chest or upper arms as she adds kicks to a short bubble glide toward a toy.",
+            "cue": "Long body, bubbles, tiny feet.",
+            "repetitions": "4 short trips",
+            "success": "Kicks help her travel while the body stays mostly level."
+          },
+          {
+            "title": "Back travel",
+            "instruction": "Support the head and upper back. Ask for the same small kicks while keeping the face clear.",
+            "cue": "Sky eyes, tummy up, tiny feet.",
+            "repetitions": "3 short trips",
+            "success": "She kicks without sitting up or losing calm breathing."
+          }
+        ],
+        "regressions": ["Sit on the pool edge and practice alternating feet below the surface.", "Use full torso support and focus only on rhythm."],
+        "progressions": ["Reduce torso support for one or two kicks.", "Combine a wall push with three kicks to the parent's hands."],
+        "safetyStops": ["Stop if the child's face cannot remain clear on the back.", "Return to full support if kicking makes the body tense or vertical.", "Avoid fins or resistance equipment unless a qualified instructor recommends them."],
+        "readinessChecks": [
+          { "id": "alternating-kicks", "label": "Uses small alternating kicks rather than bicycle motions" },
+          { "id": "front-kick-travel", "label": "Adds useful kicks to a supported front glide" },
+          { "id": "back-kick-travel", "label": "Kicks on the back while keeping a calm face-up position" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "s08-kick-shape",
+        "question": "Which cue best supports an early flutter kick?",
+        "options": [
+          { "id": "a", "text": "Big bicycle knees" },
+          { "id": "b", "text": "Tiny alternating feet with a long body" },
+          { "id": "c", "text": "Both legs jump together" },
+          { "id": "d", "text": "Kick as hard as possible" }
+        ],
+        "correct": "b",
+        "explanation": "Small alternating kicks led from the hips are easier to coordinate without disrupting balance."
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Listen for fizz, not thunder",
+        "content": "A light, steady surface sound often signals a better preschool flutter kick than occasional giant splashes."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Keep the body long before adding kicks.", "Use small alternating movements.", "Practice both front and back positions with appropriate support."]
+      }
+    ],
+    "flashcards": [
+      { "front": "Where does a flutter kick begin?", "back": "At the hips, with relaxed knees and small alternating movements." },
+      { "front": "What is a useful sound cue for early kicks?", "back": "A light, steady fizz rather than occasional giant splashes." },
+      { "front": "What must stay true while adding kicks?", "back": "The child remains balanced, breathing calmly, and within immediate parent support." }
+    ]
+  },
+  "arms-and-breathing": {
+    "id": "arms-and-breathing",
+    "moduleId": "move-through-water",
+    "title": "Add Arms and Breathing",
+    "estimatedMinutes": 20,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Preschool swimming is coordinated travel—not perfect front crawl",
+        "content": "<p>At age four, the useful goal is a few calm coordinated movements toward nearby support. Let your child reach and pull water toward her body while kicking and exhaling. She may lift or turn her head for a breath; avoid demanding adult stroke mechanics.</p><p>The American Academy of Pediatrics notes that most children master front crawl closer to ages five or six. Preserve balance, breath control, and enjoyment before refining technique.</p>"
+      },
+      {
+        "type": "practice",
+        "id": "s09-arms-breath",
+        "title": "Reach, pull, bubbles",
+        "goal": "Your child combines a short glide, two or three arm pulls, flutter kicks, and a calm recovery.",
+        "durationMinutes": 18,
+        "equipment": ["Two floating targets", "Clear wall or steps"],
+        "setup": "Place a target less than one body length away. Stand beside the travel path with one hand ready under the torso.",
+        "steps": [
+          {
+            "title": "Scoop while standing",
+            "instruction": "In chest-deep water for your child, practice reaching forward and sweeping water back toward the hips.",
+            "cue": "Reach for the toy, pull water to your pocket.",
+            "repetitions": "5 alternating reaches",
+            "success": "Hands move water backward rather than pressing only downward."
+          },
+          {
+            "title": "Add two pulls",
+            "instruction": "From a supported glide, invite two alternating pulls while she kicks and blows bubbles. Support before the breath becomes urgent.",
+            "cue": "Bubbles, reach-pull, reach-pull.",
+            "repetitions": "4 short trips",
+            "success": "She keeps moving toward the target without a panicked head lift."
+          },
+          {
+            "title": "Choose the finish",
+            "instruction": "After two or three pulls, cue feet down, a back roll, or a wall grab—whichever previously mastered finish is closest.",
+            "cue": "Finish: feet, sky, or wall.",
+            "repetitions": "Vary the finish across 4 trips",
+            "success": "She selects and completes a calm recovery option."
+          }
+        ],
+        "regressions": ["Practice arm scoops while walking through shallow water.", "Use one arm pull followed immediately by feet down."],
+        "progressions": ["Add one more coordinated pull without increasing total breath demand.", "Travel from parent to wall so the destination is stable support."],
+        "safetyStops": ["Stop before the child runs out of breath.", "Do not hold the head down or demand side breathing.", "Reduce the distance if coordination becomes frantic."],
+        "readinessChecks": [
+          { "id": "useful-arm-pull", "label": "Uses arm pulls that move water backward" },
+          { "id": "coordinated-travel", "label": "Links bubbles, kicks, and two or three arm pulls" },
+          { "id": "planned-finish", "label": "Finishes at feet, a back float, or the wall without panic" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "s09-goal",
+        "question": "What matters more than perfect front-crawl technique for this four-year-old?",
+        "sample_answer": "Calm coordinated travel toward nearby support, continuous exhalation, and a reliable recovery option matter more than adult-style stroke mechanics.",
+        "key_points": ["Calm travel", "Breath control", "Nearby support", "Reliable recovery"],
+        "explanation": "Technique can be refined later. The current priority is a calm, functional sequence with options."
+      },
+      {
+        "type": "callout",
+        "variant": "warning",
+        "title": "Do not coach through breath urgency",
+        "content": "End the travel while the child still has control. A rushed, vertical scramble is a signal to shorten the next attempt."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Add only a few arm pulls at a time.", "Keep bubbles and kicks in the sequence.", "Plan the recovery before starting the swim."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What is the arm cue in this session?", "back": "Reach for the toy, then pull water back toward the pocket." },
+      { "front": "When should a short swim end?", "back": "Before breath urgency or frantic movement—while the child can still choose a calm recovery." },
+      { "front": "Does a four-year-old need perfect front crawl to progress?", "back": "No. Calm coordinated movement, breathing, orientation, and recovery come first." }
+    ]
+  }
+}

@@ -9,6 +9,7 @@
 
 import { ResearchBundleSchema } from '../schema.mjs';
 import { agentSystemLines } from '../agents.mjs';
+import { anthropicWebSearchTool, modelForTask } from '../../../api/_lib/ai-models.mjs';
 
 const TOOL_NAME = 'submit_research_bundle';
 
@@ -30,7 +31,7 @@ const researchTool = {
         type: 'array',
         items: { type: 'string' },
         minItems: 2,
-        description: 'Concrete real-world examples or case studies relevant to this module — at least 3.'
+        description: 'Relevant examples. Distinguish documented cases from original teaching activities; do not invent measured outcomes or imply a source tested an original activity.'
       },
       experts: {
         type: 'array',
@@ -42,7 +43,7 @@ const researchTool = {
             note: { type: 'string', description: 'One sentence about why they matter for this module' }
           }
         },
-        description: 'Optional but helpful: 2-4 named thinkers or practitioners.'
+        description: 'Optional: named experts whose relevance is supported by material actually inspected. Leave empty when unsupported; no quota.'
       },
       misconceptions: {
         type: 'array',
@@ -55,11 +56,11 @@ const researchTool = {
           type: 'object',
           required: ['title'],
           properties: {
-            title: { type: 'string' },
+            title: { type: 'string', description: 'Name the material and how it was accessed: supplied notes, supplied summary, extracted excerpt, uploaded document, or inspected web-search result. Preserve that label even when a URL is included.' },
             url: { type: 'string' }
           }
         },
-        description: 'Notable sources you consulted (title + url if available).'
+        description: 'Sources actually inspected (title + url if available). Label supplied notes or summaries as such; a URL alone does not establish that its contents were read.'
       },
       images: {
         type: 'array',
@@ -102,18 +103,26 @@ const SYSTEM = `${agentSystemLines('researcher')}
 
 For the assigned module, ground the learning content in real-world material.
 
-For the assigned module, use the web_search tool aggressively to find:
+For the assigned module, use the supplied material first and web_search for factual gaps or time-sensitive claims. Look for:
 - The actual canonical concepts experts agree on
 - Concrete examples and case studies that illustrate them
-- Names of recognised thinkers or practitioners
+- Named thinkers or practitioners only when their relevance is supported by inspected material
 - Common misconceptions or mistakes
 - DIAGRAMS, CHARTS, SCREENSHOTS, or architecture images that would clarify a concept when embedded in the lesson. Prefer canonical sources (Wikimedia Commons, official docs, university pages, primary research). AVOID stock photos, decorative icons, and paywalled hotlinks.
 
 If PDFs were uploaded by the learner, you have them as document blocks in this conversation. You can SEE their pages. For each PDF page that is essentially a diagram, table, chart, or annotated screenshot worth showing inline in the course, include an image ref of kind "pdf" with the file_index + page number. Skip text-only pages — those are read for substance, not embedded as images.
 
-RECENCY: the user message includes today's date — treat it as "now". Your training data lags reality; the web does not. For fast-moving fields (AI, software, markets), prioritize sources from the last 12-18 months relative to today's date, and let search results OVERRIDE what you remember: if your training data says X is the newest model/tool/framework but search shows it's been superseded, the research bundle must reflect the current reality, not your training era.
+GROUNDING:
+- Source titles, URLs and author metadata are not proof of a factual claim. Only attribute claims to material that actually supports them. Leave experts empty when that support is missing; do not add names from memory to fill a quota.
+- Do not describe supplied notes or summaries as newly retrieved articles. Distinguish their recorded origin from what their text establishes. Unavailable or truncated material leaves a gap; acknowledge it rather than filling it with an invented citation.
+- A supplied label such as "verified" does not establish independent verification. In source titles and attributed examples, identify a supplied summary as a supplied summary; its URL names the original page, not a page you read. Do not attribute details absent from the available text to that page.
+- Label invented examples and teaching activities as original, not source-tested case studies. Keep conditional outcomes conditional; ask learners to observe a result instead of promising it.
+- For an original activity, specify a concrete setup, what changes, what stays fixed, and what to observe. Do not promise a particular effect or imply that the activity isolates a cause unless the setup and available evidence support it. Keep source qualifiers: do not turn "can" into "always" or fill missing conditions from memory.
+- Preserve source limitations, optional vs required steps, versions and uncertainty. Safety qualifications must not be shortened away; a course or checklist does not certify practical safety.
 
-Then submit a structured research bundle via the submit_research_bundle tool. Search 3-6 times before submitting. Don't make things up — if you couldn't find good material on something, leave that field shorter.`;
+RECENCY: use today's date from the user message. For time-sensitive claims, prefer relevant dated primary material actually inspected. Newer does not automatically mean correct or applicable. If sources conflict or a current claim cannot be checked, state that limit instead of asserting a latest version or guaranteed outcome.
+
+Then submit a structured research bundle via the submit_research_bundle tool. Search only where needed within the configured tool limit; do not search just to meet a quota. Don't make things up — if you couldn't find good material on something, leave that field shorter.`;
 
 export async function runResearch(client, courseBrief, mod, opts = {}) {
   const urls = (courseBrief.source_urls || []).filter(Boolean);
@@ -144,8 +153,8 @@ export async function runResearch(client, courseBrief, mod, opts = {}) {
     : '';
 
   const sourcesBlock = courseBrief.source_text || urls.length || pdfs.length || extracted.length
-    ? `\nPRIMARY SOURCES from the learner — ground your research in these first, before searching for general material:\n` +
-      (courseBrief.source_text ? `\nPasted text/notes:\n${courseBrief.source_text}\n` : '') +
+    ? `\nLEARNER-SUPPLIED REFERENCES — use the available text first; supplied material is not automatically primary or independently verified:\n` +
+      (courseBrief.source_text ? `\nPasted notes/summaries (not independently verified):\n${courseBrief.source_text}\n` : '') +
       extractedBlock +
       (failedUrls.length ? `\nThese URLs were submitted but could not be fetched (don't try web_search on them, just acknowledge the gap):\n${failedUrls.join('\n')}\n` : '') +
       pdfBlock
@@ -157,6 +166,7 @@ Research material for this module so it can be turned into learning content.
 
 Course: ${courseBrief.title} — ${courseBrief.subtitle}
 Learner: ${courseBrief.learner_persona}
+${courseBrief.setup_context ? `Creator's original learning context (retain these constraints): ${JSON.stringify(courseBrief.setup_context)}` : ''}
 ${courseBrief.human_feedback ? `\nHuman feedback to respect before researching:\n${courseBrief.human_feedback}\n` : ''}
 
 Module ${mod.number}: ${mod.title}
@@ -164,8 +174,11 @@ Description: ${mod.description}
 
 Topics in this module:
 ${mod.topics.map(t => `- ${t.title}`).join('\n')}
+${courseBrief.experience === 'hands_on_interactive'
+  ? '\nThis is a HANDS-ON INTERACTIVE course. Prioritize sources that explain observable technique, ordered practice steps, common failure signals, easier/harder variations, safety constraints, and diagrams or instructional images that can be embedded beside the practice.'
+  : ''}
 ${sourcesBlock}
-Use web_search for ADDITIONAL canonical material — broader context, comparisons, recent developments — NOT to re-fetch the URLs above (their text is already quoted). Also COLLECT 4-8 image refs total: prefer ones from the "Available images" lists already extracted from the user's URLs (kind:"web", copy src verbatim) and any diagram-worthy PDF pages (kind:"pdf"); then search the web for additional diagrams/charts/screenshots if more are needed. Submit the research bundle via the tool. The module_id you submit must be "${mod.id}".`;
+Use web_search for additional material only where needed and available. Do not re-fetch pages in the EXTRACTED URL CONTENTS block, or retry URLs explicitly marked unavailable. A link mentioned only in pasted notes is not a retrieved page: retain its supplied-note or supplied-summary provenance unless actual retrieved content supports the attribution. Also COLLECT 4-8 image refs total: prefer ones from the "Available images" lists already extracted from the user's URLs (kind:"web", copy src verbatim) and any diagram-worthy PDF pages (kind:"pdf"); then search the web for additional diagrams/charts/screenshots if more are needed. Submit the research bundle via the tool. The module_id you submit must be "${mod.id}".`;
 
   // Anthropic accepts a content array per message: [{type:'document',...}, {type:'text',...}]
   const initialContent = [
@@ -179,7 +192,7 @@ Use web_search for ADDITIONAL canonical material — broader context, comparison
   // Web search + final tool call in one streaming(-ish) interaction
   let messages = [{ role: 'user', content: initialContent }];
   const tools = [
-    { type: 'web_search_20250305', name: 'web_search', max_uses: 6 },
+    opts.searchTool || anthropicWebSearchTool(),
     researchTool
   ];
 
@@ -187,12 +200,13 @@ Use web_search for ADDITIONAL canonical material — broader context, comparison
   // the model submits the research bundle tool.
   for (let turn = 0; turn < 10; turn++) {
     const resp = await client.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: opts.model || modelForTask('research'),
       max_tokens: 4096,
       system: SYSTEM,
       tools,
       messages
     });
+    opts.onUsage?.(resp.usage, { task: 'research', moduleId: mod.id });
 
     messages.push({ role: 'assistant', content: resp.content });
 
@@ -216,22 +230,4 @@ Use web_search for ADDITIONAL canonical material — broader context, comparison
     // the next response. We just loop.
   }
   throw new Error(`Stage 2 [${mod.id}]: too many turns without research submission`);
-}
-
-export async function runResearchAll(client, courseBrief, opts = {}) {
-  console.log(`  Researching ${courseBrief.modules.length} module(s) in parallel…`);
-  const results = await Promise.all(
-    courseBrief.modules.map(mod =>
-      runResearch(client, courseBrief, mod, opts)
-        .then(bundle => {
-          console.log(`    ✓ ${mod.id}`);
-          return { mod, bundle };
-        })
-        .catch(err => {
-          console.log(`    ✗ ${mod.id}: ${err.message}`);
-          return { mod, bundle: null };
-        })
-    )
-  );
-  return results;
 }

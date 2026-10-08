@@ -1,124 +1,94 @@
-// Progress sync — mirrors the app's localStorage learning state to Supabase
-// so it follows the user across devices. Also exposes logEvent() for the
-// append-only learning_events journal.
-//
-// Inert until Supabase is configured AND a user is signed in.
+// Account-owned, course-scoped progress. Conditional writes preserve concurrent
+// device edits and never infer ownership of flat legacy records.
+import { sb, getUser, onUserChange } from './auth.js?v=33';
+import { clearAllProviderKeys, getAllProviderKeys, setAllProviderKeys } from './api-keys.js?v=1';
+import { store } from './store.js?v=5';
+import { writeLearningSnapshot, boundedLearningQuery } from './learning-state.js?v=2';
 
-import { sb, getUser, onUserChange } from './auth.js';
-import { store } from './store.js';
-
-const SYNC_KEYS = ['progress', 'quizAnswers', 'exerciseDrafts', 'flashcardState'];
-const API_KEY_STORE = 'gametheory-api-key'; // shared with chat.js + generator/index.js
-let applyingRemote = false;   // guards against echo: applying a pull shouldn't trigger a push
-let pushTimer = null;
-let unsubStore = null;
-let pulledOnce = false;
-
-// Union remote + local so a sign-in never loses progress made on this device.
-function mergeState(remote, local) {
-  const out = {};
-  out.progress = { ...(remote.progress || {}) };
-  for (const [mid, topics] of Object.entries(local.progress || {})) {
-    out.progress[mid] = { ...(out.progress[mid] || {}), ...topics };
-  }
-  for (const k of ['quizAnswers', 'exerciseDrafts', 'flashcardState']) {
-    out[k] = { ...(remote[k] || {}), ...(local[k] || {}) };
-  }
-  return out;
-}
+let currentSyncUserId = null;
+let pushTimer = null, unsubStore = null, queue = Promise.resolve(), revision = 0;
+const isCurrent = context => !!context.owner && getUser()?.id === context.owner && currentSyncUserId === context.owner && store.scope().epoch === context.epoch;
+function clearPendingPush() { clearTimeout(pushTimer); pushTimer = null; }
 
 async function pull() {
-  const c = await sb();
-  const u = getUser();
-  if (!c || !u) return;
+  const context = store.scope();
+  if (!isCurrent(context)) return;
   try {
-    const { data } = await c.from('user_state').select('state').eq('user_id', u.id).maybeSingle();
+    const client = await sb();
+    if (!client || !isCurrent(context)) return;
+    const { data, error } = await boundedLearningQuery(client.from('user_state').select('state').eq('user_id', context.owner).maybeSingle());
+    if (error) throw error;
+    if (!isCurrent(context)) return;
+    store.applyRemote(data?.state || {}, context);
     const remote = data?.state || {};
-    const merged = mergeState(remote, store.get());
-    applyingRemote = true;
-    store.set(merged);
-    applyingRemote = false;
-
-    // Mirror the per-user Anthropic API key. Remote wins on first pull so
-    // signing in on a new device picks up your saved key; if remote has none
-    // but local does, the next push uploads it.
-    if (remote._apiKey && remote._apiKey !== localStorage.getItem(API_KEY_STORE)) {
-      localStorage.setItem(API_KEY_STORE, remote._apiKey);
-    }
-
-    pulledOnce = true;
-    schedulePush(); // write the unioned state back (uploads the local key if remote was empty)
-  } catch (e) {
-    console.warn('[sync] pull failed:', e.message);
+    // Keys entered while a pull was pending must not be replaced by an old read.
+    setAllProviderKeys({ ...(remote._apiKeys || {}), ...(remote._apiKey ? { anthropic: remote._apiKey } : {}), ...getAllProviderKeys() });
+    schedulePush();
+  } catch (error) {
+    if (!isCurrent(context)) return;
+    store.setSyncStatus('error', context);
+    console.warn('[sync] pull failed:', error.message);
   }
 }
 
-async function push() {
-  const c = await sb();
-  const u = getUser();
-  if (!c || !u) return;
-  const s = store.get();
-  const state = {};
-  for (const k of SYNC_KEYS) state[k] = s[k] || {};
-  // Per-user Anthropic API key — protected by the same RLS as the rest of
-  // the blob. Underscore-prefixed so it never collides with store keys.
-  const localKey = localStorage.getItem(API_KEY_STORE);
-  if (localKey) state._apiKey = localKey;
+async function pushNow(context, options) {
+  if (!isCurrent(context)) return;
   try {
-    await c.from('user_state').upsert({ user_id: u.id, state, updated_at: new Date().toISOString() });
-  } catch (e) {
-    console.warn('[sync] push failed:', e.message);
+    const client = await sb();
+    if (!client || !isCurrent(context)) return;
+    const started = revision;
+    store.setSyncStatus('saving', context);
+    const state = await writeLearningSnapshot(client, context.owner, store.exportSnapshot(), {
+      isCurrent: () => isCurrent(context), providerKeys: getAllProviderKeys()
+    });
+    if (!state || !isCurrent(context)) return;
+    store.applyRemote(state, context);
+    store.setSyncStatus(started === revision ? 'saved' : 'pending', context);
+    if (started !== revision) schedulePush();
+  } catch (error) {
+    if (!isCurrent(context)) return;
+    store.setSyncStatus('error', context);
+    console.warn('[sync] push failed:', error.message);
+    if (options.throwOnError) throw error;
   }
 }
-
-/** Trigger a push on demand — used by callers that change state outside the store (e.g. saving the API key). */
-export function kickSync() {
-  schedulePush();
+function push(options = {}) {
+  const context = store.scope();
+  const next = queue.catch(() => {}).then(() => pushNow(context, options));
+  queue = next; return next;
 }
-
 function schedulePush() {
-  clearTimeout(pushTimer);
-  pushTimer = setTimeout(push, 1200);
+  clearPendingPush();
+  if (currentSyncUserId) pushTimer = setTimeout(() => { pushTimer = null; push(); }, 1200);
 }
+export function kickSync() { revision++; schedulePush(); }
+export async function flushSync() { clearPendingPush(); await push({ throwOnError: true }); }
+export async function pullSyncNow() { await pull(); }
 
-function startObserving() {
-  if (unsubStore) return;
-  unsubStore = store.subscribe(() => { if (!applyingRemote) schedulePush(); });
-}
-function stopObserving() {
-  if (unsubStore) { unsubStore(); unsubStore = null; }
-}
-
-/** Append-only event log. Fire-and-forget; no-op when signed out. */
 export function logEvent(type, payload = {}) {
+  const context = store.scope();
   (async () => {
-    const c = await sb();
-    const u = getUser();
-    if (!c || !u) return;
-    try {
-      await c.from('learning_events').insert({
-        user_id: u.id,
-        course_id: null,   // bundled courses aren't DB rows; slugs live in payload
-        topic_id: null,
-        event_type: type,
-        payload
-      });
-    } catch { /* analytics are best-effort */ }
+    const client = await sb();
+    if (!client || !isCurrent(context)) return;
+    try { await client.from('learning_events').insert({ user_id: context.owner, course_id: null, topic_id: null, event_type: type, payload }); } catch {}
   })();
 }
-
 function handleUser(user) {
-  if (user) {
-    if (!pulledOnce) pull();
-    startObserving();
-  } else {
-    stopObserving();
-    pulledOnce = false;
+  const next = user?.id || null;
+  if (next !== currentSyncUserId) {
+    clearPendingPush();
+    try { clearAllProviderKeys(); } catch {}
+    currentSyncUserId = next;
+    store.setOwner(next);
+    // A hung previous-account request must not hold up this account's queue.
+    queue = Promise.resolve(); revision++;
+    if (next) pull();
   }
 }
-
 export function initSync() {
+  if (unsubStore) return;
   onUserChange(handleUser);
-  // Auth may have resolved before we subscribed — catch the current state.
-  if (getUser()) handleUser(getUser());
+  handleUser(getUser());
+  unsubStore = store.subscribe((_, event) => { if (event.reason === 'local') { revision++; schedulePush(); } });
+  globalThis.addEventListener?.('online', () => { if (currentSyncUserId) pull(); });
 }

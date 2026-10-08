@@ -1,0 +1,83 @@
+(async page=>{
+  const qa=__PUBLIC_PREVIEW_QA__,checks=[],errors=[],previewRequests=[];
+  const check=(value,label)=>{if(!value)throw new Error(label);checks.push(label);};
+  page.on('pageerror',error=>errors.push(error.message));
+  page.on('request',request=>{if(request.url().includes('/api/courses/public-preview'))previewRequests.push(request.method());});
+  const signIn=async account=>{
+    const error=await page.evaluate(async({account,module})=>{window.previewQAAuth=await import(module);return(await(await window.previewQAAuth.sb()).auth.signInWithPassword({email:account.email,password:account.password})).error?.message;},{account,module:qa.modules.auth});
+    check(!error,'actual local account signs in');await page.waitForFunction(owner=>window.previewQAAuth.getUser()?.id===owner,account.owner);
+  };
+  await signIn(qa.accounts[0]);await page.goto(qa.origin+'/?experience=workspace&filter=mine');
+  await page.evaluate(async module=>{window.previewQAAuth=await import(module);},qa.modules.auth);
+  await page.getByText('Options',{exact:true}).click();
+  const open=page.getByRole('button',{name:'Preview for publishing',exact:true}),dialog=page.locator('dialog.public-course-preview');
+  const progressBefore=await page.evaluate(async module=>JSON.stringify((await import(module)).store.exportSnapshot()),qa.modules.store);
+  await open.click();await dialog.getByRole('heading',{name:'Community listing preview',exact:true}).waitFor();
+  check((await dialog.textContent()).includes('not a live public page'),'preview clearly distinguished from live publication');
+  check((await dialog.textContent()).includes('Publishing is not enabled'),'no implied publish or share success');
+  check(await dialog.locator('img').count()===0,'private images and avatars never requested');
+  check(!(await dialog.textContent()).includes('PRIVATE-'),'private fixture data absent from rendered preview');
+  const data=await page.evaluate(async courseId=>{const {data}=await(await window.previewQAAuth.sb()).auth.getSession();const r=await fetch('/api/courses/public-preview?courseId='+courseId,{headers:{Authorization:'Bearer '+data.session.access_token}});return await r.json();},qa.courseId);
+  check(!JSON.stringify(data).includes('PRIVATE-')&&!JSON.stringify(data).includes('asset_id')&&!JSON.stringify(data).includes(qa.accounts[0].owner),'network response is projected rather than full private course');
+  check(data.preview.counts.withheldImages===1&&data.preview.counts.lessons===3,'actual saved content counted');
+  const name=dialog.getByRole('textbox',{name:'Try a public author name',exact:true});
+  await name.fill('private@example.com');check((await dialog.locator('#public-author-error').textContent()).includes('not an email'),'email cannot accidentally become public author');
+  await name.fill('A'.repeat(81));check((await name.inputValue()).length===81&&(await dialog.locator('#public-author-error').textContent()).includes('1–80'),'long trial name is retained with validation, not silently truncated');
+  await name.fill('Jamie Teacher');
+  check((await dialog.locator('[data-preview-byline]').textContent()).includes('By Jamie Teacher'),'public name updates listing');
+  check((await dialog.locator('.home-author-avatar').textContent())==='JT','small circular initials avatar follows explicit name');
+  check((await dialog.locator('[data-preview-checks] summary').textContent()).includes('1 check flagged'),'author issue clears without reloading');
+  for(const width of [1440,390,320]){
+    await page.setViewportSize({width,height:1000});await dialog.evaluate(el=>el.scrollTop=0);
+    check(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth),`listing fits ${width}px`);
+    await dialog.screenshot({path:`output/playwright/public-preview-listing-${width}.png`});
+  }
+  await dialog.getByRole('button',{name:'Preview lesson content →',exact:true}).click();
+  check(await dialog.getByRole('heading',{name:'Lesson content preview',exact:true}).isVisible(),'preview opens lessons without navigating to the learner');
+  check(await dialog.getByText('Image not included in this preview',{exact:true}).count()===1,'private image omission is explicit');
+  await dialog.getByText('View answer and explanation',{exact:true}).first().click();
+  check(await dialog.getByText('Window light can be soft enough to avoid harsh facial shadows.',{exact:true}).isVisible(),'answer explanations can be reviewed');
+  check(await dialog.locator('[data-preview-lesson] input,[data-preview-lesson] button').count()===0,'lesson interactions cannot mutate progress');
+  check((await dialog.locator('[data-preview-lesson]').textContent()).includes('When to pause or stop'),'practice safety stops preserved');
+  await dialog.getByRole('combobox',{name:'Choose a lesson',exact:true}).selectOption('1');
+  check(await dialog.locator('[data-preview-lesson]').getByRole('heading',{name:'Photography lesson 2',exact:true}).count()===1,'lesson selection displays correct saved lesson');
+  for(const width of [1440,390,320]){
+    await page.setViewportSize({width,height:1000});await dialog.evaluate(el=>el.scrollTop=0);
+    check(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth),`lesson view fits ${width}px`);
+    await dialog.screenshot({path:`output/playwright/public-preview-lesson-${width}.png`});
+  }
+  await page.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));await dialog.screenshot({path:'output/playwright/public-preview-dark-320.png'});
+  check(await dialog.evaluate(el=>getComputedStyle(el).backgroundColor!=='rgb(255, 255, 255)'),'preview uses app dark surface');
+  await page.keyboard.press('Tab');check(await page.evaluate(()=>!!document.activeElement.closest('dialog')),'keyboard focus stays in preview');
+  await page.evaluate(()=>document.documentElement.setAttribute('data-theme','light'));
+  await dialog.getByText('What stays private',{exact:true}).click();
+  check(await dialog.getByText('Lesson text may still quote or describe material from your sources.',{exact:false}).isVisible(),'source-derived prose still requires privacy review');
+  await dialog.getByRole('button',{name:'Back to saved course',exact:true}).click();await dialog.getByRole('heading',{name:'Leave this preview?',exact:true}).waitFor();
+  await dialog.getByRole('button',{name:'Keep reviewing',exact:true}).click();
+  await dialog.getByRole('button',{name:'Course listing',exact:true}).click();
+  check(await name.inputValue()==='Jamie Teacher','cancel exit keeps trial byline');
+  let fail=true;await page.route('**/api/courses/public-preview?*',route=>fail?route.abort('failed'):route.continue());
+  await dialog.getByRole('button',{name:'Refresh saved content',exact:true}).click();await dialog.getByRole('alert').waitFor();
+  check(await dialog.locator('.public-preview-listing').count()===0,'failed refresh does not masquerade as current content');
+  fail=false;await dialog.getByRole('button',{name:'Try again',exact:true}).click();await name.waitFor();
+  check(await name.inputValue()==='Jamie Teacher','retry reloads saved course and preserves trial name');
+  await dialog.getByRole('button',{name:'Back to saved course',exact:true}).click();await dialog.getByRole('button',{name:'Leave preview',exact:true}).click();
+  check(await dialog.count()===0&&await open.evaluate(el=>el===document.activeElement),'close returns keyboard focus to saved-course action');
+  await open.click();await name.waitFor();check(await name.inputValue()==='','trial byline was not saved to account or browser');
+  const progressAfter=await page.evaluate(async module=>JSON.stringify((await import(module)).store.exportSnapshot()),qa.modules.store);
+  check(progressBefore===progressAfter,'preview leaves learner state unchanged');
+  let release,markPending;const pending=new Promise(resolve=>{markPending=resolve;});
+  await page.route('**/api/courses/public-preview?*',async route=>{const response=await route.fetch();const blocked=new Promise(resolve=>{release=resolve;});markPending();await blocked;await route.fulfill({response}).catch(()=>{});});
+  await dialog.getByRole('button',{name:'Refresh saved content',exact:true}).click();
+  await Promise.race([pending,page.waitForTimeout(10000).then(()=>{throw new Error('Preview response did not reach pending state');})]);
+  await page.evaluate(async()=>await(await window.previewQAAuth.sb()).auth.signOut());await page.waitForFunction(()=>!document.querySelector('dialog.public-course-preview'));
+  release?.();await page.unroute('**/api/courses/public-preview?*');
+  check(await dialog.count()===0,'sign-out closes preview while a response is in flight');
+  await signIn(qa.accounts[1]);
+  const denied=await page.evaluate(async courseId=>{const {data}=await(await window.previewQAAuth.sb()).auth.getSession();return(await fetch('/api/courses/public-preview?courseId='+courseId,{headers:{Authorization:'Bearer '+data.session.access_token}})).status;},qa.courseId);
+  check(denied===404,'second account cannot read first account preview');
+  check(previewRequests.every(method=>method==='GET'),'all preview actions use read-only requests');
+  check(!errors.length,'no browser exceptions: '+errors.join('; '));
+  const report={total:checks.length,passed:checks,scope:'Actual local Auth/API/Postgres, read-only private projection; no publication or AI calls'};
+  await page.evaluate(report=>window.__publicPreviewReport=report,report);return report;
+})

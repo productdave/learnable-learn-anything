@@ -1,0 +1,282 @@
+{
+  "title": "Agentic AI Foundations for Product Builders",
+  "modules": [
+    {
+      "id": "dinner-foundations",
+      "number": 1,
+      "icon": "target",
+      "color": "#0F766E",
+      "title": "AI Foundations: Understand and Structure User Requests",
+      "description": "Connect generative AI foundations to product decisions: prompts, context, structured responses, and a tested request-understanding workflow. Four lessons plus a guided build; allow 4–6 hours.",
+      "topics": [
+        {
+          "id": "define-a-useful-request",
+          "title": "What does “help me order dinner” mean?",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "understand-model-context",
+          "title": "What the model knows—and what it needs",
+          "quiz_plan": [
+            "true-false",
+            "multiple-choice",
+            "drag-match"
+          ]
+        },
+        {
+          "id": "structure-the-request",
+          "title": "Turn a conversation into usable fields",
+          "quiz_plan": [
+            "drag-match",
+            "multiple-choice",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "build-the-conversation-loop",
+          "title": "Build, inspect, and improve the first loop",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "grounded-recommendations",
+      "title": "Retrieval: Ground Recommendations in Reliable Information",
+      "description": "Retrieve useful menu evidence, preserve its context, filter real constraints, and explain recommendations with sources.",
+      "color": "#2563EB",
+      "icon": "target",
+      "topics": [
+        {
+          "id": "choose-the-right-source",
+          "title": "Choose the right source for each claim",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "chunk-and-retrieve",
+          "title": "Keep meaning intact when you retrieve",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "filter-before-ranking",
+          "title": "Filter constraints before ranking preferences",
+          "quiz_plan": [
+            "multiple-choice",
+            "fill-in-blank",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "build-grounded-shortlist",
+          "title": "Build a shortlist with inspectable evidence",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "tool-workflows",
+      "title": "Agent Workflows: Connect Tools and Manage State",
+      "description": "Define tool contracts, inspect state transitions, recover from failures, and understand when frameworks or multiple agents help.",
+      "color": "#7C3AED",
+      "icon": "target",
+      "topics": [
+        {
+          "id": "define-tool-contracts",
+          "title": "Give each tool a clear contract",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "track-workflow-state",
+          "title": "Track what happened and what comes next",
+          "quiz_plan": [
+            "multiple-choice",
+            "fill-in-blank",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "recover-tool-failures",
+          "title": "Recover without repeating costly actions",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "choose-orchestration",
+          "title": "Choose frameworks and protocols deliberately",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "model-adaptation",
+      "title": "Model Adaptation: Choose Prompts, Retrieval, or Fine-Tuning",
+      "description": "Diagnose failures before choosing an intervention, understand LoRA and QLoRA, and compare local-model tradeoffs.",
+      "color": "#D97706",
+      "icon": "target",
+      "topics": [
+        {
+          "id": "diagnose-before-adapting",
+          "title": "Choose the fix that matches the failure",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "prepare-training-examples",
+          "title": "Build examples that teach the intended behavior",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "understand-lora",
+          "title": "Understand what LoRA and QLoRA change",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "compare-local-models",
+          "title": "Compare a local model with your baseline",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "evaluation-debugging",
+      "title": "Evaluation: Measure Quality and Diagnose Failures",
+      "description": "Build a small test set, use appropriate graders, inspect traces, and compare changes without hiding critical failures.",
+      "color": "#DB2777",
+      "icon": "target",
+      "topics": [
+        {
+          "id": "create-evaluation-set",
+          "title": "Turn user promises into test cases",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "choose-evaluation-graders",
+          "title": "Use code, rubrics, and model judges appropriately",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "inspect-execution-traces",
+          "title": "Find the first wrong step in a trace",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "set-release-gates",
+          "title": "Decide whether an improvement is ready to ship",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "safe-release",
+      "title": "Safety and Release: Protect Users and Require Approval",
+      "description": "Keep untrusted content separate from authority, minimize sensitive data, enforce approval, and demonstrate the complete prototype honestly.",
+      "color": "#059669",
+      "icon": "target",
+      "topics": [
+        {
+          "id": "recognize-untrusted-content",
+          "title": "Treat retrieved text as evidence, not instructions",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "minimize-data-access",
+          "title": "Give the assistant only the data and access it needs",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "bind-approval-to-action",
+          "title": "Make approval specific, current, and enforceable",
+          "quiz_plan": [
+            "multiple-choice",
+            "true-false",
+            "short-answer"
+          ]
+        },
+        {
+          "id": "demonstrate-and-plan-release",
+          "title": "Demonstrate the prototype and plan a responsible release",
+          "quiz_plan": [
+            "multiple-choice",
+            "drag-match",
+            "short-answer"
+          ]
+        }
+      ]
+    }
+  ],
+  "subtitle": "Six practical modules: understand requests, ground recommendations, connect tools, adapt models, evaluate behavior, and release safely."
+}

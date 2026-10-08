@@ -1,6 +1,6 @@
 // Text-to-speech "Listen" player — Substack-style audio player UI on top of
-// the browser's built-in Web Speech API (speechSynthesis). No API key, no
-// network, keeps playing when the tab is backgrounded.
+// the browser's built-in Web Speech API (speechSynthesis). No paid AI request;
+// some browser-managed voices may use network services.
 //
 // A play icon in the topic header opens a full bottom-sheet player with a
 // cover, scrubber, elapsed/total time, skip ±15/30s, play/pause and speed.
@@ -72,6 +72,8 @@ let speakToken = 0;       // guards against stale onend/onerror after cancel()
 let rafId = null;
 let meta = { title: '', moduleName: '', moduleColor: '#4338CA', icon: 'book' };
 let ui = null;            // player DOM refs
+let returnFocus = null;
+let inertBackground = [];
 
 const supported = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -203,6 +205,7 @@ function stop() {
 }
 
 function seekToTime(t) {
+  if (!chunks.length) return;
   t = Math.max(0, Math.min(t, totalDur));
   let target = chunks.findIndex(c => t < c.start + c.dur);
   if (target < 0) target = chunks.length - 1;
@@ -218,6 +221,7 @@ function cycleSpeed() {
   localStorage.setItem(SPEED_KEY, String(rate));
   buildTimeline();
   if (ui?.speed) ui.speed.textContent = `${rate}×`;
+  if (ui?.speed) ui.speed.setAttribute('aria-label', `Playback speed, ${rate} times`);
   if (playing) { window.speechSynthesis.cancel(); speakFrom(idx); }
   else renderProgress();
 }
@@ -239,12 +243,17 @@ function renderProgress() {
   ui.knob.style.left = `${pct}%`;
   ui.elapsed.textContent = fmt(cur);
   ui.total.textContent = fmt(totalDur);
+  ui.scrub.setAttribute('aria-valuemax', String(Math.ceil(totalDur)));
+  ui.scrub.setAttribute('aria-valuenow', String(Math.round(cur)));
+  ui.scrub.setAttribute('aria-valuetext', `${fmt(cur)} of approximately ${fmt(totalDur)}. Seek by sentence.`);
   if (ui.miniFill) ui.miniFill.style.width = `${pct}%`;
 }
 
 function setPlayIcon(on) {
   if (!ui) return;
   ui.root.classList.toggle('playing', on);
+  ui.root.querySelectorAll('[data-tts-toggle]').forEach(button =>
+    button.setAttribute('aria-label', on ? 'Pause narration' : 'Play narration'));
   ui.playIc.style.display = on ? 'none' : '';
   ui.pauseIc.style.display = on ? '' : 'none';
   if (ui.miniPlayIc) ui.miniPlayIc.style.display = on ? 'none' : '';
@@ -269,7 +278,7 @@ function ensurePlayer() {
   el.className = 'tts-player';
   el.innerHTML = `
     <div class="tts-overlay" data-tts-overlay></div>
-    <div class="tts-sheet" role="dialog" aria-label="Audio player">
+    <div class="tts-sheet" role="dialog" aria-modal="true" aria-label="Audio player">
       <div class="tts-sheet-top">
         <button class="tts-icon-btn" data-tts-min aria-label="Minimize player">${SVG.chevronDown}</button>
         <button class="tts-icon-btn" data-tts-close aria-label="Close player">${SVG.close}</button>
@@ -278,13 +287,13 @@ function ensurePlayer() {
         <svg class="tts-cover-icon" width="64" height="64"><use data-tts-cover-icon href="#icon-book"/></svg>
         <div class="tts-cover-wave"><span></span><span></span><span></span><span></span><span></span></div>
       </div>
-      <div class="tts-scrub" data-tts-scrub>
+      <div class="tts-scrub" data-tts-scrub role="slider" tabindex="0" aria-label="Playback position" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
         <div class="tts-scrub-track"><div class="tts-scrub-fill" data-tts-fill></div><div class="tts-scrub-knob" data-tts-knob></div></div>
       </div>
-      <div class="tts-times"><span data-tts-elapsed>0:00</span><button class="tts-speed" data-tts-speed>${rate}×</button><span data-tts-total>0:00</span></div>
+      <div class="tts-times"><span data-tts-elapsed>0:00</span><button class="tts-speed" data-tts-speed aria-label="Playback speed, ${rate} times">${rate}×</button><span data-tts-total>0:00</span></div>
       <div class="tts-controls">
         <button class="tts-skip" data-tts-skip="-15" aria-label="Back 15 seconds">${SVG.back15}<span class="tts-skip-num">15</span></button>
-        <button class="tts-bigplay" data-tts-toggle aria-label="Play or pause">
+        <button class="tts-bigplay" data-tts-toggle aria-label="Play narration">
           <span class="tts-ic-play">${SVG.play}</span><span class="tts-ic-pause" style="display:none">${SVG.pause}</span>
         </button>
         <button class="tts-skip" data-tts-skip="30" aria-label="Forward 30 seconds">${SVG.fwd30}<span class="tts-skip-num">30</span></button>
@@ -300,11 +309,11 @@ function ensurePlayer() {
     </div>
 
     <div class="tts-mini" data-tts-mini>
-      <button class="tts-mini-main" data-tts-expand>
+      <button class="tts-mini-main" data-tts-expand aria-label="Expand audio player">
         <span class="tts-mini-cover" data-tts-mini-cover><svg width="20" height="20"><use data-tts-mini-icon href="#icon-book"/></svg></span>
         <span class="tts-mini-title" data-tts-mini-title></span>
       </button>
-      <button class="tts-icon-btn tts-mini-toggle" data-tts-toggle aria-label="Play or pause">
+      <button class="tts-icon-btn tts-mini-toggle" data-tts-toggle aria-label="Play narration">
         <span class="tts-mini-ic-play">${SVG.play}</span><span class="tts-mini-ic-pause" style="display:none">${SVG.pause}</span>
       </button>
       <button class="tts-icon-btn" data-tts-close aria-label="Close">${SVG.close}</button>
@@ -341,7 +350,7 @@ function ensurePlayer() {
 
   // wire interactions
   el.querySelectorAll('[data-tts-toggle]').forEach(b => b.addEventListener('click', togglePlay));
-  el.querySelectorAll('[data-tts-close]').forEach(b => b.addEventListener('click', closePlayer));
+  el.querySelectorAll('[data-tts-close]').forEach(b => b.addEventListener('click', () => closePlayer()));
   q('[data-tts-min]').addEventListener('click', minimizePlayer);
   q('[data-tts-expand]').addEventListener('click', openPlayer);
   q('[data-tts-overlay]').addEventListener('click', minimizePlayer);
@@ -369,6 +378,33 @@ function ensurePlayer() {
   scrub.addEventListener('pointerdown', e => { dragging = true; scrub.setPointerCapture(e.pointerId); seekFromEvent(e.clientX); });
   scrub.addEventListener('pointermove', e => { if (dragging) seekFromEvent(e.clientX); });
   scrub.addEventListener('pointerup', () => { dragging = false; });
+  scrub.addEventListener('keydown', e => {
+    if (!chunks.length) return;
+    let target;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') target = idx + 1;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') target = idx - 1;
+    else if (e.key === 'Home') target = 0;
+    else if (e.key === 'End') target = chunks.length - 1;
+    else return;
+    e.preventDefault();
+    seekToTime(chunks[Math.max(0, Math.min(target, chunks.length - 1))].start);
+  });
+  ui.sheet.addEventListener('keydown', e => {
+    if (!ui.root.classList.contains('open')) return;
+    if (e.key === 'Escape') {
+      e.preventDefault(); e.stopPropagation(); closePlayer(); return;
+    }
+    if (e.key !== 'Tab') return;
+    const controls = [...ui.sheet.querySelectorAll('button:not([disabled]), select:not([disabled]), [tabindex="0"]')];
+    const first = controls[0], last = controls.at(-1);
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  document.addEventListener('focusin', e => {
+    if (ui.root.classList.contains('open') && !ui.sheet.contains(e.target)) {
+      ui.sheet.querySelector('[data-tts-min]').focus({ preventScroll: true });
+    }
+  });
 
   return ui;
 }
@@ -405,21 +441,36 @@ function applyMeta() {
 
 function openPlayer() {
   ensurePlayer();
+  if (!ui.root.contains(document.activeElement)) returnFocus = document.activeElement;
   applyMeta();
   renderProgress();
   ui.root.classList.add('open');
   ui.root.classList.remove('minimized');
+  if (!inertBackground.length) {
+    inertBackground = [...document.body.children].filter(el => el !== ui.root && !el.hasAttribute('inert'));
+    inertBackground.forEach(el => el.setAttribute('inert', ''));
+  }
+  ui.sheet.querySelector('[data-tts-min]').focus({ preventScroll: true });
+}
+
+function restoreBackground() {
+  inertBackground.forEach(el => el.removeAttribute('inert'));
+  inertBackground = [];
 }
 
 function minimizePlayer() {
   if (!ui) return;
   ui.root.classList.remove('open');
   ui.root.classList.add('minimized'); // mini-player stays; playback continues
+  restoreBackground();
+  ui.mini.querySelector('[data-tts-expand]').focus({ preventScroll: true });
 }
 
-function closePlayer() {
+function closePlayer(restoreFocus = true) {
   stop();
   if (ui) ui.root.classList.remove('open', 'minimized');
+  restoreBackground();
+  if (restoreFocus && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
 }
 
 // ---- public API ----------------------------------------------------
@@ -437,12 +488,8 @@ export function ttsBarHTML() {
 export function initTTS(container, info = {}) {
   if (!supported()) return;
   // New topic → reset everything.
-  window.speechSynthesis.cancel();
-  if (ui) { ui.root.classList.remove('open', 'minimized'); }
-  playing = false;
-  idx = 0;
-  stopTick();
-  clearHighlight();
+  closePlayer(false);
+  returnFocus = null;
 
   chunks = collectChunks(container);
   buildTimeline();
@@ -464,5 +511,5 @@ export function initTTS(container, info = {}) {
 
 if (supported()) {
   window.addEventListener('beforeunload', () => window.speechSynthesis.cancel());
-  window.addEventListener('hashchange', () => { window.speechSynthesis.cancel(); if (ui) ui.root.classList.remove('open', 'minimized'); });
+  window.addEventListener('hashchange', () => closePlayer(false));
 }

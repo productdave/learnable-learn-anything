@@ -1,0 +1,255 @@
+{
+  "supported-back-float": {
+    "id": "supported-back-float",
+    "moduleId": "float-and-recover",
+    "title": "A Calm Supported Back Float",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Support less only when the body softens",
+        "content": "<p>A back float is a balance skill, not a test of bravery. Begin with your child's head close to your shoulder and support the base of her head plus her upper back. Ears may enter the water while the face stays clear. A wide, relaxed shape is easier to balance than a tucked chin and rigid body.</p><p>Tell her before changing your support. Reduce one hand for a moment only when her breathing is normal and her body feels soft.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/04-supported-back-float.png",
+        "alt": "Parent supporting a child's head and upper back during a relaxed back float",
+        "caption": "Support the head and upper back; keep the face clear and reduce help gradually."
+      },
+      {
+        "type": "practice",
+        "id": "s04-back-float",
+        "title": "Starfish back float",
+        "goal": "Your child relaxes on her back with a clear face, then returns to an upright hold on cue.",
+        "durationMinutes": 15,
+        "equipment": ["Shallow, calm pool space", "Optional small bath toy to look at"],
+        "setup": "Stand chest-to-chest in water where you are stable. Place her head near your shoulder before slowly leaning her back.",
+        "steps": [
+          {
+            "title": "Shoulder pillow",
+            "instruction": "Let her rest the back of her head on your shoulder while your forearm supports her upper back. Keep her face completely clear.",
+            "cue": "Head heavy, tummy up, look at the sky.",
+            "repetitions": "3 holds of 3–5 seconds",
+            "success": "Her breathing remains normal and her hands loosen."
+          },
+          {
+            "title": "Two-hand star",
+            "instruction": "Move one hand under the base of the head and one beneath the shoulder blades. Invite wide arms and a soft body.",
+            "cue": "Make a wide, quiet star.",
+            "repetitions": "3 holds of up to 5 seconds",
+            "success": "Ears can be wet while eyes, nose, and mouth stay clear."
+          },
+          {
+            "title": "Float then cuddle",
+            "instruction": "Count down, tuck her knees gently toward you, and return to a secure upright cuddle before she asks to stop.",
+            "cue": "Three, two, one—feet down and cuddle.",
+            "repetitions": "After every float",
+            "success": "She returns upright without grabbing or gasping."
+          }
+        ],
+        "regressions": ["Keep her head on your shoulder and let only the back of her hair touch water.", "Practice lying back on a dry mat while looking upward."],
+        "progressions": ["Remove the upper-back hand for one second while keeping head support.", "Move from back float to feet-down with only light guidance."],
+        "safetyStops": ["Return upright immediately for distress, breath-holding, arching, or a request to stop.", "Never remove head support without warning.", "Keep the face clear and do not blow on the child's face to trigger a reflex."],
+        "readinessChecks": [
+          { "id": "relaxed-back", "label": "Relaxes on the back with normal breathing and a clear face" },
+          { "id": "lighter-support", "label": "Accepts briefly lighter support without tucking or grabbing" },
+          { "id": "calm-upright", "label": "Returns to an upright position calmly on cue" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "multiple-choice",
+        "id": "s04-support",
+        "question": "When should a parent begin reducing support in a back float?",
+        "options": [
+          { "id": "a", "text": "After exactly five seconds" },
+          { "id": "b", "text": "When the child is calm, breathing normally, and knows what will happen" },
+          { "id": "c", "text": "As soon as the ears enter the water" },
+          { "id": "d", "text": "Only after distracting the child" }
+        ],
+        "correct": "b",
+        "explanation": "Support changes follow observable relaxation and consent, not a timer."
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "End before tension arrives",
+        "content": "A three-second relaxed float builds more useful learning than a ten-second struggle. Return upright while the experience still feels successful."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Keep the face clear and the child informed.", "Use wide shapes and gradual support changes.", "Always teach a calm route back to upright."]
+      }
+    ],
+    "flashcards": [
+      { "front": "Where should a parent support an early back float?", "back": "At the base of the head and upper back or shoulder blades, while keeping the face clear." },
+      { "front": "What shows that a child is ready for lighter support?", "back": "Normal breathing, a soft body, loose hands, and comfort with the position." },
+      { "front": "What is more useful: a short relaxed float or a long tense float?", "back": "A short relaxed float. Calm balance is the skill being learned." }
+    ]
+  },
+  "front-float-to-feet": {
+    "id": "front-float-to-feet",
+    "moduleId": "float-and-recover",
+    "title": "Front Float to Feet",
+    "estimatedMinutes": 18,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Every face-down shape needs a practiced recovery",
+        "content": "<p>A front float uses the bubble skill from Stage 1. Support the chest and shoulders, keep the float brief, and immediately teach the child to tuck knees, press down with the hands, and place feet on the floor or return to your secure hold.</p><p>The important sequence is not “stay down.” It is “bubbles, tuck, feet.”</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/05-front-float-recovery.png",
+        "alt": "Sequential illustration of a supported front float, knee tuck, and return to standing",
+        "caption": "Pair every front float with an intentional feet-down recovery."
+      },
+      {
+        "type": "practice",
+        "id": "s05-front-float",
+        "title": "Bubbles, tuck, feet",
+        "goal": "Your child makes a brief supported front float and actively returns her feet to the pool floor.",
+        "durationMinutes": 15,
+        "equipment": ["Shallow water where the child can stand", "Floating target toy"],
+        "setup": "Stand face-to-face. Keep both hands under her chest and upper arms; begin with her mouth above water.",
+        "steps": [
+          {
+            "title": "Long body with support",
+            "instruction": "Invite her to stretch toward a toy while you fully support her chest. Begin with chin above water.",
+            "cue": "Long body, hands reach.",
+            "repetitions": "3 supported shapes",
+            "success": "Her hips rise without her climbing up your arms."
+          },
+          {
+            "title": "Add bubbles",
+            "instruction": "When she chooses, lower just enough for lips or face to enter while she exhales. Keep the attempt one to two seconds.",
+            "cue": "Bubbles, then tuck.",
+            "repetitions": "3 brief floats",
+            "success": "She exhales rather than holding her breath."
+          },
+          {
+            "title": "Tuck to feet",
+            "instruction": "Guide her knees under her body as she presses hands down, then let her feet find the floor before releasing support.",
+            "cue": "Tuck your knees. Find your feet.",
+            "repetitions": "After every float",
+            "success": "She contributes to the recovery and stands balanced."
+          }
+        ],
+        "regressions": ["Keep the face above water and practice only the long-body-to-feet movement.", "Use a pool step so the feet find support quickly."],
+        "progressions": ["Reduce chest support for one second during the float.", "Start the recovery from a gentle push away from the wall."],
+        "safetyStops": ["Stop for coughing, inhaled water, panic, or refusal.", "Never hold the child face-down or extend the duration to prove a point.", "Return to full support if the feet cannot find stable ground."],
+        "readinessChecks": [
+          { "id": "front-bubbles", "label": "Exhales during a brief supported front float" },
+          { "id": "active-tuck", "label": "Actively tucks knees and presses hands down to recover" },
+          { "id": "stable-feet", "label": "Returns to balanced standing without panic" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "fill-in-blank",
+        "id": "s05-cue",
+        "sentence": "The recovery cue after a front float is “bubbles, ___, feet.”",
+        "acceptable_answers": ["tuck"],
+        "explanation": "Tucking the knees brings the body under the head so the feet can find the pool floor."
+      },
+      {
+        "type": "callout",
+        "variant": "key-insight",
+        "title": "Recovery is part of the skill",
+        "content": "Do not record a front float as mastered unless your child can also recover calmly to standing or secure support."
+      },
+      {
+        "type": "takeaway",
+        "points": ["Keep front floats brief and paired with exhalation.", "Teach the tuck from the first repetition.", "Mastery includes a calm return to support."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What three-word cue links a front float to recovery?", "back": "Bubbles, tuck, feet." },
+      { "front": "Why tuck the knees after a front float?", "back": "It brings the body underneath the head so the feet can return to the floor." },
+      { "front": "When is a front float truly useful?", "back": "When the child can both float briefly and recover calmly to standing or secure support." }
+    ]
+  },
+  "roll-turn-and-wall": {
+    "id": "roll-turn-and-wall",
+    "moduleId": "float-and-recover",
+    "title": "Roll, Turn, and Find the Wall",
+    "estimatedMinutes": 20,
+    "sections": [
+      {
+        "type": "concept",
+        "title": "Orientation connects floating to safety",
+        "content": "<p>A child who can make a float but cannot change position still needs full help. Rotation and orientation mean knowing where the surface, wall, and exit are. Practice rolling from front to back for a breath, returning forward, and turning toward a visible wall.</p><p>Keep distances tiny. The purpose is a calm decision and a reachable target—not independence beyond your arms.</p>"
+      },
+      {
+        "type": "image",
+        "src": "data/courses/little-swimmer/assets/06-roll-turn-wall.png",
+        "alt": "Child rolling from a front float to a back float and turning toward a nearby pool wall with parent beside her",
+        "caption": "Rotation creates a breathing option; orientation points that skill toward support."
+      },
+      {
+        "type": "practice",
+        "id": "s06-roll-wall",
+        "title": "Sky, tummy, wall",
+        "goal": "Your child rolls between front and back with support, then turns and reaches a nearby wall.",
+        "durationMinutes": 18,
+        "equipment": ["Clear wall section", "Bright target placed on the wall"],
+        "setup": "Work no more than one arm's length from the wall. Stand beside, not behind, so you can support the head and torso throughout.",
+        "steps": [
+          {
+            "title": "Front to sky",
+            "instruction": "From a supported front float, guide one shoulder upward while supporting the head until she faces the ceiling.",
+            "cue": "Turn your shoulder. Find the sky.",
+            "repetitions": "3 each direction",
+            "success": "She helps rotate instead of being rolled passively."
+          },
+          {
+            "title": "Sky to tummy",
+            "instruction": "From a supported back float, cue her to look toward the wall and bring one shoulder across into a supported front position.",
+            "cue": "Look, shoulder, tummy.",
+            "repetitions": "3 controlled rolls",
+            "success": "Her face enters predictably and she begins bubbles."
+          },
+          {
+            "title": "Turn and grab",
+            "instruction": "Begin facing you beside the wall. Ask her to turn toward the bright target and secure two hands while you shadow her torso.",
+            "cue": "Find the color. Two hands.",
+            "repetitions": "4 turns",
+            "success": "She orients to the wall and takes a secure hold."
+          }
+        ],
+        "regressions": ["Practice shoulder-led rolling on a mat.", "Keep one ear and cheek above water throughout the assisted turn."],
+        "progressions": ["Use only fingertip support at the upper back during the roll.", "Begin half a body length from the wall and add one small kick before grabbing."],
+        "safetyStops": ["Keep the wall within immediate reach.", "Stop if rolling causes coughing, disorientation, or distress.", "Do not release support until the child can consistently finish in a stable position."],
+        "readinessChecks": [
+          { "id": "front-to-back", "label": "Helps roll from front to a supported back float" },
+          { "id": "back-to-front", "label": "Helps roll from back to front and begins bubbles" },
+          { "id": "turns-to-wall", "label": "Turns toward a visible wall and takes a two-hand hold" }
+        ]
+      },
+      {
+        "type": "quiz",
+        "variant": "short-answer",
+        "id": "s06-why-roll",
+        "question": "Why teach rolling and turning before asking for longer independent swimming?",
+        "sample_answer": "Rolling gives the child a way to change position and reach a face-up breathing posture, while turning helps her orient toward a wall or exit. These options matter before distance.",
+        "key_points": ["Changing position", "Finding a breathing posture", "Orienting toward support", "Prioritizing options over distance"],
+        "explanation": "Water skill is more than forward travel. The child needs ways to breathe, orient, and reach support."
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "title": "Use a visible target",
+        "content": "A bright toy or marker at the wall turns an abstract command—“orient to safety”—into a concrete preschool task: “find the yellow fish.”"
+      },
+      {
+        "type": "takeaway",
+        "points": ["Use the shoulder and gaze to lead rotation.", "Pair face-down positions with bubbles.", "Always finish the sequence at stable support."]
+      }
+    ],
+    "flashcards": [
+      { "front": "What does rotation give an early swimmer?", "back": "A way to change position, including moving toward a face-up breathing posture." },
+      { "front": "What does orientation mean in the pool?", "back": "Recognizing where the surface, wall, lifeguard, and exit are and turning toward support." },
+      { "front": "How far from the wall should this early drill begin?", "back": "Within immediate parent reach—initially no more than about one arm's length." }
+    ]
+  }
+}

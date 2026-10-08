@@ -1,138 +1,19 @@
-// Browser-side course generator. Runs the same 4-stage pipeline as the Node
-// CLI, but in the user's tab using their own Anthropic API key (same pattern
-// as the AI tutor). No backend, no serverless timeout, no per-course cost to
-// the platform.
-//
-// Public API:
-//   hasApiKey() / setApiKey(key)        — manage the user's Anthropic key
-//   generateCourse(brief, onProgress)   — returns { config, curriculum, modules }
-//
-// Progress callback receives one object per event. Stages emitted:
-//   { stage: 'intake' }                                     — Stage 1 starting
-//   { stage: 'intake_done', brief }                         — outline ready
-//   { stage: 'research' }                                   — Stage 2 starting
-//   { stage: 'research_module', moduleId, status }          — one bundle done
-//   { stage: 'topics' }                                     — Stage 3 starting
-//   { stage: 'topic_done', moduleId, topicId, done, total } — one topic done
-//   { stage: 'topic_failed', ..., error }                   — one topic failed
-//   { stage: 'assemble' }                                   — Stage 4
-//   { stage: 'done', course }                               — full course ready
+// Course generation now has one production runner: the account-owned cloud
+// generation_jobs pipeline. This browser module only manages the shared
+// Anthropic key slot used by chat, sync, and the cloud generation APIs.
 
-import { createClient } from './anthropic-fetch.js';
-import { runIntake } from './stages/intake.mjs';
-import { runResearch } from './stages/research.mjs';
-import { runTopic } from './stages/topic.mjs';
-import { getTone } from './tones/conversational.mjs';
-import { assembleCourse } from './assemble-browser.js';
-import { fetchExtractedUrls } from './fetch-urls.js';
-
-// Reuse the AI tutor's existing key slot so users only have to enter their
-// Anthropic key once. (The slot name is legacy from the original app — kept
-// for zero migration friction.)
-const KEY_STORE = 'gametheory-api-key';
+// The slot name is legacy from the original app. Keep it so existing saved
+// keys migrate without ceremony.
+import { getAnthropicKey, setAnthropicKey } from '../api-keys.js?v=1';
 
 export function hasApiKey() {
-  return !!localStorage.getItem(KEY_STORE);
+  return !!getAnthropicKey();
 }
+
 export function getApiKey() {
-  return localStorage.getItem(KEY_STORE) || '';
+  return getAnthropicKey();
 }
+
 export function setApiKey(k) {
-  localStorage.setItem(KEY_STORE, (k || '').trim());
+  setAnthropicKey(k || '');
 }
-
-async function createGenerationContext(userBrief, onProgress = () => {}) {
-  const apiKey = getApiKey();
-  if (!apiKey) throw new Error('Anthropic API key not set');
-
-  const client = createClient({ apiKey });
-  const tone = getTone(userBrief.tone || 'conversational');
-  // PDFs travel two ways: api blocks (base64) for stages 1/2, thumb data URLs
-  // for assemble image-section resolution.
-  const pdfs = userBrief.pdfs || [];
-  const pdfsForApi = pdfs.map(p => ({ file_index: p.file_index, name: p.name, base64: p.base64, pageCount: (p.pageThumbs || []).length }));
-  const pdfThumbs = pdfs.map(p => ({ file_index: p.file_index, name: p.name, pageThumbs: p.pageThumbs || [] }));
-
-  // --- Stage 0: fetch + extract any source URLs ----------------------
-  const sourceUrls = (userBrief.source_urls || []).filter(Boolean);
-  let extractedUrls = [];
-  if (sourceUrls.length) {
-    onProgress({ stage: 'fetching_urls', done: 0, total: sourceUrls.length });
-    extractedUrls = await fetchExtractedUrls(sourceUrls, (p) => onProgress({ stage: 'fetching_urls', ...p }));
-  }
-  const enrichedBrief = { ...userBrief, extracted_urls: extractedUrls };
-
-  return { client, tone, pdfsForApi, pdfThumbs, enrichedBrief, extractedUrls };
-}
-
-export async function designCourseBrief(userBrief, onProgress = () => {}) {
-  const context = await createGenerationContext(userBrief, onProgress);
-
-  // --- Stage 1: intake → course brief --------------------------------
-  onProgress({ stage: 'intake' });
-  const brief = await runIntake(context.client, context.enrichedBrief, { pdfs: context.pdfsForApi });
-  onProgress({ stage: 'intake_done', brief });
-  return { brief, context };
-}
-
-export async function researchCourseBrief(brief, context, onProgress = () => {}) {
-  // --- Stage 2: research per module, in parallel ---------------------
-  onProgress({ stage: 'research', moduleCount: brief.modules.length });
-  const researchResults = await Promise.all(
-    brief.modules.map(async mod => {
-      try {
-        const bundle = await runResearch(context.client, brief, mod, { pdfs: context.pdfsForApi, extracted_urls: context.extractedUrls });
-        onProgress({ stage: 'research_module', moduleId: mod.id, status: 'ok' });
-        return { mod, bundle };
-      } catch (err) {
-        onProgress({ stage: 'research_module', moduleId: mod.id, status: 'fail', error: err.message });
-        return { mod, bundle: null };
-      }
-    })
-  );
-  return researchResults;
-}
-
-export async function writeCourseFromResearch(brief, researchResults, context, onProgress = () => {}) {
-  // --- Stage 3: topics, parallel-per-module --------------------------
-  const total = brief.modules.reduce((n, m) => n + m.topics.length, 0);
-  let done = 0;
-  onProgress({ stage: 'topics', total });
-  const topicResults = [];
-  for (const { mod, bundle } of researchResults) {
-    const chunk = await Promise.all(mod.topics.map(async topic => {
-      try {
-        const content = await runTopic(context.client, brief, mod, topic, bundle, context.tone);
-        done++;
-        onProgress({ stage: 'topic_done', moduleId: mod.id, topicId: topic.id, done, total });
-        return { moduleId: mod.id, topicId: topic.id, content };
-      } catch (err) {
-        done++;
-        onProgress({ stage: 'topic_failed', moduleId: mod.id, topicId: topic.id, done, total, error: err.message });
-        return { moduleId: mod.id, topicId: topic.id, content: null, error: err.message };
-      }
-    }));
-    topicResults.push(...chunk);
-  }
-
-  // --- Stage 4: assemble in memory (no fs) ---------------------------
-  onProgress({ stage: 'assemble' });
-  const course = assembleCourse(brief, topicResults, { pdfThumbs: context.pdfThumbs });
-  // Keep brief + per-module research bundles around the result so the caller
-  // can persist them — surgical retry of failed topics needs both to skip
-  // Stage 1/2 on the rerun.
-  const researchByModule = Object.fromEntries(
-    researchResults.map(({ mod, bundle }) => [mod.id, bundle])
-  );
-  onProgress({ stage: 'done', course });
-  return { course, brief, research: researchByModule };
-}
-
-export async function generateCourse(userBrief, onProgress = () => {}) {
-  const { brief, context } = await designCourseBrief(userBrief, onProgress);
-  const researchResults = await researchCourseBrief(brief, context, onProgress);
-  return writeCourseFromResearch(brief, researchResults, context, onProgress);
-}
-
-// In-memory assemble moved to assemble-browser.js so the service-worker
-// generator can reuse it without duplication.
