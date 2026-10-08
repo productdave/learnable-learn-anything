@@ -4,3 +4,7 @@
 
 export const SUPABASE_URL = 'https://olzardlkaxgjqvwnjzil.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_SFcaKyoKzKsW92DHvap8Ng_vycfznUI';
+// Useful illustrations are integrated into new course creation.
+export const CREATION_IMAGES_ENABLED = true;
+export const SELF_PUBLISH_ENABLED = false;
+export const MODERATION_ENABLED = false;

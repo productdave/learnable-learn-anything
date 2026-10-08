@@ -1,0 +1,30 @@
+async page => {
+  const checks=[],requests=[],out='output/playwright/hosted-account-auth-browser-dwch0b';
+  const check=(ok,label)=>{if(!ok)throw Error(label);checks.push(label);};
+  const record=request=>{const prefix='https://learnable-staging.vercel.app',url=request.url();if(url.startsWith(prefix+'/api/')) {const path=url.slice(prefix.length).split('?')[0];requests.push({path,method:request.method(),...(path==='/api/setups/generate'?{action:request.postDataJSON()?.action}:{})});}};
+  page.on('request',record);
+  const dialog=page.getByRole('dialog'),account=page.getByRole('button',{name:'Account',exact:true});
+  await account.click();
+  await dialog.getByRole('status').filter({hasText:/^Connected securely$/}).waitFor();
+  await page.getByRole('heading',{name:'Claude is connected',exact:true}).waitFor({state:'attached'});
+  check(await dialog.isVisible()&&await page.evaluate(()=>document.activeElement?.id==='workspace-account-title'),'Create refreshes behind Account without stealing its focus');
+  await page.keyboard.press('Escape');
+  check(await page.getByRole('heading',{name:'Claude is connected',exact:true}).isVisible(),'Create uses the same actual server connection as Account');
+  check(await page.getByText('Course generation isn’t enabled on this server yet. Your request is saved.',{exact:true}).isVisible(),'Connected state does not bypass the disabled generation flag');
+  await page.screenshot({path:out+'/create-connected-390.png'});
+  await account.click();
+  await dialog.getByRole('status').filter({hasText:/^Connected securely$/}).waitFor();
+  await dialog.getByRole('button',{name:'Disconnect…',exact:true}).click();
+  await dialog.getByRole('button',{name:'Disconnect Claude',exact:true}).click();
+  await dialog.getByRole('status').filter({hasText:/^Claude disconnected\. Saved courses are unchanged\.$/}).waitFor();
+  await page.getByRole('heading',{name:'Connect Claude to create your plan',exact:true}).waitFor({state:'attached'});
+  check(await dialog.isVisible(),'Readiness refresh after disconnect preserves the Account modal');
+  await page.keyboard.press('Escape');
+  check(await page.getByRole('heading',{name:'Connect Claude to create your plan',exact:true}).isVisible(),'Create immediately reflects actual Account disconnect');
+  check(await page.getByRole('button',{name:'Create course plan →',exact:true}).count()===0,'No paid start action is offered while disabled/disconnected');
+  check(requests.filter(r=>r.path==='/api/setups/generate').length>=2&&requests.filter(r=>r.path==='/api/setups/generate').every(r=>r.action==='check'),'Connection changes trigger only check preflights');
+  check(!requests.some(r=>r.method==='POST'&&(/providers|gen\/(start|resume|restart)|setups\/store/.test(r.path))),'No provider validation, generation dispatch or setup resave');
+  await page.screenshot({path:out+'/create-disconnected-390.png'});
+  page.off('request',record);
+  return {passed:true,checks,requests,paidCalls:0,realProviderKey:false};
+}

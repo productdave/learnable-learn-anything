@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Connect OpenAI · Learnable</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles/openai-connection.css">
+  <script type="module" src="/js/openai-connection.js?v=3"></script>
+</head>
+<body>
+  <header><a class="brand" href="/?experience=workspace"><span aria-hidden="true">L</span>Learnable</a><span class="tag">Course images</span></header>
+  <main>
+    <a class="back" href="/?experience=workspace&amp;filter=mine">← Back to your courses</a>
+    <section class="card" aria-labelledby="connection-title">
+      <p class="eyebrow">A secure connection · No generation yet</p>
+      <h1 id="connection-title">Connect OpenAI for course images</h1>
+      <p class="intro">Add your API key so Learnable can create illustrations for your lessons. Connecting alone does not generate an image or incur a generation charge.</p>
+      <div id="openai-connection" aria-busy="true"><p role="status">Checking your sign-in…</p></div>
+      <noscript><p>Enable JavaScript to connect your account securely.</p></noscript>
+      <aside class="next" aria-labelledby="next-title"><h2 id="next-title">What happens next?</h2><p>Once connected, return to your course. Image generation is a separate step with its own cost and confirmation. Connecting does not prove available credits or permission to generate images.</p></aside>
+    </section>
+    <p class="privacy">Your key is sent over HTTPS and stored encrypted on Learnable’s server, scoped to your account. It is never added to your course or browser storage.</p>
+  </main>
+</body>
+</html>

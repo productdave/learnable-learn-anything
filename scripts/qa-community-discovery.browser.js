@@ -1,0 +1,40 @@
+(async page=>{
+ const {origin,tag}=__COMMUNITY_QA__,checks=[],errors=[];const check=(v,label)=>{if(!v)throw new Error(label);checks.push(label);};page.on('pageerror',e=>errors.push(e.message));
+ const grid=page.locator('[data-community-grid]'),cards=grid.locator('.home-course'),search=page.locator('[data-home-search]'),more=page.getByRole('button',{name:'Load more courses',exact:true});
+ await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===12);
+ check(await page.locator('[data-home-filter]').count()===2&&await page.locator('[data-home-status]').count()===0,'only collection navigation, no personal filters in Community');
+ check(await page.locator('dialog[open]').count()===0,'guest browsing has no sign-in gate');
+ check(await page.getByText('12 courses shown',{exact:false}).isVisible(),'count is loaded results, not misleading total');
+ const firstId=await cards.first().getAttribute('data-home-course');
+ await more.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===24);
+ check(await cards.first().getAttribute('data-home-course')===firstId,'loading more preserves initial cards');
+ check(await page.evaluate(()=>document.activeElement===document.querySelectorAll('[data-community-grid] .home-course h3 a')[12]),'keyboard load focuses first new course');
+ await page.route('**/api/courses/community?*',route=>route.request().url().includes('cursor=')?route.abort('failed'):route.continue());
+ await more.click();await page.getByText('Couldn’t load more courses',{exact:true}).waitFor();check(await cards.count()===24,'failed next page retains existing courses');
+ await page.unroute('**/api/courses/community?*');await page.getByRole('button',{name:'Try again',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===36);
+ check(await cards.evaluateAll(els=>new Set(els.map(e=>e.dataset.homeCourse)).size===els.length),'retry does not duplicate cards');
+ await search.fill('Needle beyond the old cap');await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===1);
+ check((await cards.first().textContent()).includes('211'),'search finds subtitle beyond first page/old cap');check(await page.evaluate(()=>new URL(location.href).searchParams.get('q'))==='Needle beyond the old cap','search retained in URL');
+ await more.click();await page.getByText('You’ve reached the end.',{exact:false}).waitFor();check(await more.count()===0,'end removes paging action');
+ await search.fill(tag+' Distinct Teacher');await page.waitForFunction(()=>document.querySelector('[data-community-grid]')?.textContent.includes('Distinct Teacher'));check(await cards.count()===1,'author search across full public catalog');
+ await search.fill(tag+' definitely absent');await page.getByText('No matching community courses',{exact:true}).waitFor();check(await page.getByRole('button',{name:'Clear search',exact:true}).isVisible(),'no matches gives clear-search recovery');
+ await page.getByRole('button',{name:'Clear search',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===12);check(await search.inputValue()===''&&!await page.evaluate(()=>new URL(location.href).searchParams.has('q')),'clear search resets page/query');
+ let release,started;const pending=new Promise(r=>started=r);
+ await page.route('**/api/courses/community?*',async route=>{if(route.request().url().includes('q=older-query')){const response=await route.fetch();await new Promise(r=>{release=r;started();});await route.fulfill({response}).catch(()=>{});}else await route.continue();});
+ await search.fill('older-query');await pending;await search.fill(tag+' Distinct Teacher');await page.waitForFunction(()=>document.querySelector('[data-community-grid]')?.textContent.includes('Distinct Teacher'));release();await page.unroute('**/api/courses/community?*');
+ await page.waitForTimeout(150);check((await grid.textContent()).includes('Distinct Teacher'),'late search cannot replace current results');
+ await page.route('**/api/courses/community?*',route=>route.abort('failed'));await page.getByRole('button',{name:'Refresh courses',exact:true}).click();await page.getByText('Couldn’t load Community Courses',{exact:true}).waitFor();
+ check(await page.getByText('No community courses yet',{exact:true}).count()===0,'outage never shown as empty catalog');await page.unroute('**/api/courses/community?*');await page.getByRole('button',{name:'Try again',exact:true}).click();await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===1);
+ check(true,'initial retry restores results without sign-in');
+ // The final live page remains usable if the separate bundled catalog fails.
+ await page.route('**/data/courses/index.json',route=>route.abort('failed'));await more.click();await page.getByText('Couldn’t load more courses',{exact:true}).waitFor();check(await cards.count()===1,'bundled outage retains final live page');await page.unroute('**/data/courses/index.json');await page.getByRole('button',{name:'Try again',exact:true}).click();await page.getByText('You’ve reached the end.',{exact:false}).waitFor();
+ await search.fill(tag);await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===12);
+ await page.context().setOffline(true);await more.click();await page.getByText('You’re offline. Reconnect and try again.',{exact:false}).waitFor();check(await cards.count()===12,'offline next-page attempt preserves loaded courses');await page.context().setOffline(false);await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===12&&!document.querySelector('[data-community-retry]'));check(true,'reconnection revalidates public results');
+ for(const width of [1440,390,320]){await page.setViewportSize({width,height:1000});await page.locator('#home-community').scrollIntoViewIfNeeded();check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`community fits ${width}px`);await page.screenshot({path:`output/playwright/community-discovery-${width}.png`});}
+ await page.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));await page.waitForTimeout(250);
+ check(await page.evaluate(()=>{const luminance=value=>{const c=value.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return c[0]*.2126+c[1]*.7152+c[2]*.0722;};const contrast=(fg,bg)=>{const a=luminance(fg),b=luminance(bg);return(Math.max(a,b)+.05)/(Math.min(a,b)+.05);};const card=document.querySelector('.community-browser .home-course'),title=card.querySelector('h3 a'),button=document.querySelector('[data-community-refresh]');return contrast(getComputedStyle(title).color,getComputedStyle(card).backgroundColor)>=4.5&&contrast(getComputedStyle(button).color,getComputedStyle(button).backgroundColor)>=4.5;}),'dark course titles and refresh meet 4.5:1 contrast after theme settles');
+ await page.screenshot({path:'output/playwright/community-discovery-dark-320.png'});await page.evaluate(()=>document.documentElement.setAttribute('data-theme','light'));
+ let reads=0;page.on('request',r=>{if(r.url().includes('/api/courses/community'))reads++;});await page.getByRole('link',{name:'Your Courses',exact:true}).click();await page.getByRole('heading',{name:'Your Courses',exact:true}).waitFor();const before=reads;await page.waitForTimeout(250);check(reads===before,'Your Courses does not fetch catalog pages');
+ await page.goBack();await page.waitForFunction(()=>document.querySelectorAll('[data-community-grid] .home-course').length===12);check(await search.inputValue()===tag,'back restores query and revalidates first page');
+ check(errors.length===0,'no browser exceptions: '+errors.join('; '));const result={total:checks.length,checks};await page.evaluate(result=>window.__communityReport=result,result);return result;
+})

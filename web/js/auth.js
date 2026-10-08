@@ -1,22 +1,11 @@
-// Supabase auth — magic-link login + account UI.
+// Supabase auth — magic-link login, account UI, and API key management for
+// cloud course generation.
 //
 // Graceful degradation: if config.js still holds placeholders, isConfigured()
-// is false and the whole module is inert — the app behaves exactly as the
-// local-only version (localStorage progress, no login UI).
+// is false and the whole module is inert.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
-
-const ANTHROPIC_KEY_STORE = 'gametheory-api-key'; // shared with chat.js + generator/index.js + sync.js
-function getAnthropicKey() { return localStorage.getItem(ANTHROPIC_KEY_STORE) || ''; }
-function setAnthropicKey(k) {
-  if (k) localStorage.setItem(ANTHROPIC_KEY_STORE, k.trim());
-  else localStorage.removeItem(ANTHROPIC_KEY_STORE);
-}
-function maskKey(k) {
-  if (!k) return '';
-  if (k.length <= 14) return '••••••••';
-  return k.slice(0, 8) + '…' + k.slice(-4);
-}
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=1';
+import { API_KEY_PROVIDERS, getProviderKey, maskKey, setProviderKey } from './api-keys.js?v=1';
 
 let client = null;
 let currentUser = null;
@@ -89,50 +78,32 @@ function ensureModal() {
   return m;
 }
 
-function openAccount() {
+export function openAccount(options = {}) {
+  if (currentUser && document.body.dataset.experience === 'workspace') {
+    const owner = currentUser.id;
+    return import('./workspace-account.js?v=3').then(({ openWorkspaceAccount }) => {
+      if (currentUser?.id === owner) return openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCredentials: options.intent === 'course-generation' });
+    });
+  }
   const m = ensureModal();
   const body = m.querySelector('.auth-body');
+  const intent = options.intent || '';
+  const jobId = options.jobId || '';
   if (currentUser) {
-    const hasKey = !!getAnthropicKey();
     body.innerHTML = `
       <h2 class="auth-title">Your account</h2>
       <p class="auth-email">${currentUser.email}</p>
-      <p class="auth-note">Your progress and Anthropic key sync across every device you sign in on.</p>
+      <p class="auth-note">Your progress and bring-your-own model keys sync across every device you sign in on.</p>
 
       <div class="auth-section">
-        <div class="auth-section-label">Anthropic API key</div>
-        ${hasKey ? `
-          <div class="auth-keyrow">
-            <code class="auth-keymask">${maskKey(getAnthropicKey())}</code>
-            <button class="auth-link" data-action="edit-key">Replace</button>
-            <button class="auth-link auth-link--danger" data-action="clear-key">Remove</button>
-          </div>
-          <p class="auth-help">Used by the AI tutor and course generation. Runs in your browser only.</p>
-        ` : `
-          <form class="auth-keyform">
-            <input class="auth-input auth-mono" type="password" name="anthropicKey"
-              placeholder="sk-ant-..." autocomplete="off" spellcheck="false" required>
-            <button type="submit" class="auth-btn auth-btn--compact">Save key</button>
-          </form>
-          <p class="auth-help">Runs in your browser, never leaves your device.
-            <a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get one</a> — roughly $1–3 of credit per generated course.</p>
-        `}
+        <div class="auth-section-label">Model API keys</div>
+        <p class="auth-help" style="margin-bottom: var(--space-3)">Temporary testing setup: you bring your own provider keys. Later, Learnable can move to platform credits and hide this from learners.</p>
+        ${apiKeySettingsHTML()}
       </div>
 
       <div class="auth-section" data-cloud-sync-section>
-        <div class="auth-section-label">Cloud sync</div>
+        <div class="auth-section-label">Courses</div>
         <div data-cloud-sync-body><span class="auth-help">Loading sync status…</span></div>
-      </div>
-
-      <div class="auth-section">
-        <div class="auth-section-label">Migrate courses from another deployment</div>
-        <p class="auth-help">localStorage is per-domain, so courses you generated on an older Learnable URL won't appear here automatically. On the old site, open DevTools (⌥⌘I) → Console → run <code>copy(localStorage.getItem('learnable-user-courses'))</code>, then paste below.</p>
-        <textarea class="auth-input auth-mono" data-import-json rows="3" placeholder='{"course-id": { "config": {...}, ... }}' spellcheck="false" autocomplete="off"></textarea>
-        <div class="auth-keyform" style="margin-top: var(--space-2)">
-          <button class="auth-btn auth-btn--compact" data-import-run>Import courses</button>
-          <button class="auth-btn auth-btn--ghost auth-btn--compact" data-export-run>Copy my courses</button>
-        </div>
-        <div class="auth-msg" data-import-msg style="display:none; margin-top: var(--space-2)"></div>
       </div>
 
       <button class="auth-btn auth-btn--ghost auth-signout">Sign out</button>`;
@@ -141,84 +112,46 @@ function openAccount() {
       await signOut();
       openAccount();
     });
-    // Cloud-sync section is async — load + wire after the modal is mounted.
+    // Courses section is async — load + wire after the modal is mounted.
     renderCloudSyncSection(body).catch(() => {});
-    body.querySelector('[data-import-run]')?.addEventListener('click', async () => {
-      const ta = body.querySelector('[data-import-json]');
-      const msg = body.querySelector('[data-import-msg]');
-      const txt = (ta?.value || '').trim();
-      if (!txt) {
-        msg.style.display = ''; msg.className = 'auth-msg auth-msg--err';
-        msg.textContent = 'Paste the JSON you copied from the old app first.';
-        return;
-      }
-      const { importCoursesJson } = await import('./user-courses.js');
-      const result = importCoursesJson(txt);
-      msg.style.display = '';
-      if (result.imported && !result.errors.length) {
-        msg.className = 'auth-msg auth-msg--ok';
-        msg.textContent = `Imported ${result.imported} course${result.imported === 1 ? '' : 's'}. Close this dialog to see them.`;
-        if (ta) ta.value = '';
-        // Tell the library to refresh.
-        window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
-      } else if (result.imported) {
-        msg.className = 'auth-msg auth-msg--ok';
-        msg.textContent = `Imported ${result.imported}, skipped ${result.skipped}. ${result.errors.join(' ')}`;
-        if (ta) ta.value = '';
-        window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
-      } else {
-        msg.className = 'auth-msg auth-msg--err';
-        msg.textContent = result.errors.length ? result.errors.join(' ') : 'No courses found in that JSON.';
-      }
-    });
-    body.querySelector('[data-export-run]')?.addEventListener('click', async () => {
-      const { exportCoursesJson } = await import('./user-courses.js');
-      const json = exportCoursesJson();
-      const msg = body.querySelector('[data-import-msg]');
-      try {
-        await navigator.clipboard.writeText(json);
-        msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
-        msg.textContent = 'Copied your courses JSON to the clipboard.';
-      } catch {
-        // Clipboard API can fail without permission — fall back to dumping in the textarea.
-        const ta = body.querySelector('[data-import-json]');
-        if (ta) ta.value = json;
-        msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
-        msg.textContent = 'Clipboard blocked — JSON dropped into the textarea above for you to copy manually.';
-      }
-    });
-    body.querySelector('[data-action="edit-key"]')?.addEventListener('click', () => {
-      setAnthropicKey('');
-      // Re-render so the form shows
-      openAccount();
-    });
-    body.querySelector('[data-action="clear-key"]')?.addEventListener('click', async () => {
-      setAnthropicKey('');
-      const { kickSync } = await import('./sync.js?v=2');
+    body.querySelectorAll('[data-key-clear]').forEach(btn => btn.addEventListener('click', async () => {
+      setProviderKey(btn.dataset.keyClear, '');
+      const { kickSync } = await import('./sync.js?v=27');
       kickSync();
-      openAccount();
-    });
-    body.querySelector('.auth-keyform')?.addEventListener('submit', async (e) => {
+      openAccount({ intent, jobId });
+    }));
+    body.querySelectorAll('.auth-keyform').forEach(form => form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const val = e.target.anthropicKey.value.trim();
+      const provider = e.target.dataset.provider;
+      const val = e.target.apiKey.value.trim();
       if (!val) return;
-      setAnthropicKey(val);
-      const { kickSync } = await import('./sync.js?v=2');
-      kickSync();
-      openAccount();
-    });
+      setProviderKey(provider, val);
+      const { flushSync } = await import('./sync.js?v=27');
+      let synced = false;
+      try { await flushSync(); synced = true; }
+      catch { /* account modal can retry via the Courses panel */ }
+      if (synced && provider === 'anthropic') {
+        window.dispatchEvent(new CustomEvent('learnable-api-key-saved', {
+          detail: { intent, jobId }
+        }));
+      }
+      openAccount({ intent, jobId });
+    }));
   } else {
+    const intentNote = intent === 'course-generation'
+      ? `<div class="auth-msg auth-msg--ok" style="display:block; margin-bottom: var(--space-3)">Sign in first so generated courses can save to your account.</div>`
+      : '';
     body.innerHTML = `
       <h2 class="auth-title">Sign in to Learnable</h2>
       <p class="auth-note">We'll email you a magic link — no password. Your progress then follows you across devices.</p>
+      ${intentNote}
       <form class="auth-form">
         <input type="email" class="auth-input" placeholder="you@example.com" autocomplete="email" required />
         <button type="submit" class="auth-btn">Send magic link</button>
       </form>
-      <div class="auth-msg" style="display:none"></div>
-      ${localCourseTransferHTML()}`;
+      <div class="auth-msg" data-auth-submit-msg style="display:none"></div>`;
     const form = body.querySelector('.auth-form');
-    const msg = body.querySelector('.auth-msg');
+    const msg = body.querySelector('[data-auth-submit-msg]');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = form.querySelector('.auth-input').value.trim();
@@ -243,63 +176,34 @@ function openAccount() {
         msg.textContent = authErrorMessage(err);
       }
     });
-    wireLocalCourseTransfer(body);
   }
   m.style.display = '';
 }
 
-function localCourseTransferHTML() {
-  return `
-    <div class="auth-section">
-      <div class="auth-section-label">Local courses on this browser</div>
-      <p class="auth-help">You do not need to sign in to export or import generated courses. This reads the courses saved in this browser's localStorage.</p>
-      <textarea class="auth-input auth-mono" data-import-json rows="3" placeholder='{"course-id": { "config": {...}, ... }}' spellcheck="false" autocomplete="off"></textarea>
-      <div class="auth-keyform" style="margin-top: var(--space-2)">
-        <button class="auth-btn auth-btn--compact" data-import-run>Import courses</button>
-        <button class="auth-btn auth-btn--ghost auth-btn--compact" data-export-run>Copy my courses</button>
-      </div>
-      <div class="auth-msg" data-import-msg style="display:none; margin-top: var(--space-2)"></div>
-    </div>`;
-}
-
-function wireLocalCourseTransfer(body) {
-  body.querySelector('[data-import-run]')?.addEventListener('click', async () => {
-    const ta = body.querySelector('[data-import-json]');
-    const msg = body.querySelector('[data-import-msg]');
-    const txt = (ta?.value || '').trim();
-    if (!txt) {
-      msg.style.display = ''; msg.className = 'auth-msg auth-msg--err';
-      msg.textContent = 'Paste exported courses JSON first.';
-      return;
-    }
-    const { importCoursesJson } = await import('./user-courses.js');
-    const result = importCoursesJson(txt);
-    msg.style.display = '';
-    if (result.imported) {
-      msg.className = 'auth-msg auth-msg--ok';
-      msg.textContent = `Imported ${result.imported}, skipped ${result.skipped}. ${result.errors.join(' ')}`.trim();
-      if (ta) ta.value = '';
-      window.dispatchEvent(new CustomEvent('learnable-courses-imported'));
-    } else {
-      msg.className = 'auth-msg auth-msg--err';
-      msg.textContent = result.errors.length ? result.errors.join(' ') : 'No courses found in that JSON.';
-    }
-  });
-  body.querySelector('[data-export-run]')?.addEventListener('click', async () => {
-    const { exportCoursesJson } = await import('./user-courses.js');
-    const json = exportCoursesJson();
-    const msg = body.querySelector('[data-import-msg]');
-    try {
-      await navigator.clipboard.writeText(json);
-      msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
-      msg.textContent = 'Copied your courses JSON to the clipboard.';
-    } catch {
-      const ta = body.querySelector('[data-import-json]');
-      if (ta) ta.value = json;
-      msg.style.display = ''; msg.className = 'auth-msg auth-msg--ok';
-      msg.textContent = 'Clipboard blocked - JSON dropped into the textarea above for you to copy manually.';
-    }
-  });
+function apiKeySettingsHTML() {
+  return API_KEY_PROVIDERS.map(provider => {
+    const key = getProviderKey(provider.id);
+    return `
+      <div class="auth-provider-key">
+        <div class="auth-keyrow">
+          <div style="flex:1">
+            <strong>${escapeText(provider.label)}</strong>
+            <div class="auth-help">${escapeText(provider.status)}</div>
+          </div>
+          ${key ? `<code class="auth-keymask">${escapeText(maskKey(key))}</code>` : '<span class="auth-help">Not saved</span>'}
+        </div>
+        <p class="auth-help">${escapeText(provider.help)}
+          <a href="${provider.dashboardUrl}" target="_blank" rel="noopener">Dashboard</a> ·
+          <a href="${provider.guideUrl}" target="_blank" rel="noopener">How to create a key</a>
+        </p>
+        <form class="auth-keyform" data-provider="${provider.id}">
+          <input class="auth-input auth-mono" type="password" name="apiKey"
+            placeholder="${escapeText(provider.placeholder)}" autocomplete="off" spellcheck="false" required>
+          <button type="submit" class="auth-btn auth-btn--compact">${key ? 'Replace' : 'Save key'}</button>
+          ${key ? `<button type="button" class="auth-btn auth-btn--ghost auth-btn--compact" data-key-clear="${provider.id}">Remove</button>` : ''}
+        </form>
+      </div>`;
+  }).join('');
 }
 
 function authErrorMessage(err) {
@@ -315,22 +219,28 @@ function authErrorMessage(err) {
 
 export async function signOut() {
   const c = await sb();
-  if (c) await c.auth.signOut();
+  if (c) { const result = await c.auth.signOut(); if (result?.error) throw result.error; }
   currentUser = null;
   refreshAccountButton();
   emitUser();
 }
 
-// ---- Cloud sync status (per-course backup to Supabase user_courses) ----
+// ---- Account course status (per-course backup to Supabase user_courses) ----
 
-const MIGRATION_SQL = `-- Run once in Supabase → SQL Editor.
+const MIGRATION_SQL = `-- Quick repair for account course sync.
+-- For the full cloud course-builder workflow, run db/04-agentic-workflow.sql from this repo.
+-- Run in Supabase SQL Editor.
 create table if not exists public.user_courses (
   id text not null,
   owner_id uuid not null references auth.users(id) on delete cascade,
   payload jsonb not null,
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (id, owner_id)
 );
+
+alter table public.user_courses add column if not exists created_at timestamptz not null default now();
+alter table public.user_courses add column if not exists updated_at timestamptz not null default now();
 
 alter table public.user_courses enable row level security;
 
@@ -347,11 +257,9 @@ create policy "owner_delete" on public.user_courses for delete using (auth.uid()
 async function renderCloudSyncSection(body) {
   const host = body.querySelector('[data-cloud-sync-body]');
   if (!host) return;
-  const { getStatus, onSyncStatus, pushAllNow, syncCoursesNow } = await import('./course-sync.js?v=1');
-  const { _readAllCourses } = await import('./user-courses.js');
+  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=31');
 
   function render(status) {
-    const localCount = Object.keys(_readAllCourses()).length;
     const cloudCount = status.lastPullCloudCount;
     const fmtAgo = (ms) => {
       if (!ms) return 'never';
@@ -363,7 +271,7 @@ async function renderCloudSyncSection(body) {
     const pullErrHTML = status.lastPullError ? `<p class="auth-msg auth-msg--err" style="margin-top: var(--space-2)">${escapeText(status.lastPullError)}</p>` : '';
     const failuresHTML = status.pushFailures.length ? `
       <details class="auth-help" style="margin-top: var(--space-2)">
-        <summary style="cursor:pointer">${status.pushFailures.length} course${status.pushFailures.length === 1 ? '' : 's'} failed to push — details</summary>
+        <summary style="cursor:pointer">${status.pushFailures.length} course${status.pushFailures.length === 1 ? '' : 's'} could not save to your account — details</summary>
         <ul style="margin: var(--space-1) 0 0 var(--space-4); padding: 0">
           ${status.pushFailures.map(f => `<li><code>${escapeText(f.id)}</code> — ${escapeText(f.error)}</li>`).join('')}
         </ul>
@@ -373,49 +281,35 @@ async function renderCloudSyncSection(body) {
       status.pushFailures.some(f => f.kind === 'missing_table' || /table does not exist/i.test(f.error || ''));
     const sqlHTML = needsMigration ? `
       <details open class="auth-help" style="margin-top: var(--space-3); padding: var(--space-3); background: color-mix(in srgb, var(--color-rose, #E11D48) 8%, transparent); border: 1px solid color-mix(in srgb, var(--color-rose, #E11D48) 25%, transparent); border-radius: 8px;">
-        <summary style="cursor:pointer; font-weight:600; color: var(--color-rose, #E11D48)">⚠ The user_courses table doesn't exist yet — run this SQL</summary>
-        <p style="margin-top: var(--space-2)">Open <a href="https://supabase.com/dashboard/project/olzardlkaxgjqvwnjzil/sql/new" target="_blank" rel="noopener">Supabase → SQL Editor</a>, paste the block below, click Run. Then come back and hit "Sync all to cloud now".</p>
+        <summary style="cursor:pointer; font-weight:600; color: var(--color-rose, #E11D48)">⚠ Account course sync needs its table — run this SQL</summary>
+        <p style="margin-top: var(--space-2)">Open <a href="https://supabase.com/dashboard/project/olzardlkaxgjqvwnjzil/sql/new" target="_blank" rel="noopener">Supabase → SQL Editor</a>, paste the block below, click Run. For cloud course generation, also run <code>db/04-agentic-workflow.sql</code> from this repo.</p>
         <pre style="margin-top: var(--space-2); padding: var(--space-2); background: var(--bg-secondary); border-radius: 6px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; max-height: 240px; overflow-y: auto"><code>${escapeText(MIGRATION_SQL)}</code></pre>
         <button class="auth-btn auth-btn--compact" data-copy-sql style="margin-top: var(--space-2)">Copy SQL</button>
       </details>` : '';
     host.innerHTML = `
       <div class="auth-keyrow" style="margin-bottom: var(--space-2)">
         <div style="flex: 1">
-          <strong>${localCount}</strong> course${localCount === 1 ? '' : 's'} on this device · ${cloudCount === null ? '<span class="auth-help">cloud unknown</span>' : `<strong>${cloudCount}</strong> in cloud`}
+          ${cloudCount === null
+            ? '<span class="auth-help">Course count will appear after the next cloud refresh.</span>'
+            : `<strong>${cloudCount}</strong> course${cloudCount === 1 ? '' : 's'} saved to your account`}
           <div class="auth-help" style="margin-top: var(--space-1)">
-            Last pull: ${fmtAgo(status.lastPullAt)}${status.lastPushAt ? ` · last push: ${fmtAgo(status.lastPushAt)}` : ''}
+            Last refreshed: ${fmtAgo(status.lastPullAt)}${status.lastPushAt ? ` · last saved: ${fmtAgo(status.lastPushAt)}` : ''}
           </div>
         </div>
       </div>
       <div class="auth-keyform">
-        <button class="auth-btn auth-btn--compact" data-sync-push>Sync all to cloud now</button>
-        <button class="auth-btn auth-btn--ghost auth-btn--compact" data-sync-pull>Pull from cloud</button>
+        <button class="auth-btn auth-btn--ghost auth-btn--compact" data-sync-pull>Refresh from cloud</button>
       </div>
       <div class="auth-msg" data-sync-msg style="display:none; margin-top: var(--space-2)"></div>
       ${pullErrHTML}
       ${failuresHTML}
       ${sqlHTML}`;
 
-    host.querySelector('[data-sync-push]')?.addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      btn.disabled = true; btn.textContent = 'Syncing…';
-      const msgEl = host.querySelector('[data-sync-msg]');
-      const result = await pushAllNow();
-      msgEl.style.display = '';
-      if (result.failed === 0) {
-        msgEl.className = 'auth-msg auth-msg--ok';
-        msgEl.textContent = `Pushed ${result.pushed} course${result.pushed === 1 ? '' : 's'} to the cloud.`;
-      } else {
-        msgEl.className = 'auth-msg auth-msg--err';
-        msgEl.textContent = `Pushed ${result.pushed}, failed ${result.failed}. See details below.`;
-      }
-      btn.disabled = false; btn.textContent = 'Sync all to cloud now';
-    });
     host.querySelector('[data-sync-pull]')?.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
-      btn.disabled = true; btn.textContent = 'Pulling…';
+      btn.disabled = true; btn.textContent = 'Refreshing…';
       await syncCoursesNow();
-      btn.disabled = false; btn.textContent = 'Pull from cloud';
+      btn.disabled = false; btn.textContent = 'Refresh from cloud';
     });
     host.querySelector('[data-copy-sql]')?.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(MIGRATION_SQL); } catch {}

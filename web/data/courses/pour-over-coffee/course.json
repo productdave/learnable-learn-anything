@@ -1,5 +1,9 @@
 {
   "id": "pour-over-coffee",
+  "publicAuthor": {
+    "displayName": "David Wang",
+    "avatarUrl": ""
+  },
   "schemaVersion": 1,
   "name": "Pour-Over Coffee at Home",
   "title": "Pour-Over Coffee at Home",

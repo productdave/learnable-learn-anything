@@ -1,114 +1,99 @@
 <div align="center">
 
-<img src="assets/readme-cover.png" width="100%" alt="Learnable turns any learning goal into a structured, adaptive course" />
+<img src="assets/readme-cover.png" width="100%" alt="Learnable turns a learning goal into a structured course" />
 
 # Learnable
 
-**Turn any goal into a course built around you—then learn it in the same place.**
-
-An AI course builder and learning workspace combining researched lessons, hands-on practice, progress tracking, and an AI tutor.
+Describe what you want to learn or teach, create a course draft, then learn from it.
 
 </div>
 
 ## What it does
 
-Learnable starts with what you want to learn, why it matters, what you already know, and how deep you want to go. It designs a curriculum, researches each module, and turns the result into an interactive course you can study immediately.
+Learnable turns your goal, starting point and source material into an interactive
+course. The aim is a complete, useful draft for human review—not a one-shot final
+product or a guarantee that every generated detail is correct.
 
-Instead of returning another long AI answer, Learnable creates a durable learning path with modules, lessons, practice, review, search, and progress.
+The workspace is the default experience. Community Courses are separate from
+Your Courses, which has filters for work in progress and courses needing attention.
 
-## Key features
+## Create a course
 
-- **Personalized curricula** based on your goal, starting point, and preferred depth
-- **Source-aware generation** from pasted notes, web pages, and up to five PDFs
-- **Live research** for current concepts, examples, and common misconceptions
-- **Human review gates** before research and lesson writing begin
-- **Structured lessons** with concepts, examples, takeaways, and relevant visuals
-- **Five quiz formats** plus optional applied exercises
-- **Spaced-repetition flashcards** for ongoing review
-- **Context-aware AI tutor** for the current topic or selected lesson text
-- **Text-to-speech** with voice, speed, seek, and playback controls
-- **Course-wide search, progress tracking, and light and dark themes**
-- **Retry and resume tools** that preserve completed work
-- **Optional cross-device sync** through Supabase magic-link authentication
+1. Describe the course, learner and intended outcome.
+2. Choose the learning materials, such as checklists, quizzes and flashcards.
+3. Add context: notes, transcripts or raw text, URLs, and PDF/DOCX/TXT files.
+4. Review the setup and choose **Create course**. If you're not signed in, this
+   is when Learnable asks you to sign in. New generation is saved to your account.
 
-## How to use
+You review the curriculum and research direction before lessons are written.
+After lessons and learning checks are saved, the Visual Designer refines the copy
+and presentation, chooses where images help, and generates and inserts them before
+final checks. Images belong to the creation flow; not every lesson needs one.
 
-1. Select **New course**.
-2. Enter a topic or provide notes, URLs, or PDFs.
-3. Add your goal, starting point, and preferred depth.
-4. Add an Anthropic API key when prompted.
-5. Review the proposed curriculum and provide any corrections or extra context.
-6. Review the research direction before lesson writing begins.
-7. Open the completed course from your library.
-8. Work through lessons, answer quizzes, review flashcards, ask the tutor questions, and mark topics complete.
-9. Optionally sign in to sync generated courses and learning progress across devices.
+Progress and review checkpoints are shown in the course workspace. Resume keeps
+completed work rather than starting a new course. Creator-funded generation uses
+connected Claude and OpenAI accounts; provider keys are encrypted on the server.
+Starting or resuming generation can incur provider charges.
 
-Keep the browser tab open while the current human-review generation workflow is running.
+## Learning tools
 
-## Run locally
+- Structured lessons, examples, takeaways and relevant instructional images.
+- Selected checklists, quizzes and flashcards.
+- Course navigation, search, progress, text-to-speech and light/dark themes.
+- Account-owned courses and cross-device sync, with recovery for interrupted work.
 
-### Requirements
+Guided practice and an AI tutor are not part of the current MVP creation flow.
+Self-publishing and moderation have guarded implementations but are disabled by
+default; their presence in source does not mean they are enabled on a deployment.
 
-- Node.js 20+
-- npm
-- An Anthropic API key
+## Work on the source
 
-Clone the repository and install both sets of dependencies:
+Use Node.js 22.13 or later in the 22.x line, and npm:
 
-```bash
+```sh
 git clone https://github.com/productdave/learnable-learn-anything.git
 cd learnable-learn-anything
-npm install
-npm --prefix web install
+npm ci --ignore-scripts
+npm --prefix web ci --ignore-scripts
+npm run verify:cloud-architecture
+npm run test:course-description
+npm run test:visual-designer
 ```
 
-Run the complete web app, including its serverless URL-extraction endpoint:
+For an isolated preview, configure your own local/separate Supabase project using
+`.env.preview.example` and read [the database guide](db/SETUP.md), then use
+`npm run dev:setup`. It deliberately refuses the app's existing live database.
+Server secrets belong in the ignored preview file or server environment, never
+in frontend config or a commit. All paid-generation flags are off in the examples.
 
-```bash
-cd web
-npx vercel dev --listen 8765
-```
+The old local CLI generator is retired. The supported course-creation workflow
+uses authenticated server-side generation and durable checkpoints.
 
-Open [http://localhost:8765](http://localhost:8765). Learnable will ask for your Anthropic API key when you create your first course.
+See [the source snapshot guide](docs/SOURCE-SNAPSHOT.md) for more offline tests,
+setup boundaries and what is intentionally excluded from this public repository.
 
-Bundled courses and browser-local progress do not require a Supabase account. Authentication, cross-device sync, and cloud generation require a configured Supabase project and the corresponding Vercel environment variables.
-
-### CLI generator
-
-The repository also includes a resumable command-line course generator. From the repository root:
-
-```bash
-cp .env.example .env
-```
-
-Add `ANTHROPIC_API_KEY` to `.env`, then generate an example course:
-
-```bash
-npm run generate -- briefs/coffee.json --out output
-```
-
-Resume an interrupted course without regenerating completed topics:
-
-```bash
-npm run generate -- --resume COURSE_ID --out output
-```
-
-## Tech stack
+## Stack
 
 | Layer | Technology |
 |---|---|
-| Learning experience | Vanilla JavaScript modules, HTML, modular CSS |
-| Course generation | Node.js, Anthropic Messages API, Claude, Zod |
-| Research and source processing | Anthropic web search, Mozilla Readability, Linkedom, PDF.js |
-| Learning tools | Web Speech API, localStorage, service workers |
-| Accounts and data | Supabase Auth, Postgres, Storage, Realtime, row-level security |
-| Backend | Vercel-compatible Node.js serverless functions |
-| Hosting | Vercel |
+| Experience | Vanilla JavaScript modules, HTML and modular CSS |
+| Text and research | Anthropic Messages API, Claude and Zod |
+| Images | Creator-funded OpenAI image generation |
+| Source processing | Readability, Linkedom, PDF.js and Mammoth |
+| Account data | Supabase Auth, Postgres, Storage, Realtime and row-level security |
+| Backend | Node.js serverless functions, grouped for reviewed Vercel releases |
 
-## Status and limitations
+## Status
 
-Learnable is a working product prototype, not a production learning platform. It includes bundled example courses, browser-based course creation, and a separate resumable CLI generator.
+This October source snapshot is newer than GitHub's August app. It is not a
+byte-for-byte archive of production or permission to redeploy it. Production
+releases were built from scoped, verified packages; their private receipts,
+credentials, account courses and generated user data are kept outside Git.
 
-The current human-review workflow keeps its intermediate review state in the open browser tab, so refreshing before generation finishes can interrupt the run. Research is best-effort and can fall back to model knowledge when a source cannot be reached; the player does not yet present a complete source bibliography.
+Descriptions allow 5,000 Unicode characters; individual notes allow 12,000.
+Long text stays available in expandable, bounded review regions. Sources and AI
+output still need human review, particularly for high-stakes teaching.
 
-Without an account, generated courses, progress, and the Anthropic key remain in that browser. In the current signed-in prototype, the key is also stored in the user's row-level-security-protected Supabase state so cloud generation can access it. Self-hosted sync requires additional Supabase configuration, and the repository does not currently include an automated test suite.
+Offline source/mock checks do not prove fresh hosted email return, account saving,
+actual provider output, physical-phone behavior or full accessibility acceptance.
+A fresh clone-to-hosted deployment and those remaining checks need separate review.

@@ -3,11 +3,12 @@
 // Stage 4 validates everything before writing to disk.
 //
 // Imports `zod` as a bare specifier so the same file runs in both contexts:
-//   • Browser / Service Worker — resolved via the importmap in index.html
+//   • Browser — resolved via the importmap in index.html
 //     (mapped to `https://esm.sh/zod@3.23.8`).
 //   • Vercel function / Node — resolved via node_modules from web/package.json.
 
 import { z } from 'zod';
+import { componentPolicy } from './component-policy.mjs';
 
 // --- Course brief (Stage 1 output) ----------------------------------
 
@@ -45,6 +46,13 @@ export const CourseBriefSchema = z.object({
   learning_objectives: z.array(z.string()).min(2),
   modules: z.array(CourseBriefModuleSchema).min(1).max(6)
 });
+
+export function courseBriefSchemaFor(request) {
+  if (componentPolicy(request).quizzes) return CourseBriefSchema;
+  const topic = CourseBriefTopicSchema.extend({ quiz_plan: z.array(z.enum(QUIZ_VARIANTS)).length(0, 'Quizzes are not selected') });
+  const module = CourseBriefModuleSchema.extend({ topics: z.array(topic).min(3).max(8) });
+  return CourseBriefSchema.extend({ modules: z.array(module).min(1).max(6) });
+}
 
 // --- Topic content (Stage 3 output) ---------------------------------
 
@@ -142,12 +150,50 @@ const TakeawaySectionSchema = z.object({
   points: z.array(z.string()).min(3).max(6)
 });
 
+const PracticeSectionSchema = z.object({
+  type: z.literal('practice'),
+  context: z.enum(['general', 'learning', 'swimming']).optional(),
+  guidance: z.string().trim().min(20).max(1000).optional(),
+  id: z.string().min(3),
+  title: z.string().min(3),
+  goal: z.string().min(20),
+  durationMinutes: z.number().int().min(5).max(30),
+  equipment: z.array(z.string().min(1)).min(1).max(8),
+  setup: z.string().min(20),
+  steps: z.array(z.object({
+    title: z.string().min(3),
+    instruction: z.string().min(20),
+    cue: z.string().min(2),
+    repetitions: z.string().optional(),
+    success: z.string().min(10)
+  })).min(2).max(8),
+  regressions: z.array(z.string().min(5)).min(1).max(5),
+  progressions: z.array(z.string().min(5)).min(1).max(5),
+  safetyStops: z.array(z.string().min(5)).min(1).max(8),
+  readinessChecks: z.array(z.object({
+    id: z.string().regex(/^[a-z0-9-]+$/),
+    label: z.string().min(10)
+  })).min(1).max(6)
+});
+
+const ChecklistSectionSchema = z.object({
+  type: z.literal('checklist'),
+  id: z.string().regex(/^[a-z0-9-]{3,100}$/),
+  title: z.string().trim().min(3).max(160),
+  description: z.string().trim().min(20).max(600),
+  items: z.array(z.object({
+    id: z.string().regex(/^[a-z0-9-]{3,100}$/),
+    label: z.string().trim().min(5).max(200),
+    detail: z.string().trim().min(5).max(600).optional()
+  })).min(3).max(8).refine(items => new Set(items.map(item => item.id)).size === items.length, 'Checklist item IDs must be unique')
+});
+
 // Image section — embeds a diagram, chart, or screenshot inline in a topic.
 // After assemble, `src` is always a resolved URL (http(s):// or data:image/...).
 // Before assemble, Stage 3 may emit either:
 //   - { type:'image', ref_kind:'web', url, alt, caption, source_title?, source_url? }
 //   - { type:'image', ref_kind:'pdf', file_index, page, alt, caption }
-// assemble-browser.js resolves the pdf ref against the in-memory PDF thumb cache
+// assemble-course.js resolves the pdf ref against the in-memory PDF thumb cache
 // and produces the renderer-facing shape below.
 // Accepts BOTH lifecycle shapes of an image section:
 //   • Pre-assemble (what Stage 3 emits): { ref_kind:'web', url } or
@@ -155,10 +201,13 @@ const TakeawaySectionSchema = z.object({
 //   • Post-assemble (what the renderer reads): { src } — a resolved URL or
 //     data URL.
 // Validation runs at Stage 3 parse time (before assemble), so the schema MUST
-// admit the ref shapes; assemble-browser.js normalises to `src` and drops
+// admit the ref shapes; assemble-course.js normalises to `src` and drops
 // unresolvable refs.
 const ImageSectionSchema = z.object({
   type: z.literal('image'),
+  asset_id: z.string().uuid().optional(),
+  image_slot: z.literal('instruction').optional(),
+  generated_by: z.literal('openai').optional(),
   src: z.string().min(1).optional(),
   ref_kind: z.enum(['web', 'pdf']).optional(),
   url: z.string().optional(),
@@ -169,7 +218,7 @@ const ImageSectionSchema = z.object({
   source_title: z.string().optional(),
   source_url: z.string().optional()
 }).refine(
-  s => s.src || s.url || (s.file_index !== undefined && s.page !== undefined),
+  s => s.asset_id ? s.generated_by === 'openai' && s.image_slot === 'instruction' && !s.src && !s.url : s.src || s.url || (s.file_index !== undefined && s.page !== undefined),
   'image section needs src, url, or a pdf {file_index, page} ref'
 );
 
@@ -201,6 +250,8 @@ export const SectionSchema = z.union([
   CalloutSectionSchema,
   QuizSectionSchema,
   ExerciseSectionSchema,
+  PracticeSectionSchema,
+  ChecklistSectionSchema,
   TakeawaySectionSchema,
   ImageSectionSchema
 ]);
@@ -210,6 +261,17 @@ export const FlashcardSchema = z.object({
   back: z.string().min(5)
 });
 
+// A teaching decision, not an image checkbox. Keep omission explicit so that
+// an intentionally text-only lesson is distinguishable from unfinished work.
+export const LessonVisualSchema = z.discriminatedUnion('decision', [
+  z.object({ decision: z.literal('omit'), reason: z.string().trim().min(10).max(600) }).strict(),
+  z.object({
+    decision: z.literal('generate'), reason: z.string().trim().min(10).max(600),
+    prompt: z.string().trim().min(30).max(3600), alt: z.string().trim().min(10).max(300),
+    caption: z.string().trim().min(10).max(500), afterSectionIndex: z.number().int().min(0).max(14)
+  }).strict()
+]);
+
 export const TopicContentSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   moduleId: z.string().regex(/^[a-z0-9-]+$/),
@@ -218,8 +280,60 @@ export const TopicContentSchema = z.object({
   // Bumped max to 15 to allow up to 2 image sections per topic on top of the
   // existing concept/quiz/callout/takeaway mix.
   sections: z.array(SectionSchema).min(5).max(15),
-  flashcards: z.array(FlashcardSchema).min(3).max(8)
+  flashcards: z.array(FlashcardSchema).min(3).max(8),
+  visual: LessonVisualSchema.optional()
 });
+
+export function topicContentSchemaFor(brief, topicMeta = {}, { allowGeneratedAssets = true } = {}) {
+  const policy = componentPolicy(brief);
+  if (!policy.explicit) return TopicContentSchema;
+  return TopicContentSchema.extend({
+    sections: z.array(SectionSchema).min(4).max(policy.integratedVisuals ? 16 : 15),
+    visual: policy.integratedVisuals ? LessonVisualSchema : LessonVisualSchema.optional(),
+    flashcards: policy.flashcards ? z.array(FlashcardSchema).min(3).max(8) : z.array(FlashcardSchema).length(0, 'Flashcards are not selected')
+  }).superRefine((topic, ctx) => {
+    const issue = message => ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['sections'], message });
+    if (!allowGeneratedAssets && topic.sections.some(s => s.type === 'image' && (s.asset_id || s.generated_by))) issue('Do not invent generated assets. Return a visual plan; the server creates the image.');
+    if (policy.integratedVisuals && topic.visual?.decision === 'generate') {
+      // Indices refer to the authored lesson before generated assets are inserted.
+      const authored = topic.sections.filter(s => !(s.type === 'image' && s.generated_by === 'openai'));
+      if (authored[topic.visual.afterSectionIndex]?.type !== 'concept') {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['visual', 'afterSectionIndex'], message: 'Place the illustration immediately after a concept section it teaches.' });
+      }
+    }
+    const quizzes = topic.sections.filter(s => s.type === 'quiz');
+    if (!policy.quizzes && quizzes.length) issue('Quizzes are not selected; do not include quiz sections.');
+    if (policy.quizzes && (quizzes.length < 3 || quizzes.length > 5)) issue('Quizzes are selected: include 3–5 interleaved quizzes.');
+    if (policy.quizzes && topicMeta.quiz_plan?.length && JSON.stringify(quizzes.map(q => q.variant)) !== JSON.stringify(topicMeta.quiz_plan)) issue('Include exactly one quiz per planned variant, in order.');
+    if (topic.sections.filter(s => s.type === 'concept').length < 2) issue('Include at least two teaching concepts.');
+    if (!topic.sections.some(s => s.type === 'callout')) issue('Include a worked example, tip or other callout.');
+    if (topic.sections.filter(s => s.type === 'takeaway').length !== 1) issue('Include exactly one takeaway.');
+    if (topic.sections.some(s => s.type === 'exercise')) issue('Free-text exercise sections are not selected. Use only the selected components.');
+    for (const [type, selected, label] of [['practice', policy.practice, 'Practice activities'], ['checklist', policy.checklists, 'Checklists']]) {
+      const sections = topic.sections.filter(s => s.type === type);
+      if (selected && sections.length !== 1) issue(`${label} are selected: include exactly one ${type} section per lesson.`);
+      if (!selected && sections.length) issue(`${label} are not selected; do not include ${type} sections.`);
+    }
+    const ids = topic.sections.filter(s => s.id).map(s => s.id);
+    if (new Set(ids).size !== ids.length) issue('Interactive section IDs must be unique within a lesson.');
+    for (const section of topic.sections.filter(s => s.type === 'practice')) {
+      if (section.context !== 'general' || !section.guidance) issue('Generated practice requires context "general" and topic-specific guidance; never inherit swimming example instructions.');
+      if (new Set(section.readinessChecks.map(check => check.id)).size !== section.readinessChecks.length) issue('Practice readiness check IDs must be unique.');
+      const text = [section.title, section.goal, section.setup, ...section.equipment, ...section.regressions, ...section.progressions, ...section.safetyStops, ...section.readinessChecks.map(check => check.label), ...section.steps.flatMap(step => [step.title, step.instruction, step.cue, step.success])];
+      if (text.some(value => !value.trim())) issue('Practice instructions, stop rules and readiness checks must not be blank.');
+    }
+  });
+}
+
+export function compatibleTopicCheckpoint(brief, saved = {}) {
+  if (!componentPolicy(brief).explicit) return { ...saved };
+  const compatible = {};
+  for (const mod of brief.modules) for (const topic of mod.topics) {
+    const key = `${mod.id}/${topic.id}`;
+    if (saved[key] && topicContentSchemaFor(brief, topic).safeParse(saved[key]).success) compatible[key] = saved[key];
+  }
+  return compatible;
+}
 
 // --- Research bundle (Stage 2 output) -------------------------------
 

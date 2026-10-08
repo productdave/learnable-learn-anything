@@ -17,7 +17,7 @@ export function renderMatchQuiz(section) {
     <div class="match-board"><svg class="match-lines" aria-hidden="true"></svg><div class="match-column match-left">${section.pairs.map((_, i) => card(i, 'left')).join('')}</div><div class="match-column match-right">${right.map(i => card(i, 'right')).join('')}</div></div>
     <div class="quiz-actions"><button type="button" class="quiz-check-btn">Check Matches</button><span class="match-count"></span></div>
     <p class="match-status" role="status" aria-live="polite">Choose a term to start.</p>
-    <div class="quiz-explanation" style="display:none"><div class="quiz-explanation-content">${section.explanation || 'Great job matching the concepts!'}</div></div>
+    <div class="quiz-explanation" style="display:none"><div class="quiz-explanation-content">${escape(section.explanation || 'Great job matching the concepts!')}</div></div>
   </div>`;
 }
 

@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { applyImageBudgetOverlay, imageBudgetPaths } from './packaging/image-budget-overlay.mjs';
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const base = new Map([['index.html', Buffer.from('unchanged')], ...imageBudgetPaths.slice(0,3).map(path => [path, Buffer.from('old ' + path)])]);
+const source = new Map(imageBudgetPaths.map(path => [path, Buffer.from('new ' + path)]));
+const scope = { version: 1, purpose: 'hobby-image-budget', files: Object.fromEntries(imageBudgetPaths.map(path => [path, { baseSha256: base.has(path) ? sha(base.get(path)) : null, sha256: sha(source.get(path)) }])) };
+let checks = 0;
+const check = (name, run) => { run(); checks++; };
+check('only four reviewed paths applied, original preserved', () => {
+  const output = applyImageBudgetOverlay(base, source, scope);
+  assert.equal(output.size, base.size + 1); assert.equal(output.get('index.html'), base.get('index.html'));
+  for (const path of imageBudgetPaths) assert.equal(output.get(path), source.get(path));
+  assert.equal(base.has(imageBudgetPaths[3]), false); assert.match(base.get(imageBudgetPaths[0]).toString(), /^old /);
+});
+check('unreviewed file cannot be slipped into scope', () => assert.throws(() => applyImageBudgetOverlay(base, source, { ...scope, files: { ...scope.files, 'api/unknown.js': {} } }), /exactly four/));
+check('omitted patch cannot be silently skipped', () => { const changed = structuredClone(scope); delete changed.files[imageBudgetPaths[0]]; assert.throws(() => applyImageBudgetOverlay(base, source, changed), /exactly four/); });
+check('base drift rejected', () => assert.throws(() => applyImageBudgetOverlay(new Map([...base, [imageBudgetPaths[0], Buffer.from('drift')]]), source, scope), /base drift/));
+check('source drift rejected', () => assert.throws(() => applyImageBudgetOverlay(base, new Map([...source, [imageBudgetPaths[0], Buffer.from('drift')]]), scope), /source drift/));
+check('unexpected pre-existing new file rejected', () => assert.throws(() => applyImageBudgetOverlay(new Map([...base, [imageBudgetPaths[3], Buffer.from('drift')]]), source, scope), /base drift/));
+check('missing source rejected', () => { const changed = new Map(source); changed.delete(imageBudgetPaths[1]); assert.throws(() => applyImageBudgetOverlay(base, changed, scope), /missing/); });
+check('unrelated source material not incorporated', () => assert.equal(applyImageBudgetOverlay(base, new Map([...source, ['secrets.json', Buffer.from('never copy')]]), scope).has('secrets.json'), false));
+console.log(`Pinned image-budget overlay: ${checks} contracts passed; no artifact changed.`);

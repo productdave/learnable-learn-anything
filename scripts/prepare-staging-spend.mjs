@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {cpSync,mkdirSync,mkdtempSync,readFileSync,writeFileSync} from 'node:fs';
+import {join,resolve,dirname} from 'node:path';
+import {priorKit,priorArtifact,expectedSpend,verifySpendArtifact} from './packaging/staging-spend-release.mjs';
+import {digest} from './packaging/grounding-release.mjs';
+const root=resolve(new URL('..',import.meta.url).pathname),kit=mkdtempSync(join(root,'output/linux-staging/build-spend-'));
+const put=(p,bytes)=>{mkdirSync(dirname(join(kit,p)),{recursive:true});writeFileSync(join(kit,p),bytes,{flag:'wx'});};
+for(const p of ['base','source',priorArtifact])cpSync(join(root,priorKit,p),join(kit,'prior',p),{recursive:true});
+for(const p of ['base-release.json','reviewed-delta.json','grounding-input.json','linux-release-receipt.json'])put('prior/'+p,readFileSync(join(root,priorKit,p)));
+const scripts=['scripts/packaging/staging-spend-release.mjs','scripts/packaging/grounding-release.mjs','scripts/verify-staging-spend.mjs','scripts/test-staging-spend-guard.mjs','scripts/verify-grouped-functions.mjs','scripts/verify-account-frontend.mjs','scripts/verify-packaged-document-contract.mjs','scripts/browser-contract.mjs','scripts/fixtures/source-documents.mjs','scripts/test-document-sources.mjs'];
+const sourceHashes={},scriptHashes={};
+for(const p of ['scripts/staging-safeguard/client.mjs','scripts/staging-safeguard/migration.sql',...scripts]){const bytes=readFileSync(join(root,p));put(p,bytes);(scripts.includes(p)?scriptHashes:sourceHashes)[p]=digest(bytes);}
+const parent=join(kit,'output/grouped-staging');mkdirSync(parent,{recursive:true});const artifact=mkdtempSync(join(parent,'package-'));
+put('spend-input.json',JSON.stringify({at:new Date().toISOString(),artifact:artifact.slice(kit.length+1),sourceHashes,scriptHashes,paidCalls:0},null,2)+'\n');
+const expected=expectedSpend(kit);cpSync(join(kit,'prior',priorArtifact,'.vercel/output'),join(artifact,'.vercel/output'),{recursive:true});
+for(const [p,b] of expected.changes)writeFileSync(join(artifact,'.vercel/output',p),b);
+const report=structuredClone(expected.report);report.artifact=artifact;report.work=null;report.status='prepared-staging-spend-not-verified';report.stagingSpendOverlay=expected.overlay;
+for(const group of report.groups)group.files=Object.fromEntries(Object.entries(expected.inventory).filter(([p])=>p.startsWith(`functions/_functions/${group.id}.func/`)).map(([p,h])=>[p.slice(`functions/_functions/${group.id}.func/`.length),h]));
+writeFileSync(join(artifact,'packaging-report.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+verifySpendArtifact(kit,artifact);assert.ok(!Object.keys(expected.inventory).some(p=>/(?:^|\/)(?:\.env|secrets\.json)(?:$|\.)/.test(p)));
+console.log(JSON.stringify({kit,artifact,outputFiles:Object.keys(expected.inventory).length,changedServerFiles:8,browserChanges:0,secretsIncluded:false}));

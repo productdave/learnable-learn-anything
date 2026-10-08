@@ -1,0 +1,57 @@
+(async page=>{
+  const qa=__DRAFT_DELETE_QA__,checks=[],errors=[];
+  const check=(value,label)=>{if(!value)throw new Error(label);checks.push(label);};
+  page.on('pageerror',error=>errors.push(error.message));
+  const home=()=>page.goto(qa.origin+'/?experience=workspace&filter=mine');
+  const dialog=page.locator('dialog.draft-delete-dialog'),confirm=()=>dialog.locator('[data-draft-confirm]');
+  const ready=()=>page.waitForFunction(()=>{const b=document.querySelector('dialog.draft-delete-dialog [data-draft-confirm]');return b&&!b.disabled;});
+  const seed=async(id,title,owner=null)=>page.evaluate(async({qa,id,title,owner})=>{const {createDraftStore}=await import(qa.storeModule),{setupDraft}=await import(qa.modelModule);const draft=setupDraft(title);draft.brief.audience='QA learner';return createDraftStore().save({id,...draft},{ownerId:owner,expectedRevision:0});},{qa,id,title,owner});
+  const stored=async(id,owner=null)=>page.evaluate(async({qa,id,owner})=>(await import(qa.storeModule)).createDraftStore().load(id,owner),{qa,id,owner});
+  await seed('setup-guest-keep','Keep guest draft');await seed('setup-guest-delete','Delete guest draft');await home();
+  const deleteButton=title=>page.getByRole('button',{name:`Delete draft: ${title}`,exact:true});
+  await deleteButton('Delete guest draft').click();await ready();
+  check(await dialog.getByText('Delete guest draft',{exact:true}).isVisible(),'confirmation identifies selected draft');
+  check(await dialog.locator('[data-draft-keep]').evaluate(el=>el===document.activeElement),'safe action receives initial focus');
+  await page.keyboard.press('Escape');check(await dialog.count()===0&&(await stored('setup-guest-delete')).status==='found','Escape cancels without deleting');
+  check(await deleteButton('Delete guest draft').evaluate(el=>el===document.activeElement),'cancel restores opener focus');
+  await deleteButton('Delete guest draft').click();await ready();await dialog.getByRole('button',{name:'Keep draft',exact:true}).click();
+  check((await stored('setup-guest-delete')).status==='found','Keep draft does not mutate');
+  await deleteButton('Delete guest draft').click();await ready();
+  for(const width of [1440,390,320]){await page.setViewportSize({width,height:900});check(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth),`${width}px modal does not overflow`);await dialog.screenshot({path:`output/playwright/delete-draft-${width}.png`});}
+  await confirm().click();await dialog.waitFor({state:'detached'});await deleteButton('Delete guest draft').waitFor({state:'detached'});
+  check((await stored('setup-guest-delete')).status==='deleted'&&(await stored('setup-guest-keep')).status==='found','only selected guest draft deleted');
+  check(await page.getByRole('status').filter({hasText:'Draft deleted.'}).isVisible(),'deletion success is announced');
+  await page.reload();check(await deleteButton('Delete guest draft').count()===0,'deleted draft stays gone after reload');
+  await page.goto(qa.origin+'/?experience=workspace&draft=setup-guest-delete&step=goal');await page.getByText('This draft was deleted.',{exact:false}).waitFor();check(true,'old setup URL explains deletion');
+  await page.goto(qa.origin+'/?experience=workspace&draft=setup-guest-keep&step=goal');
+  await page.getByLabel('What is the course about?',{exact:false}).fill('Latest unsent title');
+  await page.getByText('Draft options',{exact:true}).click();await page.getByRole('button',{name:'Delete draft',exact:true}).click();await ready();
+  check(await dialog.getByText('Latest unsent title',{exact:true}).isVisible(),'inside-setup confirmation includes latest edits');
+  await confirm().click();await page.waitForURL('**filter=mine');check((await stored('setup-guest-keep')).status==='deleted','inside-setup deletion returns to Your Courses');
+  await seed('setup-concurrent','Concurrent draft');await home();await deleteButton('Concurrent draft').click();await ready();
+  await page.evaluate(async qa=>{const store=(await import(qa.storeModule)).createDraftStore();const row=(await store.load('setup-concurrent')).draft;row.brief.topic='Newer title';await store.save(row,{expectedRevision:row.revision});},qa);
+  await confirm().click();await dialog.getByRole('alert').waitFor();check((await stored('setup-concurrent')).draft.brief.topic==='Newer title','concurrent edit rejected without loss');
+  await dialog.getByRole('button',{name:'Keep draft',exact:true}).click();await home();await deleteButton('Newer title').click();await ready();await confirm().click();await dialog.waitFor({state:'detached'});
+  const signIn=async account=>{const error=await page.evaluate(async({qa,account})=>{window.deleteQaAuth=await import(qa.authModule);return(await(await window.deleteQaAuth.sb()).auth.signInWithPassword({email:account.email,password:account.password})).error?.message;},{qa,account});check(!error,'local QA account signs in');await page.waitForFunction(owner=>window.deleteQaAuth.getUser()?.id===owner,account.owner);};
+  await signIn(qa.accounts[0]);await seed('setup-delete','Remove this account draft',qa.accounts[0].owner);await home();
+  await deleteButton('Remove this account draft').click();await ready();
+  check(await dialog.getByText('Uploaded account source files are retained separately;', {exact:false}).isVisible(),'confirmation discloses retained originals');
+  await page.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));await dialog.screenshot({path:'output/playwright/delete-draft-dark-320.png'});
+  check(await dialog.evaluate(el=>getComputedStyle(el).backgroundColor!=='rgb(255, 255, 255)'),'dialog supports dark theme');
+  await page.keyboard.press('Tab');check(await page.evaluate(()=>!!document.activeElement.closest('dialog')),'native modal keeps keyboard focus inside');
+  await page.evaluate(()=>document.documentElement.setAttribute('data-theme','light'));
+  let failure='network';await page.route('**/api/setups/store',async route=>{if(route.request().method()==='DELETE'&&failure){const mode=failure;failure='';if(mode==='lost-reply')await route.fetch();return route.abort('failed');}return route.continue();});
+  await confirm().click();await dialog.getByRole('alert').waitFor();
+  check((await stored('setup-delete',qa.accounts[0].owner)).status==='found','network failure preserves device copy and shows retry');
+  failure='lost-reply';await confirm().click();await dialog.getByRole('alert').waitFor();
+  check((await stored('setup-delete',qa.accounts[0].owner)).status==='found','lost server reply retains local copy until confirmed');
+  await confirm().click();await dialog.waitFor({state:'detached'});await deleteButton('Remove this account draft').waitFor({state:'detached'});
+  check((await stored('setup-delete',qa.accounts[0].owner)).status==='deleted','retry safely finishes acknowledged account deletion');
+  await page.reload();await deleteButton('Keep this account draft').waitFor();check(await deleteButton('Remove this account draft').count()===0,'account list stays deleted after reload');
+  for(const width of [1440,390,320]){await page.setViewportSize({width,height:900});check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px draft list does not overflow`);await page.screenshot({path:`output/playwright/delete-draft-list-${width}.png`,fullPage:true});}
+  await deleteButton('Keep this account draft').click();await ready();
+  await page.evaluate(async qa=>{await(await(await import(qa.authModule)).sb()).auth.signOut();},qa);await dialog.waitFor({state:'detached'});check(true,'account switch closes private confirmation');
+  await signIn(qa.accounts[1]);await home();await deleteButton('Remove this account draft').waitFor();check(true,'same draft identifier in another account remains available');
+  check(errors.length===0,'no browser exceptions: '+errors.join('; '));
+  const report={total:checks.length,passed:checks};await page.evaluate(report=>window.__draftDeleteReport=report,report);return report;
+})

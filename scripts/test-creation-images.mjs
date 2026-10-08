@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import { setupDraft, COMPONENT_LABELS } from '../web/js/setup-model.js';
+import { prepareAccountPayload } from '../web/js/setup-account-model.js';
+import { setupGenerationIssues } from '../web/api/_lib/setup-generation.mjs';
+import { retainComponentChoices, creationBrief } from '../web/js/generator/component-policy.mjs';
+import { topicContentSchemaFor } from '../web/js/generator/schema.mjs';
+import { assembleCourse } from '../web/js/generator/assemble-course.js';
+import { inspectSavedCourse } from '../web/js/course-readiness.js';
+import { savedCourseReadinessHTML } from '../web/js/course-readiness-view.js';
+import { componentSetupIssues } from '../web/js/setup-components.js';
+import { curriculumFixture,lessonFixture,richComponentCombinations } from './fixtures/component-course.mjs';
+let checks=0;const check=(v,label)=>{assert.ok(v,label);checks++;};
+check(COMPONENT_LABELS.images==='Generate Course Images','image option uses the requested label across setup and summaries');
+for(const base of richComponentCombinations){
+  const components=[...base,'images'],draft=setupDraft('Learn photography');draft.brief.audience='New photographer';draft.components=components;
+  const {payload}=await prepareAccountPayload(draft);
+  check(!setupGenerationIssues(payload,{imagesEnabled:true}).length,'enabled server accepts preserved image request');
+  check(setupGenerationIssues(payload,{imagesEnabled:false}).some(i=>i.step==='create'),'disabled server blocks creation without offering an image opt-out');
+  check(!componentSetupIssues(components,{imagesEnabled:true}).length,'enabled setup supports image choice');
+  check(!componentSetupIssues(components,{imagesEnabled:false}).length,'setup remains editable when server image generation is disabled');
+  const brief=retainComponentChoices({...curriculumFixture(),components:['lessons']},creationBrief(payload));
+  check(brief.components.includes('images'),'AI plan cannot discard requested images');
+  const topics=brief.modules[0].topics.map((topic,i)=>({moduleId:'foundations',topicId:topic.id,content:{...lessonFixture(brief.components,topic),visual:i===0?{decision:'generate',reason:'A comparison makes the concepts easier to distinguish.',prompt:'Draw a clear side-by-side comparison of the two concepts in this lesson.',alt:'Two concepts compared side by side.',caption:'Compare the main differences.',afterSectionIndex:0}:{decision:'omit',reason:'The concise explanation is clearer as text.'}}}));
+  check(topics.every((r,i)=>topicContentSchemaFor(brief,brief.modules[0].topics[i]).safeParse(r.content).success),'lesson schemas retain purposeful image decisions before image execution');
+  const course=assembleCourse(brief,topics),report=inspectSavedCourse(course);
+  check(report.imageProgress.total===1&&report.imageProgress.omitted===2&&report.imageProgress.saved===0&&report.needsAttention,'only useful planned image remains outstanding');
+  check(!savedCourseReadinessHTML(course,{editable:true}).includes('data-course-images'),'saved result has no separate image studio');
+  check(savedCourseReadinessHTML(course,{jobAvailable:true,recoveryAvailable:true}).includes('Use Resume above'),'partial visual recovery continues the same course flow');
+  course.modules[1]['lesson-1'].sections.push({type:'image',image_slot:'instruction',generated_by:'openai',asset_id:'12345678-1234-4234-8234-123456789abc',alt:'Reviewed teaching point'});
+  check(inspectSavedCourse(course).needsAttention,'saved images alone do not bypass learner refinement');
+  course._visualDesign={version:1,policy:'learner-experience-v1',status:'complete',review:{summary:'Refined'},pending:null,items:Object.fromEntries(brief.modules[0].topics.map(topic=>[`foundations/${topic.id}`,{status:'saved'}]))};
+  const complete=inspectSavedCourse(course);check(complete.imageProgress.saved===1&&complete.imageProgress.omitted===2&&!complete.needsAttention,'saved planned visual plus deliberate omissions satisfy image coverage');
+  check(course.config.components.includes('images'),'image selection survives account serialization');
+}
+console.log(`Creation images: ${checks} checks across 16 image-selected material combinations.`);

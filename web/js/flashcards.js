@@ -1,8 +1,10 @@
-import { store } from './store.js';
-import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js';
-import { logEvent } from './sync.js?v=2';
+import { store } from './store.js?v=5';
+import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js?v=8';
+import { logEvent } from './sync.js?v=27';
+import { courseHasFlashcards, flashcardEmptyCopy } from './course-features.js?v=1';
 
 const capitalizeFirst = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function sm2(card, quality) {
   let { ease, interval, repetitions } = card;
@@ -35,6 +37,7 @@ function sm2(card, quality) {
 }
 
 async function getAllFlashcards() {
+  if (!courseHasFlashcards(getCourseConfig())) return [];
   const cards = [];
   const loaded = await loadAllModules();
 
@@ -46,7 +49,7 @@ async function getAllFlashcards() {
       if (!topic?.flashcards) continue;
 
       topic.flashcards.forEach((card, i) => {
-        const cardId = `${mod.id}-${topicId}-${i}`;
+        const cardId = /^[a-z0-9-]{3,120}$/.test(card._progressId || '') ? card._progressId : `${mod.id}-${topicId}-${i}`;
         cards.push({
           id: cardId,
           front: card.front,
@@ -63,29 +66,30 @@ async function getAllFlashcards() {
   return cards;
 }
 
-function getDueCards(cards) {
+function getDueCards(cards, progress) {
   const today = new Date().toISOString().split('T')[0];
   return cards.filter(card => {
-    const state = store.getFlashcardState(card.id);
+    const state = progress.getFlashcardState(card.id);
     if (!state) return true;
     return state.nextReview <= today;
   });
 }
 
-function renderFlashcardUI(overlay, cards) {
+function renderFlashcardUI(overlay, cards, progress) {
   if (cards.length === 0) {
+    const empty = flashcardEmptyCopy(getCourseConfig());
     overlay.innerHTML = `
       <div class="flashcard-container">
         <div class="flashcard-header">
           <h2>Flashcard Review</h2>
-          <button class="flashcard-close-btn" id="fc-close">
+          <button class="flashcard-close-btn" id="fc-close" aria-label="Close flashcards">
             <svg width="24" height="24"><use href="#icon-x"/></svg>
           </button>
         </div>
         <div class="flashcard-empty">
-          <svg width="48" height="48"><use href="#icon-check-circle"/></svg>
-          <h3>All caught up!</h3>
-          <p>No flashcards due for review. Come back tomorrow or study new topics to add more cards.</p>
+          <svg width="48" height="48" aria-hidden="true"><use href="#icon-cards"/></svg>
+          <h3>${empty.title}</h3>
+          <p>${empty.body}</p>
         </div>
       </div>`;
     overlay.querySelector('#fc-close').addEventListener('click', () => { overlay.style.display = 'none'; });
@@ -97,7 +101,7 @@ function renderFlashcardUI(overlay, cards) {
 
   function renderCard() {
     const card = cards[currentIndex];
-    const state = store.getFlashcardState(card.id) || { ease: 2.5, interval: 0, repetitions: 0 };
+    const state = progress.getFlashcardState(card.id) || { ease: 2.5, interval: 0, repetitions: 0 };
 
     overlay.innerHTML = `
       <div class="flashcard-container">
@@ -115,18 +119,18 @@ function renderFlashcardUI(overlay, cards) {
         </div>
 
         <div class="flashcard-meta">
-          <span style="color: ${card.moduleColor}">${card.moduleName}</span>
-          <span>${card.topicTitle}</span>
+          <span style="color: ${card.moduleColor}">${esc(card.moduleName)}</span>
+          <span>${esc(card.topicTitle)}</span>
         </div>
 
         <div class="flashcard-card ${isFlipped ? 'flipped' : ''}" id="fc-card">
           <div class="flashcard-card-inner">
             <div class="flashcard-front">
-              <p>${card.front}</p>
+              <p>${esc(card.front)}</p>
               <span class="flashcard-tap-hint">Click to reveal answer</span>
             </div>
             <div class="flashcard-back">
-              <p>${card.back}</p>
+              <p>${esc(card.back)}</p>
             </div>
           </div>
         </div>
@@ -156,10 +160,11 @@ function renderFlashcardUI(overlay, cards) {
 
     overlay.querySelectorAll('.fc-rate-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!progress.isCurrent()) return;
         const quality = parseInt(btn.dataset.quality);
-        const currentState = store.getFlashcardState(card.id) || { ease: 2.5, interval: 0, repetitions: 0 };
+        const currentState = progress.getFlashcardState(card.id) || { ease: 2.5, interval: 0, repetitions: 0 };
         const newState = sm2(currentState, quality);
-        store.saveFlashcardState(card.id, newState);
+        progress.saveFlashcardState(card.id, newState);
         logEvent('flashcard_reviewed', {
           course_slug: getCurrentCourseId(),
           module_slug: card.moduleId,
@@ -208,11 +213,13 @@ export function initFlashcards() {
   if (!trigger || !overlay) return;
 
   trigger.addEventListener('click', async () => {
+    const progress = store.bind(), courseId = getCurrentCourseId();
     overlay.style.display = '';
     overlay.innerHTML = '<div class="flashcard-container"><div class="flashcard-loading">Loading flashcards...</div></div>';
 
     const allCards = await getAllFlashcards();
-    const dueCards = getDueCards(allCards);
-    renderFlashcardUI(overlay, dueCards.length > 0 ? dueCards : allCards);
+    if (!progress.isCurrent() || courseId !== getCurrentCourseId()) { overlay.style.display = 'none'; return; }
+    const dueCards = getDueCards(allCards, progress);
+    renderFlashcardUI(overlay, dueCards.length > 0 ? dueCards : allCards, progress);
   });
 }

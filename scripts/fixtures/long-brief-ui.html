@@ -1,0 +1,19 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/"><title>Local long-brief UI fixture</title>
+<link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/components.css"><link rel="stylesheet" href="styles/learnable.css"><link rel="stylesheet" href="styles/themes.css"><link rel="stylesheet" href="styles/home.css?v=28"></head>
+<body class="home-mode" data-experience="workspace"><main class="app-main"><div class="app-main-inner" id="fixture"></div></main>
+<script type="module">
+import { createSetupCreation } from './js/setup-create.js?v=13';
+import { homeSetupDraftHTML, homeJobHTML, originalRequestHTML } from './js/home.js?v=29';
+import { setupDraft } from './js/setup-model.js?v=7';
+const topic = ('A beginner course about improvement loops\n\n' + 'Use clear examples and explain the evidence and trade-offs. '.repeat(120)).slice(0,5000);
+const draft=setupDraft(topic); draft.id='local-ui-fixture'; draft.brief.audience='Product managers';
+const host=document.querySelector('#fixture'),user={id:'synthetic-owner',email:'fixture@example.invalid'};
+if(new URLSearchParams(location.search).has('cards')){
+  host.innerHTML='<div class="home-experience"><h1>Local UI fixture · drafts and workspace</h1>'+homeSetupDraftHTML({...draft,brief:{...draft.brief,topic:'x'.repeat(15000)}})+homeJobHTML({id:'fixture-job',title:topic,status:'running'})+originalRequestHTML({brief:{topic:'x'.repeat(15000)}})+'</div>';
+}else{
+  createSetupCreation({sessions:{flush:async()=>true,acknowledge:async()=>true},getUser:()=>user,
+    accountClient:{save:async()=>({revision:1})},client:{check:async()=>({enabled:true,ready:true,connected:true,model:'Synthetic UI fixture',issues:[],sources:null}),start:async()=>{throw Error('Local UI test only. No provider calls are possible.');}},
+    imageClient:{connection:async()=>({connected:true,generationEnabled:true})},navigate:()=>{},openJob:()=>{}
+  }).render(host,{id:draft.id,owner:user.id,draft,version:1,record:{}});
+}
+</script></body></html>

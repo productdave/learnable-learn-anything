@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+// Process-local Docker adapter for this project's Supabase CLI only.
+// Explicit publish addresses avoid Docker Desktop ignoring bridge defaults.
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+
+export function localDockerArgs(input) {
+  const args = [...input];
+  if (!['create', 'run'].includes(args[0])) return args;
+  const name = args[args.indexOf('--name') + 1];
+  if (!name?.startsWith('supabase_') || !name.endsWith('_learnable-setup-local')) throw new Error('This Docker adapter can create only Learnable local Supabase containers.');
+  for (let i = 1; i < args.length; i++) {
+    if (!['-p', '--publish'].includes(args[i])) continue;
+    const value = args[i + 1];
+    if (!/^\d+:\d+(?:\/(?:tcp|udp))?$/.test(value || '')) throw new Error('Unexpected port binding; refusing to expose it.');
+    args[++i] = `127.0.0.1:${value}`;
+  }
+  return args;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try {
+    const binary = process.env.LEARNABLE_REAL_DOCKER;
+    if (!binary || !path.isAbsolute(binary) || path.resolve(binary) === path.resolve(process.argv[1])) throw new Error('Start using npm run local:start, not this adapter directly.');
+    const result = spawnSync(binary, localDockerArgs(process.argv.slice(2)), { stdio: 'inherit' });
+    process.exitCode = result.status ?? 1;
+  } catch (error) { console.error(error.message); process.exitCode = 1; }
+}

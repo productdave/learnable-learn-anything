@@ -1,0 +1,2 @@
+Original local browser QA transcript.
+This is synthetic test material, not a user's document.

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listen keyboard test | Learnable</title>
+<link rel="icon" href="/web/favicon.svg">
+<link rel="stylesheet" href="/web/styles/tokens.css?v=1">
+<link rel="stylesheet" href="/web/styles/base.css?v=1">
+<link rel="stylesheet" href="/web/styles/components.css?v=29">
+<style>
+  main { max-width: 760px; margin: 32px auto; padding: 24px; }
+  main p { margin: 16px 0; }
+  .fixture-nav { display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; }
+  .fixture-nav button, .fixture-nav a { padding:12px; border:1px solid #aaa; border-radius:8px; }
+</style>
+<body>
+<svg style="display:none" aria-hidden="true"><symbol id="icon-book" viewBox="0 0 24 24"><path d="M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3z"/></symbol></svg>
+<main id="fixture">
+  <p>Local component check only. Synthetic lesson; no account or provider connection.</p>
+  <h1 class="topic-title">Listen and keyboard navigation</h1>
+  <div id="listen-entry"></div>
+  <div class="topic-sections">
+    <section class="concept-section">
+      <h2 class="concept-title">A useful next step</h2>
+      <div class="concept-body">
+        <p>Start with a small, clear question. Compare what you know with what remains uncertain.</p>
+        <p>Choose a bounded next step. Keep someone responsible for reviewing the result.</p>
+        <p>You can pause this narration, move between sentences or minimize the player.</p>
+      </div>
+    </section>
+  </div>
+  <nav class="fixture-nav" aria-label="Test actions">
+    <button id="outside">Outside player</button>
+    <a href="#another-lesson">Navigate away</a>
+  </nav>
+  <p id="fixture-status" role="status">No background action.</p>
+</main>
+<script type="module">
+  import { ttsBarHTML, initTTS } from '/web/js/tts.js?v=5';
+  const main = document.querySelector('main');
+  document.querySelector('#listen-entry').innerHTML = ttsBarHTML();
+  initTTS(main, { title: 'Listen and keyboard navigation', moduleName: 'Local accessibility check' });
+  document.querySelector('#outside').addEventListener('click', () => {
+    document.querySelector('#fixture-status').textContent = 'Background action reached.';
+  });
+  window.addEventListener('hashchange', () => {
+    document.querySelector('#fixture-status').textContent = 'Navigation stopped the player.';
+  });
+</script>
+</body>
+</html>

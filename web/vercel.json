@@ -1,3 +1,23 @@
 {
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/setups/generate.js": {
+      "includeFiles": "{api/_lib/document-reader.mjs,js/{setup-model,draft-store}.js,node_modules/pdfjs-dist/legacy/build/**,node_modules/pdfjs-dist/cmaps/**,node_modules/pdfjs-dist/standard_fonts/**,node_modules/pdfjs-dist/wasm/**}"
+    },
+    "api/setups/store.js": {
+      "includeFiles": "{js/{setup-model,draft-store}.js,node_modules/pdfjs-dist/legacy/build/**,node_modules/pdfjs-dist/cmaps/**,node_modules/pdfjs-dist/standard_fonts/**,node_modules/pdfjs-dist/wasm/**}"
+    },
+    "api/gen/sources.js": {
+      "includeFiles": "{js/{setup-model,draft-store}.js,node_modules/pdfjs-dist/legacy/build/**,node_modules/pdfjs-dist/cmaps/**,node_modules/pdfjs-dist/standard_fonts/**,node_modules/pdfjs-dist/wasm/**}"
+    },
+    "api/gen/review.js": {
+      "includeFiles": "{js/{setup-model,draft-store}.js,node_modules/pdfjs-dist/legacy/build/**,node_modules/pdfjs-dist/cmaps/**,node_modules/pdfjs-dist/standard_fonts/**,node_modules/pdfjs-dist/wasm/**}"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/gen/sweep",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

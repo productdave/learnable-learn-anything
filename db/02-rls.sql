@@ -145,17 +145,8 @@ create policy "Users insert own events"
 
 -- Intentionally NO update/delete policies on learning_events — append-only.
 
--- =============================================================================
--- 7. generation_jobs — owners can see their jobs, only server can write
--- =============================================================================
-alter table public.generation_jobs enable row level security;
-
-create policy "Owners read their jobs"
-  on public.generation_jobs for select
-  using (auth.uid() = owner_id);
-
-create policy "Owners insert their jobs"
-  on public.generation_jobs for insert
-  with check (auth.uid() = owner_id);
-
--- Updates happen server-side via service role (bypasses RLS).
+-- generation_jobs is owned by db/04-agentic-workflow.sql. That migration
+-- renames the legacy Phase 2.2 table created by db/01-schema.sql, creates the
+-- durable cloud state-machine table, and installs the only supported RLS
+-- policy for it. Keep it there so rerunning this base RLS script after db/04
+-- cannot collide with the cloud workflow policy.

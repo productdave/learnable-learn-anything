@@ -1,17 +1,18 @@
-import { loadAllModules } from './course-loader.js';
+import { loadAllModules } from './course-loader.js?v=8';
+import { store } from './store.js?v=5';
+const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 let searchIndex = [];
-let isInitialized = false;
+let indexTicket = 0;
 
 function stripHtml(html) {
-  const div = document.createElement('div');
+  const div = document.createElement('template');
   div.innerHTML = html;
-  return div.textContent || div.innerText || '';
+  return div.content.textContent || '';
 }
 
 async function buildIndex() {
-  if (isInitialized) return;
-
+  const ticket=++indexTicket,entries=[];searchIndex=[];
   const loaded = await loadAllModules();
 
   for (const { mod, data } of loaded) {
@@ -21,7 +22,7 @@ async function buildIndex() {
         const topic = data[topicId];
         if (!topic?.sections) continue;
 
-        searchIndex.push({
+        entries.push({
           moduleId: mod.id,
           moduleName: mod.title,
           moduleColor: mod.color,
@@ -40,7 +41,7 @@ async function buildIndex() {
           if (section.points) text += section.points.join(' ');
 
           if (text.trim()) {
-            searchIndex.push({
+            entries.push({
               moduleId: mod.id,
               moduleName: mod.title,
               moduleColor: mod.color,
@@ -56,7 +57,7 @@ async function buildIndex() {
 
         if (topic.flashcards) {
           topic.flashcards.forEach(card => {
-            searchIndex.push({
+            entries.push({
               moduleId: mod.id,
               moduleName: mod.title,
               moduleColor: mod.color,
@@ -71,7 +72,7 @@ async function buildIndex() {
     } catch { /* module not loaded yet */ }
   }
 
-  isInitialized = true;
+  if(ticket===indexTicket)searchIndex=entries;
 }
 
 function search(query) {
@@ -85,9 +86,9 @@ function search(query) {
       const start = Math.max(0, idx - 40);
       const end = Math.min(entry.text.length, idx + query.length + 60);
       let snippet = (start > 0 ? '...' : '') +
-        entry.text.slice(start, idx) +
-        '<mark>' + entry.text.slice(idx, idx + query.length) + '</mark>' +
-        entry.text.slice(idx + query.length, end) +
+        esc(entry.text.slice(start, idx)) +
+        '<mark>' + esc(entry.text.slice(idx, idx + query.length)) + '</mark>' +
+        esc(entry.text.slice(idx + query.length, end)) +
         (end < entry.text.length ? '...' : '');
 
       results.push({
@@ -129,12 +130,12 @@ function renderResults(results, container) {
     html += `
       <div class="search-group">
         <a href="#/${group.moduleId}/${group.topicId}" class="search-group-header" onclick="document.getElementById('search-overlay').style.display='none'">
-          <span class="search-group-module" style="color: ${group.moduleColor}">${group.moduleName}</span>
-          <span class="search-group-topic">${group.topicTitle}</span>
+          <span class="search-group-module" style="color: ${group.moduleColor}">${esc(group.moduleName)}</span>
+          <span class="search-group-topic">${esc(group.topicTitle)}</span>
         </a>
         ${group.items.map(item => `
           <a href="#/${item.moduleId}/${item.topicId}" class="search-result-item" onclick="document.getElementById('search-overlay').style.display='none'">
-            <span class="search-result-type">${item.type}</span>
+            <span class="search-result-type">${esc(item.type)}</span>
             <span class="search-result-snippet">${item.snippet}</span>
           </a>
         `).join('')}
@@ -159,13 +160,14 @@ export function initSearch() {
     input.value = '';
     resultsEl.innerHTML = '<div class="search-empty">Start typing to search across all topics</div>';
     setTimeout(() => input.focus(), 50);
-    buildIndex();
+    buildIndex().then(()=>{if(overlay.style.display!=='none'&&input.value)renderResults(search(input.value),resultsEl);}).catch(()=>{resultsEl.textContent='Search could not be loaded. Close and try again.';});
   }
 
   function close() {
     overlay.style.display = 'none';
     input.value = '';
   }
+  store.subscribe((_,event)=>{if(event.reason==='scope'){indexTicket++;searchIndex=[];resultsEl.replaceChildren();close();}});
 
   trigger.addEventListener('click', open);
 
