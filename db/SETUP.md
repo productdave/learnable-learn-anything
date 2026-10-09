@@ -1,16 +1,20 @@
 # Supabase setup and migration history
 
-## Read this first — 8 October 2026
+## Read this first — 9 October 2026
 
 The current source inventory runs from `01-schema.sql` through
-`24-visual-designer.sql`. The dated sections below are historical rollout notes,
+`25-platform-ai-spend.sql`. Migration 25 is an unapplied development candidate
+for the OpenRouter spending ledger. It creates no allowances or enabled jobs;
+only its isolated local database tests have run. See
+[OpenRouter development status](../docs/OPENROUTER-DEVELOPMENT.md) for activation
+gates and the remaining job-lifecycle integration. The dated sections below are historical rollout notes,
 not a statement of current hosted settings or a fresh-install acceptance result.
 The existing hosted databases must not be initialized again from this guide.
 
 For a new isolated development project, read migrations in numeric order, inspect
 their prerequisites and apply them deliberately. Start with `db/01-schema.sql`,
 `db/02-rls.sql`, `db/03-user-state.sql` and `db/04-agentic-workflow.sql`, then review
-05–24. Some later migrations replace functions/policies created earlier; do not
+05–25. Some later migrations replace functions/policies created earlier; do not
 apply a random subset or use a production target for experimentation.
 
 Use [the source snapshot guide](../docs/SOURCE-SNAPSHOT.md) for the current app,

@@ -510,6 +510,13 @@ Now produce the topic via the submit_topic tool. Use moduleId "${mod.id}" and id
       if (!policy.flashcards && input && typeof input === 'object' && !Array.isArray(input) && input.flashcards === undefined) input.flashcards = [];
       return topicContentSchemaFor(courseBrief, topicMeta, { allowGeneratedAssets: false }).parse(input);
     } catch (err) {
+      if (err?.code === 'invalid_output' && err.paidOutput?.usage) {
+        opts.onUsage?.(err.paidOutput.usage, { task: 'lesson', moduleId: mod.id, topicId: topicMeta.id, attempt: attempt + 1 });
+        if (err.paidOutput.retryable) {
+          outputShape = { stopReason: err.paidOutput.kind === 'truncated' ? 'max_tokens' : 'unknown' };
+          err.kind = err.paidOutput.kind;
+        }
+      }
       if (outputShape) err.outputShape = outputShape;
       attemptErrors.push(err);
       // Shape/validation diagnostics, not raw lessons, source notes or API bodies.
