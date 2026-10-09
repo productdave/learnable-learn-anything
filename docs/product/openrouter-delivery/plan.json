@@ -1,0 +1,962 @@
+{
+  "title": "Learnable funded course creation",
+  "subtitle": "PRD, experience design and feature-by-feature delivery plan",
+  "version": "Draft 1 • 9 October 2026",
+  "summary": "Build a complete course-creation experience that people can use without managing AI accounts. Keep the current setup and two review points, make costs understandable, preserve work when generation stops, and deliver a useful private draft. Finish the product definition and experience before extending the technical foundation.",
+  "status": "Product and experience proposal for review. Existing OpenRouter adapter: offline acceptance only. No new product feature, live model, wallet or release acceptance is claimed by this document.",
+  "next": "Use F-01, funded access and account status, as the first product feature. Implement it behind a server-controlled cohort flag, QA its normal and failure states, record the evidence, then move to F-02.",
+  "decision": "Working assumption: defer the in-course tutor and AI editing for the first platform-funded pilot, with clear unavailable states and server enforcement. A tutor-scope question is pending. Paid bundles, prices and margin are later decisions.",
+  "principles": [
+    "Product definition → experience and acceptance criteria → one feature → feature QA → evidence and fixes → next feature → integrated release candidate → release later.",
+    "The existing PR is an engineering foundation. It is not proof that a person can create a course without keys.",
+    "Deliver a complete, useful first draft for human review. Keep factual accuracy, honest source attribution and safety checks; flag material gaps without blocking every reasonable addition beyond the supplied notes.",
+    "Keep source work and unfinished courses safe. Review, refresh, sign-in, balance checks and reading never initiate paid generation.",
+    "Use one standard generation experience. Model selection, routing and correction stay in the service; learners should not need to compare model IDs."
+  ],
+  "prd": [
+    {
+      "title": "Problem and opportunity",
+      "body": "Today, a learner can finish setting up a course and still face two provider connections, two balances and provider-specific errors. Several recovery and account surfaces assume an Anthropic key; images assume OpenAI; the tutor has another key path. Replacing the transport alone leaves that experience intact. The product should take responsibility for access, cost, progress and recovery while the learner focuses on what they want to learn."
+    },
+    {
+      "title": "Who it is for",
+      "body": "Primary: an invited learner or creator who has a learning goal, optionally has notes, URLs or files, and wants a usable private course draft. Secondary: a returning creator with an older course funded by their own provider connections. Operator: David, who grants complimentary pilot credits, controls total provider spending and investigates uncertain charges. Shared teams, institutional accounts and anonymous paid generation are outside this pilot."
+    },
+    {
+      "title": "Job to be done",
+      "body": "When I have a topic or source material, help me turn it into a course at a cost I understand. Let me review the direction before the full draft is written, show me what is saved, and let me continue safely if something stops."
+    },
+    {
+      "title": "First release scope",
+      "body": "Invite-only, non-commercial web pilot on the current Hobby target. New eligible jobs use Learnable-funded OpenRouter access and complimentary Learnable credits. Reuse Goal, Experience, Context and Review; include course outline and research approvals, selected learning materials, purposeful illustrations, private saved drafts, durable progress, cost estimates, cancellation, recovery and usage history. Use a small enforced pilot course-size envelope; the first acceptance fixture is one module with three lessons. Define the actual cohort size and course cap before enabling the pilot."
+    },
+    {
+      "title": "Later scope",
+      "body": "Selling credit bundles, setting real prices or markup, checkout, refunds of money, subscriptions, public distribution, ChatGPT/Slack entry points, team billing, learner-facing model switches and a full human refinement workflow. The credit architecture should support later sales without pretending that complimentary pilot credits are money or raw provider tokens."
+    },
+    {
+      "title": "Tutor and editing boundary",
+      "body": "Recommended pilot default: course creation is funded; in-course AI tutor and AI rewrite proposals are unavailable to platform-funded accounts until they have their own funded routes and limits. Remove their key prompts for that cohort and enforce the same denial server-side. Reading, quizzes, flashcards, checklists and ordinary saved learning progress remain usable. Older creator-funded jobs keep a clearly labelled legacy connection path. If tutor is included, add F-10 before integrated acceptance; do not quietly retain BYOK as the solution."
+    },
+    {
+      "title": "Business hypothesis",
+      "body": "A learner will prefer one predictable Learnable balance to multiple provider accounts, and a task-specific model mix can lower course costs while keeping the draft useful. Validate the experience and whole-course contribution before choosing a bundle size or dollar price. The earlier idea of 500 tokens becomes a possible bundle of Learnable credits; one credit must never be presented as one model token."
+    }
+  ],
+  "requirements": [
+    [
+      "P-01",
+      "No-key access",
+      "An eligible new learner can reach a ready-to-create state without entering an Anthropic, OpenAI or OpenRouter key. Every visible route and corresponding API enforces the funding mode."
+    ],
+    [
+      "P-02",
+      "Preserve setup and source review",
+      "Goal, learner, depth, constraints, materials and source selections survive sign-in, refresh and retry. Review extraction warnings and source changes before AI work. Never silently truncate or invent an attachment."
+    ],
+    [
+      "P-03",
+      "Understandable cost consent",
+      "Before the first paid dispatch, show estimated credits, maximum authorized credits, included work and quote expiry. Start requires an explicit action bound to the saved setup revision and current quote."
+    ],
+    [
+      "P-04",
+      "Two human review points",
+      "Pause on a durable outline and on a durable research bundle. Show saved results, assumptions, sources and the cost of remaining work. Approval never conceals an increased cap or a changed source set."
+    ],
+    [
+      "P-05",
+      "Complete useful draft",
+      "Accepted scope produces all requested lessons and selected tools, with useful images where justified and explicit omission where appropriate. Show material uncertainty; reject invalid factual attribution, unsafe content and broken assessments."
+    ],
+    [
+      "P-06",
+      "Transparent progress",
+      "Show current stage, saved counts and truthful review/paused/partial/complete states. Closing the browser does not erase the job. Do not use a timer to invent completed work or label a partial course complete."
+    ],
+    [
+      "P-07",
+      "Safe recovery",
+      "Resume preserves accepted outputs and the original funding mode. Duplicate requests reattach. A lost receipt or unknown provider outcome blocks replacement work until reconciled."
+    ],
+    [
+      "P-08",
+      "Fair credit treatment",
+      "Keep available, held and used credits distinct. Internal provider costs and learner debits are separate ledgers. Proposed pilot policy bills only valid work saved for the learner; invalid outputs and system repair costs remain Learnable costs."
+    ],
+    [
+      "P-09",
+      "Account and course isolation",
+      "Balance, grants, quotes, jobs, usage and files belong to the authenticated owner. Account changes invalidate pending UI actions. Neither the browser nor a model can grant credits, select another owner's budget or increase a cap."
+    ],
+    [
+      "P-10",
+      "Compatible legacy recovery",
+      "Jobs created with creator funding retain it. Explain connection problems on those jobs without switching to Learnable funds or deleting keys needed by them. New pilot courses cannot fall back to legacy keys."
+    ],
+    [
+      "P-11",
+      "Operable cost controls",
+      "Enforce pool, owner, job and operation limits before dispatch, including research, images, reasoning and all retries. Keep immutable receipts and explicit reconciliation. No automatic top-up or automatic reopening of closed allowances."
+    ],
+    [
+      "P-12",
+      "Accessible and observable delivery",
+      "Keyboard and screen-reader users can understand states and act. Mobile layout supports the complete journey. Record consent, transitions, successful saves and cost outcomes without storing credentials or raw private source text in analytics."
+    ]
+  ],
+  "economics": [
+    [
+      "Terminology",
+      "Learnable credits are a product unit. Tokens and USD are internal provider accounting units. The pilot uses complimentary credits with no stated cash value."
+    ],
+    [
+      "Before work",
+      "A quote specifies the setup/source revision, scope, expiry, maximum credit debit and operator-approved provider-dollar envelope. Quoting and viewing sources do not buy an AI response."
+    ],
+    [
+      "Available / held / used",
+      "Available = granted minus held minus settled debits. A hold lowers available credits but is not yet a charge. Display all three without double-counting. Two devices must see the same authoritative balance."
+    ],
+    [
+      "Proposed debit policy",
+      "Debit only valid outputs durably saved and made available to the learner: outline, research, lessons and accepted images. User-requested revisions are newly quoted work. Do not charge the learner again for duplicate operations, invalid model output or infrastructure repair. Learnable still records and pays every known provider charge."
+    ],
+    [
+      "Calculation to implement after policy sign-off",
+      "Use a versioned conversion policy: cumulative credits = round upward once on aggregate eligible cost × pricing multiplier ÷ configured credit value. Debit only the difference from prior settlement, up to the learner-authorized cap. Lock the version to the authorization. No dollar or multiplier values are approved here."
+    ],
+    [
+      "Partial / cancellation",
+      "Keep and itemize valid saved work. Settle only those delivered units under the proposed policy; release unstarted work. A dispatched request may finish after Cancel. Wait for its known outcome before releasing the associated hold. Cancellation is not a promise of zero cost."
+    ],
+    [
+      "Unknown outcome",
+      "Keep the provider reservation and the matching learner hold pending; block blind replacement. Show 'Checking a charge' and saved work. An operator reconciles against a provider receipt; any courtesy adjustment is an explicit ledger entry, not deletion of cost evidence."
+    ],
+    [
+      "Long human review",
+      "Release holds for unstarted future stages when the current authorization expires. Keep consumed credits and unresolved in-flight holds. On return, quote remaining work again and obtain consent if the price, scope or maximum changes. Never discard the reviewed outline or research."
+    ],
+    [
+      "Price / model change",
+      "Preserve the immutable job identity and funding source; append a new explicit authorization revision for remaining work. No silent model substitution or cap increase. A retired or unavailable pinned model pauses the affected stage until the approved change path is accepted."
+    ],
+    [
+      "Example only",
+      "Prototype numbers are synthetic: 500 complimentary credits, estimate 50–80, maximum hold 80, final debit 62, release 18. These are not prices, promises or a cost forecast."
+    ],
+    [
+      "Commercial later",
+      "Measure provider spend, unsuccessful attempts, hosting, payment costs and support before selecting margins or bundles. The provider ledger cannot substitute for customer credit or monetary refund accounting."
+    ]
+  ],
+  "journey": [
+    [
+      "J-01",
+      "Arrive and sign in",
+      "A simple description of creating a private draft; reading existing courses stays available.",
+      "Save setup through auth; no paid work.",
+      "Sign-in expires or the account changes: preserve the appropriate account's setup and request sign-in."
+    ],
+    [
+      "J-02",
+      "Describe the course",
+      "Goal → Experience → Context: audience, outcome, depth, notes/files/links and materials.",
+      "Existing source ownership, content limits and extraction review apply.",
+      "Show missing/corrupt/unsupported source next to the item; allow correction or explicit removal."
+    ],
+    [
+      "J-03",
+      "Check access and balance",
+      "Account shows complimentary credits and pilot access. No provider-key form for this cohort.",
+      "Server resolves eligibility and funding mode; unavailable is different from zero balance.",
+      "No access: save setup and explain invitation requirement. Service unavailable: reading still works."
+    ],
+    [
+      "J-04",
+      "Review cost and start",
+      "Show estimated range, maximum, included outline/research/draft/images and source-use disclosure. Primary action: 'Create course'.",
+      "Bind quote and one stable operation ID to setup/source revision. Atomically hold credits before any provider call.",
+      "Stale quote or insufficient balance: refresh estimate or edit scope; never start under stale consent."
+    ],
+    [
+      "J-05",
+      "Review the outline",
+      "Course structure, expected lesson count, assumptions and remaining estimate. Approve or request changes.",
+      "Save outline and its known cost, then pause. A change request is explicit additional work with consent.",
+      "Growth beyond the approved scope requires a new estimate. An old review button cannot approve a newer revision."
+    ],
+    [
+      "J-06",
+      "Review research",
+      "Sources, material claims, evidence gaps and what will be added beyond supplied notes.",
+      "Bound native search and document processing; citations preserve provenance; then pause.",
+      "Unreadable source or weak evidence: label gap and offer repair/review. Do not fabricate a citation."
+    ],
+    [
+      "J-07",
+      "Build the draft",
+      "Stage names and saved counts: lessons, learning tools, refinement, illustrations.",
+      "Pin accepted model policy; checkpoint each accepted unit; reserve every attempt before dispatch.",
+      "A provider or platform funding problem pauses new work and keeps earlier outputs."
+    ],
+    [
+      "J-08",
+      "Leave and return",
+      "Library card says Creating, Waiting for review, Needs attention or Draft ready.",
+      "Read authoritative state; reattach the same job. Review pauses are not timeouts.",
+      "Refresh, two tabs and missed handoff do not start a replacement job or repeat a settled request."
+    ],
+    [
+      "J-09",
+      "Handle an interruption",
+      "Explain what is saved, what remains and which action is safe.",
+      "Resume only known incomplete work under a valid authorization; separate pending charge reconciliation.",
+      "Show a Retry/Resume button only when dispatch is safe. Keep it absent while a charge is unknown."
+    ],
+    [
+      "J-10",
+      "Cancel or change scope",
+      "State what can finish and how held credits will be resolved. Keep saved work.",
+      "Stop scheduling; late outputs and receipts still reconcile. Restart is explicit newly quoted work.",
+      "Do not label a cancellation complete while a dispatched charge is unknown or refund twice."
+    ],
+    [
+      "J-11",
+      "Review the complete draft",
+      "Open the private reader with all required materials or clear partial-state explanation.",
+      "Finalize only after durable course and asset saves. Release unused holds and show a receipt.",
+      "An image omission can be intentional; a failed promised image leaves an explicit partial state."
+    ],
+    [
+      "J-12",
+      "Check usage and continue learning",
+      "Available/held/used credits, course-level receipt and support reference. Reading and saved progress are free.",
+      "Retain audit entries after deleting a course; redact private content from support diagnostics.",
+      "Tutor and AI-edit controls follow the pilot scope; they must not reintroduce a key prompt."
+    ]
+  ],
+  "impacts": [
+    [
+      "Home / Your Courses",
+      "Show pilot access and low-balance entry point; stable saved-job cards and quote/hold/attention states.",
+      "web/js/home.js; web/js/home-model.js; web/js/jobs.js"
+    ],
+    [
+      "Setup steps",
+      "Keep Goal, Experience and Context; replace 'check AI connections' language with cost/access review; retain source warnings.",
+      "web/js/course-setup.js; web/js/setup-components.js; web/js/setup-source-review.js"
+    ],
+    [
+      "Create confirmation",
+      "Replace two provider forms for the pilot cohort with credit quote, maximum authorization, privacy explanation and one explicit action.",
+      "web/js/setup-create.js; web/js/setup-generation-client.js; web/api/setups/generate.js"
+    ],
+    [
+      "Older start paths",
+      "Enforce the same eligibility, quote and job-id rules for direct start and any old intake deep link.",
+      "web/js/intake.js; web/api/gen/start.js; web/api/_lib/setup-generation.mjs"
+    ],
+    [
+      "Outline / research reviews",
+      "Show remaining estimate and revision identity; changes may need new consent; preserve human approvals.",
+      "web/js/intake.js; web/api/gen/review.js; generator/stages/intake.mjs; generator/stages/research.mjs"
+    ],
+    [
+      "Progress / recovery",
+      "Funding-specific safe copy; no creator-key advice for platform problems; same-job recovery and cancellation.",
+      "web/js/cloud-gen-client.js; web/api/gen/resume.js; restart.js; sweep.js; watchdog.js; credentials-ready.js"
+    ],
+    [
+      "Account / usage",
+      "Available, held, used and complimentary grant entries; legacy connections separated from pilot access.",
+      "web/js/workspace-account.js; new funded-access and credit-history service/modules (proposed)"
+    ],
+    [
+      "Tutor",
+      "Explicit pilot exclusion or a funded backend with per-turn caps. Remove browser-secret prompts for platform users.",
+      "web/js/chat.js; web/index.html; account sync/key paths"
+    ],
+    [
+      "AI edit proposals",
+      "Deferred full refinement workflow; deny unsupported platform proposals server-side and explain the boundary in the editor.",
+      "web/api/courses/proposal.js; web/api/_lib/refinement-request.mjs; course editor UI"
+    ],
+    [
+      "Images and reader",
+      "Generation, recovery, requests and asset acceptance use the same funding scope; saved images load without provider access.",
+      "web/api/_lib/integrated-course-images.mjs; web/api/course-images/*; web/js/course-image-client.js; reader/media code"
+    ],
+    [
+      "Sync / sign-out / multiple tabs",
+      "Scope readiness, quotes and balances to owner; remove stale state on account switch; do not transport server keys through sync.",
+      "web/js/auth.js; web/js/sync.js; setup-account/client modules; cloud subscriptions"
+    ],
+    [
+      "Support / operator",
+      "Grant and revoke only unused allowance, pause new work, reconcile receipts, inspect sanitized operation IDs and cost breakdowns.",
+      "New service-only grant/reconciliation operations (proposed); ai-spend-ledger.mjs; DB accounting tables"
+    ],
+    [
+      "Sharing / distribution",
+      "No automatic publication or change to private links. Future chat adapters must reuse these product contracts.",
+      "Existing publication and discovery routes; AD-04/AD-08 integration later"
+    ]
+  ],
+  "states": [
+    [
+      "draft",
+      "No AI dispatched",
+      "Edit / save / sign in",
+      "No hold"
+    ],
+    [
+      "quote_ready",
+      "Current scope and maximum visible",
+      "Create course",
+      "No debit; hold only on accepted start"
+    ],
+    [
+      "running",
+      "Known job is working",
+      "View progress / request cancellation",
+      "Hold for authorized work; settle known saved units"
+    ],
+    [
+      "review_outline / review_research",
+      "Waiting for the learner",
+      "Approve / request changes",
+      "Saved work retained; unstarted holds expire or are released"
+    ],
+    [
+      "needs_requote",
+      "Scope, price or authorization changed",
+      "Review new estimate",
+      "No new call until renewed consent"
+    ],
+    [
+      "partial / resumable",
+      "Some valid outputs saved",
+      "Open saved draft / Resume",
+      "Keep prior settled units; quote only remaining work"
+    ],
+    [
+      "checking_charge",
+      "A dispatched outcome is uncertain",
+      "Check status / contact support",
+      "Retain uncertain hold; no replacement"
+    ],
+    [
+      "cancelling",
+      "Stop requested; work may be in flight",
+      "View status",
+      "No new scheduling; reconcile late receipts"
+    ],
+    [
+      "cancelled",
+      "Known work stopped",
+      "Open saved work / new quoted request",
+      "Release only confirmed unused amounts"
+    ],
+    [
+      "complete",
+      "Promised draft and assets durably saved",
+      "Open draft / view receipt",
+      "Final debit; unused hold released"
+    ],
+    [
+      "platform_unavailable",
+      "Learnable access/provider pool cannot support work",
+      "Keep editing / check again",
+      "No new reservation/dispatch"
+    ],
+    [
+      "legacy_connection_required",
+      "This older job uses creator connections",
+      "Manage legacy connection",
+      "Do not transfer charges to Learnable"
+    ]
+  ],
+  "edges": [
+    [
+      "E-01",
+      "F-01",
+      "Not invited / grant missing",
+      "Creation is not available for this account yet.",
+      "Save setup; no key prompt and no provider dispatch."
+    ],
+    [
+      "E-02",
+      "F-01",
+      "Zero balance versus unavailable balance",
+      "No credits available / We couldn't check your balance.",
+      "Distinguish an authoritative zero from a failed read; never invent a balance."
+    ],
+    [
+      "E-03",
+      "F-01",
+      "Another account signs in mid-flow",
+      "Your account changed. Review this setup again.",
+      "Abort actions; no cross-owner quote, balance, source or course leakage."
+    ],
+    [
+      "E-04",
+      "F-01",
+      "Older creator-funded course",
+      "This course uses your earlier AI connection.",
+      "Legacy management only for its owner; no automatic funding switch."
+    ],
+    [
+      "E-05",
+      "F-02",
+      "Quote expired / policy price expired",
+      "Review the updated estimate before continuing.",
+      "New authorization for remaining work; prior saved outputs and charges stay intact."
+    ],
+    [
+      "E-06",
+      "F-02",
+      "Setup / source / material changed after quote",
+      "Your setup changed. Check the estimate again.",
+      "Bind digest and revision; reject old confirmation server-side."
+    ],
+    [
+      "E-07",
+      "F-02",
+      "Two devices consume the same remaining credit",
+      "Your available credits changed.",
+      "One atomic winner; no negative balance or double hold."
+    ],
+    [
+      "E-08",
+      "F-02",
+      "Requested course exceeds pilot scope",
+      "This course is larger than the pilot allows.",
+      "Offer explicit scope edit; do not silently shrink an accepted request."
+    ],
+    [
+      "E-09",
+      "F-03",
+      "Double click / lost start response",
+      "Checking for your saved course creation…",
+      "Stable operation ID reattaches one job; do not buy another outline."
+    ],
+    [
+      "E-10",
+      "F-03",
+      "Missing server key / exhausted gateway credit / disabled provider",
+      "Course creation is paused. Your setup is saved.",
+      "Platform owner action; never ask the learner to fund a provider."
+    ],
+    [
+      "E-11",
+      "F-03",
+      "Unsupported model/schema or content refusal",
+      "We couldn't create this part of the draft.",
+      "No silent fallback; charge accounting remains correct; refusal does not trigger blind correction."
+    ],
+    [
+      "E-12",
+      "F-03",
+      "Outline changes increase cost or length",
+      "Review the new scope and maximum.",
+      "Old approval cannot authorize new work; retain prior outline revision."
+    ],
+    [
+      "E-13",
+      "F-04",
+      "File missing, encrypted, damaged or oversized",
+      "This source needs attention before we continue.",
+      "Repair/remove explicitly; no silent truncation; no charge during source inspection."
+    ],
+    [
+      "E-14",
+      "F-04",
+      "URL unavailable / content changes / unsafe fetch destination",
+      "We couldn't use this source.",
+      "Keep safe-fetch and provenance checks; review gaps without inventing evidence."
+    ],
+    [
+      "E-15",
+      "F-04",
+      "Research contains weak attribution or a material gap",
+      "Review these source gaps.",
+      "Reject fabricated citations; distinguish sourced statements, assumptions and suggested additions."
+    ],
+    [
+      "E-16",
+      "F-04",
+      "Research approval waits for days",
+      "Your research is saved. Check the remaining estimate.",
+      "Renew expired authorization; do not mutate original funding or erase the checkpoint."
+    ],
+    [
+      "E-17",
+      "F-04",
+      "Two tabs submit conflicting review actions",
+      "This review has changed. Load the latest version.",
+      "Revision/CAS winner only; no duplicate rerun or stale approval."
+    ],
+    [
+      "E-18",
+      "F-05",
+      "Malformed or truncated paid lesson",
+      "Repairing this lesson within the approved limit.",
+      "At most two lesson attempts total; record every provider charge; no third attempt disguised as escalation."
+    ],
+    [
+      "E-19",
+      "F-05",
+      "Poor content / wrong assessment answer / safety issue",
+      "This lesson needs review.",
+      "Use quality rubric, preserve attribution and selected components; do not mark quality passed on schema alone."
+    ],
+    [
+      "E-20",
+      "F-05",
+      "Model unavailable or retired",
+      "Creation is paused while we check model access.",
+      "No automatic unreviewed replacement; explicit versioned authorization if route changes."
+    ],
+    [
+      "E-21",
+      "F-06",
+      "No image is educationally useful",
+      "No illustration needed for this lesson.",
+      "Intentional omission is allowed with rationale; avoid filler and factual-diagram claims."
+    ],
+    [
+      "E-22",
+      "F-06",
+      "Image paid but download/store/attach fails",
+      "Your lesson is saved; its illustration needs attention.",
+      "Recover original receipt/asset first; immutable asset identity; do not regenerate blindly."
+    ],
+    [
+      "E-23",
+      "F-06",
+      "Image refusal or invalid format",
+      "We couldn't add this illustration.",
+      "Keep text and prior images; use truthful partial state or explicit reviewed omission."
+    ],
+    [
+      "E-24",
+      "F-06",
+      "Designer changes protected teaching or answers",
+      "The suggested change wasn't accepted.",
+      "Retain original copy; bounded correction/fallback and all cost reservations; preserve existing reason-length fix."
+    ],
+    [
+      "E-25",
+      "F-07",
+      "Browser closes / network offline / handoff missed",
+      "Creation continues / reconnect to check saved progress.",
+      "Server state is authoritative; use tested bounded continuation claim, not repeated paid requests."
+    ],
+    [
+      "E-26",
+      "F-07",
+      "Lease lost / cancellation races with response",
+      "Stopping new work; saving the final status.",
+      "Old runner cannot overwrite newer state; late receipt can still settle once."
+    ],
+    [
+      "E-27",
+      "F-07",
+      "Timeout after dispatch / missing receipt / settlement reply lost",
+      "Checking a charge. Your saved work is safe.",
+      "Hold funds, stop replacements and reconcile; no unsupported promise of refund or safe retry."
+    ],
+    [
+      "E-28",
+      "F-07",
+      "Cancel before start versus after valid saved work",
+      "Unused credits will be released when the status is confirmed.",
+      "Different known outcomes; don't refund delivered work or an unknown in-flight amount automatically."
+    ],
+    [
+      "E-29",
+      "F-07",
+      "Restart / changed sources / repeated revision",
+      "Review the new estimate before starting again.",
+      "Explicit fresh authorization; preserve older accepted outputs and original funding lineage."
+    ],
+    [
+      "E-30",
+      "F-08",
+      "Duplicate settlement / provider receipt reuse",
+      "One usage entry per accepted operation.",
+      "Idempotent settlement and unique receipt protection; no double refund/debit."
+    ],
+    [
+      "E-31",
+      "F-08",
+      "Hold remains after quote expiry / job deletion",
+      "Some credits are still held while we check a charge.",
+      "Unstarted holds release; uncertain holds persist with support reference. Deletion is not a refund or audit deletion."
+    ],
+    [
+      "E-32",
+      "F-08",
+      "Operator grants/revokes/reconciles concurrently",
+      "Updated balance or pending review.",
+      "Service-only audited changes; revoke unused allowance only; no retroactive cancellation of consumed credits."
+    ],
+    [
+      "E-33",
+      "F-09",
+      "Cached old UI / deprecated deep link",
+      "Load the current course status.",
+      "Backend enforces policy even when old key forms or start buttons exist in cached clients."
+    ],
+    [
+      "E-34",
+      "F-09",
+      "Keyboard / screen reader / narrow mobile / 200% text",
+      "Status and next action stay readable and reachable.",
+      "Visible focus, labelled controls, announced errors, no color-only meaning, no focus loss or horizontal page clipping."
+    ],
+    [
+      "E-35",
+      "F-09",
+      "Learner opens tutor or AI editing",
+      "This feature isn't included in the pilot yet.",
+      "Cohort-aware UI and server denial; no key prompt or alternate unmetered route."
+    ],
+    [
+      "E-36",
+      "F-09",
+      "Rollout disabled while a job is running",
+      "New creation is paused; existing work is saved.",
+      "Separate new-start kill switch from safe continuation; never switch a job to creator funding during rollback."
+    ],
+    [
+      "E-37",
+      "F-09",
+      "Service budget exhausted while credits remain",
+      "Creation is temporarily paused. Your credits are kept.",
+      "Credits are not a guarantee of current provider capacity; no hidden customer top-up instruction."
+    ],
+    [
+      "E-38",
+      "F-09",
+      "Complete course save/receipt response is lost",
+      "Checking the saved draft…",
+      "Read back durable course/receipt; don't regenerate or show completion before the saved result is verified."
+    ]
+  ],
+  "features": [
+    {
+      "id": "F-01",
+      "title": "Funded access and account status",
+      "outcome": "An invited learner sees whether creation is available and understands their complimentary balance without managing keys.",
+      "scope": "Server funding-mode and eligibility projection; account/create readiness; available/held/used balance; platform versus legacy recovery copy. Add operator grant contract with default-deny authorization. No paid dispatch in this feature.",
+      "files": "workspace-account.js, setup-create.js, setup-generation-client.js; proposed access/credit projection API and grant schema",
+      "depends": [],
+      "or": [
+        "OR-02",
+        "OR-06"
+      ],
+      "status": "Next — not implemented",
+      "qa": "Owner isolation, denied/missing/expired grants, zero versus unknown balance, sign-out/account switch, two devices, legacy job unaffected, key-free UI, keyboard/mobile and zero provider calls.",
+      "exit": "A real signed-in local account and a second adversarial account exercise every readiness state. The server, not UI flags, denies unauthorized use. Record exact DB/API/UI evidence."
+    },
+    {
+      "id": "F-02",
+      "title": "Course estimate and explicit authorization",
+      "outcome": "A learner can see the maximum credit use before starting and can choose to change scope.",
+      "scope": "Revision-bound quotes, expiry, source digest, fixed course-size envelope, credit holds and versioned authorization. Implement long-review renewal without changing job funding identity. Separate learner credits from provider-dollar reservations.",
+      "files": "course-setup.js, setup-create.js, setups/generate.js, setup-generation.mjs; proposed quote/authorization/credit RPCs",
+      "depends": [
+        "F-01"
+      ],
+      "or": [
+        "OR-02",
+        "OR-06"
+      ],
+      "status": "Planned",
+      "qa": "Expired/changed quote, insufficient credit, concurrent confirmation, rounding at boundaries, grants/quote tampering, source limits, no AI on check/save, accessible confirmation and duplicate request behavior.",
+      "exit": "One confirmed action atomically creates one authorization/hold; failed or duplicate actions do not buy work. Credit policy is explicit and versioned."
+    },
+    {
+      "id": "F-03",
+      "title": "Create and review a funded outline",
+      "outcome": "A learner starts once, sees a saved outline and can approve or change it.",
+      "scope": "Wire one resolver and saved-policy client factory across all generation entry points before enabling dispatch; outline route through OpenRouter; stable starts, consent, usage, durable review and legacy compatibility.",
+      "files": "gen/start.js, setups/generate.js, gen/review.js, resume.js, restart.js, credentials-ready.js, sweep.js, gen-runner.mjs; openrouter modules",
+      "depends": [
+        "F-02"
+      ],
+      "or": [
+        "OR-01",
+        "OR-02",
+        "OR-03"
+      ],
+      "status": "Planned; OR-01 adapter already tested offline",
+      "qa": "All entry points share the same funding owner, policy and limits; duplicate/lost starts, missing key, provider outage/refusal, strict schema, late receipt, failed checkpoint, changed outline and stale approval.",
+      "exit": "A local real-job harness reaches outline review with durable cost evidence and no legacy key read for a platform job. Live route/schema check is required before hosted acceptance."
+    },
+    {
+      "id": "F-04",
+      "title": "Research, sources and the second review",
+      "outcome": "A learner sees evidence and gaps before lessons are written.",
+      "scope": "Native PDF/search/citation compatibility, bounded evidence collection, structured bundle submission, truthful extraction/provenance, source changes and renewed review consent.",
+      "files": "generator/stages/research.mjs, document/source inspection, gen/review.js, intake review UI, OpenRouter research adapter",
+      "depends": [
+        "F-03"
+      ],
+      "or": [
+        "OR-03"
+      ],
+      "status": "Planned",
+      "qa": "Unusable files/URLs, changed sources, unsupported native parameters, bounded tool turns and search cost, cited versus inferred claims, missing citation, long pause, two tabs and rerun authorization.",
+      "exit": "Source fixtures round-trip to the review UI; a bounded live compatibility check proves the selected route and billing. Unsupported paths stay disabled."
+    },
+    {
+      "id": "F-05",
+      "title": "Draft lessons with the mixed-model policy",
+      "outcome": "A learner receives coherent lessons and their chosen learning tools at an acceptable measured cost.",
+      "scope": "Open-weight lesson writer with frontier baseline comparison; selected quizzes/flashcards/checklists; fixed total attempt limit; per-unit saves; factual/assessment/coverage rubric and aggregate cost/latency evidence.",
+      "files": "generator/stages/topic.mjs, schema.mjs, gen-runner.mjs, token/cost usage, evaluation fixtures",
+      "depends": [
+        "F-04"
+      ],
+      "or": [
+        "OR-04"
+      ],
+      "status": "Planned; synthetic stage integration exists",
+      "qa": "Valid schema is insufficient: score accuracy, sources, coverage, teaching usefulness, answers, selected components, two-attempt maximum, budget stop and loss of the second response.",
+      "exit": "Paired evaluation meets the agreed rubric and complete-course cost envelope; choose a default from evidence. No automatic promotion of the cheapest model."
+    },
+    {
+      "id": "F-06",
+      "title": "Refine the draft and add useful illustrations",
+      "outcome": "The course keeps its teaching content and includes durable, purposeful visuals.",
+      "scope": "Frontier Designer parity, protected-copy validation, bounded correction/fallback, one priced image route, asset provenance/storage/attachment and recovery. Evaluate cheaper refinement separately after parity.",
+      "files": "visual-designer.mjs, generator/stages/visual-design.mjs, integrated-course-images.mjs, course image request/accept APIs, reader assets",
+      "depends": [
+        "F-05"
+      ],
+      "or": [
+        "OR-05",
+        "OR-04"
+      ],
+      "status": "Planned",
+      "qa": "Protected wording/answers, long safe rationale, source attribution, image omission, format/size limits, price bound, download/store/attach failure, existing PNG assets, duplicate receipt and uncertain image recovery.",
+      "exit": "A small saved draft retains text and images across refresh and same-job recovery; every Designer/image attempt is accounted for. Image quality and cost are live gates."
+    },
+    {
+      "id": "F-07",
+      "title": "Finish, cancel and recover the same course",
+      "outcome": "A learner understands what is saved and can take a safe next action after interruption.",
+      "scope": "Consolidate progress/library states, all review/partial/cancel paths, pending-charge copy, resumable job controls, renewals and checkpoint handoff. The safety invariants already apply from F-03; this feature completes the cross-app experience.",
+      "files": "intake.js, home.js, cloud-gen-client.js, gen/recovery and continuation modules, watchdog.js, resume/restart/cancel handlers",
+      "depends": [
+        "F-06"
+      ],
+      "or": [
+        "OR-02",
+        "OR-06"
+      ],
+      "status": "Planned",
+      "qa": "Refresh/close browser, offline network, lost lease, missed handoff, Cancel race, late receipt, price expiry, known versus unknown failure, partial images, duplicate Resume and unchanged saved work.",
+      "exit": "Fault-injection journeys preserve all accepted work and never cross the approved limits or re-buy an uncertain operation. All user messages have one safe primary action."
+    },
+    {
+      "id": "F-08",
+      "title": "Usage history and operator reconciliation",
+      "outcome": "Learners can understand their balance and an operator can resolve uncertainty without losing accounting evidence.",
+      "scope": "Course receipts, grants/holds/debits/releases, safe support references, service-only grant/revoke/pause/reconcile tools, delete retention and per-model/whole-course contribution reporting.",
+      "files": "account/usage views, proposed credit ledger and operator operations, ai-spend-ledger.mjs, accounting database functions",
+      "depends": [
+        "F-07"
+      ],
+      "or": [
+        "OR-02",
+        "OR-06"
+      ],
+      "status": "Planned",
+      "qa": "Double settlement/refund, shared receipt reuse, missing receipt, concurrent grants, negative balance prevention, rounding, deletion, no secret/source leakage and operator audit authorization.",
+      "exit": "Provider ledger and learner credit ledger reconcile on known fixtures, remain distinct for absorbed failures, and preserve unresolved holds. Manual corrections are explicit entries."
+    },
+    {
+      "id": "F-09",
+      "title": "Complete pilot acceptance and prepare a release",
+      "outcome": "A learner can complete the entire private creation journey without a provider account.",
+      "scope": "Full journey, all app surfaces/deep links, cohort exclusions, mobile/accessibility, regression of old jobs, operator runbook, rollback and a fresh staged package. Prepare a release candidate; do not release automatically.",
+      "files": "Full app, staged package, acceptance evidence and continuity records",
+      "depends": [
+        "F-08"
+      ],
+      "or": [
+        "OR-06"
+      ],
+      "status": "Planned — release later",
+      "qa": "Happy path plus all E-01–E-38; new and legacy accounts; warm/cold/browser restart; no unexplained debit, unresolved critical defect or leaked key; accessibility and real-device/browser checks; bounded live course.",
+      "exit": "Evidence-backed go/no-go review, all feature gates closed, open risks visible, rollback preserves jobs and balances. Production release needs separate explicit authorization."
+    },
+    {
+      "id": "F-10",
+      "title": "Funded in-course tutor — optional scope",
+      "outcome": "A learner asks about a saved lesson without supplying another API key.",
+      "scope": "Only if included: server-side contextual chat, per-turn estimate/cap, separate session budget, streaming final receipt and interruption accounting. Do not ship the existing browser-key path to platform users.",
+      "files": "web/js/chat.js, web/index.html, proposed funded tutor endpoint and session budget",
+      "depends": [
+        "F-02",
+        "F-05",
+        "F-08"
+      ],
+      "or": [
+        "OR-06"
+      ],
+      "status": "Later by recommendation; awaiting tutor-scope response",
+      "qa": "Context ownership, per-turn/session cap, lost streaming receipt, Stop/retry ambiguity, useful grounded answer, quota exhaustion and no browser-stored provider secret.",
+      "exit": "If selected for the first pilot, F-09 additionally depends on F-10 and its live/UX acceptance. Otherwise explicit unavailable states are tested in F-09."
+    }
+  ],
+  "qa": [
+    [
+      "Before implementation",
+      "Each feature has a user outcome, included/excluded states, data/credit rules, API boundary, UI copy, dependencies and specific acceptance tests. Review the relevant prototype states first."
+    ],
+    [
+      "During implementation",
+      "Build the smallest usable vertical slice on the isolated branch. Reuse accepted infrastructure; don't expose a half-wired paid route. Add meaningful regression tests for ownership, money and recovery."
+    ],
+    [
+      "Local feature QA",
+      "Run targeted unit/contracts, actual local DB tests when accounting changes, real endpoint integration, browser interaction and accessible/mobile states relevant to that feature. Test both platform and legacy modes."
+    ],
+    [
+      "Evidence and defects",
+      "Record command/build/commit, fixture, expected/actual result, screenshots where useful, cost/reservations and unresolved defects. Distinguish code complete, local QA passed, live check passed and hosted accepted."
+    ],
+    [
+      "Move to the next feature",
+      "Resolve blockers and accept the current feature's defined local slice before starting the next implementation. If a required live dependency is unavailable, record the block; documentation/design may continue, but don't mark the feature accepted."
+    ],
+    [
+      "Integrated QA",
+      "After feature QA, test the complete journey, cross-feature races, long pauses, old clients, account switch, operator reconciliation and partial recovery against a fresh staging package."
+    ],
+    [
+      "Paid QA",
+      "One logical run shares the US$5 cap across text, research/search, images, reasoning, corrections and parallel calls. Estimate and reserve first; reduce fixtures or stop if the next dispatch cannot fit. No auto-reload or reopening closed runs."
+    ],
+    [
+      "Release later",
+      "Keep release candidate, staging acceptance and production authorization separate. Verify exact source/artifact including concurrent recovery fixes, migration/rollback plan, cohort settings, provider access and accounting totals. Merge/deploy only after explicit release instruction."
+    ]
+  ],
+  "metrics": [
+    [
+      "Access friction",
+      "100% of tested new-pilot routes are free of provider key prompts; at least 4 of 5 invited usability participants complete setup/quote explanation without help. Proposed target; not measured."
+    ],
+    [
+      "Money correctness",
+      "Zero duplicate debits, cross-owner access, negative available balance or provider-envelope overruns in the defined concurrency/fault suite. All dispatched operations have a reservation and settled or unresolved receipt state."
+    ],
+    [
+      "Draft quality",
+      "Score accuracy, attribution, coverage, usefulness and assessment correctness on representative fixtures. No critical factual/safety/citation/answer defect is acceptable; target at least 4/5 on each rubric dimension. Human-reviewed live results required."
+    ],
+    [
+      "Recovery",
+      "Every prescribed recovery fixture retains prior accepted work and has no paid replay of an unknown operation. Review pauses are distinguishable from stalls."
+    ],
+    [
+      "Usability and accessibility",
+      "Complete the happy path and recovery with keyboard, screen-reader spot checks, narrow viewport and 200% text. Every error explains retained work and a safe next action."
+    ],
+    [
+      "Performance and economics",
+      "Measure setup-to-outline, active generation time excluding human review, saved-draft completion, provider cost by stage, absorbed failures, credit debit and support effort. Establish latency and commercial targets from evidence; no invented speed or savings claim."
+    ]
+  ],
+  "technicalGaps": [
+    [
+      "Separate credits from dollars",
+      "The existing SQL ledger is provider-cost infrastructure, not a customer wallet. Add a distinct credit ledger and atomic link between quote consent, holds and eligible debits; do not relabel micro-USD as credits."
+    ],
+    [
+      "Fix long-review expiry",
+      "Current policy snapshots expire within 24 hours and the new migration makes the binding immutable. Before F-02, separate immutable funding/route identity from append-only quote/authorization revisions. Test multi-day reviews, expiry and new consent; do not simply extend timestamps in place."
+    ],
+    [
+      "Cover the actual entry points",
+      "Both /api/setups/generate and /api/gen/start create jobs. Review/resume/restart/sweep/credentials-ready and image requests must share the resolver. Tutor and proposal routes require explicit scope handling."
+    ],
+    [
+      "Preserve current reliability work",
+      "The OpenRouter branch has the Designer rationale baseline but not all newer production timeout/credit-message changes. Reconcile those reviewed changes before relevant feature integration and packaging. Never copy private production records or frozen output into the PR."
+    ],
+    [
+      "Local tests are not live acceptance",
+      "41 adapter/stage and 41 DB checks from the previous phase are existing evidence. Native research/schema/provider access, actual cost/quality/images, customer wallet and hosted no-key journey remain unproved."
+    ],
+    [
+      "Product evidence first",
+      "The visible credit policy, cohort/exclusion copy and long-review rules guide the implementation. Do not let the current adapter shape silently define the customer promise."
+    ]
+  ],
+  "decisions": [
+    [
+      "D-01",
+      "Tutor in the first pilot",
+      "Recommend defer; show an honest unavailable state for platform users and retain legacy isolation. User response pending.",
+      "Does not block writing the plan or F-01 access status; changes F-09 scope if included."
+    ],
+    [
+      "D-02",
+      "Learner debit policy",
+      "Recommend charge only valid saved deliverables, absorb invalid output and system repair, keep unknown holds pending.",
+      "Confirm before implementing F-02/F-08 debit settlement; prototype illustrates this proposal."
+    ],
+    [
+      "D-03",
+      "Pilot limits",
+      "Recommend invited users, one standard experience and a small server-enforced course envelope. First acceptance fixture: one module, three lessons.",
+      "Choose cohort and limits before enabling the pilot; no grants minted by this plan."
+    ],
+    [
+      "D-04",
+      "Paid pricing",
+      "Bundle size, credit value, margin, purchase/refund terms and hosting for commercial use remain later.",
+      "No payment implementation or sales promise in this pilot."
+    ],
+    [
+      "D-05",
+      "Release timing",
+      "Feature QA first, then integrated staging and a release candidate.",
+      "Production release remains a later, explicit decision."
+    ]
+  ],
+  "sources": [
+    [
+      "Existing technical foundation",
+      "docs/OPENROUTER-DEVELOPMENT.md; PR #4, commit 6e764dc"
+    ],
+    [
+      "Current setup and consent",
+      "web/js/course-setup.js; setup-create.js; setup-generation-client.js; web/api/setups/generate.js"
+    ],
+    [
+      "Recovery and legacy funding",
+      "web/js/intake.js; cloud-gen-client.js; workspace-account.js; web/api/gen/*"
+    ],
+    [
+      "Additional key paths",
+      "web/js/chat.js; web/index.html; web/api/courses/proposal.js"
+    ],
+    [
+      "Current limits and materials",
+      "web/api/_lib/setup-generation.mjs; web/js/generator/component-policy.mjs"
+    ],
+    [
+      "Continuity and acceptance",
+      "docs/APP-UPGRADE-PLAN.md; docs/upgrade/SESSION-HANDOFF.md; RELEASE-ACCEPTANCE-AUDIT.md; QA-COST-LEDGER.md"
+    ]
+  ]
+}

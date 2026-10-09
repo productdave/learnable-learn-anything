@@ -80,20 +80,46 @@ database. It does not prove a full migration replay or hosted acceptance.
 
 ## Next implementation work
 
-1. Finish OR-02: one funding resolver across start, review, Resume, restart,
-   credentials-ready, sweep/continuation and image recovery. Bind approved grants
-   and the policy at job creation, construct task-specific clients from the saved
-   snapshot, preserve creator-funded recovery, and add full endpoint tests.
-2. Complete OR-03 with a server-side OpenRouter key: verify exact model/provider
-   IDs, strict schema compatibility, native PDFs, search bounds and citation
-   provenance. Account for evidence gathering and structured submission as
-   separate requests when required.
-3. Run the OR-04 paired course evaluation before accepting a default model mix.
-   Compare factual quality, useful draft completeness, component preservation,
-   total cost and latency. Model choices in this code remain hypotheses.
-4. Implement OR-05 image request pricing, durable receipt/assets and recovery,
-   then OR-06 server-granted test credits and the no-BYOK pilot interface.
-5. Verify a fresh staging package before proposing a production migration.
+The [product delivery plan](product/openrouter-delivery/index.html) now governs
+the sequence. It includes the PRD, experience and credit rules, 38 initial edge
+cases, app-wide impact and per-feature QA. The adjacent
+[interactive prototype](product/openrouter-delivery/prototype.html) is a state
+explorer with synthetic data and no provider calls. Open either HTML file locally,
+or serve that directory. Rebuild the plan with
+`python3 docs/product/openrouter-delivery/render.py`.
+
+1. F-01: funded access and account status, with default-off eligibility, distinct
+   available/held/used credits and owner isolation. No paid dispatch.
+2. F-02: revision-bound quotes, explicit consent and atomic credit holds. The
+   customer credit ledger is separate from the existing provider-dollar ledger.
+   Separate immutable job funding from append-only authorization renewals, so a
+   multi-day human review can resume without rewriting an expired policy.
+3. F-03: funded outline and review. Complete the OR-02 resolver across
+   `/api/setups/generate`, `/api/gen/start`, review, resume, restart,
+   credentials-ready, sweep/continuation and image recovery before enabling paid
+   dispatch. Preserve legacy job funding and run actual endpoint tests.
+4. F-04: cited research and the second review. Verify native PDF/search/schema
+   compatibility and all request costs under OR-03 before accepting the route.
+5. F-05: mixed-model lesson generation and selected learning tools. Run the OR-04
+   paired quality/cost evaluation; the cheapest model is not automatically accepted.
+6. F-06: protected Designer refinement and durable useful illustrations, including
+   OR-05 pricing, receipts, storage and uncertain-result recovery.
+7. F-07: complete progress, partial drafts, cancellation and same-job recovery
+   across the app. Safety invariants already apply from F-03.
+8. F-08: learner usage receipts and service-only operator reconciliation.
+9. F-09: integrated pilot acceptance, fresh staging package and release candidate.
+   Release comes later. Optional funded tutor F-10 precedes F-09 only if included.
+
+Implement, QA, fix and record evidence for one feature before the next. Keep local,
+live and hosted acceptance separate. F-01 is next and not yet implemented. Tutor
+and AI edits are deferred for platform accounts by recommendation; both visible
+key prompts and backend access need an explicit scope guard. Paid bundles and
+prices remain later. OR-01–OR-06 are underlying engineering workstreams, not
+additional scope to count again on top of F-01–F-10.
+
+Reconcile newer reviewed continuation/watchdog and provider-error changes from the
+other workstream before relevant integration or packaging. Do not overwrite the
+dirty checkout or reuse a frozen release artifact for new packaging.
 
 An OpenRouter key alone is not an activation switch. No live model, research,
 image, end-to-end platform funding or hosted acceptance is claimed here. Future
@@ -102,4 +128,6 @@ requests and retries. Real purchases and credit pricing remain separate work.
 
 The canonical tracker is the existing
 [Learnable roadmap](https://app.notion.com/p/3f471b32838481cb8c69fd30cafd18a7),
-with OR-01–OR-06 linked under platform-funding task AD-08.
+with OR-01–OR-06 and F-01–F-10 under platform-funding task AD-08. The
+[funded-creation PRD](https://app.notion.com/p/3f471b32838481e59768fdedcd9a615b)
+records the product contract and links the native feature tasks.

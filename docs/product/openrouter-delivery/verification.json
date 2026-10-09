@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-09",
+  "scope": "Product plan and standalone prototype only",
+  "browser": "Codex in-app browser, local static HTTP server",
+  "stateCount": 22,
+  "interactionAssertionsPassed": 21,
+  "checks": [
+    "Start disabled before consent",
+    "Outline saved with 5 used",
+    "Research saved with 15 used",
+    "Dashboard navigation preserves in-progress balance",
+    "Dashboard reopens same progress state",
+    "Viewing a partial draft preserves uncertain hold",
+    "Reader labels partial draft",
+    "Return to uncertain job does not offer resume",
+    "No blind retry for uncertain charge",
+    "Create entry cannot release an uncertain hold",
+    "Long-review navigation does not restore expired hold",
+    "Expired authorization requires renewed consent",
+    "Renewed authorization resumes without repurchasing reviewed work",
+    "Setup preserves no-access gate",
+    "Known partial resume preserves balance",
+    "All 22 prototype states render",
+    "Keyboard Space gives explicit cost consent",
+    "Keyboard Enter reaches outline review",
+    "Cancellation status check does not release pending hold",
+    "Insufficient credits remain blocked after setup navigation",
+    "No-access dashboard does not claim pilot access"
+  ],
+  "layout": {
+    "desktop": "Visual inspection passed",
+    "mobile": {
+      "requestedViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 375,
+      "documentScrollWidth": 375,
+      "planPassed": true,
+      "prototypePassed": true
+    }
+  },
+  "consoleWarningsOrErrors": 0,
+  "notRun": [
+    "Actual application feature QA",
+    "Real credit/accounting database integration",
+    "Live provider schema, search, PDF, model quality and images",
+    "Hosted no-key journey",
+    "Screen-reader audit",
+    "200% text audit",
+    "User usability research"
+  ],
+  "limits": [
+    "State explorer uses synthetic data and illustrative balances",
+    "Scenario selection and reload reset to a fixture; edits are not persisted",
+    "No provider, wallet, source upload, auth or real course generation is connected"
+  ],
+  "providerQaSpendUsd": {
+    "text": 0,
+    "search": 0,
+    "images": 0,
+    "retries": 0,
+    "total": 0
+  }
+}
