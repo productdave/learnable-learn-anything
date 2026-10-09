@@ -103,6 +103,35 @@ test('invalid returned output retains token usage and requires explicit retry of
   assert.deepEqual(f.state.row.payload._visualDesign.lastFailure, previousFailure, 'retry retains the last failed operation for diagnosis');
 });
 
+test('same-job Resume saves bounded reasons without repeating accepted lessons or review', async () => {
+  const f = fixture(); f.state.afterCall = key => { if (key === 'lesson-2') throw Object.assign(new Error('rejected output'), { kind: 'visual_design' }); };
+  await assert.rejects(f.run(), { code: 'VISUAL_DESIGN_FAILED' });
+  const accepted = clone(f.state.row.payload.modules[1]['lesson-1']);
+  const review = clone(f.state.row.payload._visualDesign.review);
+  const item = clone(f.state.row.payload._visualDesign.items['foundations/lesson-1']);
+  const courseId = f.state.row.payload.config.id, jobId = f.state.row.payload._generationJobId, targets = [];
+  const client = { messages: { create: async request => {
+    const input = JSON.parse(request.messages[0].content); targets.push(input.target.topicId);
+    return { usage: { input_tokens: 50, output_tokens: 20 }, stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'submit_lesson_visual_design', input: {
+      summary: 'Keep the saved explanation.', edits: [], flags: [], alignment: { quizAnswersPreserved: true, checksMatchTeaching: true },
+      visual: { decision: 'omit', reason: 'The complete explanation teaches this relationship without adding a decorative illustration. '.repeat(15) }
+    } }] };
+  } } };
+  f.state.afterCall = null;
+  const result = await f.run({ refine: undefined, client, retryFailedDesign: true });
+  assert.deepEqual(targets, ['lesson-2', 'lesson-3']);
+  assert.deepEqual(f.state.row.payload.modules[1]['lesson-1'], accepted);
+  assert.deepEqual(f.state.row.payload._visualDesign.review, review);
+  assert.deepEqual(f.state.row.payload._visualDesign.items['foundations/lesson-1'], item);
+  assert.equal(f.state.row.payload.config.id, courseId); assert.equal(f.state.row.payload._generationJobId, jobId);
+  assert.equal(result.progress.completed, 3); assert.equal(result.progress.status, 'complete');
+  assert.equal(f.state.row.payload._visualDesign.usage.total.calls, 5);
+  assert.equal(f.state.row.payload._visualDesign.pending, null);
+  assert.match(f.state.row.payload.modules[1]['lesson-2'].visual.reason, /\[shortened\]$/);
+  assertDesignComplete(f.state.row.payload);
+  await f.run({ client: null }); assert.equal(targets.length, 2);
+});
+
 test('unconfirmed transport never silently dispatches a replacement, even with Resume', async () => {
   const f = fixture(); const error = new Error('lost network');
   await assert.rejects(f.run({ review: async () => { f.state.calls.push('transport'); throw error; } }), { code: 'VISUAL_DESIGN_UNCERTAIN' });

@@ -263,10 +263,11 @@ export const FlashcardSchema = z.object({
 
 // A teaching decision, not an image checkbox. Keep omission explicit so that
 // an intentionally text-only lesson is distinguishable from unfinished work.
+export const LESSON_VISUAL_REASON_LIMIT = 600;
 export const LessonVisualSchema = z.discriminatedUnion('decision', [
-  z.object({ decision: z.literal('omit'), reason: z.string().trim().min(10).max(600) }).strict(),
+  z.object({ decision: z.literal('omit'), reason: z.string().trim().min(10).max(LESSON_VISUAL_REASON_LIMIT) }).strict(),
   z.object({
-    decision: z.literal('generate'), reason: z.string().trim().min(10).max(600),
+    decision: z.literal('generate'), reason: z.string().trim().min(10).max(LESSON_VISUAL_REASON_LIMIT),
     prompt: z.string().trim().min(30).max(3600), alt: z.string().trim().min(10).max(300),
     caption: z.string().trim().min(10).max(500), afterSectionIndex: z.number().int().min(0).max(14)
   }).strict()

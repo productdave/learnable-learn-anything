@@ -4,6 +4,7 @@ import test from 'node:test';
 import { curriculumFixture, lessonFixture } from './fixtures/component-course.mjs';
 import { assembleCourse } from '../web/js/generator/assemble-course.js';
 import { creationBrief, retainComponentChoices } from '../web/js/generator/component-policy.mjs';
+import { LessonVisualSchema } from '../web/js/generator/schema.mjs';
 import {
   VISUAL_DESIGNER_POLICY, usesVisualDesigner, DESIGN_CONTEXT_LIMITS, buildCourseDesignContext,
   runCourseVisualReview, runLessonVisualDesign, validateCourseVisualReview, applyLessonVisualDesign
@@ -24,6 +25,86 @@ const plan = () => ({ summary: 'Use clearer chunks for beginners; preserve the l
 const generate = () => ({ decision: 'generate', reason: 'A side-by-side view makes the change in lighting direction easier to compare.', prompt: 'Create an illustrative side-by-side diagram of the same object beside a window, showing two light directions with simple arrows and a quiet background.', alt: 'The same object under two window-light directions, with arrows showing the light.', caption: 'An illustrative comparison of light direction and the resulting shadows.', afterSectionIndex: 0 });
 const provider = (tool, input, inspect = () => {}) => ({ messages: { create: async request => { inspect(request); return { usage: { input_tokens: 30, output_tokens: 40 }, stop_reason: 'tool_use', content: [{ type: 'tool_use', name: tool, input }] }; } } });
 const edit = (field, value, sectionIndex = 0) => ({ scope: 'section', sectionIndex, field, value });
+
+test('overlong image reasons are bounded metadata, not a reason to reject valid lesson work', async () => {
+  for (const visual of [plan().visual, generate()]) {
+    const course = fixture(), before = copy(course);
+    for (const length of [600, 601, 5000]) {
+      const submission = { ...plan(), visual: { ...visual, reason: 'x'.repeat(length) } }, original = copy(submission);
+      const result = applyLessonVisualDesign(course, target, submission);
+      assert.ok(result.visual.reason.length <= 600);
+      assert.equal(result.visual.reason, length === 600 ? original.visual.reason : result.visual.reason);
+      if (length > 600) assert.match(result.visual.reason, /\[shortened\]$/);
+      assert.deepEqual({ ...result.visual, reason: original.visual.reason }, original.visual);
+      assert.deepEqual(result.lesson.sections, saved(course).sections);
+      assert.deepEqual(submission, original);
+      assert.equal(LessonVisualSchema.safeParse(original.visual).success, length <= 600, 'saved visual schema remains strict');
+      let calls = 0, usages = 0;
+      const run = await runLessonVisualDesign(provider('submit_lesson_visual_design', submission, request => {
+        calls++;
+        assert.match(JSON.parse(request.messages[0].content).visualRules, /reason.*240/i);
+      }), course, target, reviewFor(course), { onUsage: () => usages++ });
+      assert.equal(calls, 1); assert.equal(usages, 1);
+      assert.deepEqual(run.visual, result.visual);
+    }
+    assert.deepEqual(course, before);
+  }
+});
+
+test('reason shortening cannot hide unsafe tails or bypass response and field validation', () => {
+  const course = fixture(), before = copy(course);
+  for (const tail of ['https://example.org/private', '<script>bad</script>', 'javascript:bad', 'data:bad']) {
+    assert.throws(() => applyLessonVisualDesign(course, target, { ...plan(), visual: {
+      ...generate(), reason: 'x'.repeat(650) + tail
+    } }), { code: 'VISUAL_DESIGN_VISUAL' });
+  }
+  const reason = 'x'.repeat(650);
+  for (const mutate of [
+    v => { v.alt = 'x'.repeat(301); }, v => { v.caption = 'x'.repeat(501); },
+    v => { v.prompt = 'x'.repeat(3601); }, v => { v.asset_id = 'invented'; },
+    v => { v.decision = 'unknown'; }, v => { v.reason = { text: reason }; }
+  ]) {
+    const visual = { ...generate(), reason }; mutate(visual);
+    assert.throws(() => applyLessonVisualDesign(course, target, { ...plan(), visual }), { code: 'VISUAL_DESIGN_SCHEMA' });
+  }
+  assert.throws(() => applyLessonVisualDesign(course, target, { ...plan(), visual: { ...generate(), reason: 'x'.repeat(100001) } }), { code: 'VISUAL_DESIGN_SIZE' });
+  const hostile = { ...plan(), visual: { ...generate(), reason } };
+  Object.defineProperty(hostile.visual, '__proto__', { value: {}, enumerable: true });
+  assert.throws(() => applyLessonVisualDesign(course, target, hostile), { code: 'VISUAL_DESIGN_INPUT' });
+  assert.deepEqual(course, before);
+});
+
+test('shortened reasons respect Unicode boundaries and do not shorten teaching or other image fields', () => {
+  const course = fixture(), visual = { ...generate(), reason: 'x'.repeat(587) + '😀'.repeat(50) };
+  const submission = { ...plan(), visual, edits: [edit('title', 'Look at the window light')] };
+  const result = applyLessonVisualDesign(course, target, submission);
+  assert.ok(result.visual.reason.length <= 600);
+  assert.doesNotMatch(result.visual.reason, /[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+  assert.match(result.visual.reason, /\[shortened\]$/);
+  assert.equal(result.lesson.sections[0].title, 'Look at the window light');
+  assert.deepEqual({ ...result.visual, reason: visual.reason }, visual);
+  assert.notEqual(saved(course).sections[0].title, 'Look at the window light');
+});
+
+test('preserve-copy fallback accepts an overlong safe reason without weakening protected copy checks', async () => {
+  const course = fixture(); saved(course).sections[0].content = '<p>The result may vary. Original teaching stays here.</p>';
+  const before = copy(course); let calls = 0, usage = 0;
+  const client = { messages: { create: async request => {
+    calls++;
+    const input = JSON.parse(request.messages[0].content);
+    if (calls === 3) { assert.equal(input.preserveOriginalCopy, true); assert.equal(input.correction, undefined); }
+    return { usage: {}, stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'submit_lesson_visual_design', input: {
+      ...plan(), edits: calls < 3 ? [edit('content', '<p>This rejected rewrite removes the qualification.</p>')] : [],
+      visual: { ...generate(), reason: 'The lighting relationship benefits from a clear side-by-side comparison. '.repeat(15) }
+    } }] };
+  } } };
+  const result = await runLessonVisualDesign(client, course, target, reviewFor(course), { onUsage: () => usage++ });
+  assert.equal(calls, 3); assert.equal(usage, 3);
+  assert.deepEqual(result.lesson.sections, saved(course).sections);
+  assert.match(result.visual.reason, /\[shortened\]$/);
+  assert.ok(result.flags.some(f => f.kind === 'context' && /original wording retained/i.test(f.message)));
+  assert.deepEqual(course, before);
+});
 
 test('one bounded correction repairs rejected copy without relaxing protected wording', async () => {
   const course = fixture(), original = saved(course);
