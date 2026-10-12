@@ -3,9 +3,10 @@
 The private-pilot implementation is ready for a bounded staging trial. It uses
 one server-owned OpenRouter key for the course plan, source research, lessons,
 Designer review and illustrations. Learner credits and payments remain parked.
-**Hosted acceptance is still open:** the key is missing from `learnable-staging`.
-No shared migration, manual staging deployment or live model call was made in
-this phase. Production remains unchanged.
+**The paused one-key build is now on [staging](https://learnable-staging.vercel.app).**
+Migrations 27/28 and hosted access checks passed. Generation remains paused
+because `OPENROUTER_API_KEY` is missing. Live course acceptance is still open;
+no allowance or model call was made. Production remains unchanged.
 
 Work is isolated on `codex/openrouter-single-key`, in
 [draft PR #6](https://github.com/productdave/learnable-learn-anything/pull/6).
@@ -94,15 +95,37 @@ under `output/playwright/openrouter/`. The packaged candidate is
 `dc69bd2a3e3b512f65005775c9d16da6656d68dbc310e26a74c9381dc447eeee`.
 Earlier packages from this phase are superseded and must not be deployed.
 
+## Hosted staging result
+
+[Hosted verification](hosted-verification.json) records the staging-only migration
+and deployment `dpl_6tWED2eWPe1XRP1t2qLCY4SqirCD`. Existing data and permissions
+are preserved. All four new funding/admission tables are empty, with no grants
+or enrollment. Eight authenticated API/access checks passed: managed paused
+readiness, rejection of personal-key setup, preserved owner Admin access and
+private ledger/RPC boundaries. The temporary owner session was revoked.
+
+Six migration-wrapper checks passed on disposable local PostgreSQL before the
+hosted migration. The deployed derivative passed 216 module imports and seven
+direct-provider guards. Six served assets match their frozen hashes; health and
+unauthenticated route checks passed. Signed-out Home and Account sign-in were
+viewed in hosted Chromium at desktop/mobile sizes with no overflow or console
+errors. Authenticated Account/Create UI evidence remains local, as described above.
+
+Deployed artifact: `output/staging/2026-10-11-openrouter/release-Kk1xFu`, report
+SHA256 `64a13cf8db9b729a96f9c648e87711da9824adb63a16375916e10d91c9edcacd`.
+The `release-Vcuz5U` package above is its frozen source, not the current deployment.
+Rollout receipts are under `output/staging/2026-10-12-openrouter-closed/`.
+
 ## What's next
 
 1. Confirm the sensitive key exists in the staging project's Production and
    Preview environments. Those names refer to environments inside the staging
    project; do not change the live Learnable project.
 2. Re-read current staging state, review catalog pricing/access and check for
-   newer accepted runtime work. Apply migrations 27/28, then create one explicit
-   pilot enrollment with a whole-run US$5 ceiling. Keep closed allowances closed.
-3. Deploy a fresh verified candidate to staging. Test a small PDF/source-backed
+   newer accepted runtime work. Migrations 27/28 are installed; do not reapply.
+   Create one explicit pilot enrollment with a whole-run US$5 ceiling. Keep old
+   allowances closed.
+3. Activate a fresh verified candidate on staging. Test a small PDF/source-backed
    course through plan review, research review, lessons, Designer, images and
    reopen/resume. Check actual receipts, course quality and mobile behavior.
 4. Record remaining funds/holds, staging results and any required repairs before
