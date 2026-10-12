@@ -11,6 +11,8 @@
 // Reuses the stage modules from web/js/generator/stages/*.mjs as pure
 // generation steps. The browser no longer orchestrates course generation.
 
+import { randomUUID } from 'node:crypto';
+import { createGenerationTrace, safeDiagnostic } from './generation-observability.mjs';
 import { runIntake } from '../../js/generator/stages/intake.mjs';
 import { runResearch } from '../../js/generator/stages/research.mjs';
 import { runTopic } from '../../js/generator/stages/topic.mjs';
@@ -18,7 +20,7 @@ import { getTone } from '../../js/generator/tones/conversational.mjs';
 import { createClient as createAnthropic } from '../../js/generator/anthropic-fetch.js';
 import { assembleCourse } from '../../js/generator/assemble-course.js';
 import { retainComponentChoices } from '../../js/generator/component-policy.mjs';
-import { courseBriefSchemaFor, topicContentSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
+import { ResearchBundleSchema, courseBriefSchemaFor, topicContentSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
 import { signedPdfUrl } from './supabase-server.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { clearSavedCourseIdForJob, reconcileGeneratedCourseRun, rollbackGeneratedCourseSave, saveGeneratedCourse } from './course-save.mjs';
@@ -37,8 +39,10 @@ import { pauseForContinuation } from './gen-continuation.mjs';
 import { runIntegratedCourseImages, usesIntegratedVisuals } from './integrated-course-images.mjs';
 import { runVisualDesigner, usesVisualDesigner, assertDesignComplete } from './visual-designer.mjs';
 
-import { generationProvider, generationModels, requireGenerationCapabilities } from './generation-provider.mjs';
+import { generationProvider, generationModels, generationOperationScope, requireGenerationCapabilities } from './generation-provider.mjs';
 import { createOpenRouterClient } from './openrouter-client.mjs';
+import { createOpenRouterNativeClient } from './openrouter-native.mjs';
+import { createOpenRouterImageGenerator } from './openrouter-image.mjs';
 import { createAiSpendLedger } from './ai-spend-ledger.mjs';
 
 const STAGE2_CONCURRENCY = 3;
@@ -107,7 +111,7 @@ function hasObjectKeys(value) {
 function isProgressCheckpoint(fields = {}) {
   if (Object.prototype.hasOwnProperty.call(fields, 'brief') && fields.brief) return true;
   if (Array.isArray(fields.extracted_urls) && fields.extracted_urls.length > 0) return true;
-  if (hasObjectKeys(fields.research)) return true;
+  if (hasObjectKeys(fields.research) || hasObjectKeys(fields.research_evidence)) return true;
   if (hasObjectKeys(fields.topics_by_key)) return true;
   if (fields.saved_course_id) return true;
   if (hasObjectKeys(fields.image_progress)) return true;
@@ -151,10 +155,12 @@ function isRunnerWritableStatus(status) {
  *  - complete: run Stage 3/4 and save the course. */
 export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmail = null, apiKey, userBrief, checkpoint, pdfRefs, mode = 'complete', requestBudget = createGenerationRequestBudget(), retryFailedImages = false, retryFailedDesign = false }) {
   if (!runId) throw new Error('runGeneration requires runId so stale cloud runners cannot write checkpoints.');
-  supabase = bindGenerationClient(supabase, requestBudget);
+  const trace = createGenerationTrace({ client: supabase, jobId, ownerId, runId });
+  supabase = bindGenerationClient(supabase, requestBudget, { trace });
+  trace.emit('run.started', { stage: checkpoint?.stage || 'intake', remainingMs: requestBudget.remainingMs() });
 
   let client = null;
-  let provider = { gateway: 'anthropic' };
+  let provider = { gateway: 'anthropic' }, operationScope = '';
   let spendLedger = null;
   let tone = null;
   let pdfsForApi = [];
@@ -165,13 +171,14 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
 
   function onUsage(task, usage, meta = {}, aiModels = {}) {
     const config = aiModels[task] || {};
-    recordTokenUsage(tokenUsage, {
+    const recorded = recordTokenUsage(tokenUsage, {
       task,
       provider: config.provider || 'anthropic',
       model: config.model || null,
       usage,
-      meta
+      meta: { ...meta, callId: randomUUID() }
     });
+    if (recorded) trace.emit('provider.response', { usage: tokenUsage.calls.at(-1), dispatched: 'yes' });
   }
 
   async function currentJobState() {
@@ -233,6 +240,7 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         await assertRunnerWritable();
         throw checkpointWriteError('Could not persist generation checkpoint even though the job is still active.');
       }
+      await trace.flush();
     });
     return patchQueue;
   }
@@ -357,18 +365,22 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
       if (saved.payload._visualDesign?.status === 'complete') {
         await patch({ design_progress: assertDesignComplete(saved.payload) });
       } else {
-        const models = getAiModelRegistry();
-        assertCloudGenerationModelSupport(models);
-        ensureTextClient();
+        const models = generationModels(provider);
+        if (provider.gateway !== 'openrouter') { assertCloudGenerationModelSupport(models); ensureTextClient(); }
         await runVisualDesigner({ supabase, ownerId, jobId, runId, courseId, client,
-          model: models.lesson.model, requestBudget, assertRunnerWritable, patch,
-          withHeartbeat: withLeaseHeartbeat, retryFailedDesign });
+          model: models.lesson.model, models,
+          // Designer owns protected-content validation and its one bounded correction.
+          clientFor: provider.gateway === 'openrouter' ? task => textClientFor(task, value => value) : null, requestBudget, assertRunnerWritable, patch,
+          withHeartbeat: withLeaseHeartbeat, retryFailedDesign, trace });
       }
       await patch({ stage: 'images', message: 'Visual Designer is creating illustrations from the refined lessons…' });
     }
     await runIntegratedCourseImages({ supabase, ownerId, jobId, runId, courseId, requestBudget,
+      ...(provider.gateway === 'openrouter' ? { gatewayPolicy: provider.policy,
+        generate: createOpenRouterImageGenerator({ apiKey: provider.apiKey, policy: provider.policy,
+          ledger: spendLedger, beforeDispatch: assertRunnerWritable }) } : {}),
       assertRunnerWritable, checkpoint: checkpoint?.image_progress || {}, patch,
-      withHeartbeat: withLeaseHeartbeat, retryFailedImages });
+      withHeartbeat: withLeaseHeartbeat, retryFailedImages, trace });
     await patch({ stage: 'assemble', message: agentMessage('assemble') });
   }
 
@@ -380,10 +392,11 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
     return client;
   }
 
-  function textClientFor(task, validateResult) {
+  function textClientFor(task, validateResult, options = {}) {
     if (provider.gateway !== 'openrouter') return ensureTextClient();
-    return createOpenRouterClient({ apiKey: provider.apiKey, policy: provider.policy, task,
-      ledger: spendLedger, validateResult, requestBudget, beforeDispatch: assertRunnerWritable });
+    const factory = provider.policy.routes[task]?.adapter === 'native-messages-schema' ? createOpenRouterNativeClient : createOpenRouterClient;
+    return factory({ apiKey: provider.apiKey, policy: provider.policy, task,
+      ledger: spendLedger, validateResult, operationScope, requestBudget, beforeDispatch: assertRunnerWritable, ...options });
   }
 
   try {
@@ -394,6 +407,7 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
       .eq('id', jobId).eq('owner_id', ownerId).maybeSingle();
     if (providerError || !providerJob) throw checkpointWriteError('Could not confirm the saved course provider.');
     provider = generationProvider(providerJob, ownerId);
+    if (provider.gateway === 'openrouter') operationScope = generationOperationScope(providerJob);
     requireGenerationCapabilities(provider, { mode, userBrief, checkpoint, pdfRefs });
     const aiModels = generationModels(provider);
     if (provider.gateway === 'openrouter') spendLedger = createAiSpendLedger({ supabase, ownerId, jobId, runId, policyHash: provider.policy.fingerprint });
@@ -488,10 +502,11 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
 
     // Stage 2 — research per module.
     const researchByModule = checkpoint?.research || {};
+    const researchEvidence = providerJob.research_evidence || {};
     let failures = checkpoint?.failures || [];
     const researchResults = new Array(brief.modules.length);
     let researchCursor = 0;
-    const researchWorkers = Array.from({ length: Math.min(STAGE2_CONCURRENCY, brief.modules.length) }, async () => {
+    const researchWorkers = Array.from({ length: Math.min(provider.gateway === 'openrouter' ? 1 : STAGE2_CONCURRENCY, brief.modules.length) }, async () => {
       while (true) {
         const i = researchCursor++;
         if (i >= brief.modules.length) return;
@@ -502,8 +517,19 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
           continue;
         }
         try {
-          const bundle = await withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(client, brief, mod, {
+          const researchClient = textClientFor('research', value => {
+            const bundle = ResearchBundleSchema.parse(value);
+            if (bundle.module_id !== mod.id) throw new Error('Research belongs to another module.');
+            return bundle;
+          }, { savedEvidence: researchEvidence[mod.id] || null, saveEvidence: async evidence => {
+            onUsage('research', evidence.usage, { moduleId: mod.id, phase: 'evidence' }, aiModels);
+            researchEvidence[mod.id] = evidence;
+            await patch({ research_evidence: researchEvidence, stage: 'research',
+              message: `${agentNameForStage('research')} saved evidence for “${mod.title}”…` });
+          } });
+          const bundle = await withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(researchClient, brief, mod, {
             model: aiModels.research.model,
+            today: provider.gateway === 'openrouter' ? provider.policy.reviewedAt.slice(0, 10) : undefined,
             searchTool: anthropicWebSearchTool(),
             onUsage: (usage, meta) => onUsage('research', usage, meta, aiModels),
             pdfs: await ensurePdfsForApi(`PDF source resolution for research ${mod.id}`),
@@ -680,7 +706,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
     await finishCourseJob({ status, message: status === 'completed' && usesIntegratedVisuals(userBrief)
       ? 'Your course draft is ready to review.' : message, courseRowId, done });
   } catch (err) {
-    console.error(`[gen ${jobId}] FAILED:`, err);
+    trace.emit('operation.failed', { error: err?.diagnostic || err, remainingMs: requestBudget.remainingMs() });
+    console.error(`[gen ${jobId}] FAILED:`, safeDiagnostic(err?.diagnostic || err));
     // A remote save/finalization can commit before its acknowledgement is lost.
     // Do not delete a confirmed course to compensate for an unknown outcome.
     if (courseSaveAttempt && err?.code !== GENERATION_IO_UNCERTAIN) {
@@ -737,6 +764,10 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
       failurePatch(err)
     ).eq('id', jobId).eq('owner_id', ownerId).eq('run_id', runId).in('status', RUNNER_WRITABLE_STATUSES);
     throw err;
+  } finally {
+    // Invocation completion is not course completion. The checkpoint is authority.
+    trace.emit('run.stopped', { remainingMs: requestBudget.remainingMs() });
+    await trace.flush();
   }
 }
 

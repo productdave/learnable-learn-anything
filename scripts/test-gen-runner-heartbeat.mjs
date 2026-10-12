@@ -25,7 +25,7 @@ const wrappers = [
   'pdfResolutionPromise = withLeaseHeartbeat(label, async () => {',
   "withLeaseHeartbeat('source URL extraction', () => serverFetchUrls(pendingSourceUrls, {",
   "withLeaseHeartbeat('curriculum design', async () => runIntake(curriculumClient, enrichedBrief, {",
-  'withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(client, brief, mod, {',
+  'withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(researchClient, brief, mod, {',
   'withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(lessonClient, brief, mod, topic, bundle, tone, {'
 ];
 for (const snippet of wrappers) {

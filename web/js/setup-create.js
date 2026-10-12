@@ -2,7 +2,7 @@ import { escapeHome as esc } from './home-model.js?v=7';
 import { setupURL, sourceCounts } from './setup-model.js?v=7';
 import { renderSetupSourceReview } from './setup-source-review.js?v=5';
 import { componentSummaryHTML, mountCourseImageInfo } from './setup-components.js?v=10';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 import { briefTitle, briefPreviewHTML } from './brief-presentation.js?v=1';
 
 export const creationURL = id => `?draft=${encodeURIComponent(id)}&step=create`;
@@ -27,6 +27,11 @@ export function createSetupCreation({ sessions, getUser, accountClient, client, 
     const result = await client.check(current.session.owner, current.session.id, current.revision);
     if (!active(current)) return;
     if (result.existing) { await openJob(result.jobId, current.session.owner); return; }
+    if (result.managed) {
+      current.check = result;
+      if (current.reviewedDigest !== result.sources?.digest) current.reviewedDigest = '';
+      return;
+    }
     let openAI;
     try { openAI = await imageClient.connection(current.session.owner); }
     catch (error) { openAI = { connected: false, error: error.message || 'Couldn’t check OpenAI. Try again before creating your course.' }; }
@@ -80,14 +85,14 @@ export function createSetupCreation({ sessions, getUser, accountClient, client, 
       <section class="setup-card" aria-label="Creation checks"><h2>${esc(briefTitle(session.draft.brief.topic))}</h2>
         ${briefTitle(session.draft.brief.topic) !== session.draft.brief.topic ? briefPreviewHTML(session.draft.brief.topic, { label: 'course description' }) : ''}
         <p>${counts.notes} ${counts.notes === 1 ? 'note' : 'notes'} · ${counts.links} ${counts.links === 1 ? 'link' : 'links'} · ${counts.files} ${counts.files === 1 ? 'file' : 'files'}</p>
-        ${componentSummaryHTML(session.draft.components)}
+        ${componentSummaryHTML(session.draft.components, { managed: readiness?.managed })}
         <p class="source-help">${current.revision ? 'Request saved' : 'Saving this request'} to <strong>${esc(getUser()?.email || 'your account')}</strong>. No AI work starts until you confirm below.</p>
         <p role="status" aria-live="polite">${esc(busy)}</p>
         <p class="setup-field-error" data-creation-error role="alert" tabindex="-1">${esc(error)}</p>
         ${readiness ? `${!readiness.enabled ? '<div class="home-notice home-notice--warning"><strong>Course creation is paused on this server.</strong><p>Your setup is saved. Creation is temporarily unavailable; this is not a problem with your API key. No generation has started and no AI charge has been made. Select Check again when creation is available to continue.</p></div>' : ''}
           ${readiness.issues.filter(issue => !issue.fileId).length ? `<section class="setup-create-issues"><h3>Before creation can start</h3><p>Your setup stays saved while these items are resolved.</p><ul>${readiness.issues.filter(issue => !issue.fileId).map(issue => `<li>${esc(issue.text)} ${issue.step !== 'create' ? `<a class="home-draft-link" href="${esc(setupURL(session.id, issue.step))}">Edit ${esc(issue.step)}</a>` : ''}</li>`).join('')}</ul></section>` : ''}
           ${renderSetupSourceReview(readiness.sources, { reviewed, busy: !!busy, contextURL: setupURL(session.id, 'context') })}
-          <section class="setup-create-provider"><h3>${readiness.connected ? 'Claude is connected' : 'Connect Claude for course writing'}</h3>
+          ${readiness.managed ? `<section class="setup-create-provider"><h3>${readiness.ready ? 'Ready to create' : 'Course creation needs attention'}</h3><p>${esc(readiness.message || 'Learnable manages the AI connection. No personal API keys are needed.')}</p></section>` : `          <section class="setup-create-provider"><h3>${readiness.connected ? 'Claude is connected' : 'Connect Claude for course writing'}</h3>
           <p>${readiness.connected ? `Using ${esc(readiness.model)}. Your key stays on the server, encrypted at rest.` : 'Learnable uses your own Claude API account. Connect it once to create your course. Checking the connection does not generate content.'}</p>
           ${readiness.connected ? `<button type="button" class="home-draft-link" data-create-action="disconnect" ${disabled}>Disconnect Claude</button>` : `<form data-connection-form><div class="setup-field"><label for="setup-provider-key">Claude API key</label><input id="setup-provider-key" name="api-key" type="password" autocomplete="off" spellcheck="false" required placeholder="sk-ant-…" aria-describedby="setup-key-help" ${disabled}><p id="setup-key-help" class="source-help">Stored encrypted on the server, never in your course or browser storage. You can disconnect it here.</p></div><button class="home-button" type="submit" ${disabled}>Connect Claude</button></form><a class="home-draft-link" href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener noreferrer">Get a Claude API key ↗</a>`}
           </section>
@@ -95,7 +100,8 @@ export function createSetupCreation({ sessions, getUser, accountClient, client, 
           ${readiness.openAI?.error ? `<p class="setup-field-error" role="status">${esc(readiness.openAI.error)}</p>` : ''}
           ${readiness.openAI?.generationEnabled === false ? '<p class="setup-field-error">Image generation is unavailable on this server. Your setup is saved; check again when creation is enabled.</p>' : ''}
           ${readiness.openAI?.connected ? `<p class="source-help">Your key is encrypted on the server. Checking this connection does not generate an image.</p><button type="button" class="home-draft-link" data-create-action="disconnect-images" ${disabled}>Disconnect OpenAI</button>` : `<form data-image-connection-form><div class="setup-field"><label for="setup-image-provider-key">OpenAI API key</label><input id="setup-image-provider-key" type="password" autocomplete="off" spellcheck="false" required placeholder="sk-…" aria-describedby="setup-image-key-help" ${disabled}><p id="setup-image-key-help" class="source-help">Stored encrypted on the server, never in course content or browser storage. Connecting does not create images.</p></div><button class="home-button" type="submit" ${disabled}>Connect OpenAI</button></form>`}</section>
-          ${readiness.ready ? '<aside class="setup-create-consent"><h3>What happens when you create?</h3><p>Your request and source text go to Claude, and supplied links are fetched. Lesson-specific illustration descriptions go to OpenAI. Creating your course includes these text and image charges to your connected provider accounts.</p><p>We’ll pause for your course plan and research reviews, then create the complete draft, including useful images. No separate image approvals are needed. The draft stays private for you to review.</p></aside>' : ''}` : ''}
+`}
+          ${readiness.ready && readiness.managed ? '<aside class="setup-create-consent"><h3>What happens when you create?</h3><p>Learnable sends your request, sources and illustration descriptions through OpenRouter to the models creating your course. This staging test uses the testing allowance.</p><p>We’ll pause for your course plan and research reviews, then create the draft with useful images. It stays private for you to review.</p></aside>' : readiness.ready ? '<aside class="setup-create-consent"><h3>What happens when you create?</h3><p>Your request and source text go to Claude, and supplied links are fetched. Lesson-specific illustration descriptions go to OpenAI. Creating your course includes these text and image charges to your connected provider accounts.</p><p>We’ll pause for your course plan and research reviews, then create the complete draft, including useful images. No separate image approvals are needed. The draft stays private for you to review.</p></aside>' : ''}` : ''}
         ${error && readiness?.ready ? `<button class="home-draft-link" type="button" data-create-action="retry" ${disabled}>Recheck sources and connection</button>` : ''}
         <footer class="setup-footer"><a class="home-button home-button--secondary" href="${esc(setupURL(session.id, 'review'))}">Keep editing</a><button class="home-button${readiness?.ready ? '' : ' home-button--secondary'}" type="button" data-create-action="${readiness?.ready ? 'start' : 'retry'}" ${busy || (readiness?.ready && needsReview) ? 'disabled' : ''} ${readiness?.ready && needsReview ? 'aria-describedby="source-review-next"' : ''}>${busy ? 'Please wait…' : readiness?.ready ? 'Create course →' : 'Check again'}</button></footer>
       </section></div>`;

@@ -50,10 +50,10 @@ export async function inspectSetupSources(row, owner, client) {
   const digest = issues.length ? null : createHash('sha256').update(JSON.stringify(['source-reader-v1', row.content_hash, source_text, files.map(f => [f.id, f.kind, f.pages, f.warnings])])).digest('hex');
   return { source_text, issues, review: { files, characters, limit: SETUP_SOURCE_TEXT_LIMIT, complete: !issues.length, requiresReview: files.length > 0, digest } };
 }
-export async function setupToGenerationBrief(row, owner, client, inspection) {
+export async function setupToGenerationBrief(row, owner, client, inspection, options) {
   const payload = normalizeAccountPayload(row.payload);
   const sources = inspection || await inspectSetupSources(row, owner, client);
-  const issues = [...setupGenerationIssues(payload), ...sources.issues];
+  const issues = [...setupGenerationIssues(payload, options), ...sources.issues];
   if (issues.length) throw Object.assign(new Error(issues[0].text), { issues });
   const source_text = sources.source_text;
   const b = payload.brief;

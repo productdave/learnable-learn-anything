@@ -3,7 +3,7 @@
 import { readApiKey } from './supabase-server.mjs';
 import { validateOpenRouterPolicy, OpenRouterError } from './openrouter-policy.mjs';
 import { missingResearchModules } from './gen-research-checkpoint.mjs';
-import { usesIntegratedVisuals } from './integrated-course-images.mjs';
+import { usesIntegratedVisuals } from './generation-materials-policy.mjs';
 import { getAiModelRegistry } from './ai-models.mjs';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -34,11 +34,11 @@ export function generationProvider(job, ownerId, { env = process.env, now = Date
 // quietly use an owner's OpenAI key for images or remove PDFs/search to succeed.
 export function requireGenerationCapabilities(provider, { mode = 'complete', userBrief = {}, checkpoint = null, pdfRefs = [] } = {}) {
   if (provider.gateway !== 'openrouter') return;
-  if (pdfRefs.length || userBrief.pdfRefs?.length)
+  if (!provider.policy.nativeResearchAccepted && (pdfRefs.length || userBrief.pdfRefs?.length))
     stop('unsupported', 'OpenRouter PDF support is not ready yet. Your uploaded sources are retained.');
-  if (mode !== 'curriculum' && (!checkpoint?.brief || missingResearchModules(checkpoint.brief, checkpoint.research || {}).length))
+  if (!provider.policy.nativeResearchAccepted && mode !== 'curriculum' && (!checkpoint?.brief || missingResearchModules(checkpoint.brief, checkpoint.research || {}).length))
     stop('unsupported', 'OpenRouter research and citations are not ready yet. Your review checkpoint is retained.');
-  if (mode === 'complete' && usesIntegratedVisuals(userBrief))
+  if (!provider.policy.imagesAccepted && mode === 'complete' && usesIntegratedVisuals(userBrief))
     stop('unsupported', 'OpenRouter illustration support is not ready yet. Your course is retained; no separate OpenAI key is requested.');
 }
 
@@ -63,4 +63,13 @@ export function requireNewGenerationProvider({ env = process.env } = {}) {
   if (provider === 'anthropic') return;
   if (provider !== 'openrouter') stop('configuration', 'Course generation has an unsupported provider configuration.');
   stop('unsupported', 'OpenRouter course creation is being connected. Research, illustrations and pilot authorization must pass QA before new courses can start.');
+}
+
+// Only an explicit persisted Restart or review revision authorizes repeating a request.
+// A new lease, Resume or automatic continuation is never a new billing cycle.
+export function generationOperationScope(job) {
+  const restart = Array.isArray(job?.review_history) ? [...job.review_history].reverse().find(item => ['restart_generation', 'revise_curriculum', 'rerun_research'].includes(item?.action)) : null;
+  if (!restart) return '';
+  if (!uuid.test(restart.run_id || '')) stop('configuration', 'The saved restart authorization is incomplete.');
+  return `restart_${restart.run_id}`;
 }

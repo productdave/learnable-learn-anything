@@ -107,29 +107,36 @@ export function createGenerationRequestBudget({
 // scoped operations with a broad fetch/retry. Supabase's public abortSignal API
 // receives the combined deadline; Promise.race bounds non-cancellable storage
 // reads too. Remote commit outcome can remain unknown after an abort.
-export function bindGenerationClient(client, budget, { phase = 'finish' } = {}) {
+export function bindGenerationClient(client, budget, { phase = 'finish', trace = null } = {}) {
   const options = { phase, timeoutMs: 10_000, code: GENERATION_IO_UNCERTAIN };
-  function wrap(query, signals = []) {
+  function observe(work, operationId) {
+    const started = Date.now();
+    const report = error => trace?.emit('operation.failed', { operationId, error,
+      elapsedMs: Date.now() - started, remainingMs: budget.remainingMs(), saved: 'unknown' });
+    return work().then(result => { if (result?.error) report(result.error); return result; }, error => { report(error); throw error; });
+  }
+  function wrap(query, signals = [], label = 'db.query') {
     return new Proxy(query, { get(target, property) {
-      if (property === 'abortSignal') return signal => wrap(target, [...signals, signal]);
+      if (property === 'abortSignal') return signal => wrap(target, [...signals, signal], label);
       if (property === 'then' && typeof target.then === 'function') {
-        return (resolve, reject) => budget.runOperation(signal => {
+        return (resolve, reject) => observe(() => budget.runOperation(signal => {
           const combined = signals.length ? AbortSignal.any([signal, ...signals]) : signal;
           combined.throwIfAborted();
           return typeof target.abortSignal === 'function' ? target.abortSignal(combined) : target;
-        }, { ...options, ...(signals.length ? { signal: AbortSignal.any(signals) } : {}) }).then(resolve, reject);
+        }, { ...options, ...(signals.length ? { signal: AbortSignal.any(signals) } : {}) }), label).then(resolve, reject);
       }
       const value = Reflect.get(target, property, target);
       if (typeof value !== 'function') return value;
       return (...args) => {
         const result = Reflect.apply(value, target, args);
-        return result && (typeof result.then === 'function' || typeof result.select === 'function') ? wrap(result, signals) : result;
+        const nextLabel = label.startsWith('db.') && label.split('.').length === 2 && ['select','insert','update','delete','upsert'].includes(property) ? `${label}.${property}` : label;
+        return result && (typeof result.then === 'function' || typeof result.select === 'function') ? wrap(result, signals, nextLabel) : result;
       };
     } });
   }
   const scoped = Object.create(client);
-  scoped.from = (...args) => wrap(client.from(...args));
-  scoped.rpc = (...args) => wrap(client.rpc(...args));
+  scoped.from = (...args) => wrap(client.from(...args), [], `db.${args[0]}`);
+  scoped.rpc = (...args) => wrap(client.rpc(...args), [], `rpc.${args[0]}`);
   if (client.storage) {
     scoped.storage = Object.create(client.storage);
     scoped.storage.from = (...args) => {
@@ -137,7 +144,7 @@ export function bindGenerationClient(client, budget, { phase = 'finish' } = {}) 
       return new Proxy(bucket, { get(target, property) {
         const value = Reflect.get(target, property, target);
         return typeof value === 'function'
-          ? (...parameters) => budget.runOperation(() => Reflect.apply(value, target, parameters), options)
+          ? (...parameters) => observe(() => budget.runOperation(() => Reflect.apply(value, target, parameters), options), `storage.${String(property)}`)
           : value;
       } });
     };

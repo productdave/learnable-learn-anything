@@ -22,7 +22,7 @@ export async function acceptCourseImage(args) {
   try {
     const target = { ...row.payload.target, kind:'lesson' }, selected = refinementTarget(course.payload,target);
     const lesson = structuredClone(selected.lesson);
-    const section = { type:'image', asset_id:row.id, image_slot:'instruction', generated_by:'openai', alt, ...(caption ? { caption } : {}) };
+    const section = { type:'image', asset_id:row.id, image_slot:'instruction', generated_by:row.payload.quote?.provider === 'openrouter' ? 'openrouter' : 'openai', alt, ...(caption ? { caption } : {}) };
     const index = lesson.sections.findIndex(item => item.type === 'image' && item.image_slot === 'instruction');
     if (index >= 0) lesson.sections[index] = section;
     else {

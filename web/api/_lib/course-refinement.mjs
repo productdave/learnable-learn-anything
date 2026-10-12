@@ -50,7 +50,7 @@ function withoutTracking(value) {
 
 function validateMedia(section) {
   if (section.type !== 'image') return;
-  if (section.asset_id && section.generated_by === 'openai' && section.image_slot === 'instruction' && section.alt?.trim()) return;
+  if (section.asset_id && ['openai', 'openrouter'].includes(section.generated_by) && section.image_slot === 'instruction' && section.alt?.trim()) return;
   const src = section.src;
   if (typeof src !== 'string' || !src.trim()) fail('media', 'Choose a saved image file or link; unresolved image references cannot replace saved content.');
   const embedded = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(src);

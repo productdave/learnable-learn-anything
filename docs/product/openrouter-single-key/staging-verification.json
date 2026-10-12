@@ -1,0 +1,180 @@
+{
+  "at": "2026-10-12T04:29:06.714734+00:00",
+  "branch": "codex/openrouter-single-key",
+  "scope": "OR-02/03/05 and managed course-creation UI; staging candidate only",
+  "core": {
+    "passed": 422,
+    "failed": 0,
+    "command": "node --test scripts/test-openrouter-client.mjs scripts/test-openrouter-stages.mjs scripts/test-openrouter-generation.mjs scripts/test-openrouter-native.mjs scripts/test-openrouter-image.mjs scripts/test-openrouter-admission.mjs scripts/test-openrouter-ui.mjs scripts/test-openrouter-schema.mjs scripts/test-visual-designer.mjs scripts/test-visual-designer-contract.mjs scripts/test-integrated-course-images.mjs scripts/test-image-requests.mjs scripts/test-publication-images.mjs scripts/test-integrated-generation-runner.mjs scripts/test-generation-request-deadline.mjs scripts/test-generation-entry-deadline.mjs scripts/test-generation-continuation.mjs"
+  },
+  "localPostgreSQL": {
+    "ledgerChecks": 41,
+    "admissionChecks": 23,
+    "hostedChanges": false
+  },
+  "regressions": [
+    {
+      "test": "test-setup-generation",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-workspace-account",
+      "exit": 0,
+      "passed": true,
+      "retestedAt": "2026-10-12T04:18:23.819Z"
+    },
+    {
+      "test": "test-creator-images",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-image-progress",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-creation-images",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-gen-start-idempotency",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-gen-restart",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-gen-review-transitions",
+      "exit": 0,
+      "passed": true,
+      "retestedAt": "2026-10-12T04:18:23.736Z"
+    },
+    {
+      "test": "test-gen-runner-lazy-pdf",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-gen-runner-pdf-failure",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-gen-runner-heartbeat",
+      "exit": 0,
+      "passed": true,
+      "retestedAt": "2026-10-12T04:18:23.778Z"
+    },
+    {
+      "test": "test-api-key-saved-unblocks-cloud-jobs",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-cloud-review-api-key-recovery",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-cloud-review-feedback-durable-on-key-missing",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-cloud-auto-recovery-retry",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-grouped-functions",
+      "exit": 0,
+      "passed": true
+    },
+    {
+      "test": "test-module-syntax",
+      "exit": 0,
+      "passed": true,
+      "retestedAt": "2026-10-12T04:18:26.047Z"
+    },
+    {
+      "test": "test-visual-designer-spend-guard",
+      "exit": 0,
+      "passed": true
+    }
+  ],
+  "browser": {
+    "environment": "local actual components, synthetic readiness, no API access",
+    "desktop": [
+      1280,
+      960
+    ],
+    "mobile": [
+      390,
+      844
+    ],
+    "checks": [
+      "Account has no personal key inputs",
+      "Admin entry retained",
+      "Create retains course materials",
+      "Managed image help has no OpenAI/Claude billing copy",
+      "Escape closes image help",
+      "No horizontal overflow",
+      "Paused creation cannot start",
+      "No generation dispatched",
+      "No console errors"
+    ],
+    "screenshots": [
+      "output/playwright/openrouter/image-help-mobile.png",
+      "output/playwright/openrouter/account-desktop.png",
+      "output/playwright/openrouter/create-desktop.png",
+      "output/playwright/openrouter/create-mobile.png",
+      "output/playwright/openrouter/create-paused-mobile.png",
+      "output/playwright/openrouter/account-mobile.png"
+    ]
+  },
+  "package": {
+    "at": "2026-10-12T04:30:47.049Z",
+    "artifact": "output/staging/2026-10-11-openrouter/release-Vcuz5U",
+    "reportHash": "dc69bd2a3e3b512f65005775c9d16da6656d68dbc310e26a74c9381dc447eeee",
+    "files": 4770,
+    "functions": 8,
+    "legacyPaidDispatchDisabled": true,
+    "hostedChanges": 0,
+    "providerCalls": 0,
+    "passed": true,
+    "imported": 216,
+    "guards": 7,
+    "failures": [],
+    "networkCalls": 0,
+    "paidUsd": 0
+  },
+  "keyConfigured": false,
+  "hostedMigrations": false,
+  "manualStagingDeployment": false,
+  "liveModelCompatibility": "unrun",
+  "liveCourseQuality": "unrun",
+  "paidUsd": {
+    "text": 0,
+    "search": 0,
+    "images": 0,
+    "retries": 0,
+    "total": 0
+  },
+  "cumulativeRecordedQAUsd": 14.592942,
+  "archivedUnpricedTextCharge": true,
+  "logicalRunCapUsd": 5,
+  "evidence": {
+    "output/qa/2026-10-11-openrouter-staging/combined-tests.log": "287fc0471c1d57d9e75d1af7a99e27086636c28235bbd2158e6e595a7be48d78",
+    "output/qa/2026-10-11-openrouter-staging/ledger-database.log": "dfb8053504993fc06bee68729e47b58b1f42c0616737be95ec4816dac4a66b62",
+    "output/qa/2026-10-11-openrouter-staging/admission-database.log": "c49c9ef7e4ca80994c4edea9e5eacc35c98a5a7da0b2a5755e36b606532d6b66",
+    "output/qa/2026-10-11-openrouter-staging/regression-results.json": "3901b956e3ec29af5e0d56f851ebeea91f85df9089730d4f1ff6917c4ec4e158",
+    "output/qa/2026-10-11-openrouter-staging/package-tests.log": "e8771bb0c5ef38e41897028ebd8ee9ea14a88b5c39e9e87c12f215851439d288",
+    "output/qa/2026-10-11-openrouter-staging/image-help-ui-tests.log": "efeffcd811df962ecea4d5462a6cc684874bbb688e938db45910837295db686b"
+  }
+}

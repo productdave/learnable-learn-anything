@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import test, { afterEach } from 'node:test';
 import { randomUUID } from 'node:crypto';
 import { createOpenRouterPolicy } from '../web/api/_lib/openrouter-policy.mjs';
-import { generationProvider, generationModels, requireGenerationCapabilities, readGenerationApiKey, requireNewGenerationProvider } from '../web/api/_lib/generation-provider.mjs';
+import { generationProvider, generationModels, requireGenerationCapabilities, readGenerationApiKey, requireNewGenerationProvider, generationOperationScope } from '../web/api/_lib/generation-provider.mjs';
+import { appendReviewHistory } from '../web/api/_lib/gen-review-history.mjs';
+import { createGenerationRequestBudget } from '../web/api/_lib/gen-request-budget.mjs';
 import { runGeneration } from '../web/api/_lib/gen-runner.mjs';
 import { createReviewHandler } from '../web/api/gen/review.js';
 import { createResumeHandler } from '../web/api/gen/resume.js';
@@ -85,7 +87,7 @@ function setup(f = fixture()) {
       const topic=row.brief.modules.flatMap(m=>m.topics).find(t=>t.id===id);
       assert.ok(topic);output=lessonFixture(row.user_brief.components,topic);
     }
-    return new Response(JSON.stringify({ id: 'gen-synthetic-' + calls.length, model: request.model, provider: request.provider.only[0],
+    return new Response(JSON.stringify({ id: 'gen-synthetic-' + calls.length, model: request.model, provider: request.model.startsWith('anthropic/') ? 'Anthropic' : 'Parasail',
       usage: { prompt_tokens: 100, completion_tokens: 100, cost: .001 },
       choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(output) } }] }));
   };
@@ -251,4 +253,54 @@ test('actual continuation claims the saved OpenRouter job and preserves its allo
     body:{jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id}},res);await Promise.all(h.background);
   assert.equal(res.statusCode,200);assert.equal(res.body.accepted,true);assert.equal(h.runs.length,1);
   assert.equal(h.runs[0].apiKey,env.OPENROUTER_API_KEY);assert.deepEqual(h.row.ai_budget_ids,before);
+});
+
+test('actual v2 runner researches through one gateway and persists inspected evidence at human review',async()=>{
+ const native=createOpenRouterPolicy({version:'openrouter-native-v2',reviewedAt:policy.reviewedAt,validUntil:policy.validUntil,now});
+ const brief=curriculumFixture(),h=setup(fixture({ai_policy:native,stage:'research',brief}));
+ globalThis.fetch=async(url,options)=>{
+  assert.equal(url,'https://openrouter.ai/api/v1/messages');const request=JSON.parse(options.body);h.calls.push(request);
+  const moduleId=request.messages[0].content.find(b=>b.type==='text').text.match(/module_id you submit must be "([^"]+)"/)[1];
+  const input={module_id:moduleId,key_concepts:['Light direction','Compare shadows'],examples:['Original window exercise','Original shadow exercise'],sources:[],images:[]};
+  return Response.json({id:'msg-synthetic',model:request.model,provider:'Anthropic',stop_reason:'end_turn',usage:{input_tokens:100,output_tokens:100,cost:.001,server_tool_use:{web_search_requests:0}},content:[{type:'text',text:request.tools?'Evidence notes for the module.':JSON.stringify(input)}]}, {headers:{'x-generation-id':'gen-research-'+h.calls.length}});
+ };
+ await runGeneration({supabase:h.client,jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id,userBrief:h.row.user_brief,checkpoint:{brief,research:{}},pdfRefs:[],mode:'research'});
+ assert.equal(h.row.status,'review_research');assert.equal(h.calls.length,brief.modules.length*2);assert.equal(h.receipts.length,h.calls.length);assert.equal(h.holds.length,0);
+ for(const mod of brief.modules){assert.equal(h.row.research[mod.id].module_id,mod.id);assert.equal(h.row.research[mod.id]._evidence.gateway,'openrouter');}
+});
+
+test('billing scope follows persisted Restart, never the transient runner lease',()=>{
+ const id=randomUUID(),j={run_id:randomUUID(),review_history:appendReviewHistory([], {action:'restart_generation',runId:id})};
+ j.review_history=appendReviewHistory(j.review_history,{action:'approve_curriculum',runId:randomUUID()});
+ assert.equal(generationOperationScope(j),'restart_'+id);j.run_id=randomUUID();assert.equal(generationOperationScope(j),'restart_'+id);
+ assert.equal(generationOperationScope({run_id:randomUUID()}),'');assert.throws(()=>generationOperationScope({review_history:[{action:'restart_generation'}]}));
+});
+
+test('actual runner saves cited evidence before a time-slice boundary and resumes without repeating search',async()=>{
+ const native=createOpenRouterPolicy({version:'openrouter-native-v2',reviewedAt:policy.reviewedAt,validUntil:policy.validUntil,now});
+ const brief=curriculumFixture(),h=setup(fixture({ai_policy:native,stage:'research',brief}));
+ process.env.LEARNABLE_GENERATION_CONTINUATION='0';let elapsed=0,searches=0;
+ globalThis.fetch=async(url,options)=>{
+  assert.equal(url,'https://openrouter.ai/api/v1/messages');const request=JSON.parse(options.body);h.calls.push(request);
+  const moduleId=request.messages[0].content.find(b=>b.type==='text').text.match(/module_id you submit must be "([^"]+)"/)[1];
+  const output={module_id:moduleId,key_concepts:['Light direction','Compare shadows'],examples:['Original window exercise','Original shadow exercise'],sources:[],images:[]};
+  if(request.tools){searches++;elapsed=150001;}
+  return Response.json({id:'msg-synthetic',model:request.model,provider:'Anthropic',stop_reason:'end_turn',usage:{input_tokens:100,output_tokens:100,cost:.001,server_tool_use:{web_search_requests:request.tools?1:0}},
+    content:[{type:'text',text:request.tools?'Evidence with source limits.':JSON.stringify(output),...(request.tools?{citations:[{type:'web_search_result_location',url:'https://example.test/source',cited_text:'Evidence.'}]}:{})}]},
+    {headers:{'x-generation-id':'gen-resume-'+h.calls.length}});
+ };
+ const args={supabase:h.client,jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id,userBrief:h.row.user_brief,checkpoint:{brief,research:{}},pdfRefs:[],mode:'research'};
+ const log=console.error;console.error=()=>{};
+ try{await runGeneration({...args,requestBudget:createGenerationRequestBudget({now:()=>elapsed})});}finally{console.error=log;}
+ assert.equal(h.row.status,'timed_out');assert.equal(searches,1);assert.equal(h.calls.length,1);
+ assert.equal(h.row.research_evidence[brief.modules[0].id].evidence.citations.length,1);assert.equal(Object.keys(h.row.research||{}).length,0);
+ h.row.status='running';h.row.run_id=randomUUID();
+ await runGeneration({...args,runId:h.row.run_id,checkpoint:{brief,research:h.row.research||{}}});
+ assert.equal(h.row.status,'review_research');assert.equal(searches,brief.modules.length);assert.equal(h.calls.length,brief.modules.length*2);
+ assert.equal(h.holds.length,0);assert.equal(h.row.research[brief.modules[0].id]._evidence.citations.length,1);
+});
+
+for(const action of ['revise_curriculum','rerun_research'])test('explicit '+action+' persists its own regeneration scope',()=>{
+ const id=randomUUID(),review_history=appendReviewHistory([], {action,runId:id});
+ assert.equal(generationOperationScope({review_history}),'restart_'+id);
 });

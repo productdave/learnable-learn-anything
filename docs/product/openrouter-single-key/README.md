@@ -1,104 +1,119 @@
-# OpenRouter first: saved provider routing
+# One OpenRouter connection for course creation
 
-The one-key migration is back ahead of learner credits. This slice connects the
-existing OpenRouter text adapter to the real course runner and recovery routes.
-It is locally tested; a complete illustrated course through one key is **not yet
-ready**. Research, PDFs, Designer routing and image generation still need their
-own integration and live acceptance.
+The private-pilot implementation is ready for a bounded staging trial. It uses
+one server-owned OpenRouter key for the course plan, source research, lessons,
+Designer review and illustrations. Learner credits and payments remain parked.
+**Hosted acceptance is still open:** the key is missing from `learnable-staging`.
+No shared migration, manual staging deployment or live model call was made in
+this phase. Production remains unchanged.
 
-Work is on `codex/openrouter-single-key`, based on `codex/openrouter-generation`.
-Credit work remains on `codex/openrouter-credits` in [draft PR #5](https://github.com/productdave/learnable-learn-anything/pull/5).
-The primary dirty checkout and frozen release artifacts are preserved.
+Work is isolated on `codex/openrouter-single-key`, in
+[draft PR #6](https://github.com/productdave/learnable-learn-anything/pull/6).
+The existing dirty main checkout, parked credit branch and frozen releases are
+preserved. This extends the earlier saved-job routing slice; its historical
+[verification record](verification.json) remains separate.
 
 ## What changed
 
-- An owned job's immutable policy chooses its gateway and model routes. The
-  runner re-reads this binding; a caller's key or current model environment cannot
-  silently move a saved job to another provider.
-- Approved saved OpenRouter jobs resolve `OPENROUTER_API_KEY` on the server. Their
-  outline uses the frontier route and their lessons use the selected open-weight
-  route. Existing schema validation, human review and saved course workflow remain.
-- Review, Resume, restart, sweep and timed continuation use one credential and
-  capability resolver. Errors keep review/checkpoint state and ask for operator
-  attention when appropriate. Saving a legacy Claude key cannot revive or rewrite
-  an OpenRouter job.
-- The runner connects the existing scoped dollar ledger to every supported call.
-  Three approved budget scopes, a current reviewed policy and the active job lease
-  remain required. This adds no credit wallet, grants or automatic top-ups.
-- New starts selected for OpenRouter stop before source extraction or personal
-  key lookup. Existing starts can still reattach. Native research/PDF and image
-  requests fail before paid dispatch, rather than dropping sources or using OpenAI.
-- Legacy jobs retain their direct-provider path, including image-only recovery.
-  The explicit credential-save endpoint now checks job ownership before looking
-  for a key, returning 404 for an inaccessible job.
+| Course work | Candidate route | Role |
+| --- | --- | --- |
+| Plan and source research | Claude Sonnet 5.5 through Anthropic | Frontier reasoning, native PDFs and cited evidence |
+| Lesson drafts | DeepSeek V4.1 Flash through Parasail FP8 | Open-weight cost/performance candidate |
+| Course and lesson design review | Claude Sonnet 5.5 through Anthropic | Preserve factual meaning, sources and learning checks |
+| New illustrations | FLUX.2 Klein 4B through Black Forest Labs | Open-weight raster generation with stored assets |
 
-## Configuration and limits
+These are candidate selections, not a quality or latency benchmark. Qwen remains
+a comparison option. Requests pin catalog endpoint tags; receipts validate the
+provider's display name. There is no automatic provider fallback.
 
-`LEARNABLE_OPENROUTER_ENABLED=1` permits the resolver to consider **already
-provisioned** OpenRouter jobs. `OPENROUTER_API_KEY` is server-only. Neither variable
-creates a job, allowance, policy or enrollment. Missing key, disabled routing,
-expired/corrupt policy or missing budget binding stops dispatch without fallback.
+PDF bytes stay native. Research first gathers evidence with at most one native
+search, saves its notes/citations under the owned runner lease, then makes a
+separate structured submission. This avoids Claude's incompatible citation/JSON
+combination. A time-slice resume reads the saved evidence without repeating the
+search. The original application validators still enforce constraints after
+Claude's transport schema is simplified.
 
-`LEARNABLE_GENERATION_PROVIDER=openrouter` selects the future public start path;
-it currently reports that integration is incomplete and buys no work. Leave new
-starts on the existing configuration until the remaining gates pass. No hosted
-environment variable was set by this implementation.
+Designer proposals are validated by the existing Designer stage, which retains
+its one bounded correction against the original saved lesson. Known paid invalid
+outputs retain usage; uncertain requests retain their dollar reservation. Image
+bytes, receipts and additive `generated_by: openrouter` provenance are validated
+before durable attachment. Existing OpenAI assets remain readable.
 
-The policy's current 24-hour price window is deliberately enforced. A long human
-review cannot silently refresh its policy or receive another allowance. Append-only
-operator renewal and safe new-job admission remain OR-02 work. Identical settled
-operation replay remains blocked by the existing ledger; deliberate regeneration
-needs explicit operation/cycle authorization before general pilot use.
+Account and Create use the current layout with one connection status and no
+personal API key forms in managed mode. Shared image help across Experience,
+Review and Create no longer describes separate Claude/OpenAI accounts. Sources,
+materials, confirmations, both human reviews and the Admin entry remain. The
+legacy tutor and post-course AI editing are separate, unmigrated flows; this
+candidate's server package blocks direct paid Claude/OpenAI generation.
 
-## Verification
+## Funding and configuration
 
-32 new offline tests exercise the actual runner and HTTP handlers with synthetic
-provider responses and database I/O. They cover an outline saved at curriculum
-review; three open-weight lessons with quizzes/flashcards saved as one course;
-review/restart/Resume/sweep/continuation; unchanged funding binding; missing or
-expired authorization; no legacy key reads; image/PDF/search gates; public-start
-checks and duplicate reattachment.
+This is operator-funded admission, not a customer credit wallet. Migration
+`db/27-platform-ai-spend.sql` is the earlier dollar ledger renamed from 25 to
+avoid the newer Admin migration. `db/28-openrouter-pilot-admission.sql` adds
+private pilot admission and the research evidence checkpoint. Installation
+creates no enrollment or spending allowance. Service-only RPCs authorize owned
+jobs against pool, owner and job limits; the runner re-reads the immutable binding.
 
-The combined core suite passes **240 tests** (32 new plus 208 existing provider,
-runner, deadline and continuation checks). Fourteen supporting regression scripts
-also pass, including source retention, legacy key recovery, setup generation,
-Hobby function packaging, module syntax and the Designer spending guard. Earlier
-source-string assertions were updated to the new resolver/client names while
-retaining their ordering and heartbeat checks. The owner-isolation expectation
-was updated for the deliberate earlier 404 check; no access check was removed.
+Required server settings for an explicitly activated trial:
 
-Replay the new gateway tests with `npm run test:openrouter`. Exact commands and
-results are in [verification.json](verification.json). Full logs are under
-`output/qa/2026-10-11-openrouter-single-key/` in this checkout.
+- `OPENROUTER_API_KEY`: Sensitive server variable in the **learnable-staging**
+  Vercel project. Never put it in browser config, source control or chat.
+- `LEARNABLE_GENERATION_PROVIDER=openrouter` and `LEARNABLE_OPENROUTER_ENABLED=1`.
+- Existing setup-generation and continuation settings, plus one operator-created
+  reviewed policy and bounded pilot allowance.
 
-These are offline runtime tests, not actual model-quality or hosted tests. This
-phase ran no browser application QA, live model calls, shared/hosted migrations,
-or manual deployments. The existing 41 disposable PostgreSQL ledger checks are
-prior foundation evidence; they were not rerun or counted in this phase.
+The fresh package sets the public `MANAGED_COURSE_GENERATION` display flag. It
+confers no server permission. All actual model work still requires an owned job,
+current policy and atomic dollar reservation. Explicit Restart and review
+revision use the persisted `run_id` to authorize a new operation scope; a new
+lease or Resume does not. Policies expire after at most 24 hours. Long-review
+renewal remains an operator gate; there is no automatic renewal or reload.
+
+## What has been checked
+
+[Staging candidate verification](staging-verification.json) records:
+
+- 422 combined offline Node tests, including actual runner and handler paths.
+- 41 real disposable PostgreSQL ledger checks and 23 admission checks.
+- 18 supporting regression scripts passed during this phase.
+- Actual mixed-model runner with three lessons, frontier review/refinement,
+  two synthetic PNG assets, bounded correction and duplicate-free resume.
+- Actual research runner interrupted between evidence and submission, then
+  resumed with its citations and no repeated search.
+- Local Chromium checks of actual Account/Create components at desktop and
+  mobile sizes with synthetic readiness; no key fields or horizontal overflow,
+  paused state cannot start, image help closes with Escape, zero console errors.
+- Fresh eight-function Hobby package: 216 module imports and seven direct-provider
+  guards passed without network access. Accepted Admin assets remain in the parent.
+
+Replay core gateway checks with `npm run test:openrouter`; the larger combined
+command and evidence hashes are in the verification JSON. Local screenshots are
+under `output/playwright/openrouter/`. The packaged candidate is
+`output/staging/2026-10-11-openrouter/release-Vcuz5U`, SHA256 of packaging report
+`dc69bd2a3e3b512f65005775c9d16da6656d68dbc310e26a74c9381dc447eeee`.
+Earlier packages from this phase are superseded and must not be deployed.
 
 ## What's next
 
-1. OR-03: native PDF and bounded search/citation transport, with faithful evidence
-   and structured research submission through the same OpenRouter key.
-2. OR-04: compare frontier and open-weight drafting on identical source fixtures;
-   wire and verify both Designer tasks without losing protected content.
-3. OR-05: integrate a conservatively priced image route, receipts, durable assets
-   and additive provenance; retain readable historical OpenAI assets.
-4. Complete operator admission and long-review renewal, reconcile newer primary
-   runtime changes/migration numbering, then test a small complete course in a
-   fresh staging package. Production activation requires separate authorization.
-5. Return to learner credits, usage reporting and checkout after this works.
+1. Confirm the sensitive key exists in the staging project's Production and
+   Preview environments. Those names refer to environments inside the staging
+   project; do not change the live Learnable project.
+2. Re-read current staging state, review catalog pricing/access and check for
+   newer accepted runtime work. Apply migrations 27/28, then create one explicit
+   pilot enrollment with a whole-run US$5 ceiling. Keep closed allowances closed.
+3. Deploy a fresh verified candidate to staging. Test a small PDF/source-backed
+   course through plan review, research review, lessons, Designer, images and
+   reopen/resume. Check actual receipts, course quality and mobile behavior.
+4. Record remaining funds/holds, staging results and any required repairs before
+   saying David can test the complete flow. Production release is a later action.
 
-OpenRouter's official [Messages API](https://openrouter.ai/docs/api/api-reference/anthropic-messages/create-messages),
-[web search](https://openrouter.ai/docs/guides/features/server-tools/web-search) and
-[image API](https://openrouter.ai/docs/guides/overview/multimodal/image-generation)
-were rechecked as integration references. They do not prove Learnable's native
-citations, selected endpoint access, image price bound or accepted output quality.
-The candidate model prices were not freshly accepted for paid use in this phase.
+Current logical QA run `openrouter-staging-20261011`: text, search, images and
+retries each US$0. Cumulative recorded assistant QA is US$14.592942 plus one
+archived unpriced text charge. The US$5 cap includes every stage and retry.
 
-## QA spending
-
-Logical run: `openrouter-single-key-20261011`. Text US$0; provider search US$0;
-images US$0; retries US$0. Total **US$0**. Cumulative recorded assistant QA remains
-**US$14.355246 plus one archived unpriced text charge**. No allowance was opened,
-subscription upgraded or credit auto-reload enabled.
+Protocol references: [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs),
+[OpenRouter provider routing](https://openrouter.ai/docs/guides/routing/provider-selection),
+[native search](https://openrouter.ai/docs/guides/features/server-tools/web-search),
+[image generation](https://openrouter.ai/docs/guides/overview/multimodal/image-generation),
+and [BFL image pricing](https://bfl.ai/pricing?category=flux.2).

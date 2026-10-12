@@ -35,7 +35,7 @@ export function designLessons(course) {
 export function designContentHash(course) {
   const modules = clone(course.modules || {});
   for (const lessons of Object.values(modules)) for (const lesson of Object.values(lessons || {})) {
-    lesson.sections = (lesson.sections || []).filter(s => !(s.type === 'image' && s.generated_by === 'openai' && s.image_slot === 'instruction'));
+    lesson.sections = (lesson.sections || []).filter(s => !(s.type === 'image' && ['openai', 'openrouter'].includes(s.generated_by) && s.image_slot === 'instruction'));
   }
   return designHash({ config: course.config, curriculum: course.curriculum, modules, brief: course._brief });
 }
@@ -57,8 +57,8 @@ export function assertDesignComplete(course) {
 }
 
 export async function runVisualDesigner({ supabase, ownerId, jobId, runId, courseId, client,
-  model, requestBudget, assertRunnerWritable, patch, withHeartbeat = (_label, work) => work(),
-  retryFailedDesign = false, review = runCourseVisualReview, refine = runLessonVisualDesign } = {}) {
+  model, models = null, clientFor = null, requestBudget, assertRunnerWritable, patch, withHeartbeat = (_label, work) => work(),
+  retryFailedDesign = false, trace = null, review = runCourseVisualReview, refine = runLessonVisualDesign } = {}) {
   async function load() {
     const { data, error } = await supabase.from('user_courses').select('payload,updated_at')
       .eq('owner_id', ownerId).eq('id', courseId).maybeSingle();
@@ -87,10 +87,11 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
       fail('VISUAL_DESIGN_CONFLICT', 'The course or generation changed while refining. Your saved work is retained; no stale edit was applied.');
     }
     row = { payload: data.payload, updated_at: data.updatedAt }; course = row.payload;
+    await trace?.flush();
     return progress;
   }
   if (!course._visualDesign) {
-    if (designLessons(course).some(x => x.lesson.sections.some(s => s.asset_id && s.generated_by === 'openai'))) {
+    if (designLessons(course).some(x => x.lesson.sections.some(s => s.asset_id && ['openai', 'openrouter'].includes(s.generated_by)))) {
       fail('VISUAL_DESIGN_CONFLICT', 'This draft already has generated images. It will not be automatically rewritten.');
     }
     const next = clone(course);
@@ -110,6 +111,8 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
   }
 
   async function action(key, work, apply) {
+    const task = key === 'course' ? 'visual_review' : 'visual_refinement';
+    const route = models?.[task] || { model, provider: 'anthropic' };
     await assertRunnerWritable();
     requestBudget.assertCanStart(); // Safe scheduling check before persisting a paid intent.
     // The database bounds this checkpoint to 128 KiB. Reserve the largest valid
@@ -127,11 +130,13 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
     let result;
     try {
       result = await withHeartbeat(key === 'course' ? 'course visual review' : `refining ${key}`, () => work({
-        model, onDispatch: () => { received = false; }, onUsage: (value, meta = {}) => {
+        model: route.model, onDispatch: () => { received = false; }, onUsage: (value, meta = {}) => {
           received = true;
-          recordTokenUsage(usage, { task: key === 'course' ? 'visual_review' : 'visual_refinement', provider: 'anthropic', model, usage: value,
-            meta: { operationId: course._visualDesign.pending.id, ...(key === 'course' ? {} : { lesson: key }),
+          const recorded = recordTokenUsage(usage, { task, provider: route.provider, model: route.model, usage: value,
+            meta: { callId: randomUUID(), operationId: course._visualDesign.pending.id, ...(key === 'course' ? {} : { lesson: key }),
               stage: 'visual_design', operation: meta.operation || null } });
+          if (recorded) trace?.emit('provider.response', { stage: 'design', operationId: course._visualDesign.pending.id,
+            ...(key === 'course' ? {} : { lessonId: key }), usage: usage.calls.at(-1), dispatched: 'yes' });
         },
       }));
     } catch (error) {
@@ -144,6 +149,8 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
       const diagnostic = { ...visualDesignFailureDiagnostic(error, received),
         operation: key === 'course' ? 'course_review' : 'lesson_refinement',
         operationId: next._visualDesign.pending.id, at: new Date().toISOString() };
+      trace?.emit('operation.failed', { stage: 'design', operationId: diagnostic.operationId, error: diagnostic,
+        ...(key === 'course' ? {} : { lessonId: key }), dispatched: received ? 'yes' : 'unknown' });
       if (!safe) next._visualDesign.lastFailure = diagnostic;
       next._visualDesign.pending = safe ? null : { ...next._visualDesign.pending, status: known ? 'failed' : 'unknown' };
       next._visualDesign.status = safe ? (key === 'course' ? 'reviewing' : 'refining') : 'attention';
@@ -153,7 +160,9 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
       await commit(next);
       if (safe) throw error;
       const actionLabel = key === 'course' ? 'course review' : 'lesson refinement';
-      const message = known
+      const message = diagnostic.code === 'PROVIDER_CREDIT_BALANCE'
+        ? 'Claude API credit has run out. Add credit in your Claude Console, then resume course creation. Your saved lessons and completed refinements are retained.'
+        : known
         ? `The Visual Designer stopped during ${actionLabel}. Your saved lessons are retained. Resume retries this step only. Reference: ${diagnostic.code}.`
         : `The Visual Designer ${actionLabel} result or charge is uncertain. Your saved lessons are retained. No replacement request will run automatically. Reference: ${diagnostic.code}.`;
       throw Object.assign(new Error(message), { code: known ? 'VISUAL_DESIGN_FAILED' : 'VISUAL_DESIGN_UNCERTAIN', diagnostic });
@@ -170,7 +179,7 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
   }
 
   if (!course._visualDesign.review) {
-    await action('course', opts => review(client, course, opts), (next, result) => {
+    await action('course', opts => review(clientFor ? clientFor('visual_review', { course }) : client, course, opts), (next, result) => {
       next._visualDesign.review = result;
       next._visualDesign.status = 'refining';
     });
@@ -179,7 +188,7 @@ export async function runVisualDesigner({ supabase, ownerId, jobId, runId, cours
     if (course._visualDesign.items[selected.key]?.status === 'saved') continue;
     const inputHash = designHash(course.modules[selected.number][selected.target.topicId]);
     await patch({ message: `Visual Designer is refining lessons — ${designProgress(course).completed}/${designProgress(course).total} saved` });
-    await action(selected.key, opts => refine(client, course, selected.target, course._visualDesign.review, opts), (next, result) => {
+    await action(selected.key, opts => refine(clientFor ? clientFor('visual_refinement', { course, target: selected.target }) : client, course, selected.target, course._visualDesign.review, opts), (next, result) => {
       next.modules[selected.number][selected.target.topicId] = result.lesson;
       const title = result.lesson.title;
       if (title) {
