@@ -19,17 +19,19 @@ import { removePdfUploadsForJob } from './delete.js';
 import { creationBrief } from '../../js/generator/component-policy.mjs';
 import { readProtectedKey } from '../_lib/provider-vault.mjs';
 import { imagePolicy, requireImagePolicy } from '../_lib/image-policy.mjs';
+import { readFundedAccess, fundedStartBlock } from '../_lib/funded-access.mjs';
 
 export const config = {
   runtime: 'nodejs',
   maxDuration: 300   // Five-minute Hobby/Fluid Compute request window.
 };
 
-export function createStartHandler({ runGeneration = defaultRunGeneration, background = waitUntil, authenticate = userFromRequest, admin = serviceClient, createBudget = createGenerationRequestBudget, imageConnection = async (client, ownerId) => {
+export function createStartHandler({ runGeneration = defaultRunGeneration, background = waitUntil, authenticate = userFromRequest, admin = serviceClient, createBudget = createGenerationRequestBudget, access = readFundedAccess, imageConnection = async (client, ownerId) => {
   requireImagePolicy(imagePolicy());
   return readProtectedKey(client, ownerId, 'openai');
 } } = {}) {
 return async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   const requestBudget = createBudget({ request: req });
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'POST only' });
@@ -76,6 +78,9 @@ return async function handler(req, res) {
     if (prior) return res.status(200).json({ jobId, existing: true,
       status: await expireExistingJobIfStale(supabase, prior, user.id), pdfRefs: prior.user_brief?.pdfRefs || [] });
   }
+
+  const funding = await access(supabase, user.id);
+  if (funding.mode !== 'legacy') return res.status(409).json(fundedStartBlock(funding));
 
   // Get the user's Anthropic key (stored under user_state by sync.js).
   let apiKey;

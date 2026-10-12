@@ -21,7 +21,7 @@
 //     previously synced (and therefore really got deleted, not "never
 //     uploaded yet").
 
-import { sb, getUser, onUserChange } from './auth.js?v=33';
+import { sb, getUser, onUserChange } from './auth.js?v=34';
 import {
   _readAllCourses,
   _onCoursesChanged,

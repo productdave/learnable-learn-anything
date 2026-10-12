@@ -1,5 +1,5 @@
-import { getUser, onUserChange } from './auth.js?v=33';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { getUser, onUserChange } from './auth.js?v=34';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 
 // Blob URLs live only for the currently mounted lesson and account. The course
 // record always retains the stable asset ID, never an expiring URL or PNG bytes.

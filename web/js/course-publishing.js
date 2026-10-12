@@ -1,4 +1,4 @@
-import { sb,getUser,onUserChange } from './auth.js?v=33';
+import { sb,getUser,onUserChange } from './auth.js?v=34';
 import { escapeHome as esc } from './home-model.js?v=7';
 
 export async function publicationRequest(path,body=null) {

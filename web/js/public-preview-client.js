@@ -1,4 +1,4 @@
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 
 export function createPublicPreviewClient({ getIdentity = getUser, getClient = sb, fetcher = fetch } = {}) {
   return { async load(owner, courseId) {

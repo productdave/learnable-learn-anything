@@ -1,5 +1,5 @@
-import {getUser} from './auth.js?v=33';
-import {publicationRequest} from './course-publishing.js?v=6';
+import {getUser} from './auth.js?v=34';
+import {publicationRequest} from './course-publishing.js?v=7';
 
 // No persistent status cache. Batches avoid one network request per course card.
 export function createPublicationStatusClient({getIdentity=getUser,request=publicationRequest}={}) {

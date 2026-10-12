@@ -69,7 +69,7 @@ async function fixture(kind = 'create', options = {}) {
     course_setups: [row], generation_jobs: ['create', 'start'].includes(kind) ? [] : [job],
     provider_connections: [{ owner_id: 'owner', provider: 'anthropic', encrypted_key: sealProviderKey('sk-ant-synthetic-entry-test', 'owner') }, { owner_id: 'owner', provider: 'openai', encrypted_key: sealProviderKey('sk-synthetic-image-entry-test', 'owner', 'openai') }], user_state: []
   };
-  const db = { auth: { admin: { async getUserById(owner) {
+  const db = { rpc: async () => ({ data: null, error: null }), auth: { admin: { async getUserById(owner) {
     await options.ownerLookup?.(owner, time); time.advance(options.ownerLookupMs || 0);
     return { data: { user: { email: `${owner}@example.test` } } };
   } } }, from(table) {

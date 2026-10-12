@@ -8,7 +8,7 @@ export const functionGroups = [
   { id: 'sources', maxDuration: 300, routes: ['setups/store', 'setups/generate', 'gen/sources'] },
   { id: 'courses', maxDuration: 300, routes: ['courses/get', 'courses/refine', 'courses/proposal', 'courses/community', 'courses/publish', 'courses/publication-status', 'courses/public-preview', 'courses/public-image', 'courses/moderation'] },
   { id: 'images', maxDuration: 300, routes: ['courses/images'] },
-  { id: 'providers', maxDuration: 300, routes: ['providers/connection', 'providers/openai'] },
+  { id: 'providers', maxDuration: 300, routes: ['providers/connection', 'providers/openai', 'account/access'] },
   { id: 'media', maxDuration: 20, routes: ['media/resolve-image'] },
   { id: 'health', maxDuration: 300, routes: ['health/cloud'] },
 ];

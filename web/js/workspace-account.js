@@ -1,5 +1,6 @@
-import { createSetupGenerationClient } from './setup-generation-client.js?v=9';
+import { createSetupGenerationClient } from './setup-generation-client.js?v=10';
 import { escapeHome as esc } from './home-model.js?v=7';
+import { fundedAccessHTML } from './funded-access-view.js?v=1';
 
 let currentDialog = null;
 
@@ -17,13 +18,14 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
   dialog.innerHTML = `<button type="button" class="auth-close" aria-label="Close account">×</button>
     <h2 class="auth-title" id="workspace-account-title" tabindex="-1">Your account</h2>
     <p class="auth-email">${esc(user.email || 'Signed in')}</p>
-    <p class="auth-note" id="workspace-account-intro">Manage the connection used to create your courses. Your courses and requests stay saved to this account.</p>
-    <section class="workspace-account-connection" aria-labelledby="workspace-claude-title">
+    <p class="auth-note" id="workspace-account-intro">Your courses and requests stay saved to this account.</p>
+    <div data-funded-account aria-live="polite"></div>
+    <section class="workspace-account-connection" data-legacy-account hidden aria-labelledby="workspace-claude-title">
       <h3 id="workspace-claude-title">Claude · course creation</h3>
       <p class="auth-note">Use your own Claude API account for plans, research and lessons. Generation is billed by your provider only when you explicitly start it. Connecting checks access; it does not generate content.</p>
       <div data-account-connection></div>
     </section>
-    <details class="workspace-account-other"><summary>Images and tutor connections</summary>
+    <details class="workspace-account-other" data-legacy-other hidden><summary>Images and tutor connections</summary>
       <p class="auth-note">Useful course images are created with OpenAI during course creation. You can connect OpenAI on the Create course screen; there is no separate image workspace to complete.</p>
       <p class="auth-note">The existing tutor uses a separate browser-stored key, managed in the tutor. Connecting or disconnecting here does not change that key.</p>
     </details>
@@ -31,14 +33,14 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
     <p class="auth-msg auth-msg--err" data-account-signout-error role="alert" tabindex="-1" hidden></p>`;
   const host = dialog.querySelector('[data-account-connection]');
   const state = { connection: null, busy: '', error: '', notice: '', replacing: false, confirming: false, recoveryPending: recoverCredentials };
-  let disposed = false, ticket = 0;
+  let disposed = false, ticket = 0, accessTicket = 0, legacyAllowed = false;
   const sameOwner = () => getUser()?.id === owner;
   const active = () => !disposed && sameOwner();
   const notify = (connection, cleared) => window.dispatchEvent(new CustomEvent('learnable-provider-connection-changed', { detail: { owner, connected: connection?.connected, cleared } }));
   const unsubscribe = onUserChange(() => { if (!sameOwner()) close(); });
   function close() {
     if (disposed) return;
-    disposed = true; ticket++; unsubscribe();
+    disposed = true; ticket++; accessTicket++; unsubscribe();
     dialog.querySelectorAll('input').forEach(input => { input.value = ''; });
     dialog.close(); dialog.remove();
     if (currentDialog === dialog) currentDialog = null;
@@ -67,7 +69,7 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
     if (focus) host.querySelector(focus)?.focus({ preventScroll: true });
   }
   async function run(action) {
-    if (!active() || state.busy) return;
+    if (!active() || state.busy || !legacyAllowed) return;
     const mine = ++ticket;
     const initiatedHere = host.contains(document.activeElement);
     if (typeof action === 'object') state.recoveryPending = true;
@@ -103,6 +105,40 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
       }
     }
   }
+  const fundingHost = dialog.querySelector('[data-funded-account]');
+  async function checkAccess() {
+    const mine = ++accessTicket;
+    const restoreFocus = fundingHost.contains(document.activeElement);
+    legacyAllowed = false;
+    dialog.querySelector('[data-legacy-account]').hidden = true;
+    dialog.querySelector('[data-legacy-other]').hidden = true;
+    fundingHost.innerHTML = '<p role="status">Checking your account…</p>';
+    try {
+      const access = await client.access(owner);
+      if (!active() || mine !== accessTicket) return;
+      if (!['legacy','platform'].includes(access?.mode)) throw new Error('Unknown access');
+      legacyAllowed = access.mode === 'legacy' || recoverCredentials;
+      fundingHost.innerHTML = access.mode === 'legacy' ? '' : `${fundedAccessHTML(access)}
+        <div class="workspace-account-actions"><button type="button" class="auth-btn auth-btn--ghost" disabled aria-describedby="credit-tools-help">Add credits</button><button type="button" class="auth-btn auth-btn--ghost" disabled aria-describedby="credit-tools-help">Usage history</button></div>
+        <p class="auth-note" id="credit-tools-help">Credit purchases and usage history are coming later. Nothing is charged from this screen.</p>
+        <button type="button" class="auth-btn auth-btn--ghost" data-access-refresh>Refresh balance</button>`;
+      dialog.querySelector('[data-legacy-account]').hidden = !legacyAllowed;
+      dialog.querySelector('[data-legacy-other]').hidden = !legacyAllowed;
+      if (access.mode === 'platform' && recoverCredentials) {
+        dialog.querySelector('#workspace-claude-title').textContent = 'Connection for an older course';
+        dialog.querySelector('[data-legacy-account] .auth-note').textContent = 'This connection is only for recovering older courses created with your own key. Connecting does not restart a course or enable credit-based creation.';
+      }
+      if (legacyAllowed) void run('check');
+    } catch {
+      if (!active() || mine !== accessTicket) return;
+      fundingHost.innerHTML = `${fundedAccessHTML(null)}<button type="button" class="auth-btn auth-btn--ghost" data-access-refresh>Try again</button>`;
+    } finally {
+      if (active() && mine === accessTicket && restoreFocus) fundingHost.querySelector('[data-access-refresh]')?.focus({ preventScroll: true });
+    }
+  }
+  fundingHost.addEventListener('click', event => {
+    if (event.target.closest('[data-access-refresh]') && active()) void checkAccess();
+  });
   dialog.querySelector('.auth-close').addEventListener('click', close);
   dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
   host.addEventListener('submit', event => {
@@ -132,6 +168,6 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
   });
   currentDialog = dialog; document.body.append(dialog); draw(); dialog.showModal();
   dialog.querySelector('h2').focus();
-  void run('check');
+  void checkAccess();
   return { close };
 }

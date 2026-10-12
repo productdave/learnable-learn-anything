@@ -12,7 +12,7 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 // Explicit allowlist: generation needs its authenticated read-after-save route.
 // Self-publishing has a separate local-only boundary; raw API sources/cron stay off.
-export const previewGenerationRoutes = ['providers/connection', 'providers/openai', 'setups/generate', 'gen/sources', 'gen/review', 'gen/resume', 'gen/cancel', 'gen/watchdog', 'gen/restart', 'gen/delete', 'gen/credentials-ready', 'courses/get', 'courses/refine', 'courses/proposal', 'courses/images', 'courses/public-preview'];
+export const previewGenerationRoutes = ['account/access', 'providers/connection', 'providers/openai', 'setups/generate', 'gen/sources', 'gen/review', 'gen/resume', 'gen/cancel', 'gen/watchdog', 'gen/restart', 'gen/delete', 'gen/credentials-ready', 'courses/get', 'courses/refine', 'courses/proposal', 'courses/images', 'courses/public-preview'];
 
 function jwtRole(key) {
   try { return JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role; }

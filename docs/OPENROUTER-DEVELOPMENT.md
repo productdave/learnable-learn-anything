@@ -1,5 +1,17 @@
 # OpenRouter implementation status
 
+## 11 October — F-01 implementation started
+
+`codex/openrouter-credits` now adds server-owned enrollment, complimentary grants,
+Account balances and key-free Create readiness on top of this foundation.
+349 automated checks plus cache/syntax checks and 19 synthetic browser assertions
+passed. Real local Auth/PostgREST is covered; newer-app integration, full migration
+replay and hosted acceptance remain open. Funded dispatch and purchases remain off.
+See [F-01 implementation and evidence](product/funded-access/README.md). The
+foundation details below remain valid; this update supersedes its old next-action
+status.
+
+
 The first implementation slice adds a server adapter, fixed task routes, a durable
 spending ledger and tests against the actual curriculum and lesson stages. It is
 development infrastructure: the hosted job runner still uses the existing creator
@@ -111,7 +123,7 @@ or serve that directory. Rebuild the plan with
    Release comes later. Optional funded tutor F-10 precedes F-09 only if included.
 
 Implement, QA, fix and record evidence for one feature before the next. Keep local,
-live and hosted acceptance separate. F-01 is next and not yet implemented. Tutor
+live and hosted acceptance separate. F-01 is implemented locally on the new branch; integration/acceptance remain open. Tutor
 and AI edits are deferred for platform accounts by recommendation; both visible
 key prompts and backend access need an explicit scope guard. Paid bundles and
 prices remain later. OR-01–OR-06 are underlying engineering workstreams, not

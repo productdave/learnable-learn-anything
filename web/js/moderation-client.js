@@ -1,4 +1,4 @@
-import {getUser,sb} from './auth.js?v=33';
+import {getUser,sb} from './auth.js?v=34';
 
 export function createModerationClient({getIdentity=getUser,getSession=async()=> (await (await sb()).auth.getSession()).data?.session,fetcher=(...args)=>fetch(...args)}={}) {
   async function request(path,body=null,binary=false) {

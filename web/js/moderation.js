@@ -1,7 +1,7 @@
-import {getUser,onUserChange,openAccount} from './auth.js?v=33';
+import {getUser,onUserChange,openAccount} from './auth.js?v=34';
 import {escapeHome as esc} from './home-model.js?v=7';
-import {createModerationClient} from './moderation-client.js?v=3';
-import {publicPreviewSectionHTML} from './public-course-preview.js?v=7';
+import {createModerationClient} from './moderation-client.js?v=4';
+import {publicPreviewSectionHTML} from './public-course-preview.js?v=8';
 import {mountSharedImages} from './shared-course-images.js?v=3';
 
 export const REPORTS_URL='?moderation=reports';

@@ -8,18 +8,18 @@ import {
   hasApiKey,
   setApiKey
 } from './generator/index.js?v=4';
-import { flushSync, kickSync, pullSyncNow } from './sync.js?v=27';
+import { flushSync, kickSync, pullSyncNow } from './sync.js?v=28';
 import { createJob, updateJob, getJob, onJobsChange, removeJob } from './jobs.js?v=5';
-import { cloudGenAvailable, requireCloudBackendReady, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, restartCloudGenerationWithSources, reattachCloudGeneration, submitCloudReview, deleteCloudGeneration, hasSavedRequestRestartIntent, reviewPendingForAction, generationActionSnapshot } from './cloud-gen-client.js?v=92';
+import { cloudGenAvailable, requireCloudBackendReady, startCloudGeneration, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, restartCloudGenerationWithSources, reattachCloudGeneration, submitCloudReview, deleteCloudGeneration, hasSavedRequestRestartIntent, reviewPendingForAction, generationActionSnapshot } from './cloud-gen-client.js?v=93';
 import { pdfToBase64, extractPdfPageThumbs, dataUrlsBytes } from './pdf-extract.js?v=1';
 import { COURSE_AGENT_SEQUENCE, agentMessage, agentNameForStage } from './generator/agents.mjs?v=2';
-import { getUser, onUserChange, openAccount } from './auth.js?v=33';
-import { courseCanSyncToAccount } from './course-sync.js?v=31';
+import { getUser, onUserChange, openAccount } from './auth.js?v=34';
+import { courseCanSyncToAccount } from './course-sync.js?v=32';
 import { invalidateCourseCache } from './course-loader.js?v=8';
 import { getUserCourse, removeUserCourse } from './user-courses.js?v=4';
-import { mountReviewSourceEditor } from './review-source-editor.js?v=14';
+import { mountReviewSourceEditor } from './review-source-editor.js?v=15';
 import { researchEvidence, researchEvidenceHTML, reviewIdentity, captureReviewState, restoreReviewState } from './research-evidence.js?v=6';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 import { briefTitle } from './brief-presentation.js?v=1';
 
 let modal = null;

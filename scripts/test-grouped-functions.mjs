@@ -8,7 +8,7 @@ async function check(name, test) { await test(); checks++; }
 function response() { return { headers: {}, setHeader(k,v) { this.headers[k] = v; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; }, end(body) { this.body = body; return this; } }; }
 const files = new Map(endpointPaths.map(path => [path, readFileSync(new URL('../web/' + path, import.meta.url))]));
 const config = buildOutputConfig(JSON.parse(readFileSync(new URL('../web/vercel.json', import.meta.url))));
-await check('26 routes, 8 groups', () => { assert.equal(endpointPaths.length, 26); assert.equal(functionGroups.length, 8); validateEndpoints(files); });
+await check('27 routes, 8 groups', () => { assert.equal(endpointPaths.length, 27); assert.equal(functionGroups.length, 8); validateEndpoints(files); });
 await check('unknown route fails closed at build', () => assert.throws(() => validateEndpoints(new Map([...files, ['api/new/action.js', Buffer.from('')]])), /inventory changed/));
 await check('root, nested and mjs endpoints cannot disappear silently', () => {
   for (const path of ['api/new.js','api/new/nested/action.js','api/new/action.mjs']) assert.throws(() => validateEndpoints(new Map([...files,[path,Buffer.from('')]])),/inventory changed/);

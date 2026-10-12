@@ -1,4 +1,4 @@
-import { sb, getUser, onUserChange } from './auth.js?v=33';
+import { sb, getUser, onUserChange } from './auth.js?v=34';
 import { createMaterialDefaultsClient, STANDARD_MATERIALS, canonicalMaterials } from './material-defaults.js?v=4';
 import { COMPONENT_LABELS } from './setup-model.js?v=7';
 

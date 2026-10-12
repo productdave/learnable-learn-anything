@@ -1,8 +1,8 @@
-import { getUser, onUserChange } from './auth.js?v=33';
-import { createPublicPreviewClient } from './public-preview-client.js?v=4';
+import { getUser, onUserChange } from './auth.js?v=34';
+import { createPublicPreviewClient } from './public-preview-client.js?v=5';
 import { normalizePublicAuthor, publicAuthorInitials } from './public-author.js?v=1';
 import { escapeHome as esc } from './home-model.js?v=7';
-import { openCoursePublishing } from './course-publishing.js?v=6';
+import { openCoursePublishing } from './course-publishing.js?v=7';
 import * as appConfig from './config.js?v=1';
 import { sharedImageHTML,mountSharedImages } from './shared-course-images.js?v=3';
 

@@ -2,8 +2,9 @@ import { escapeHome as esc } from './home-model.js?v=7';
 import { setupURL, sourceCounts } from './setup-model.js?v=7';
 import { renderSetupSourceReview } from './setup-source-review.js?v=5';
 import { componentSummaryHTML, mountCourseImageInfo } from './setup-components.js?v=10';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 import { briefTitle, briefPreviewHTML } from './brief-presentation.js?v=1';
+import { fundedAccessHTML } from './funded-access-view.js?v=1';
 
 export const creationURL = id => `?draft=${encodeURIComponent(id)}&step=create`;
 
@@ -27,6 +28,9 @@ export function createSetupCreation({ sessions, getUser, accountClient, client, 
     const result = await client.check(current.session.owner, current.session.id, current.revision);
     if (!active(current)) return;
     if (result.existing) { await openJob(result.jobId, current.session.owner); return; }
+    if (result.funding === 'platform') {
+      current.check = { ...result, ready: false }; current.reviewedDigest = ''; return;
+    }
     let openAI;
     try { openAI = await imageClient.connection(current.session.owner); }
     catch (error) { openAI = { connected: false, error: error.message || 'Couldn’t check OpenAI. Try again before creating your course.' }; }
@@ -84,7 +88,7 @@ export function createSetupCreation({ sessions, getUser, accountClient, client, 
         <p class="source-help">${current.revision ? 'Request saved' : 'Saving this request'} to <strong>${esc(getUser()?.email || 'your account')}</strong>. No AI work starts until you confirm below.</p>
         <p role="status" aria-live="polite">${esc(busy)}</p>
         <p class="setup-field-error" data-creation-error role="alert" tabindex="-1">${esc(error)}</p>
-        ${readiness ? `${!readiness.enabled ? '<div class="home-notice home-notice--warning"><strong>Course creation is paused on this server.</strong><p>Your setup is saved. Creation is temporarily unavailable; this is not a problem with your API key. No generation has started and no AI charge has been made. Select Check again when creation is available to continue.</p></div>' : ''}
+        ${readiness?.funding === 'platform' ? fundedAccessHTML(readiness.access) : readiness ? `${!readiness.enabled ? '<div class="home-notice home-notice--warning"><strong>Course creation is paused on this server.</strong><p>Your setup is saved. Creation is temporarily unavailable; this is not a problem with your API key. No generation has started and no AI charge has been made. Select Check again when creation is available to continue.</p></div>' : ''}
           ${readiness.issues.filter(issue => !issue.fileId).length ? `<section class="setup-create-issues"><h3>Before creation can start</h3><p>Your setup stays saved while these items are resolved.</p><ul>${readiness.issues.filter(issue => !issue.fileId).map(issue => `<li>${esc(issue.text)} ${issue.step !== 'create' ? `<a class="home-draft-link" href="${esc(setupURL(session.id, issue.step))}">Edit ${esc(issue.step)}</a>` : ''}</li>`).join('')}</ul></section>` : ''}
           ${renderSetupSourceReview(readiness.sources, { reviewed, busy: !!busy, contextURL: setupURL(session.id, 'context') })}
           <section class="setup-create-provider"><h3>${readiness.connected ? 'Claude is connected' : 'Connect Claude for course writing'}</h3>

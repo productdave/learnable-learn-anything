@@ -1,7 +1,7 @@
 import { accountSetupURL, setupReturnURL } from './setup-handoff.js?v=6';
 import { setupURL } from './setup-model.js?v=7';
 import { escapeHome as esc } from './home-model.js?v=7';
-import { setupAuthReturnProblem } from './setup-account-client.js?v=12';
+import { setupAuthReturnProblem } from './setup-account-client.js?v=13';
 import { briefTitle } from './brief-presentation.js?v=1';
 
 // This is an interruption of Review, not a fifth step or a backup workflow.

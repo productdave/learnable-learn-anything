@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 
 export const minimumBrowserVersions = {
+  'js/workspace-account.js': 4, 'js/funded-access-view.js': 1, 'js/setup-generation-client.js': 10,
   'js/learning-store.js': 3, 'js/user-courses.js': 4, 'js/flashcards.js': 29, 'js/store.js': 5,
   'js/course-editor.js': 7, 'js/course-refinement-client.js': 7, 'styles/course-editor.css': 3,
   'js/course-images.js': 5, 'js/course-image-client.js': 5, 'js/private-course-images.js': 5, 'js/openai-connection.js': 3, 'styles/course-images.css': 2,

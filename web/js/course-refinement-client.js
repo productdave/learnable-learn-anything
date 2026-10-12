@@ -1,4 +1,4 @@
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 
 export function createCourseRefinementClient({ getIdentity = getUser, getClient = sb, fetcher = fetch } = {}) {
   async function request(owner, method, body, endpoint = 'refine') {
