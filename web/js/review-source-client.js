@@ -1,4 +1,4 @@
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 import { prepareAccountPayload, sourcePath, sha256, SETUP_BUCKET } from './setup-account-model.js?v=7';
 
 export function createReviewSourceClient({ getClient = sb, getIdentity = getUser, fetcher = fetch } = {}) {

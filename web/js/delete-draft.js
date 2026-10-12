@@ -1,5 +1,5 @@
 import { escapeHome as esc } from './home-model.js?v=7';
-import { onUserChange } from './auth.js?v=33';
+import { onUserChange } from './auth.js?v=34';
 import { briefTitle } from './brief-presentation.js?v=1';
 
 // Shared confirmation for Home and setup. Cards disappear only after deletion

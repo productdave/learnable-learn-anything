@@ -1,4 +1,4 @@
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 
 export function createSetupGenerationClient({ getIdentity = getUser, getClient = sb, fetcher = fetch } = {}) {
   async function request(owner, path, method, body) {
@@ -17,10 +17,11 @@ export function createSetupGenerationClient({ getIdentity = getUser, getClient =
     let result;
     try { result = await response.json(); } catch { throw new Error('Course creation is temporarily unavailable. Your setup is unchanged.'); }
     guard();
-    if (!response.ok) throw Object.assign(new Error(result.error || 'Couldn’t complete this request. Please retry.'), { code: result.code, readiness: result.sources ? result : null });
+    if (!response.ok) throw Object.assign(new Error(result.error || 'Couldn’t complete this request. Please retry.'), { code: result.code, readiness: result.sources || result.funding === 'platform' ? result : null });
     return result;
   }
   return {
+    access: owner => request(owner, '/api/account/access', 'GET'),
     connection: owner => request(owner, '/api/providers/connection', 'GET'),
     // Empty body only clears credential-wait messages. A jobId would authorize
     // resuming paid work in this legacy endpoint, so never supply one here.

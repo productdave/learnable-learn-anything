@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "providerCalls": 0,
+  "providerCostUSD": 0,
+  "hostedChanges": "Automatic Vercel Git previews only; no production/shared-staging alias promotion or hosted migration. No hosted app QA.",
+  "results": [
+    {
+      "name": "funded-unit",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/funded-unit.log"
+    },
+    {
+      "name": "funded-database",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/funded-database.log"
+    },
+    {
+      "name": "legacy-account",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/legacy-account.log"
+    },
+    {
+      "name": "legacy-setup",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/legacy-setup.log"
+    },
+    {
+      "name": "generation-deadline",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/generation-deadline.log"
+    },
+    {
+      "name": "grouped-functions",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/grouped-functions.log"
+    },
+    {
+      "name": "browser-cache",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/browser-cache.log"
+    },
+    {
+      "name": "syntax",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/syntax.log"
+    },
+    {
+      "name": "openrouter",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/openrouter.log"
+    },
+    {
+      "name": "provider-spend-database",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/provider-spend-database.log"
+    },
+    {
+      "name": "real-local-auth",
+      "status": "passed",
+      "log": "output/qa/2026-10-11-funded-access/real-local-auth.log"
+    }
+  ],
+  "date": "2026-10-11",
+  "automatedChecks": 349,
+  "browserAssertions": 19,
+  "browserEvidence": "output/qa/2026-10-11-funded-access/browser-verification.json",
+  "releaseStatus": "F-01 in progress; local checks pass; integration and hosted acceptance open",
+  "cumulativeRecordedQACostUSD": 14.355246,
+  "additionalHistoricalCost": "one archived unpriced text charge"
+}

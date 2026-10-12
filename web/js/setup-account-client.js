@@ -1,4 +1,4 @@
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 import { SETUP_BUCKET, accountIssue, prepareAccountPayload, normalizeAccountPayload, sha256, sourcePath } from './setup-account-model.js?v=7';
 
 // Supabase owns token verification. Keep only a generic error flag, never an

@@ -12,9 +12,9 @@
 //   4. Exposes cancel / resume / review actions against the API endpoints.
 
 import { updateJob, getJob, ensureJob, removeJob, listCloudJobMirrors } from './jobs.js?v=5';
-import { sb, getUser } from './auth.js?v=33';
+import { sb, getUser } from './auth.js?v=34';
 import { invalidateCourseCache } from './course-loader.js?v=8';
-import { courseCanSyncToAccount, coursePayloadForAccount, courseRemoteTimestamp, hasLocalChangesSinceSync, shouldInstallRemoteCourse, syncCoursesNow } from './course-sync.js?v=31';
+import { courseCanSyncToAccount, coursePayloadForAccount, courseRemoteTimestamp, hasLocalChangesSinceSync, shouldInstallRemoteCourse, syncCoursesNow } from './course-sync.js?v=32';
 import { _installCourseFromRemote, _readAllCourses, _removeCourseLocalSilent } from './user-courses.js?v=4';
 import { agentMessage } from './generator/agents.mjs?v=2';
 

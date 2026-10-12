@@ -9,9 +9,10 @@ import { generationLeaseFields } from '../_lib/gen-state.mjs';
 import { runGeneration } from '../_lib/gen-runner.mjs';
 import { createGenerationRequestBudget, bindGenerationClient, withGenerationSignal, isGenerationBudgetStop } from '../_lib/gen-request-budget.mjs';
 import { setupIdentifier } from '../../js/setup-account-model.js';
+import { readFundedAccess, fundedStartBlock } from '../_lib/funded-access.mjs';
 
 export const config = { runtime: 'nodejs', maxDuration: 300 };
-export function createSetupGenerationHandler({ authenticate = userFromRequest, admin = serviceClient, run = runGeneration, background = waitUntil, validate = checkAnthropicKey, createBudget = createGenerationRequestBudget, enabled = () => process.env.LEARNABLE_SETUP_GENERATION === '1' } = {}) {
+export function createSetupGenerationHandler({ authenticate = userFromRequest, admin = serviceClient, run = runGeneration, background = waitUntil, validate = checkAnthropicKey, createBudget = createGenerationRequestBudget, access = readFundedAccess, enabled = () => process.env.LEARNABLE_SETUP_GENERATION === '1' } = {}) {
   return async (req, res) => {
     const requestBudget = createBudget({ request: req });
     const timedOut = error => {
@@ -37,6 +38,8 @@ export function createSetupGenerationHandler({ authenticate = userFromRequest, a
       const { data: existing, error: lookupError } = await client.from('generation_jobs').select('id,status').eq('owner_id', user.id).eq('id', jobId).maybeSingle();
       if (lookupError) throw new Error('Couldn’t check existing creation progress. Retry before starting again.');
       if (existing) return res.status(200).json({ existing: true, jobId, status: existing.status });
+      const funding = await access(client, user.id);
+      if (funding.mode !== 'legacy') return res.status(body.action === 'check' ? 200 : 409).json(fundedStartBlock(funding));
       const sources = await requestBudget.runOperation(() => inspectSetupSources(row, user.id, client), { timeoutMs: 35_000 });
       const issues = [...setupGenerationIssues(row.payload), ...sources.issues], apiKey = await readProtectedKey(client, user.id);
       // New creation includes purposeful visuals. Check both account connections

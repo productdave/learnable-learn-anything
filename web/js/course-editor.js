@@ -1,5 +1,5 @@
-import { getUser, onUserChange } from './auth.js?v=33';
-import { createCourseRefinementClient } from './course-refinement-client.js?v=7';
+import { getUser, onUserChange } from './auth.js?v=34';
+import { createCourseRefinementClient } from './course-refinement-client.js?v=8';
 import { homeURL, escapeHome as esc } from './home-model.js?v=7';
 
 const fields = new Set(['title', 'content', 'estimatedMinutes', 'sections', 'flashcards', 'question', 'statement', 'correct', 'explanation', 'options', 'text', 'pairs', 'left', 'right', 'sentence', 'acceptable_answers', 'sample_answer', 'key_points', 'points', 'prompt', 'hints', 'guidance', 'goal', 'durationMinutes', 'equipment', 'setup', 'steps', 'instruction', 'cue', 'repetitions', 'success', 'regressions', 'progressions', 'safetyStops', 'readinessChecks', 'label', 'description', 'items', 'detail', 'src', 'alt', 'caption', 'source_title', 'source_url', 'front', 'back']);

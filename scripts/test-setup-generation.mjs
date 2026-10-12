@@ -68,7 +68,7 @@ try {
   check(!setupGenerationIssues({ ...withFile.payload, sources: { ...withFile.payload.sources, files: [{ name: 'guide.pdf' }] } }).some(i => i.step === 'context'), 'PDF documents now proceed to real extraction checks');
 
   const tables = { course_setups: [structuredClone(row)], provider_connections: [], generation_jobs: [] };
-  const db = { from(table) {
+  const db = { rpc: async () => ({ data: null, error: null }), from(table) {
     let filters = [], operation = 'select', input;
     const execute = () => {
       const matched = tables[table].filter(item => filters.every(([k, v]) => item[k] === v));

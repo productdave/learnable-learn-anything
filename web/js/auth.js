@@ -81,7 +81,7 @@ function ensureModal() {
 export function openAccount(options = {}) {
   if (currentUser && document.body.dataset.experience === 'workspace') {
     const owner = currentUser.id;
-    return import('./workspace-account.js?v=3').then(({ openWorkspaceAccount }) => {
+    return import('./workspace-account.js?v=4').then(({ openWorkspaceAccount }) => {
       if (currentUser?.id === owner) return openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCredentials: options.intent === 'course-generation' });
     });
   }
@@ -116,7 +116,7 @@ export function openAccount(options = {}) {
     renderCloudSyncSection(body).catch(() => {});
     body.querySelectorAll('[data-key-clear]').forEach(btn => btn.addEventListener('click', async () => {
       setProviderKey(btn.dataset.keyClear, '');
-      const { kickSync } = await import('./sync.js?v=27');
+      const { kickSync } = await import('./sync.js?v=28');
       kickSync();
       openAccount({ intent, jobId });
     }));
@@ -126,7 +126,7 @@ export function openAccount(options = {}) {
       const val = e.target.apiKey.value.trim();
       if (!val) return;
       setProviderKey(provider, val);
-      const { flushSync } = await import('./sync.js?v=27');
+      const { flushSync } = await import('./sync.js?v=28');
       let synced = false;
       try { await flushSync(); synced = true; }
       catch { /* account modal can retry via the Courses panel */ }
@@ -257,7 +257,7 @@ create policy "owner_delete" on public.user_courses for delete using (auth.uid()
 async function renderCloudSyncSection(body) {
   const host = body.querySelector('[data-cloud-sync-body]');
   if (!host) return;
-  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=31');
+  const { getStatus, onSyncStatus, syncCoursesNow } = await import('./course-sync.js?v=32');
 
   function render(status) {
     const cloudCount = status.lastPullCloudCount;

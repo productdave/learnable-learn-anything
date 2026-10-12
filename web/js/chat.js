@@ -1,5 +1,5 @@
 import { getCourseConfig } from './course-loader.js?v=8';
-import { kickSync } from './sync.js?v=27';
+import { kickSync } from './sync.js?v=28';
 
 const MODEL = 'claude-haiku-4-5-20251001';
 const API_URL = 'https://api.anthropic.com/v1/messages';

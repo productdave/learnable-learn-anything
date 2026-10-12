@@ -1,5 +1,5 @@
-import { sb } from './auth.js?v=33';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { sb } from './auth.js?v=34';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const errors = {

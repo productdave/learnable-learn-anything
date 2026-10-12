@@ -1,33 +1,33 @@
 import { store } from './store.js?v=5';
 import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js?v=8';
 import { renderSidebar } from './components/sidebar.js?v=6';
-import { renderTopicView, refreshLearningControls } from './components/topic-view.js?v=45';
-import { renderLearningStatus } from './components/learning-status.js?v=7';
+import { renderTopicView, refreshLearningControls } from './components/topic-view.js?v=46';
+import { renderLearningStatus } from './components/learning-status.js?v=8';
 import { initSearch } from './search.js?v=7';
-import { initFlashcards } from './flashcards.js?v=29';
+import { initFlashcards } from './flashcards.js?v=30';
 import { courseHasFlashcards } from './course-features.js?v=1';
-import { initChat, closeChat } from './chat.js?v=25';
-import { initAuth, getUser, onUserChange, openAccount } from './auth.js?v=33';
-import { initSync } from './sync.js?v=27';
-import { openIntake, openIntakeForJob, openIntakeWithDraft, mountIntakeForJob } from './intake.js?v=97';
+import { initChat, closeChat } from './chat.js?v=26';
+import { initAuth, getUser, onUserChange, openAccount } from './auth.js?v=34';
+import { initSync } from './sync.js?v=28';
+import { openIntake, openIntakeForJob, openIntakeWithDraft, mountIntakeForJob } from './intake.js?v=98';
 import { listActiveJobs, onJobsChange, markInterruptedIfStale, removeJob, removeCloudJobs, updateJob, getJob as getJobLazy } from './jobs.js?v=5';
-import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, rehydrateCloudSubscriptions, markStaleCloudJobs, markCloudCredentialsReady, deleteCloudGeneration, clearCloudGenerationSubscriptions, pullSavedCloudCourseForJob, hasSavedRequestRestartIntent, generationActionSnapshot } from './cloud-gen-client.js?v=92';
+import { cloudGenAvailable, cancelCloudGeneration, resumeCloudGeneration, restartOrStartCloudGeneration, rehydrateCloudSubscriptions, markStaleCloudJobs, markCloudCredentialsReady, deleteCloudGeneration, clearCloudGenerationSubscriptions, pullSavedCloudCourseForJob, hasSavedRequestRestartIntent, generationActionSnapshot } from './cloud-gen-client.js?v=93';
 import { getUserCourse, removeUserCourse, canDeleteCourse, _setCurrentUserEmailFromAuth, _onCoursesChanged, _installCourseFromRemote } from './user-courses.js?v=4';
-import { courseCanSyncToAccount, initCourseSync, syncCoursesNow } from './course-sync.js?v=31';
+import { courseCanSyncToAccount, initCourseSync, syncCoursesNow } from './course-sync.js?v=32';
 import { agentNameForStage } from './generator/agents.mjs?v=2';
 import { createHomeController,homeAuthorHTML } from './home.js?v=29';
 import { createCommunityCatalog } from './community-catalog.js?v=1';
-import { mountModeration,REPORTS_URL } from './moderation.js?v=3';
-import { createModerationClient } from './moderation-client.js?v=3';
-import { createSetupController } from './course-setup.js?v=25';
+import { mountModeration,REPORTS_URL } from './moderation.js?v=4';
+import { createModerationClient } from './moderation-client.js?v=4';
+import { createSetupController } from './course-setup.js?v=26';
 import { HOME_URL, homeURL, workspaceExperience } from './home-model.js?v=7';
-import { openCourseEditor } from './course-editor.js?v=7';
-import { openCourseImages } from './course-images.js?v=5';
-import { openPublicCoursePreview } from './public-course-preview.js?v=7';
-import { openCourseReport,openCoursePublishing } from './course-publishing.js?v=6';
-import { createPublicationStatusClient } from './publication-status-client.js?v=4';
+import { openCourseEditor } from './course-editor.js?v=8';
+import { openCourseImages } from './course-images.js?v=6';
+import { openPublicCoursePreview } from './public-course-preview.js?v=8';
+import { openCourseReport,openCoursePublishing } from './course-publishing.js?v=7';
+import { createPublicationStatusClient } from './publication-status-client.js?v=5';
 import * as appConfig from './config.js?v=1';
-import { disposePrivateCourseImages } from './private-course-images.js?v=5';
+import { disposePrivateCourseImages } from './private-course-images.js?v=6';
 import { disposeSharedCourseImages } from './shared-course-images.js?v=3';
 
 let cloudGenerationRefresh = null;
@@ -43,7 +43,7 @@ function getSetupController() {
   if (!setupController) setupController = createSetupController({
     getOwner: () => getUser()?.id || null, navigate: navigateTo,
     openJob: async (jobId, owner) => {
-      const { reattachCloudGeneration } = await import('./cloud-gen-client.js?v=92');
+      const { reattachCloudGeneration } = await import('./cloud-gen-client.js?v=93');
       if (getUser()?.id !== owner) return;
       const attached = await reattachCloudGeneration(jobId);
       if (getUser()?.id !== owner) return;

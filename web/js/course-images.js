@@ -1,5 +1,5 @@
-import { getUser, onUserChange } from './auth.js?v=33';
-import { createCourseImageClient } from './course-image-client.js?v=5';
+import { getUser, onUserChange } from './auth.js?v=34';
+import { createCourseImageClient } from './course-image-client.js?v=6';
 import { homeURL, escapeHome as esc } from './home-model.js?v=7';
 import { courseImageProgress, nextImageIndex, IMAGE_PROGRESS_LABELS } from './image-progress.js?v=2';
 import { imageCostHTML } from './image-cost.js?v=2';

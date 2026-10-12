@@ -2853,6 +2853,13 @@
   margin: auto; width: min(540px, calc(100% - 32px)); max-width: 540px;
   padding: 28px; color: var(--text-primary);
 }
+.funded-access { margin-block: 20px; }
+.funded-access h3 { margin: 0 0 8px; font-size: var(--font-base); }
+.funded-balance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-block: 20px; }
+.funded-balance dt { color: var(--text-secondary); font-size: 13px; }
+.funded-balance dd { margin: 4px 0 0; font-size: 22px; font-weight: 600; overflow-wrap: anywhere; }
+.workspace-account { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.workspace-account [hidden] { display: none !important; }
 .workspace-account::backdrop { background: rgba(15, 18, 30, .55); backdrop-filter: blur(2px); }
 .workspace-account .auth-close { width: 44px; height: 44px; font-size: 26px; }
 .workspace-account .auth-title { padding-right: 36px; font-size: 24px; line-height: 1.3; }

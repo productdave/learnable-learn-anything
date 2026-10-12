@@ -1,9 +1,9 @@
 import { initMatchQuiz } from './match-quiz.js?v=2';
 import { store } from '../store.js?v=5';
 import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=8';
-import { logEvent } from '../sync.js?v=27';
+import { logEvent } from '../sync.js?v=28';
 import { getUserCourse, saveUserCourse } from '../user-courses.js?v=4';
-import { mountPrivateCourseImages } from '../private-course-images.js?v=5';
+import { mountPrivateCourseImages } from '../private-course-images.js?v=6';
 import { sharedImageHTML,mountSharedCourseImages } from '../shared-course-images.js?v=3';
 
 // Module-level context for the topic currently being rendered — used by
@@ -25,7 +25,7 @@ import { renderPayoffMatrix, initPayoffMatrixInteractivity } from './payoff-matr
 import { renderSimulator, initSimulatorInteractivity } from './simulator.js';
 import { renderPractice, initPracticeInteractivity } from './practice.js?v=5';
 import { renderChecklist, initChecklists } from './checklist.js?v=3';
-import { renderLearningStatus } from './learning-status.js?v=7';
+import { renderLearningStatus } from './learning-status.js?v=8';
 import { ttsBarHTML, initTTS } from '../tts.js?v=5';
 
 function renderSection(section, index) {

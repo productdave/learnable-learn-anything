@@ -2,9 +2,9 @@
   "title": "Learnable funded course creation",
   "subtitle": "PRD, experience design and feature-by-feature delivery plan",
   "version": "Draft 1 • 9 October 2026",
-  "summary": "Build a complete course-creation experience that people can use without managing AI accounts. Keep the current setup and two review points, make costs understandable, preserve work when generation stops, and deliver a useful private draft. Finish the product definition and experience before extending the technical foundation.",
-  "status": "Product and experience proposal for review. Existing OpenRouter adapter: offline acceptance only. No new product feature, live model, wallet or release acceptance is claimed by this document.",
-  "next": "Use F-01, funded access and account status, as the first product feature. Implement it behind a server-controlled cohort flag, QA its normal and failure states, record the evidence, then move to F-02.",
+  "summary": "We have started the first credits feature on an isolated branch. Account and Create now read server-owned access and complimentary balances without asking funded learners for provider keys. Next, finish integration and acceptance before building quotes and credit deductions. Existing review points and useful private drafts remain the product goal.",
+  "status": "F-01 is built locally on codex/openrouter-credits (draft PR #5). Local automated checks pass, including real local Auth/PostgREST. Newer-app integration, full migration replay and remaining browser/accessibility acceptance are open. No paid or hosted acceptance is claimed.",
+  "next": "Finish F-01 integration and acceptance, then F-02 quotes, consent and atomic learner-credit holds. H-01 usage reporting precedes funded generation. Keep purchases and funded dispatch unavailable until their own features pass QA.",
   "decision": "Working assumption: defer the in-course tutor and AI editing for the first platform-funded pilot, with clear unavailable states and server enforcement. A tutor-scope question is pending. Paid bundles, prices and margin are later decisions.",
   "principles": [
     "Product definition → experience and acceptance criteria → one feature → feature QA → evidence and fixes → next feature → integrated release candidate → release later.",
@@ -652,13 +652,13 @@
       "title": "Funded access and account status",
       "outcome": "An invited learner sees whether creation is available and understands their complimentary balance without managing keys.",
       "scope": "Server funding-mode and eligibility projection; account/create readiness; available/held/used balance; platform versus legacy recovery copy. Add operator grant contract with default-deny authorization. No paid dispatch in this feature.",
-      "files": "workspace-account.js, setup-create.js, setup-generation-client.js; proposed access/credit projection API and grant schema",
+      "files": "workspace-account.js, setup-create.js, setup-generation-client.js, funded-access-view.js; account/access API, funded-access helper and migration 26. Evidence: docs/product/funded-access/README.md; draft PR #5.",
       "depends": [],
       "or": [
         "OR-02",
         "OR-06"
       ],
-      "status": "Next — not implemented",
+      "status": "In progress — local implementation and tests pass; integration acceptance open",
       "qa": "Owner isolation, denied/missing/expired grants, zero versus unknown balance, sign-out/account switch, two devices, legacy job unaffected, key-free UI, keyboard/mobile and zero provider calls.",
       "exit": "A real signed-in local account and a second adversarial account exercise every readiness state. The server, not UI flags, denies unauthorized use. Record exact DB/API/UI evidence."
     },

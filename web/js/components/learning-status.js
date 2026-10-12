@@ -1,5 +1,5 @@
 import { store } from '../store.js?v=5';
-import { flushSync } from '../sync.js?v=27';
+import { flushSync } from '../sync.js?v=28';
 
 // Only show a call to action when preservation actually needs attention.
 export function renderLearningStatus(container) {

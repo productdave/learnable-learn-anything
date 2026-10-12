@@ -1,6 +1,6 @@
 import { store } from './store.js?v=5';
 import { loadAllModules, getCourseConfig, getCurrentCourseId } from './course-loader.js?v=8';
-import { logEvent } from './sync.js?v=27';
+import { logEvent } from './sync.js?v=28';
 import { courseHasFlashcards, flashcardEmptyCopy } from './course-features.js?v=1';
 
 const capitalizeFirst = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';

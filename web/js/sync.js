@@ -1,6 +1,6 @@
 // Account-owned, course-scoped progress. Conditional writes preserve concurrent
 // device edits and never infer ownership of flat legacy records.
-import { sb, getUser, onUserChange } from './auth.js?v=33';
+import { sb, getUser, onUserChange } from './auth.js?v=34';
 import { clearAllProviderKeys, getAllProviderKeys, setAllProviderKeys } from './api-keys.js?v=1';
 import { store } from './store.js?v=5';
 import { writeLearningSnapshot, boundedLearningQuery } from './learning-state.js?v=2';
