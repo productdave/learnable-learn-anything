@@ -8,6 +8,7 @@
 // finishes or maxDuration is hit. Real-time status updates land in the
 // generation_jobs row; the client subscribes to those via Realtime.
 
+import { requireNewGenerationProvider } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
 import { readJsonBody, requirePdfRefsBelongToJob, requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
@@ -77,6 +78,8 @@ return async function handler(req, res) {
       status: await expireExistingJobIfStale(supabase, prior, user.id), pdfRefs: prior.user_brief?.pdfRefs || [] });
   }
 
+  try { requireNewGenerationProvider(); }
+  catch (error) { return res.status(error.statusCode || 409).json({ code: error.code, error: error.message, ready: false }); }
   // Get the user's Anthropic key (stored under user_state by sync.js).
   let apiKey;
   try { apiKey = await readApiKey(supabase, user.id); }

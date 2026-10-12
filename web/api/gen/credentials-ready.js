@@ -5,6 +5,7 @@
 // Recoverable background jobs are claimed and resumed server-side so the user
 // does not need to keep the browser open after saving credentials.
 
+import { hasGenerationBinding } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
 import { readApiKey, readJsonBody, requireSafeJobId, serviceClient, userFromRequest } from '../_lib/supabase-server.mjs';
@@ -36,6 +37,19 @@ return async function handler(req, res) {
     return res.status(e.statusCode || 401).json({ error: e.message });
   }
 
+  const body = (await requestBudget.runOperation(() => readJsonBody(req), { timeoutMs: 10_000 })) || {};
+  let jobId = '';
+  if (body.jobId) {
+    try { jobId = requireSafeJobId(body.jobId); }
+    catch (e) { return res.status(e.statusCode || 400).json({ error: e.message }); }
+    const { data: job, error } = await supabase.from('generation_jobs').select('*')
+      .eq('id', jobId).eq('owner_id', user.id).maybeSingle();
+    if (error) return res.status(503).json({ error: 'Could not confirm saved course access.' });
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    if (hasGenerationBinding(job)) return res.status(409).json({ code: 'openrouter_connection',
+      error: 'This course uses the Learnable OpenRouter connection. Continue from its review or Resume action; no personal provider key is needed.' });
+  }
+
   let apiKey;
   try {
     apiKey = await readApiKey(supabase, user.id);
@@ -45,13 +59,6 @@ return async function handler(req, res) {
   }
 
   try {
-    const body = (await requestBudget.runOperation(() => readJsonBody(req), { timeoutMs: 10_000 })) || {};
-    let jobId = '';
-    if (body.jobId) {
-      try { jobId = requireSafeJobId(body.jobId); }
-      catch (e) { return res.status(e.statusCode || 400).json({ error: e.message }); }
-    }
-
     const result = await recoverCredentialWaitsForUser(supabase, user.id, jobId, {
       apiKey,
       ownerEmail: user.email || null,
@@ -97,7 +104,7 @@ export async function recoverCredentialWaitsForUser(supabase, ownerId, jobId = '
   const { data, error } = await query;
   if (error) throw error;
 
-  const waiting = (data || []).filter(row => isMissingApiKeyText(`${row.error || ''}\n${row.message || ''}`));
+  const waiting = (data || []).filter(row => !hasGenerationBinding(row) && isMissingApiKeyText(`${row.error || ''}\n${row.message || ''}`));
   const results = await Promise.all(waiting.map(row => recoverWaitingRow(supabase, ownerId, row, { apiKey, ownerEmail, startRecoverable, requestBudget, runnerClient })));
   const confirmed = results.filter(Boolean);
   return {

@@ -18,7 +18,7 @@ import { getTone } from '../../js/generator/tones/conversational.mjs';
 import { createClient as createAnthropic } from '../../js/generator/anthropic-fetch.js';
 import { assembleCourse } from '../../js/generator/assemble-course.js';
 import { retainComponentChoices } from '../../js/generator/component-policy.mjs';
-import { compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
+import { courseBriefSchemaFor, topicContentSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
 import { signedPdfUrl } from './supabase-server.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { clearSavedCourseIdForJob, reconcileGeneratedCourseRun, rollbackGeneratedCourseSave, saveGeneratedCourse } from './course-save.mjs';
@@ -36,6 +36,10 @@ import { publicFetch } from './public-fetch.mjs';
 import { pauseForContinuation } from './gen-continuation.mjs';
 import { runIntegratedCourseImages, usesIntegratedVisuals } from './integrated-course-images.mjs';
 import { runVisualDesigner, usesVisualDesigner, assertDesignComplete } from './visual-designer.mjs';
+
+import { generationProvider, generationModels, requireGenerationCapabilities } from './generation-provider.mjs';
+import { createOpenRouterClient } from './openrouter-client.mjs';
+import { createAiSpendLedger } from './ai-spend-ledger.mjs';
 
 const STAGE2_CONCURRENCY = 3;
 const STAGE3_CONCURRENCY = 4;
@@ -150,6 +154,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
   supabase = bindGenerationClient(supabase, requestBudget);
 
   let client = null;
+  let provider = { gateway: 'anthropic' };
+  let spendLedger = null;
   let tone = null;
   let pdfsForApi = [];
   let pdfThumbs = pdfThumbsFromRefs(pdfRefs);
@@ -369,13 +375,28 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
   // Keep a single lazy factory site: staging packaging injects the same guarded
   // creator-funded client here for both lesson writing and learner refinement.
   function ensureTextClient() {
+    if (provider.gateway === 'openrouter') throw new Error('OpenRouter requires a task-specific validated client.');
     if (!client) client = createAnthropic({ apiKey, requestBudget, beforeDispatch: assertRunnerWritable });
     return client;
   }
 
+  function textClientFor(task, validateResult) {
+    if (provider.gateway !== 'openrouter') return ensureTextClient();
+    return createOpenRouterClient({ apiKey: provider.apiKey, policy: provider.policy, task,
+      ledger: spendLedger, validateResult, requestBudget, beforeDispatch: assertRunnerWritable });
+  }
+
   try {
-    const aiModels = getAiModelRegistry();
     if (await bailIfInactive()) return;
+    // Re-read the owned, persisted binding even if an entry point passed a key.
+    // Never infer a job's provider from today's model environment or a checkpoint.
+    const { data: providerJob, error: providerError } = await supabase.from('generation_jobs').select('*')
+      .eq('id', jobId).eq('owner_id', ownerId).maybeSingle();
+    if (providerError || !providerJob) throw checkpointWriteError('Could not confirm the saved course provider.');
+    provider = generationProvider(providerJob, ownerId);
+    requireGenerationCapabilities(provider, { mode, userBrief, checkpoint, pdfRefs });
+    const aiModels = generationModels(provider);
+    if (provider.gateway === 'openrouter') spendLedger = createAiSpendLedger({ supabase, ownerId, jobId, runId, policyHash: provider.policy.fingerprint });
     // A saved complete text draft is now the source of truth. Image continuation
     // must never reassemble it from old topic checkpoints or overwrite assets
     // already attached by a previous time slice.
@@ -397,8 +418,7 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         throw checkpointWriteError('The saved course no longer matches its refinement checkpoint. Your retained draft was not overwritten.');
       }
     }
-    assertCloudGenerationModelSupport(aiModels);
-    ensureTextClient();
+    if (provider.gateway !== 'openrouter') { assertCloudGenerationModelSupport(aiModels); ensureTextClient(); }
     tone = getTone(userBrief?.tone || 'conversational');
     if (await bailIfInactive()) return;
 
@@ -426,7 +446,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
     let brief = checkpoint?.brief ? retainComponentChoices(checkpoint.brief, userBrief) : null;
     if (!brief) {
       await patch({ stage: 'intake', status: 'running', message: agentMessage('intake') });
-      brief = await withLeaseHeartbeat('curriculum design', async () => runIntake(client, enrichedBrief, {
+      const curriculumClient = textClientFor('curriculum', value => courseBriefSchemaFor(enrichedBrief).parse(value));
+      brief = await withLeaseHeartbeat('curriculum design', async () => runIntake(curriculumClient, enrichedBrief, {
         model: aiModels.curriculum.model,
         onUsage: (usage, meta) => onUsage('curriculum', usage, meta, aiModels),
         pdfs: await ensurePdfsForApi('PDF source resolution for curriculum design')
@@ -561,7 +582,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         const { mod, topic, bundle } = work[i];
         const key = `${mod.id}/${topic.id}`;
         try {
-          const content = await withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(client, brief, mod, topic, bundle, tone, {
+          const lessonClient = textClientFor('lesson', value => topicContentSchemaFor(brief, topic, { allowGeneratedAssets: false }).parse(value));
+          const content = await withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(lessonClient, brief, mod, topic, bundle, tone, {
             model: aiModels.lesson.model,
             onUsage: (usage, meta) => onUsage('lesson', usage, meta, aiModels)
           }));

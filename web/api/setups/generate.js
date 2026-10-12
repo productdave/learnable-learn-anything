@@ -1,3 +1,4 @@
+import { requireNewGenerationProvider } from '../_lib/generation-provider.mjs';
 import { randomUUID } from 'node:crypto';
 import { waitUntil } from '@vercel/functions';
 import { userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
@@ -37,6 +38,8 @@ export function createSetupGenerationHandler({ authenticate = userFromRequest, a
       const { data: existing, error: lookupError } = await client.from('generation_jobs').select('id,status').eq('owner_id', user.id).eq('id', jobId).maybeSingle();
       if (lookupError) throw new Error('Couldn’t check existing creation progress. Retry before starting again.');
       if (existing) return res.status(200).json({ existing: true, jobId, status: existing.status });
+      try { requireNewGenerationProvider(); }
+      catch (error) { return res.status(error.statusCode || 409).json({ code: error.code, error: error.message, ready: false }); }
       const sources = await requestBudget.runOperation(() => inspectSetupSources(row, user.id, client), { timeoutMs: 35_000 });
       const issues = [...setupGenerationIssues(row.payload), ...sources.issues], apiKey = await readProtectedKey(client, user.id);
       // New creation includes purposeful visuals. Check both account connections

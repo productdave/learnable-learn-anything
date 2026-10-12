@@ -257,7 +257,7 @@ assert.throws(
 {
   const reviewSource = readFileSync(join(process.cwd(), 'web/api/gen/review.js'), 'utf8');
   const transitionIndex = reviewSource.indexOf('transition = buildReviewTransition');
-  const apiKeyIndex = reviewSource.indexOf('apiKey = await readApiKey');
+  const apiKeyIndex = reviewSource.indexOf('apiKey = await readGenerationApiKey');
   const claimIndex = reviewSource.indexOf('updateJobFromStatus');
   assert.ok(transitionIndex > -1, 'review handler should build/validate the transition.');
   assert.ok(apiKeyIndex > -1, 'review handler should read the API key.');

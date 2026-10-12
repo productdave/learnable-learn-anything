@@ -7,9 +7,10 @@
 // - approve_research: write lessons, assemble, and save the course.
 // - rerun_research: rerun research with feedback, then pause again.
 
+import { hasGenerationBinding, readGenerationApiKey } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
-import { requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
+import { requireSafeJobId, userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
 import { runGeneration as defaultRunGeneration } from '../_lib/gen-runner.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { outlineForBrief, topicCountForBrief } from '../_lib/gen-brief.mjs';
@@ -82,9 +83,10 @@ return async function handler(req, res) {
   }
 
   let apiKey;
-  try { apiKey = await readApiKey(supabase, user.id); }
+  try { apiKey = await readGenerationApiKey(supabase, user.id, job, { mode: transition.runnerMode, checkpoint: transition.checkpoint, userBrief: (transition.runnerRow || job).user_brief }); }
   catch (e) {
     if (isGenerationBudgetStop(e)) throw e;
+    if (hasGenerationBinding(job)) return res.status(e.statusCode || 409).json({ code: e.code, error: e.message });
     let marked;
     try {
       marked = await markReviewWaitingForApiKey(supabase, jobId, user.id, transition.expectedStatus, job.run_id, e.message || String(e), transition.patch.review_history);
