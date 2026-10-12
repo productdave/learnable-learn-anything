@@ -2,7 +2,7 @@
   "status": "passed",
   "providerCalls": 0,
   "providerCostUSD": 0,
-  "hostedChanges": 0,
+  "hostedChanges": "Automatic Vercel Git previews only; no production/shared-staging alias promotion or hosted migration. No hosted app QA.",
   "results": [
     {
       "name": "funded-unit",

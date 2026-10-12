@@ -73,7 +73,11 @@ endpoint. Browser locator evaluations for focus/geometry timed out; focus was
 read from DOM snapshots and layout inspected in screenshots. An immediate
 last-to-first Tab assertion was not confirmed. Refresh focus, the next Tab and
 Escape passed; complete native focus-boundary and screen-reader acceptance stay
-open. No AI calls occurred: text/search/images/retries US$0. Cumulative recorded
+open. Git pushes triggered automatic Vercel branch previews in the three linked projects.
+Read-only deployment receipts confirm preview targets and branch-only aliases;
+production and shared staging aliases were not replaced. The previews are not
+hosted application acceptance, and no hosted migration was applied.
+No AI calls occurred: text/search/images/retries US$0. Cumulative recorded
 QA remains US$14.355246 plus one archived unpriced text charge.
 
 ## Configuration and release gates
