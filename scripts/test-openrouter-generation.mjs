@@ -2,7 +2,7 @@
 // No provider keys, network calls or learner-credit schema are needed.
 import assert from 'node:assert/strict';
 import test, { afterEach } from 'node:test';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { createOpenRouterPolicy } from '../web/api/_lib/openrouter-policy.mjs';
 import { generationProvider, generationModels, requireGenerationCapabilities, readGenerationApiKey, requireNewGenerationProvider, generationOperationScope } from '../web/api/_lib/generation-provider.mjs';
 import { appendReviewHistory } from '../web/api/_lib/gen-review-history.mjs';
@@ -16,6 +16,7 @@ import { createCredentialsReadyHandler, recoverCredentialWaitsForUser } from '..
 import { createSweepHandler } from '../web/api/gen/sweep.js';
 import { createSetupGenerationHandler } from '../web/api/setups/generate.js';
 import { curriculumFixture, lessonFixture } from './fixtures/component-course.mjs';
+import { pdfFixture } from './fixtures/source-documents.mjs';
 
 const originalFetch = globalThis.fetch;
 const environment = { ...process.env };
@@ -267,6 +268,30 @@ test('actual v2 runner researches through one gateway and persists inspected evi
  await runGeneration({supabase:h.client,jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id,userBrief:h.row.user_brief,checkpoint:{brief,research:{}},pdfRefs:[],mode:'research'});
  assert.equal(h.row.status,'review_research');assert.equal(h.calls.length,brief.modules.length*2);assert.equal(h.receipts.length,h.calls.length);assert.equal(h.holds.length,0);
  for(const mod of brief.modules){assert.equal(h.row.research[mod.id].module_id,mod.id);assert.equal(h.row.research[mod.id]._evidence.gateway,'openrouter');}
+});
+
+for(const mode of ['curriculum','research'])for(const corrupt of [false,true])test(`setup PDF originals reach the real native runner; mode=${mode}, corrupt=${corrupt}`,async()=>{
+ const native=createOpenRouterPolicy({version:'openrouter-native-v2',reviewedAt:policy.reviewedAt,validUntil:policy.validUntil,now});
+ const pdf=pdfFixture(['Original native PDF source.']),hash=createHash('sha256').update(pdf).digest('hex');
+ const brief=curriculumFixture(),h=setup(fixture({ai_policy:native,...(mode==='research'?{brief,stage:'research'}:{})}));
+ h.row.user_brief.source_storage_id='saved-setup';
+ h.row.user_brief.source_manifest={notes:[],links:[],files:[{id:'native-file',name:'source.pdf',size:pdf.length,sha256:corrupt?'0'.repeat(64):hash}]};
+ const paths=[];
+ h.client.storage.from=bucket=>{assert.equal(bucket,'setup-sources');return {download:async path=>{paths.push(path);return {data:new Blob([pdf])};}};};
+ globalThis.fetch=async(url,options)=>{
+  assert.equal(url,'https://openrouter.ai/api/v1/messages');const body=JSON.parse(options.body);h.calls.push(body);
+  const document=body.messages[0].content.find(b=>b.type==='document');assert.equal(document.source.data,pdf.toString('base64'));
+  const moduleId=brief.modules[0].id,research={module_id:moduleId,key_concepts:['Light direction','Compare shadows'],examples:['Original window exercise','Original shadow exercise'],sources:[],images:[]};
+  return Response.json({id:'msg-original-pdf',model:body.model,provider:'Anthropic',stop_reason:'end_turn',usage:{input_tokens:100,output_tokens:100,cost:.001},content:[{type:'text',text:body.tools?'Evidence read from the original PDF.':JSON.stringify(mode==='research'?research:brief)}]},{headers:{'x-generation-id':'gen-original-pdf-'+h.calls.length}});
+ };
+ const run=()=>runGeneration({supabase:h.client,jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id,userBrief:h.row.user_brief,checkpoint:mode==='research'?{brief,research:{}}:null,pdfRefs:[],mode});
+ if(corrupt){
+  if(mode==='curriculum')await assert.rejects(run,/no longer matches/);
+  else{await run();assert.equal(h.row.status,'review_research');assert.match(h.row.failures[0].error,/no longer matches/);assert.equal(Object.keys(h.row.research||{}).length,0);}
+  assert.equal(h.calls.length,0);assert.equal(h.reservations.length,0);
+ }
+ else{await run();assert.equal(h.row.status,'review_'+mode);assert.equal(h.calls.length,mode==='research'?2:1);assert.equal(h.receipts.length,h.calls.length);}
+ assert.equal(paths.length,1);assert.equal(paths[0],`${h.row.owner_id}/saved-setup/native-file/${corrupt?'0'.repeat(64):hash}`);
 });
 
 test('billing scope follows persisted Restart, never the transient runner lease',()=>{

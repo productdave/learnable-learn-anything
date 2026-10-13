@@ -22,6 +22,7 @@ import { assembleCourse } from '../../js/generator/assemble-course.js';
 import { retainComponentChoices } from '../../js/generator/component-policy.mjs';
 import { ResearchBundleSchema, courseBriefSchemaFor, topicContentSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
 import { signedPdfUrl } from './supabase-server.mjs';
+import { setupPdfSources, resolveSetupPdfs } from './gen-setup-pdfs.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { clearSavedCourseIdForJob, reconcileGeneratedCourseRun, rollbackGeneratedCourseSave, saveGeneratedCourse } from './course-save.mjs';
 import { clearResearchFailure, clearTopicFailure, pruneResolvedFailures, replaceResearchFailure, replaceTopicFailure } from './gen-failures.mjs';
@@ -286,14 +287,19 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
   }
 
   async function ensurePdfsForApi(label = 'PDF source resolution') {
-    if (pdfsForApi.length || !pdfRefs?.length) return pdfsForApi;
+    // Setup sources previously reached models only as extracted text. Retain
+    // native pages for OpenRouter while preserving the legacy upload path.
+    const setupSources = provider.gateway === 'openrouter' ? setupPdfSources(userBrief) : [];
+    if (pdfsForApi.length || (!pdfRefs?.length && !setupSources.length)) return pdfsForApi;
     if (!pdfResolutionPromise) {
       pdfResolutionPromise = withLeaseHeartbeat(label, async () => {
         const pdfs = await resolvePdfs(supabase, pdfRefs, { ownerId, jobId, requestBudget });
-        return pdfs.map(p => ({
+        const legacy = pdfs.map(p => ({
           file_index: p.file_index, name: p.name, base64: p.base64,
           pageCount: (p.pageThumbs || []).length
         }));
+        const offset = legacy.length ? Math.max(...legacy.map(p => p.file_index)) + 1 : 0;
+        return [...legacy, ...await resolveSetupPdfs(supabase, setupSources, { ownerId, requestBudget, offset })];
       });
     }
     pdfsForApi = await pdfResolutionPromise;

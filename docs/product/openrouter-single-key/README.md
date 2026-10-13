@@ -15,6 +15,31 @@ The existing dirty main checkout, parked credit branch and frozen releases are
 preserved. This extends the earlier saved-job routing slice; its historical
 [verification record](verification.json) remains separate.
 
+## Pilot activation candidate — not deployed
+
+Current staging still serves the verified key refresh with generation paused.
+A new candidate fixes a gap in the actual setup flow: original PDFs now reach
+OpenRouter planning and research, alongside extracted source text. Files are
+loaded from owner-scoped storage and checked against their reviewed byte count
+and SHA256 before any model reservation. Resume uses the saved source manifest.
+Existing legacy PDF thumbnails remain; this change does not create thumbnails
+for setup-source PDFs.
+
+The fresh package preserves current browser/Admin assets and changes only the
+runner and its new PDF resolver in two function bundles. It passes 165 focused
+source cases, 47 actual-package cases, 218 imports and seven direct-provider
+guards. Ten real disposable PostgreSQL operator checks passed, as did 50 document
+parser checks and the three existing PDF/heartbeat regression scripts.
+
+Current catalog review confirms the pinned routes/prices. A four-lesson course
+fixture includes an original three-page PDF, notes and all selected materials.
+One pilot is prepared with a shared USD 5 ceiling and a USD 3.90 estimate including
+correction contingency; no enrollment, allowance, deployment or provider call
+was made in this preparation. CLI authorization for remaining staging deployment
+is pending after the earlier one-upload exception. Live acceptance is still open.
+
+See [pilot preparation evidence](pilot-preparation-verification.json).
+
 ## What changed
 
 | Course work | Candidate route | Role |

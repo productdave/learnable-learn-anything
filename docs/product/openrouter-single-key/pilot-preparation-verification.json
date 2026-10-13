@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-13T01:16:41.141Z",
+  "artifact": "/Users/davidwang/.codex/worktrees/openrouter-generation/Learnable/output/staging/2026-10-12-openrouter-pilot/release-4n5PM6",
+  "reportSha256": "b996dd707eef309094e8ea64396cf0ee1bebd56ffe363fe34fef2224738254bc",
+  "sourceDeployment": "dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe",
+  "allOutputBytesPreserved": false,
+  "files": 4868,
+  "functions": 8,
+  "imports": 218,
+  "guards": 7,
+  "flags": [
+    "LEARNABLE_GENERATION_PROVIDER=openrouter",
+    "LEARNABLE_OPENROUTER_ENABLED=1",
+    "LEARNABLE_SETUP_GENERATION=1",
+    "LEARNABLE_GENERATION_CONTINUATION=1",
+    "LEARNABLE_CREATION_IMAGES=0",
+    "LEARNABLE_GPT_IMAGES=0",
+    "LEARNABLE_IMAGE_REQUESTS=0",
+    "LEARNABLE_AI_REFINEMENT=0",
+    "LEARNABLE_SELF_PUBLISH=0",
+    "LEARNABLE_PUBLIC_IMAGES=0",
+    "LEARNABLE_MODERATION=0",
+    "LEARNABLE_GENERATION_LOGS=1"
+  ],
+  "policyFingerprint": "0fb43d83e3d8cc0bfa812fd6c2c9281d73404952ac51b9480755eae1bb5470e7",
+  "providerCalls": 0,
+  "paidUsd": 0,
+  "hostedChanges": 0,
+  "changed": [
+    "functions/_functions/generation.func/api/_lib/gen-runner.mjs",
+    "functions/_functions/generation.func/api/_lib/gen-setup-pdfs.mjs",
+    "functions/_functions/sources.func/api/_lib/gen-runner.mjs",
+    "functions/_functions/sources.func/api/_lib/gen-setup-pdfs.mjs"
+  ],
+  "actualPackageChecks": 47,
+  "supersedes": "/Users/davidwang/.codex/worktrees/openrouter-generation/Learnable/output/staging/2026-10-12-openrouter-pilot/release-UnKHtS",
+  "scope": "Local native setup-PDF repair and reviewed pilot candidate; not deployed",
+  "sourceTests": 165,
+  "actualPackageTests": 47,
+  "operatorDatabaseChecks": 10,
+  "documentParserChecks": 50,
+  "supportingScripts": [
+    "test-gen-runner-lazy-pdf.mjs",
+    "test-gen-runner-pdf-failure.mjs",
+    "test-gen-runner-heartbeat.mjs"
+  ],
+  "pilotProvisioned": false,
+  "liveKeyValidityTested": false,
+  "browserAccount": "Signed-in managed paused status and preserved Admin entry",
+  "screenshot": "/Users/davidwang/Learnable/output/qa/openrouter-pilot-paused-20261012.png",
+  "qa": {
+    "logicalRun": "openrouter-staging-20261011",
+    "capUsd": 5,
+    "estimateUsd": 3.9,
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "totalUsd": 0,
+    "cumulativeRecordedBaselineUsd": 19.259934,
+    "historicalUnpricedCharges": 1
+  },
+  "policyReviewedAt": "2026-10-13T01:10:14.222Z",
+  "policyValidUntil": "2026-10-14T01:10:14.222Z",
+  "remaining": [
+    "User confirmation of CLI method for remaining staging deployments",
+    "Fresh alias/setting/data preflight, deploy verified candidate, verify READY",
+    "Provision one bounded pilot; run whole source-backed course, both reviews and all selected materials",
+    "Reconcile receipts/cost, verify saved course and browser reopen/resume before declaring staging test-ready"
+  ],
+  "limits": [
+    "Existing legacy PDF thumbnails are preserved; this repair sends native setup-source pages but does not generate new setup PDF thumbnails."
+  ]
+}

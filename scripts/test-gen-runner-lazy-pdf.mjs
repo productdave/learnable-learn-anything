@@ -21,7 +21,7 @@ assert.ok(
 assert.ok(
   runBody.includes('let pdfResolutionPromise = null;') &&
   runBody.includes('async function ensurePdfsForApi') &&
-  runBody.includes('if (pdfsForApi.length || !pdfRefs?.length) return pdfsForApi;'),
+  runBody.includes('if (pdfsForApi.length || (!pdfRefs?.length && !setupSources.length)) return pdfsForApi;'),
   'runner should cache PDF document hydration for model stages.'
 );
 assert.ok(
