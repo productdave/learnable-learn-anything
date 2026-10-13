@@ -1,0 +1,156 @@
+{
+  "at": "2026-10-13T00:22:34.184Z",
+  "deploymentId": "dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe",
+  "ready": true,
+  "stagingAlias": "dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe",
+  "project": "prj_nphig6i4hA9E8o9Wg3nhzxyP1krB",
+  "configuredKey": [
+    {
+      "key": "OPENROUTER_API_KEY",
+      "type": "sensitive",
+      "target": [
+        "preview"
+      ]
+    },
+    {
+      "key": "OPENROUTER_API_KEY",
+      "type": "sensitive",
+      "target": [
+        "development"
+      ]
+    },
+    {
+      "key": "OPENROUTER_API_KEY",
+      "type": "sensitive",
+      "target": [
+        "production"
+      ]
+    }
+  ],
+  "deploymentHasKeyName": true,
+  "createdAfterKeySettings": true,
+  "served": [
+    "index.html",
+    "js-admin-log-fixes-20261012/config.js",
+    "js-admin-log-fixes-20261012/app.js",
+    "js-admin-log-fixes-20261012/workspace-account.js",
+    "js-admin-log-fixes-20261012/setup-create.js",
+    "js-admin-log-fixes-20261012/admin-dashboard.js"
+  ],
+  "routes": [
+    {
+      "path": "/api/health/cloud",
+      "status": 200
+    },
+    {
+      "path": "/api/providers/connection",
+      "status": 401
+    },
+    {
+      "path": "/api/admin/generation?access=1",
+      "status": 401
+    }
+  ],
+  "stagingDataPreserved": true,
+  "settingsPreserved": true,
+  "state": {
+    "budgets": 0,
+    "requests": 0,
+    "pilots": 0,
+    "admissions": 0
+  },
+  "productionBefore": "dpl_6r9uQwmjxQjjPLC17Y5J4scdHDhA",
+  "productionAfter": "dpl_6r9uQwmjxQjjPLC17Y5J4scdHDhA",
+  "productionWritesByThisRun": 0,
+  "providerCalls": 0,
+  "paidUsd": 0,
+  "liveKeyValidityTested": false,
+  "scope": "Approved staging key refresh; generation remains paused",
+  "artifact": "/Users/davidwang/.codex/worktrees/openrouter-generation/Learnable/output/staging/2026-10-12-openrouter-key-refresh/release-NOtRHg",
+  "reportSha256": "76a4e0311519f0e37a9fa84e82ab53aa168106b2c0e9ed5d20403e892b4cd72f",
+  "sourceDeployment": "dpl_EeibUQdoAm4KyVAe1wxNirgJdjAs",
+  "sourceCommit": "42430ae6aad6bedbd212e5c0ac9a63be4f1bbd96",
+  "allOutputBytesPreserved": true,
+  "files": 4866,
+  "functions": 8,
+  "localPackageImports": 216,
+  "localDirectProviderGuards": 7,
+  "authenticatedAccessChecks": [
+    {
+      "name": "authenticated managed connection is paused and discloses no funding policy",
+      "passed": true
+    },
+    {
+      "name": "personal key setup rejected before validation or storage",
+      "passed": true
+    },
+    {
+      "name": "existing owner Admin entry preserved",
+      "passed": true
+    },
+    {
+      "name": "service RPC available; no implicit enrollment",
+      "passed": true
+    },
+    {
+      "name": "anonymous cannot invoke private pilot inspector",
+      "passed": true
+    },
+    {
+      "name": "anonymous cannot read private funding ledger",
+      "passed": true
+    },
+    {
+      "name": "authenticated cannot invoke private pilot inspector",
+      "passed": true
+    },
+    {
+      "name": "authenticated cannot read private funding ledger",
+      "passed": true
+    }
+  ],
+  "temporarySessionRevoked": true,
+  "screenshot": "/Users/davidwang/Learnable/output/qa/openrouter-key-refresh-ready-20261012.png",
+  "qa": {
+    "logicalRun": "openrouter-staging-20261011",
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "totalUsd": 0,
+    "capUsd": 5,
+    "cumulativeRecordedBaselineUsd": 19.259934,
+    "additionalHistoricalCost": "one archived unpriced text charge"
+  },
+  "remaining": [
+    "Refresh reviewed model policy/pricing",
+    "Provision one capped pilot and activate full-course testing",
+    "Live model compatibility, course quality, receipts, images and recovery acceptance"
+  ],
+  "evidence": [
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/prepared.json",
+      "sha256": "34f9d29f0d2bd6554f941aa908d431a3a8cf0aff46a59d52c6953ed82c63555f"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/deployment-intent.json",
+      "sha256": "b6eceb3b17c879e6e5d988273de022e6019beb05251c2d145d8668cbc1711486"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/deployment.json",
+      "sha256": "17699d19e48945dccf481ee455f1b8621487855263fbe8826de49b4b5fc7d8e4"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/verified.json",
+      "sha256": "fafe8d46e08dabf9090912595c214bda56d321412fd9ae5e8875edd8e645d5fb"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/access-verified.json",
+      "sha256": "53b6a586c6977a29431419436b9cc01a1e9b8237542af50c0b24ac137e1c3eec"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-key-refresh/temporary-session-revoked.json",
+      "sha256": "0dc11e3eede97f991556a6d98e8b1b8d3bc502172c22cbe321211f519b479307"
+    }
+  ]
+}

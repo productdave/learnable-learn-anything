@@ -4,9 +4,10 @@ The private-pilot implementation is ready for a bounded staging trial. It uses
 one server-owned OpenRouter key for the course plan, source research, lessons,
 Designer review and illustrations. Learner credits and payments remain parked.
 **The paused one-key build is now on [staging](https://learnable-staging.vercel.app).**
-Migrations 27/28 and hosted access checks passed. Generation remains paused
-because `OPENROUTER_API_KEY` is missing. Live course acceptance is still open;
-no allowance or model call was made. Production remains unchanged.
+Migrations 27/28 and hosted access checks passed. The Sensitive OpenRouter key
+is now included in the new staging deployment. Generation remains paused pending
+bounded pilot activation; the full course test still needs to run. No allowance or
+model call was made in this rollout; no production write was performed.
 
 Work is isolated on `codex/openrouter-single-key`, in
 [draft PR #6](https://github.com/productdave/learnable-learn-anything/pull/6).
@@ -95,7 +96,26 @@ under `output/playwright/openrouter/`. The packaged candidate is
 `dc69bd2a3e3b512f65005775c9d16da6656d68dbc310e26a74c9381dc447eeee`.
 Earlier packages from this phase are superseded and must not be deployed.
 
-## Hosted staging result
+## Current deployment: key refresh verified
+
+The key is configured and deployment `dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe` is Ready
+at [Learnable staging](https://learnable-staging.vercel.app). Vercel confirms the
+new deployment includes `OPENROUTER_API_KEY`; its secret value was never revealed.
+David approved a CLI upload after Vercel rejected browser redeployment of the
+prebuilt package. All 4,866 output files match the newer accepted Admin staging
+package. Eight functions, 216 offline imports and seven direct-provider guards
+passed. Six hosted assets match; health/authentication checks and eight
+signed-in API/access checks passed. The temporary session was revoked.
+
+[Key refresh verification](key-refresh-verification.json) records the current
+result. The four pilot/funding tables remain empty. Model calls, validity of the
+key against OpenRouter, complete-course QA and authenticated browser course flow
+are still untested. Production was not written by this rollout.
+
+Artifact: `output/staging/2026-10-12-openrouter-key-refresh/release-NOtRHg`;
+report SHA256 `76a4e0311519f0e37a9fa84e82ab53aa168106b2c0e9ed5d20403e892b4cd72f`.
+
+## Earlier hosted staging result
 
 [Hosted verification](hosted-verification.json) records the staging-only migration
 and deployment `dpl_6tWED2eWPe1XRP1t2qLCY4SqirCD`. Existing data and permissions
@@ -118,9 +138,8 @@ Rollout receipts are under `output/staging/2026-10-12-openrouter-closed/`.
 
 ## What's next
 
-1. Confirm the sensitive key exists in the staging project's Production and
-   Preview environments. Those names refer to environments inside the staging
-   project; do not change the live Learnable project.
+1. The key configuration/deployment step is complete. Keep its value server-only.
+   Live key validity and selected-model access still need the bounded course test.
 2. Re-read current staging state, review catalog pricing/access and check for
    newer accepted runtime work. Migrations 27/28 are installed; do not reapply.
    Create one explicit pilot enrollment with a whole-run US$5 ceiling. Keep old
@@ -132,7 +151,7 @@ Rollout receipts are under `output/staging/2026-10-12-openrouter-closed/`.
    saying David can test the complete flow. Production release is a later action.
 
 Current logical QA run `openrouter-staging-20261011`: text, search, images and
-retries each US$0. Cumulative recorded assistant QA is US$14.592942 plus one
+retries each US$0. Cumulative recorded assistant QA baseline is US$19.259934 plus one
 archived unpriced text charge. The US$5 cap includes every stage and retry.
 
 Protocol references: [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs),
