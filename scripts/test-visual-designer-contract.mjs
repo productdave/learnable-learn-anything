@@ -26,6 +26,35 @@ const generate = () => ({ decision: 'generate', reason: 'A side-by-side view mak
 const provider = (tool, input, inspect = () => {}) => ({ messages: { create: async request => { inspect(request); return { usage: { input_tokens: 30, output_tokens: 40 }, stop_reason: 'tool_use', content: [{ type: 'tool_use', name: tool, input }] }; } } });
 const edit = (field, value, sectionIndex = 0) => ({ scope: 'section', sectionIndex, field, value });
 
+test('numeric comparisons in image descriptions remain literal teaching text', async () => {
+  const course = fixture(), before = copy(course);
+  for (const comparison of ['<20% correction time', '>80% task completion', '<= 5 examples', '>=-2.5 degrees', '< .5 seconds']) {
+    for (const field of ['reason', 'prompt', 'alt', 'caption']) {
+      const visual = { ...generate(), [field]: `Show a validation gate labeled ${comparison}.` };
+      const submission = { ...plan(), visual };
+      const result = applyLessonVisualDesign(course, target, submission);
+      assert.equal(result.visual[field], visual[field], 'Comparisons must not be rewritten or removed');
+      assert.deepEqual(result.lesson.sections, saved(course).sections);
+    }
+  }
+  const visual = { ...generate(), reason: 'Keep <20% correction time as an illustrative threshold. '.repeat(20) };
+  const result = await runLessonVisualDesign(provider('submit_lesson_visual_design', { ...plan(), visual }), course, target, reviewFor(course));
+  assert.match(result.visual.reason, /<20%/);
+  assert.match(result.visual.reason, /\[shortened\]$/);
+  assert.deepEqual(course, before);
+});
+
+test('numeric comparisons cannot hide markup, links or unsafe tails in image plans', () => {
+  const course = fixture(), before = copy(course);
+  for (const unsafe of ['<20% <script>bad</script>', '>80% <svg/>', '<=5 https://example.org', '>=2 javascript:bad', '< .5 data:bad', '<<20%', '<20 onclick=bad>', '<twenty', '20 > label']) {
+    for (const field of ['reason', 'prompt', 'alt', 'caption']) {
+      assert.throws(() => applyLessonVisualDesign(course, target, { ...plan(), visual: { ...generate(), [field]: 'Show this illustrative comparison: ' + unsafe } }), { code: 'VISUAL_DESIGN_VISUAL' });
+    }
+  }
+  assert.throws(() => applyLessonVisualDesign(course, target, { ...plan(), visual: { ...generate(), reason: 'A threshold of <20%. '.repeat(40) + '<script>bad</script>' } }), { code: 'VISUAL_DESIGN_VISUAL' });
+  assert.deepEqual(course, before);
+});
+
 test('overlong image reasons are bounded metadata, not a reason to reject valid lesson work', async () => {
   for (const visual of [plan().visual, generate()]) {
     const course = fixture(), before = copy(course);
@@ -447,4 +476,10 @@ test('lesson audit enforces 800 UTF-8 bytes, retaining every flag and usage on r
   await assert.rejects(runLessonVisualDesign(provider('submit_lesson_visual_design', tooLarge, () => calls++), course, target, reviewFor(course), { onUsage: () => usage++ }), { code: 'VISUAL_DESIGN_AUDIT_SIZE', kind: 'visual_design' });
   assert.equal(calls, 3); assert.equal(usage, 3);
   assert.ok(JSON.stringify(audit(tooLarge)).length < 802, 'UTF-8 bytes, not JavaScript character count, decide the limit');
+});
+
+test('settled invalid gateway response records Designer usage before preserving a failed step',async()=>{
+ const calls=[],error=Object.assign(new Error('Paid gateway output was malformed'),{code:'invalid_output',paidOutput:{usage:{input_tokens:100,output_tokens:20,cost:.001},retryable:false}});
+ await assert.rejects(runCourseVisualReview({messages:{async create(){throw error;}}},fixture(),{onUsage:(usage,meta)=>calls.push({usage,meta})}),e=>e===error);
+ assert.equal(calls.length,1);assert.equal(calls[0].usage.cost,.001);assert.equal(calls[0].meta.attempt,1);
 });

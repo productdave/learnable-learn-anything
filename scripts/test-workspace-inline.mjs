@@ -8,6 +8,7 @@ import { parseHTML } from 'linkedom';
 import * as evidence from '../web/js/research-evidence.js';
 import { COURSE_AGENT_SEQUENCE, agentNameForStage } from '../web/js/generator/agents.mjs';
 import { imageCostHTML } from '../web/js/image-cost.js';
+import { briefTitle } from '../web/js/brief-presentation.js';
 
 const root = resolve(process.env.INLINE_JS_ROOT || 'web/js');
 const strip = source => source.replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '').replace(/^export /gm, '');
@@ -27,7 +28,7 @@ let job = { id:'job',ownerId:'owner',runner:'cloud',runId:'run-1',status:'runnin
 jobs.set('job', job);
 const emit = () => { for(const fn of [...listeners]) fn(); };
 const update = patch => { job={...job,...patch};jobs.set('job',job);emit(); };
-const context = vm.createContext({ window,document,location,navigator,history:{pushState(){calls.push('navigate');}},PopStateEvent:window.Event,AbortController,URLSearchParams,console,
+const context = vm.createContext({ config: { MANAGED_COURSE_GENERATION: false }, briefTitle, window,document,location,navigator,history:{pushState(){calls.push('navigate');}},PopStateEvent:window.Event,AbortController,URLSearchParams,console,
   setTimeout,clearTimeout,setInterval:fn=>{timers.add(fn);return fn;},clearInterval:fn=>timers.delete(fn),
   localStorage:{getItem:()=>null,removeItem(){}},sessionStorage:{getItem:()=>null,removeItem(){}},
   confirm:()=>{confirms++;return true;}, getUser:()=>user,onUserChange:fn=>authListeners.add(fn),getJob:id=>jobs.get(id),

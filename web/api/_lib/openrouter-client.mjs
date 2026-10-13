@@ -1,13 +1,14 @@
 // Normalizes schema-constrained text into Learnable's existing Messages facade.
 // Native PDF/search and images are deliberately separate acceptance gates.
 import { createHash } from 'node:crypto';
-import { openRouterRoute, quoteOpenRouterText, refuse, OpenRouterError } from './openrouter-policy.mjs';
+import { claudeOutputSchema } from './openrouter-schema.mjs';
+import { openRouterRoute, openRouterProviderTag, quoteOpenRouterText, refuse, OpenRouterError } from './openrouter-policy.mjs';
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const REQUEST_KEYS = new Set(['model', 'max_tokens', 'system', 'tools', 'tool_choice', 'messages', 'temperature', 'top_p', 'top_k']);
 const hash = json => createHash('sha256').update(json).digest('hex');
 
-async function boundedResult(response) {
+export async function boundedResult(response) {
   const limit = 4 * 1024 * 1024;
   if (Number(response.headers.get('content-length')) > limit) refuse('uncertain', 'Gateway response exceeded the receipt limit.');
   const reader = response.body?.getReader();
@@ -30,7 +31,7 @@ function tokenDetails(value, names) {
   return Object.fromEntries(names.filter(k => Number.isSafeInteger(value[k]) && value[k] >= 0).map(k => [k, value[k]]));
 }
 
-function invalidOutput(message, receipt, { retryable = true, kind = 'tool' } = {}) {
+export function invalidOutput(message, receipt, { retryable = true, kind = 'tool' } = {}) {
   const error = new OpenRouterError('invalid_output', message);
   // Only attached after durable settlement. The stage may use its existing
   // second attempt; no new retry loop or raw model output is exposed here.
@@ -68,9 +69,9 @@ export function prepareOpenRouterText(original, route) {
   // Only approved fields are built. Incompatible forced tools/sampling are not forwarded.
   const body = { model: route.model, messages, max_tokens: opts.max_tokens, stream: false,
     reasoning: route.reasoning,
-    provider: { only: [route.provider], allow_fallbacks: false, require_parameters: true,
+    provider: { only: [openRouterProviderTag(route)], allow_fallbacks: false, require_parameters: true,
       data_collection: 'deny', max_price: { prompt: route.inputDollarsPerMillion, completion: route.outputDollarsPerMillion } },
-    response_format: { type: 'json_schema', json_schema: { name: route.tool, strict: true, schema: tool.input_schema } } };
+    response_format: { type: 'json_schema', json_schema: { name: route.tool, strict: true, schema: route.provider === 'Anthropic' ? claudeOutputSchema(tool.input_schema) : tool.input_schema } } };
   const json = JSON.stringify(body);
   if (Buffer.byteLength(json) > route.maxInputBytes) refuse('unsupported', 'Request is too large for the reviewed text route.');
   return { body, json, reservedMicrousd, fingerprint: hash(json) };
@@ -97,9 +98,10 @@ export function openRouterReceipt(result, reservation, route) {
 }
 
 export function createOpenRouterClient({ apiKey, policy, task, ledger, validateResult,
-  requestBudget = null, beforeDispatch = null, fetcher = fetch, now = Date.now } = {}) {
+  operationScope = '', requestBudget = null, beforeDispatch = null, fetcher = fetch, now = Date.now } = {}) {
   if (typeof window !== 'undefined' || !apiKey || !ledger?.reserve || !ledger?.settle || !ledger?.hold
       || typeof validateResult !== 'function') refuse('configuration', 'Server key, durable ledger and result validator are required.');
+  if (operationScope && !/^restart_[0-9a-f-]{36}$/i.test(operationScope)) refuse('configuration', 'Invalid restart authorization.');
   let stopped = null;
   return { messages: { async create(original) {
     if (stopped) throw stopped;
@@ -111,7 +113,7 @@ export function createOpenRouterClient({ apiKey, policy, task, ledger, validateR
     const request = requestBudget?.beginRequest();
     let hold, settled = false;
     try {
-      hold = await ledger.reserve({ ...reservation, operationKey: `${task}:${reservation.fingerprint}`, model: route.model, task });
+      hold = await ledger.reserve({ ...reservation, operationKey: `${operationScope ? operationScope + ':' : ''}${task}:${reservation.fingerprint}`, model: route.model, task });
       request?.throwIfExpired?.();
       // Recheck the lease after reservation; a cancellation must not initiate paid work.
       await beforeDispatch?.();

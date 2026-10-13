@@ -3,7 +3,7 @@ const list = value => Array.isArray(value) ? value : [];
 const text = value => typeof value === 'string' && !!value.trim();
 const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 export const sameImageLesson = (a,b) => a?.moduleId === b?.moduleId && a?.topicId === b?.topicId;
-export const savedGeneratedImage = lesson => list(lesson?.sections).find(s => s?.type === 'image' && s.image_slot === 'instruction' && s.generated_by === 'openai' && uuid(s.asset_id) && text(s.alt));
+export const savedGeneratedImage = lesson => list(lesson?.sections).find(s => s?.type === 'image' && s.image_slot === 'instruction' && ['openai', 'openrouter'].includes(s.generated_by) && uuid(s.asset_id) && text(s.alt));
 export function courseImageProgress(course, requests = []) {
   const selected = list(course?.config?.components || course?._brief?.components).includes('images');
   const integrated = (course?.config?.materials_policy || course?._brief?.materials_policy) === 'integrated-visuals-v2';

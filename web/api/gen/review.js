@@ -7,9 +7,10 @@
 // - approve_research: write lessons, assemble, and save the course.
 // - rerun_research: rerun research with feedback, then pause again.
 
+import { hasGenerationBinding, readGenerationApiKey } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
-import { requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
+import { requireSafeJobId, userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
 import { runGeneration as defaultRunGeneration } from '../_lib/gen-runner.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { outlineForBrief, topicCountForBrief } from '../_lib/gen-brief.mjs';
@@ -82,9 +83,10 @@ return async function handler(req, res) {
   }
 
   let apiKey;
-  try { apiKey = await readApiKey(supabase, user.id); }
+  try { apiKey = await readGenerationApiKey(supabase, user.id, job, { mode: transition.runnerMode, checkpoint: transition.checkpoint, userBrief: (transition.runnerRow || job).user_brief }); }
   catch (e) {
     if (isGenerationBudgetStop(e)) throw e;
+    if (hasGenerationBinding(job)) return res.status(e.statusCode || 409).json({ code: e.code, error: e.message });
     let marked;
     try {
       marked = await markReviewWaitingForApiKey(supabase, jobId, user.id, transition.expectedStatus, job.run_id, e.message || String(e), transition.patch.review_history);
@@ -148,7 +150,7 @@ export function buildReviewTransition({ action, job, feedback = '', runId = '', 
       expectedStatus: 'review_curriculum',
       runnerMode: 'research',
       runnerRow: job,
-      checkpoint: { brief, research: {}, topics_by_key: {}, failures: [], extracted_urls: job.extracted_urls || [] },
+      checkpoint: { stage: 'research', brief, research: {}, topics_by_key: {}, failures: [], extracted_urls: job.extracted_urls || [] },
       patch: {
         status: 'running',
         run_id: runId,
@@ -189,7 +191,7 @@ export function buildReviewTransition({ action, job, feedback = '', runId = '', 
       expectedStatus: 'review_curriculum',
       runnerMode: 'curriculum',
       runnerRow: { ...job, user_brief: userBrief },
-      checkpoint: { extracted_urls: job.extracted_urls || [] },
+      checkpoint: { stage: 'intake', extracted_urls: job.extracted_urls || [] },
       patch: {
         status: 'running',
         run_id: runId,
@@ -222,6 +224,7 @@ export function buildReviewTransition({ action, job, feedback = '', runId = '', 
       runnerMode: 'complete',
       runnerRow: job,
       checkpoint: {
+        stage: 'topics',
         brief,
         research: job.research || {},
         topics_by_key: job.topics_by_key || {},
@@ -256,7 +259,7 @@ export function buildReviewTransition({ action, job, feedback = '', runId = '', 
       expectedStatus: 'review_research',
       runnerMode: 'research',
       runnerRow: sourceUpdate ? { ...job, user_brief: userBrief } : job,
-      checkpoint: { brief, research: {}, topics_by_key: {}, failures: [], extracted_urls: extractedUrls },
+      checkpoint: { stage: 'research', brief, research: {}, topics_by_key: {}, failures: [], extracted_urls: extractedUrls },
       patch: {
         status: 'running',
         run_id: runId,

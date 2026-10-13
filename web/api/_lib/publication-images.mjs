@@ -33,7 +33,7 @@ export async function collectPublicationImages({ db, ownerId, courseId, course, 
       for (const [si,section] of sections.entries()) {
         if (section?.type!=='image') continue;
         if (++count>24) fail('Public sharing supports up to 24 images per course in this preview. Your previous public version is unchanged.');
-        if (!/^[a-f0-9-]{36}$/.test(section.asset_id || '') || section.generated_by!=='openai') continue;
+        if (!/^[a-f0-9-]{36}$/.test(section.asset_id || '') || !['openai', 'openrouter'].includes(section.generated_by)) continue;
         const row=await store.get(ownerId,section.asset_id), a=row?.payload?.asset, target=row?.payload?.target;
         if (!row || row.owner_id!==ownerId || row.course_id!==courseId || !row.accepted || row.status!=='ready' || row.payload?.assetRemoved || target?.moduleId!==mod.id || target?.topicId!==topic.id || !hex(a?.sha256) || !Number.isInteger(a.bytes) || a.bytes<1 || a.bytes>8388608 || !Number.isInteger(a.width) || !Number.isInteger(a.height) || a.width<1 || a.height<1) continue;
         total+=a.bytes;

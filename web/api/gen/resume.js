@@ -5,9 +5,10 @@
 // checkpoint (brief, research per module, topics_by_key). Skips work that
 // already finished — no re-billing.
 
+import { hasGenerationBinding, readGenerationApiKey } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
-import { readJsonBody, requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
+import { readJsonBody, requireSafeJobId, userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
 import { runGeneration as defaultRunGeneration } from '../_lib/gen-runner.mjs';
 import { createGenerationRequestBudget, bindGenerationClient, withGenerationSignal, isGenerationBudgetStop } from '../_lib/gen-request-budget.mjs';
 import { checkpointForJob, isImageOnlyRecovery, isRecoverableStatus, isReviewStatus, RECOVERABLE_STATUSES, resumeModeFor, resumeStageFor } from '../_lib/gen-recovery.mjs';
@@ -58,11 +59,11 @@ return async function handler(req, res) {
 
   let apiKey;
   try {
-    if (isImageOnlyRecovery(job)) apiKey = null;
-    else apiKey = await readApiKey(supabase, user.id);
+    apiKey = await readGenerationApiKey(supabase, user.id, job, { mode: resumeModeFor(job), checkpoint: checkpointForJob(job), skipLegacyKey: isImageOnlyRecovery(job) });
   }
   catch (e) {
     if (isGenerationBudgetStop(e)) throw e;
+    if (hasGenerationBinding(job)) return res.status(e.statusCode || 409).json({ code: e.code, error: e.message });
     let marked;
     try {
       marked = await markRecoverableWaitingForApiKey(supabase, jobId, user.id, job.status, job.run_id, e.message || String(e));

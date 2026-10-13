@@ -1,3 +1,4 @@
+import { inspectOpenRouterAccess, publicOpenRouterAccess } from '../_lib/openrouter-admission.mjs';
 import { userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
 import { readProtectedKey, sealProviderKey, checkAnthropicKey } from '../_lib/provider-vault.mjs';
 import { getAiModelRegistry, assertCloudGenerationModelSupport } from '../_lib/ai-models.mjs';
@@ -11,7 +12,13 @@ export function createConnectionHandler({ authenticate = userFromRequest, admin 
     let user;
     try { ({ user } = await authenticate(req)); } catch { return res.status(401).json({ error: 'Sign in again to manage your AI connection.' }); }
     try {
-      const client = admin(), models = getAiModelRegistry(); assertCloudGenerationModelSupport(models);
+      const client = admin();
+      const platform = await inspectOpenRouterAccess(client, user.id);
+      if (platform) {
+        if (req.method === 'GET') return res.status(200).json(publicOpenRouterAccess(platform));
+        if (req.method === 'POST') return res.status(409).json({ error: 'Course creation uses the Learnable connection. No personal API key is needed.' });
+      }
+      const models = getAiModelRegistry(); assertCloudGenerationModelSupport(models);
       if (req.method === 'GET') return res.status(200).json({ connected: !!await readProtectedKey(client, user.id), provider: 'anthropic', model: models.curriculum.model });
       if (req.method === 'DELETE') {
         const { error } = await client.from('provider_connections').delete().eq('owner_id', user.id).eq('provider', 'anthropic');

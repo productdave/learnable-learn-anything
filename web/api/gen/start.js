@@ -8,6 +8,7 @@
 // finishes or maxDuration is hit. Real-time status updates land in the
 // generation_jobs row; the client subscribes to those via Realtime.
 
+import { inspectOpenRouterAccess, admitOpenRouterJob } from '../_lib/openrouter-admission.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
 import { readJsonBody, requirePdfRefsBelongToJob, requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
@@ -77,19 +78,24 @@ return async function handler(req, res) {
       status: await expireExistingJobIfStale(supabase, prior, user.id), pdfRefs: prior.user_brief?.pdfRefs || [] });
   }
 
+  let platform;
+  try { platform = await inspectOpenRouterAccess(supabase, user.id);
+    if (platform && !platform.ready) return res.status(409).json({ code: platform.reason, error: platform.message, ready: false }); }
+  catch (error) { return res.status(error.statusCode || 409).json({ code: error.code, error: error.message, ready: false }); }
   // Get the user's Anthropic key (stored under user_state by sync.js).
   let apiKey;
-  try { apiKey = await readApiKey(supabase, user.id); }
+  try { apiKey = platform ? null : await readApiKey(supabase, user.id); }
   catch (e) { if (isGenerationBudgetStop(e)) throw e; return res.status(e.statusCode || 400).json({ error: e.message }); }
 
-  if (!await imageConnection(supabase, user.id)) return res.status(409).json({ code: 'image_connection', error: 'Connect OpenAI on the Create course screen so Learnable can include useful illustrations. No generation has started.' });
+  if (!platform && !await imageConnection(supabase, user.id)) return res.status(409).json({ code: 'image_connection', error: 'Connect OpenAI on the Create course screen so Learnable can include useful illustrations. No generation has started.' });
 
   // Insert the row first so the client can subscribe before work begins.
   // If the browser retries the same request after a network hiccup, attach to
   // the existing owned job instead of failing and stranding the local card.
   requestBudget.assertCanStart();
+  const binding = platform ? await admitOpenRouterJob(supabase, user.id, jobId, platform) : {};
   const { error: insertErr } = await supabase.from('generation_jobs').insert({
-    id: jobId,
+    ...binding, id: jobId,
     owner_id: user.id,
     user_brief: { ...userBrief, pdfRefs },
     status: 'running',

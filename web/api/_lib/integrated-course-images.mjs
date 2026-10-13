@@ -3,15 +3,15 @@
 // never creates a replacement for an uncertain provider attempt.
 import { createHash } from 'node:crypto';
 import { imageRequestStore, imageAssetStore, ImageRequestError } from './image-request-store.mjs';
-import { imageLessonHash, imageFundingQuote, startImageRequest, runImageRequest, reconcileImageRequest } from './image-request.mjs';
+import { imageLessonHash, imageFundingQuote, imageRequestPolicy, startImageRequest, runImageRequest, reconcileImageRequest } from './image-request.mjs';
 import { imagePolicy, ImageGenerationError } from './image-policy.mjs';
 import { IMAGE_SAVE_RESERVE_MS } from './image-execution.mjs';
 import { usesVisualDesigner, assertDesignComplete } from './visual-designer.mjs';
 import { refinementFingerprint, refinementTarget } from './course-refinement.mjs';
 import { GENERATION_PAUSE, GENERATION_UNCERTAIN } from './gen-request-budget.mjs';
 
-export const INTEGRATED_VISUALS_POLICY = 'integrated-visuals-v2';
-export const usesIntegratedVisuals = brief => brief?.materials_policy === INTEGRATED_VISUALS_POLICY;
+import { INTEGRATED_VISUALS_POLICY, usesIntegratedVisuals } from './generation-materials-policy.mjs';
+export { INTEGRATED_VISUALS_POLICY, usesIntegratedVisuals };
 const fail = (message, code = 'GENERATION_IMAGE_ATTENTION') => { throw Object.assign(new Error(message), { code }); };
 const savedImage = lesson => lesson?.sections?.find(section => section.type === 'image' && section.image_slot === 'instruction' && section.asset_id);
 
@@ -93,7 +93,7 @@ export async function attachGenerationImage(args) {
   const takeaway = lesson.sections.findIndex(section => section.type === 'takeaway');
   const index = Number.isInteger(args.visual.afterSectionIndex) && args.visual.afterSectionIndex >= 0 && args.visual.afterSectionIndex < lesson.sections.length
     ? args.visual.afterSectionIndex + 1 : takeaway < 0 ? lesson.sections.length : takeaway;
-  lesson.sections.splice(index, 0, { type: 'image', asset_id: row.id, image_slot: 'instruction', generated_by: 'openai',
+  lesson.sections.splice(index, 0, { type: 'image', asset_id: row.id, image_slot: 'instruction', generated_by: row.payload.quote.provider === 'openrouter' ? 'openrouter' : 'openai',
     alt: row.payload.alt, ...(args.visual.caption ? { caption: args.visual.caption } : {}) });
   const { data, error } = await args.supabase.rpc('attach_generation_course_image', {
     p_owner: args.ownerId, p_job: args.jobId, p_run: args.runId, p_course: args.courseId,
@@ -106,9 +106,9 @@ export async function attachGenerationImage(args) {
 
 export async function runIntegratedCourseImages({ supabase, ownerId, jobId, runId, courseId, requestBudget,
   assertRunnerWritable, checkpoint = {}, patch, withHeartbeat = (_label, work) => work(), retryFailedImages = false,
-  env = process.env, store = imageRequestStore(supabase), assets = imageAssetStore(supabase), generate,
-  attach = attachGenerationImage } = {}) {
-  const args = { supabase, ownerId, jobId, runId, courseId, store, assets, env };
+  env = process.env, store = imageRequestStore(supabase), assets = imageAssetStore(supabase), generate, gatewayPolicy = null,
+  attach = attachGenerationImage, trace = null } = {}) {
+  const args = { supabase, ownerId, jobId, runId, courseId, store, assets, env, gatewayPolicy, trace };
   let course = await loadOwnedDraft(args);
   args.requireDesign = usesVisualDesigner(course.payload._brief) || course.payload._visualDesign != null;
   let rows = integratedImageInventory(course.payload);
@@ -160,12 +160,12 @@ export async function runIntegratedCourseImages({ supabase, ownerId, jobId, runI
         request = null;
       }
     }
-    const dispatchWindow = imagePolicy(env).timeoutMs + IMAGE_SAVE_RESERVE_MS;
+    const dispatchWindow = imageRequestPolicy(env, gatewayPolicy).timeoutMs + IMAGE_SAVE_RESERVE_MS;
     if (!request || request.payload.status === 'queued') {
       if (requestBudget.remainingMs() < dispatchWindow) {
         throw Object.assign(new Error('Continuing course illustrations in the next hosting time slice.'), { code: GENERATION_PAUSE });
       }
-      const funding = imageFundingQuote(env);
+      const funding = imageFundingQuote(env, gatewayPolicy);
       if (!request) await startImageRequest({ ...args, operationId: item.operationId, expectedRequestId: item.expectedRequestId || null,
         target: row.target, slot: `instruction-${cycle}`, baseHash, prompt: visual.prompt, alt: visual.alt,
         consent: true, fundingHash: funding.hash, acknowledgePossibleCharge: !!item.expectedRequestId });
@@ -192,7 +192,7 @@ export async function runIntegratedCourseImages({ supabase, ownerId, jobId, runI
         ['outcome_unknown', 'asset_missing', 'save_unconfirmed', 'response'].includes(result.request.error);
       fail(uncertain
         ? 'An illustration outcome could not be confirmed. Your lessons are saved. Check this same course again; no replacement image will be generated automatically.'
-        : `OpenAI course image generation could not finish (${result.request.error || result.request.status}). Your lessons are saved. Resolve the connection or provider issue, then Resume this course.`);
+        : `${gatewayPolicy ? 'Learnable' : 'OpenAI'} course image generation could not finish (${result.request.error || result.request.status}). Your lessons are saved. Resolve the connection or provider issue, then Resume this course.`);
     }
     await attach({ ...args, operationId: item.operationId, acceptanceId: item.acceptanceId, visual });
     item.status = 'saved'; item.error = null;

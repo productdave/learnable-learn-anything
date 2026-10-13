@@ -18,6 +18,13 @@ const diagnosticFields = new Set('summary guidance lessons flags kind message mo
 const issueCodes = new Set('invalid_type invalid_literal unrecognized_keys invalid_union invalid_union_discriminator invalid_enum_value invalid_arguments invalid_return_type invalid_date invalid_string too_small too_big invalid_intersection_types not_multiple_of not_finite custom'.split(' '));
 const stopReasons = new Set(['tool_use', 'max_tokens', 'end_turn', 'stop_sequence', 'pause_turn', 'refusal']);
 const unsafeVisualText = /[<>]|https?:\/\/|(?:javascript|data)\s*:/i;
+function hasUnsafeVisualText(value) {
+  // Numeric comparisons are teaching text, not HTML (e.g. "<20% correction
+  // time"). Ignore only those comparisons while checking; keep the original
+  // string verbatim. Remaining brackets, markup and unsafe URLs still fail.
+  const withoutComparisons = value.replace(/[<>]=?\s*[+-]?(?:\d+(?:\.\d+)?|\.\d+)/g, '');
+  return unsafeVisualText.test(withoutComparisons);
+}
 function safeIssues(issues) {
   return (Array.isArray(issues) ? issues : []).slice(0, 4).map(issue => ({
     path: (Array.isArray(issue?.path) ? issue.path : []).slice(0, 8).map(part =>
@@ -31,8 +38,14 @@ function safeIssues(issues) {
 // unknown keys, submitted values, request headers or arbitrary provider codes.
 export function visualDesignFailureDiagnostic(error, responseReceived = false) {
   const httpStatus = Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : null;
-  const code = diagnosticCodes.has(error?.code) || error?.code === 'GENERATION_REQUEST_UNCERTAIN'
-    ? error.code : httpStatus ? 'PROVIDER_HTTP_ERROR' : 'UNCLASSIFIED_ERROR';
+  // Classify this known provider rejection without retaining its raw body or
+  // treating other 400s (invalid parameters, context, etc.) as billing failures.
+  const creditBalance = httpStatus === 400 && error?.type === 'invalid_request_error'
+    && typeof error?.message === 'string'
+    && /\bcredit balance is too low to access the Anthropic API\b/i.test(error.message);
+  const code = creditBalance ? 'PROVIDER_CREDIT_BALANCE'
+    : diagnosticCodes.has(error?.code) || error?.code === 'GENERATION_REQUEST_UNCERTAIN'
+      ? error.code : httpStatus ? 'PROVIDER_HTTP_ERROR' : 'UNCLASSIFIED_ERROR';
   return { version: 1, code, responseReceived: !!responseReceived,
     ...(httpStatus ? { httpStatus } : {}),
     ...(stopReasons.has(error?.diagnostic?.stopReason) ? { stopReason: error.diagnostic.stopReason } : {}),
@@ -86,7 +99,7 @@ function parseLessonDesign(input) {
   if (input && !Array.isArray(input) && visual && !Array.isArray(visual) &&
       ['generate', 'omit'].includes(visual.decision) && typeof visual.reason === 'string' &&
       visual.reason.trim().length > LESSON_VISUAL_REASON_LIMIT) {
-    if (unsafeVisualText.test(visual.reason)) fail('VISUAL', 'Image plans must contain only relevant teaching descriptions, not HTML or external URLs.');
+    if (hasUnsafeVisualText(visual.reason)) fail('VISUAL', 'Image plans must contain only relevant teaching descriptions, not HTML or external URLs.');
     // Only this auxiliary justification may be shortened. The decision, image
     // prompt, accessibility text and all teaching still pass their strict checks.
     // Mark the abbreviation, preserve UTF-16 pairs, and never mutate the proposal.
@@ -243,8 +256,13 @@ async function callOnce(client, tool, input, system, options, metadata, validate
     // The persisted action intent spans this bounded correction. Reset outcome
     // certainty before each dispatch: a lost second response is still unknown.
     options.onDispatch?.();
-    const response = await client.messages.create({ model: options.model || modelForTask('lesson'), max_tokens: tool === courseVisualReviewTool ? 12000 : 16000,
-      system, tools: [tool], tool_choice: { type: 'tool', name: tool.name }, messages: [{ role: 'user', content: JSON.stringify(submitted) }] });
+    let response;
+    try { response = await client.messages.create({ model: options.model || modelForTask('lesson'), max_tokens: tool === courseVisualReviewTool ? 12000 : 16000,
+      system, tools: [tool], tool_choice: { type: 'tool', name: tool.name }, messages: [{ role: 'user', content: JSON.stringify(submitted) }] }); }
+    catch (error) {
+      if (error.paidOutput?.usage) options.onUsage?.(error.paidOutput.usage, { task: 'lesson', stage: 'visual_design', ...metadata, attempt });
+      throw error;
+    }
     options.onUsage?.(response.usage, { task: 'lesson', stage: 'visual_design', ...metadata, attempt });
     const uses = response.content?.filter(block => block.type === 'tool_use') || [];
     try {
@@ -382,7 +400,7 @@ export function applyLessonVisualDesign(course, target, input) {
   if (design.sectionOrder) { validateOrder(original.sections, design.sectionOrder); lesson.sections = design.sectionOrder.map(index => lesson.sections[index]); }
   if (!design.alignment.checksMatchTeaching && !design.flags.some(flag => flag.kind === 'alignment' || flag.kind === 'contradiction')) fail('ALIGNMENT', 'Unresolved learning-check alignment needs an explicit review flag.');
   for (const key of ['reason', 'prompt', 'alt', 'caption']) if (typeof design.visual[key] === 'string') {
-    if (unsafeVisualText.test(design.visual[key])) fail('VISUAL', 'Image plans must contain only relevant teaching descriptions, not HTML or external URLs.');
+    if (hasUnsafeVisualText(design.visual[key])) fail('VISUAL', 'Image plans must contain only relevant teaching descriptions, not HTML or external URLs.');
   }
   lesson.visual = clone(design.visual);
   const parsed = topicContentSchemaFor(briefFor(course), selected.meta).safeParse(lesson);

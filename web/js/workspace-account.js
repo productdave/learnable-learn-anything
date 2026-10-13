@@ -1,11 +1,12 @@
-import { createSetupGenerationClient } from './setup-generation-client.js?v=9';
+import { createSetupGenerationClient } from './setup-generation-client.js?v=10';
 import { escapeHome as esc } from './home-model.js?v=7';
+import { createAdminClient } from './admin-client.js?v=2';
 
 let currentDialog = null;
 
 // Workspace creation owns a server-vault connection. Legacy tutor keys are not
 // read, migrated or erased here. Closing/connecting never authorizes generation.
-export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCredentials = false, client = createSetupGenerationClient() }) {
+export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCredentials = false, client = createSetupGenerationClient(), adminClient = createAdminClient() }) {
   if (currentDialog?.isConnected) { currentDialog.focus(); return; }
   const user = getUser();
   if (!user?.id) return;
@@ -19,14 +20,15 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
     <p class="auth-email">${esc(user.email || 'Signed in')}</p>
     <p class="auth-note" id="workspace-account-intro">Manage the connection used to create your courses. Your courses and requests stay saved to this account.</p>
     <section class="workspace-account-connection" aria-labelledby="workspace-claude-title">
-      <h3 id="workspace-claude-title">Claude · course creation</h3>
-      <p class="auth-note">Use your own Claude API account for plans, research and lessons. Generation is billed by your provider only when you explicitly start it. Connecting checks access; it does not generate content.</p>
+      <h3 id="workspace-claude-title">Course creation</h3>
+      <p class="auth-note" data-account-legacy-intro>Use your own Claude API account for plans, research and lessons. Generation is billed by your provider only when you explicitly start it. Connecting checks access; it does not generate content.</p>
       <div data-account-connection></div>
     </section>
     <details class="workspace-account-other"><summary>Images and tutor connections</summary>
       <p class="auth-note">Useful course images are created with OpenAI during course creation. You can connect OpenAI on the Create course screen; there is no separate image workspace to complete.</p>
       <p class="auth-note">The existing tutor uses a separate browser-stored key, managed in the tutor. Connecting or disconnecting here does not change that key.</p>
     </details>
+    <section class="workspace-admin-entry" data-account-admin hidden aria-label="Administration"></section>
     <button type="button" class="auth-btn auth-btn--ghost" data-account-signout>Sign out</button>
     <p class="auth-msg auth-msg--err" data-account-signout-error role="alert" tabindex="-1" hidden></p>`;
   const host = dialog.querySelector('[data-account-connection]');
@@ -49,6 +51,15 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
     const connected = state.connection?.connected === true, known = state.connection !== null;
     const disabled = state.busy ? 'disabled' : '';
     host.setAttribute('aria-busy', String(!!state.busy));
+    const managed = state.connection?.managed === true || state.managed === true;
+    dialog.querySelector('[data-account-legacy-intro]').hidden = !known || managed;
+    dialog.querySelector('.workspace-account-other').hidden = !known || managed;
+    if (managed) {
+      host.innerHTML = `<p class="workspace-account-status" role="status" tabindex="-1">${esc(state.busy || state.error || state.connection?.message || 'Course connection status is unavailable. Check again.')}</p><p class="auth-note">Learnable manages one connection for course plans, research, lessons and illustrations.</p><button type="button" class="auth-btn auth-btn--ghost" data-account-action="check" ${disabled}>Check status</button>`;
+      dialog.querySelector('[data-account-signout]').disabled = !!state.busy;
+      if (focus) host.querySelector(focus)?.focus({ preventScroll: true });
+      return;
+    }
     host.innerHTML = `<p class="workspace-account-status" role="status" tabindex="-1">${esc(state.busy || state.notice || (known ? connected ? 'Connected securely' : 'Not connected' : 'Connection status unavailable'))}</p>
       ${state.error ? `<p class="auth-msg auth-msg--err" role="alert" tabindex="-1" data-account-error>${esc(state.error)}</p>` : ''}
       ${known ? `<p class="auth-note">${connected ? `Using ${esc(state.connection.model || 'your account’s course model')}. ` : ''}This connection is encrypted on the server, not stored in this browser or in your course.</p>` : ''}
@@ -76,7 +87,7 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
     try {
       const result = await (action === 'check' ? client.connection(owner) : action === 'disconnect' ? client.disconnect(owner) : client.connect(owner, action.key));
       let cleared;
-      if (sameOwner() && result.connected && (action !== 'check' || state.recoveryPending)) {
+      if (sameOwner() && !result.managed && result.connected && (action !== 'check' || state.recoveryPending)) {
         state.recoveryPending = true;
         if (active()) { state.connection = result; state.busy = 'Connected. Updating paused course status…'; draw(); }
         try {
@@ -88,7 +99,7 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
       }
       if (sameOwner()) notify(result, cleared);
       if (!active() || ticket !== mine) return;
-      state.connection = result; state.replacing = false; state.confirming = false;
+      state.managed = result.managed === true; state.connection = result; state.replacing = false; state.confirming = false;
       state.notice = action === 'check' ? '' : action === 'disconnect' ? 'Claude disconnected. Saved courses are unchanged.' : 'Claude connected securely. No course generation has started.';
     } catch {
       // A failed response cannot establish whether a mutation reached the server.
@@ -133,5 +144,17 @@ export function openWorkspaceAccount({ getUser, onUserChange, signOut, recoverCr
   currentDialog = dialog; document.body.append(dialog); draw(); dialog.showModal();
   dialog.querySelector('h2').focus();
   void run('check');
+  void adminClient.access().then(result => {
+    if (!active() || result.allowed !== true) return;
+    const entry = dialog.querySelector('[data-account-admin]');
+    entry.hidden = false;
+    entry.innerHTML = '<h3>Admin</h3><p class="auth-note">Generation logs, token usage and agent handoffs across Learnable.</p><a href="?admin=generation">Open admin overview →</a>';
+    entry.querySelector('a').addEventListener('click', event => {
+      // Same-tab navigation must release the modal and its focus trap. Let the
+      // app's router handle the link; modified clicks keep this tab unchanged.
+      if (!event.defaultPrevented && (event.button ?? 0) === 0
+          && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) close();
+    });
+  }).catch(() => { /* Access is checked again on every server request. */ });
   return { close };
 }

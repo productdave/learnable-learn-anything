@@ -33,7 +33,7 @@ execFileSync('docker', command('postgres', `create database ${db}`), { stdio: 'p
 try {
   query(`create table public.generation_jobs(id text primary key,owner_id uuid,run_id text,status text,lease_expires_at timestamptz);
     insert into public.generation_jobs values('${job}','${owner}','${lease}','running',now()+interval '1 hour');`);
-  query(readFileSync(new URL('../db/25-platform-ai-spend.sql', import.meta.url), 'utf8'));
+  query(readFileSync(new URL('../db/27-platform-ai-spend.sql', import.meta.url), 'utf8'));
   check('migration creates no grants', () => assert.equal(query('select count(*) from public.learnable_ai_budgets'), '0'));
   check('no policy/grants cannot reserve', () => assert.equal(result(reserve(1)).ok, false));
   for (const role of ['anon', 'authenticated']) check(`${role} cannot read budgets or invoke reserve`, () => {

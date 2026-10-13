@@ -307,7 +307,7 @@ for (const kind of ['create', 'review', 'start', 'resume', 'restart', 'credentia
     assert.equal((await f.call()).code, 401); assert.equal(f.calls.length, 0);
     if (kind !== 'start') {
       const other = await fixture(kind, { owner: 'other-owner' });
-      assert.equal((await other.call()).code, kind === 'credentials' ? 400 : 404); assert.equal(other.runs.length, 0);
+      assert.equal((await other.call()).code, 404); assert.equal(other.runs.length, 0);
     }
   });
 

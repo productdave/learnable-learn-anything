@@ -4,6 +4,7 @@ import { refinementTarget, refinementFingerprint } from './course-refinement.mjs
 import { generateCreatorImage, decodeImagePNG, imageUsage } from './openai-image.mjs';
 import { imagePolicy, requireImagePolicy, ImageGenerationError } from './image-policy.mjs';
 import { imageRequestStore, imageAssetStore, ImageRequestError } from './image-request-store.mjs';
+import { openRouterImagePolicy } from './openrouter-image.mjs';
 import { IMAGE_SAVE_RESERVE_MS } from './image-execution.mjs';
 
 export const IMAGE_REQUEST_LEASE_MS = 300000;
@@ -24,8 +25,12 @@ export function imageLessonHash(row, target) {
     return refinementFingerprint({ instance: row.created_at, courseId: row.id, module: selected.mod.id, lesson: selected.lesson });
   } catch { fail('stale'); }
 }
-export function imageFundingQuote(env = process.env) {
-  const policy = imagePolicy(env); requireImagePolicy(policy);
+export function imageRequestPolicy(env = process.env, gatewayPolicy = null) {
+  if (gatewayPolicy) return openRouterImagePolicy(gatewayPolicy);
+  const policy = imagePolicy(env); requireImagePolicy(policy); return policy;
+}
+export function imageFundingQuote(env = process.env, gatewayPolicy = null) {
+  const policy = imageRequestPolicy(env, gatewayPolicy);
   const quote = { funding: policy.funding, provider: policy.provider, model: policy.model, n: policy.n,
     size: policy.size, quality: policy.quality, outputFormat: policy.output_format, moderation: policy.moderation };
   return { ...quote, hash: refinementFingerprint(quote) };
@@ -71,7 +76,7 @@ async function view(args, row, savedCourse) {
 }
 export async function inspectImageLesson(args) {
   const row = await course(args);
-  return { baseHash: imageLessonHash(row, args.target), funding: imageFundingQuote(args.env) };
+  return { baseHash: imageLessonHash(row, args.target), funding: imageFundingQuote(args.env, args.gatewayPolicy) };
 }
 export async function getImageRequest(args) { return view(args, await read(args)); }
 export async function listImageRequests(args) {
@@ -85,7 +90,7 @@ export async function startImageRequest(args) {
   identity(args);
   if (!uuid(args.operationId) || !(args.expectedRequestId === null || uuid(args.expectedRequestId))) fail('request', 400);
   if (args.consent !== true) fail('consent', 400);
-  const quote = imageFundingQuote(args.env), policy = imagePolicy(args.env);
+  const quote = imageFundingQuote(args.env, args.gatewayPolicy), policy = imageRequestPolicy(args.env, args.gatewayPolicy);
   if (args.fundingHash !== quote.hash) fail('consent', 400);
   const prompt = typeof args.prompt === 'string' ? args.prompt.trim() : '', alt = typeof args.alt === 'string' ? args.alt.trim() : '';
   if (!prompt || [...prompt].length > policy.maxPromptCharacters || !alt || [...alt].length > policy.maxAltCharacters ||
@@ -136,18 +141,22 @@ export async function reconcileImageRequest(args) {
 export async function runImageRequest(args) {
   let row = await read(args);
   if (row.payload.status !== 'queued' || now(args) >= row.payload.expiresAt) return reconcileImageRequest(args);
+  let preflight = 'image.course_read';
   try {
     const current = await course(args);
+    preflight = 'image.lesson_hash';
     if (imageLessonHash(current, row.payload.target) !== row.payload.baseHash) fail('stale');
-    if (imageFundingQuote(args.env).hash !== row.payload.quote.hash) fail('consent', 400);
+    preflight = 'image.funding_quote';
+    if (imageFundingQuote(args.env, args.gatewayPolicy).hash !== row.payload.quote.hash) fail('consent', 400);
   } catch (error) {
+    args.trace?.emit('image.preflight_failed', { stage: 'images', task: preflight, operationId: args.operationId, error, dispatched: 'no' });
     const code = ['stale','not_found','consent'].includes(error.code) ? error.code : 'configuration';
     row = await merge(args, r => r.payload.status !== 'queued' ? null : { status: 'failed', error: code, workerDone: true, finishedAt: new Date(now(args)).toISOString() });
     return view(args, row);
   }
   // Do not start a paid call when preflight has consumed the time needed for
   // the provider's existing 150-second limit plus a bounded persistence window.
-  if (args.remainingMs && args.remainingMs() < imagePolicy(args.env).timeoutMs + IMAGE_SAVE_RESERVE_MS) {
+  if (args.remainingMs && args.remainingMs() < imageRequestPolicy(args.env, args.gatewayPolicy).timeoutMs + IMAGE_SAVE_RESERVE_MS) {
     row = await merge(args, r => r.payload.status !== 'queued' ? null : {
       status: 'failed', error: 'not_started', workerDone: true, finishedAt: new Date(now(args)).toISOString(),
     });
@@ -168,7 +177,7 @@ export async function runImageRequest(args) {
     // The course-generation caller rechecks its live lease/cancellation here.
     // Manual image requests omit this hook and retain their existing behavior.
     await args.beforeDispatch?.();
-    if (args.remainingMs && args.remainingMs() < imagePolicy(args.env).timeoutMs + IMAGE_SAVE_RESERVE_MS) {
+    if (args.remainingMs && args.remainingMs() < imageRequestPolicy(args.env, args.gatewayPolicy).timeoutMs + IMAGE_SAVE_RESERVE_MS) {
       row = await merge(args, r => ({ workerDone: true, mayHaveCharged: false,
         ...(!stopped(r.payload.status) ? { status: 'failed', error: 'not_started', finishedAt: new Date(now(args)).toISOString() } : {}) }));
       return view(args, row);
@@ -180,13 +189,13 @@ export async function runImageRequest(args) {
   } catch (error) {
     const trusted = error instanceof ImageGenerationError;
     row = await merge(args, r => ({ workerDone: true, mayHaveCharged: trusted ? error.mayHaveCharged : true,
-      usage: imageUsage(error.usage), providerRequestId: /^req_[A-Za-z0-9_-]{1,100}$/.test(error.requestId || '') ? error.requestId : null,
+      usage: imageUsage(error.usage), providerRequestId: /^(?:req_[A-Za-z0-9_-]{1,100}|gen-[A-Za-z0-9_-]{1,180})$/.test(error.requestId || '') ? error.requestId : null,
       ...(!stopped(r.payload.status) ? { status: trusted && ['timeout','response','unavailable'].includes(error.code) ? 'unknown' : 'failed',
         error: trusted ? error.code : 'outcome_unknown', finishedAt: new Date(now(args)).toISOString() } : {}) }));
     return view(args, row);
   }
   const usage = imageUsage(generated?.provenance?.usage);
-  const providerRequestId = /^req_[A-Za-z0-9_-]{1,100}$/.test(generated?.provenance?.requestId || '') ? generated.provenance.requestId : null;
+  const providerRequestId = /^(?:req_[A-Za-z0-9_-]{1,100}|gen-[A-Za-z0-9_-]{1,180})$/.test(generated?.provenance?.requestId || '') ? generated.provenance.requestId : null;
   let image;
   try {
     if (!['funding','provider','model','n','size','quality','outputFormat'].every(key => generated?.provenance?.[key] === row.payload.quote[key])) throw new Error();
