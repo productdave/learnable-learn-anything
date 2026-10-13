@@ -20,7 +20,7 @@ import { getTone } from '../../js/generator/tones/conversational.mjs';
 import { createClient as createAnthropic } from '../../js/generator/anthropic-fetch.js';
 import { assembleCourse } from '../../js/generator/assemble-course.js';
 import { retainComponentChoices } from '../../js/generator/component-policy.mjs';
-import { ResearchBundleSchema, courseBriefSchemaFor, topicContentSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
+import { ResearchBundleSchema, courseBriefSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
 import { signedPdfUrl } from './supabase-server.mjs';
 import { setupPdfSources, resolveSetupPdfs } from './gen-setup-pdfs.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
@@ -614,7 +614,11 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         const { mod, topic, bundle } = work[i];
         const key = `${mod.id}/${topic.id}`;
         try {
-          const lessonClient = textClientFor('lesson', value => topicContentSchemaFor(brief, topic, { allowGeneratedAssets: false }).parse(value));
+          // runTopic owns normalization and the full course contract. Validating
+          // here first would reject recoverable encodings and erase the field
+          // diagnostics needed by its one bounded corrective attempt. The
+          // gateway still settles usage before returning a paid response.
+          const lessonClient = textClientFor('lesson', value => value);
           const content = await withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(lessonClient, brief, mod, topic, bundle, tone, {
             model: aiModels.lesson.model,
             onUsage: (usage, meta) => onUsage('lesson', usage, meta, aiModels)

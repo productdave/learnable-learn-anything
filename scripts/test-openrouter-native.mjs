@@ -84,3 +84,16 @@ test('research stage records known paid invalid submission usage without repeati
  await assert.rejects(runResearch(f.client,{title:'Flowcharts'},{id:'one',topics:[{title:'Decisions'}]},{model:route.model,onUsage:(value,meta)=>usage.push({value,meta})}),{code:'invalid_output'});
  assert.equal(f.requests.length,2);assert.equal(f.saved.length,1);assert.equal(usage.length,1);assert.equal(usage[0].meta.invalidOutput,true);assert.equal(usage[0].value.cost,.024);
 });
+
+test('delayed image receipt stays within a finite GET-only lookup window',async()=>{
+ let reads=0;const waits=[];
+ const r=await readOpenRouterGeneration({id:'gen-img-delayed',apiKey:'synthetic',wait:async ms=>waits.push(ms),fetcher:async(_url,opts)=>{
+  assert.equal(opts.method,'GET');reads++;return reads<6?new Response('',{status:404}):Response.json({data:{id:'gen-img-delayed',total_cost:.014}});
+ }});
+ assert.equal(r.total_cost,.014);assert.equal(reads,6);assert.deepEqual(waits,[250,500,1000,2000,4000]);
+});
+test('receipt indexing failure has a hard lookup bound and retains uncertainty',async()=>{
+ let reads=0;const waits=[];
+ await assert.rejects(readOpenRouterGeneration({id:'gen-img-absent',apiKey:'synthetic',wait:async ms=>waits.push(ms),fetcher:async(_url,opts)=>{assert.equal(opts.method,'GET');reads++;return new Response('',{status:404});}}),{code:'uncertain'});
+ assert.equal(reads,7);assert.equal(waits.reduce((a,b)=>a+b,0),15750);
+});

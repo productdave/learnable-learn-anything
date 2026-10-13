@@ -244,6 +244,29 @@ test('actual runner saves all open-weight lessons using saved research and no pe
   for(const lesson of Object.values(saved.modules[1])) { assert.ok(lesson.sections.some(s=>s.type==='quiz'));assert.ok(lesson.flashcards.length >= 3); }
 });
 
+for (const correction of [false, true]) test(`gateway lesson validation belongs to the writer after normalization; correction=${correction}`, async () => {
+  const brief={...curriculumFixture(),components:['lessons','quizzes','flashcards']};
+  const research=Object.fromEntries(brief.modules.map(m=>[m.id,{module_id:m.id,key_concepts:['Light','Composition'],examples:['Window','Frame'],experts:[],misconceptions:[],sources:[],images:[]} ]));
+  const h=setup(fixture({stage:'topics',brief,research})), gateway=globalThis.fetch;
+  const seen=new Map();
+  globalThis.fetch=async(url,options)=>{
+    const request=JSON.parse(options.body),text=request.messages[1].content;
+    const id=text.match(/and id "([^"]+)"/)[1],count=(seen.get(id)||0)+1;seen.set(id,count);
+    const response=await gateway(url,options),result=await response.json();
+    const lesson=JSON.parse(result.choices[0].message.content);
+    if (correction && count===1) lesson.sections=lesson.sections.filter(s=>s.type!=='takeaway');
+    if (correction && count===2) assert.match(text,/Include exactly one takeaway/);
+    // Existing writer normalization is lossless and must precede validation.
+    if (!correction) lesson.sections=JSON.stringify(lesson.sections);
+    result.choices[0].message.content=JSON.stringify(lesson);
+    return Response.json(result);
+  };
+  await runGeneration({supabase:h.client,jobId:h.row.id,ownerId:h.row.owner_id,runId:h.row.run_id,userBrief:h.row.user_brief,checkpoint:{brief,research},pdfRefs:[],mode:'complete'});
+  assert.equal(h.row.status,'completed');
+  assert.equal(h.calls.length,correction?6:3);assert.equal(h.receipts.length,h.calls.length);
+  assert.equal(h.holds.length,0);assert.equal(h.courses.size,1);
+});
+
 test('actual continuation claims the saved OpenRouter job and preserves its allowance',async()=>{
   const h=setup(fixture({status:'queued'})),res=h.response();
   h.row.continuation={version:1,phase:'pending',runId:h.row.run_id,sequence:1,stalls:0,progress:'a'.repeat(64)};

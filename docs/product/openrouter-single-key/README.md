@@ -1,52 +1,65 @@
 # One OpenRouter connection for course creation
 
-The private-pilot implementation is ready for a bounded staging trial. It uses
-one server-owned OpenRouter key for the course plan, source research, lessons,
-Designer review and illustrations. Learner credits and payments remain parked.
-**The paused one-key build is now on [staging](https://learnable-staging.vercel.app).**
-Migrations 27/28 and hosted access checks passed. The Sensitive OpenRouter key
-is now included in the new staging deployment. Generation remains paused pending
-bounded pilot activation; the full course test still needs to run. No allowance or
-model call was made in this rollout; no production write was performed.
+The one-key course build is active on [Learnable staging](https://learnable-staging.vercel.app).
+It uses a server-owned OpenRouter key for the plan, source research, lessons,
+Designer review and illustrations. The staging integration passed; content quality
+still needs work. Customer credits and payments remain parked. This phase makes
+no production writes.
+
+The funded four-lesson staging course is complete and reopens with all four
+illustrations, 14 quiz questions, four checklists and 24 flashcards. Native PDF,
+cited research, both approvals and mixed-model generation passed live. All
+31 dispatches are settled at **USD 1.016872**, including failures/corrections and
+the one lost-asset image charge. [Live evidence](live-course-verification.json)
+separates transport/accounting success from content quality.
+
+**The quality gate remains open.** The lighting lesson confuses apparent shadow
+position with physical movement, and its illustration has garbled labels. This
+synthetic draft is available for product testing, not approved for teaching or
+publishing. FLUX is not yet accepted for labelled instructional diagrams. The
+next model comparison should test a frontier image route or simpler briefs.
 
 Work is isolated on `codex/openrouter-single-key`, in
 [draft PR #6](https://github.com/productdave/learnable-learn-anything/pull/6).
-The existing dirty main checkout, parked credit branch and frozen releases are
-preserved. This extends the earlier saved-job routing slice; its historical
-[verification record](verification.json) remains separate.
+The dirty primary checkout, parked credit branch and frozen releases are preserved.
 
-## Pilot activation candidate — not deployed
+## Current staging activation
 
-Current staging still serves the verified key refresh with generation paused.
-A new candidate fixes a gap in the actual setup flow: original PDFs now reach
-OpenRouter planning and research, alongside extracted source text. Files are
-loaded from owner-scoped storage and checked against their reviewed byte count
-and SHA256 before any model reservation. Resume uses the saved source manifest.
-Existing legacy PDF thumbnails remain; this change does not create thumbnails
-for setup-source PDFs.
+Deployment `dpl_2Fv5qsGPcvxhu1Qac1wjRQoKSVcy` is READY with the Sensitive key,
+OpenRouter, setup generation and continuation enabled. The final repair preserved
+all staging table counts/full row digests, funding, settings, access and eight
+served assets. The earlier activation changed `user_state` during browser sync;
+its full pre-upload payload was not retained, so exact preservation of that
+particular earlier row is not claimed. This rollout made no production writes.
 
-The fresh package preserves current browser/Admin assets and changes only the
-runner and its new PDF resolver in two function bundles. It passes 165 focused
-source cases, 47 actual-package cases, 218 imports and seven direct-provider
-guards. Ten real disposable PostgreSQL operator checks passed, as did 50 document
-parser checks and the three existing PDF/heartbeat regression scripts.
+The owner pilot retains the original shared USD 5 ceiling, 40 dispatches including
+retries, and expiry `2026-10-14T01:10:14.222Z` (6:10pm Pacific, 13 October). Pool,
+owner and job rows enforce the same spend. Auto-top-up is off. Remaining headroom
+USD 3.983128 cannot cover another full conservative research reservation. Do not
+renew the allowance automatically. Reviewing the saved draft makes no AI calls.
 
-Current catalog review confirms the pinned routes/prices. A four-lesson course
-fixture includes an original three-page PDF, notes and all selected materials.
-One pilot is prepared with a shared USD 5 ceiling and a USD 3.90 estimate including
-correction contingency; no enrollment, allowance, deployment or provider call
-was made in this preparation. CLI authorization for remaining staging deployment
-is pending after the earlier one-upload exception. Live acceptance is still open.
+Original PDF bytes reach the model through owned storage, with size and SHA256
+checks. The browser retains the five selected materials and both review gates.
+[Source fixture evidence](hosted-fixture-verification.json) records hosted
+extraction, private original download and anonymous denial.
 
-See [pilot preparation evidence](pilot-preparation-verification.json).
+Final package `output/staging/2026-10-13-openrouter-image-repair/release-2yNIvR`
+has 4,964 files and eight Hobby functions; report SHA256
+`b961b167613da862ebd75143a6dceb8b0cda5f1fd7b600a307330a876832415c`.
+Unrelated assets/Admin are preserved and the temporary receipt diagnostic is gone.
+The lesson writer owns normalization/full validation and its bounded correction.
+Seven receipt GET attempts tolerate indexing delay without repeating a paid POST.
+The initial image failure is consistent with indexing delay; its original error
+body was not retained, so that cause is not proven. The known USD 0.014 charge was
+reconciled before an explicit replacement. No uncertain holds remain.
 
-The private QA setup is now saved in staging. Its original three-page PDF passes
-private download/SHA256, anonymous denial and hosted extraction checks. The
-browser source preview and acknowledgement work with all five current creation
-materials. Existing other setup/course/job rows and empty funding tables remain
-unchanged. No activation deployment or model call occurred. See the separate
-[hosted fixture result](hosted-fixture-verification.json); full native-model and
-complete-course acceptance remain open.
+All **177 source cases**, 84 Designer UI assertions, 43 workspace assertions,
+59 actual-package cases, 218 offline imports and seven provider guards pass.
+Account, completed workspace, all four lesson images and 24-card review passed
+live browser checks. Reopening kept the request count at 31. Human content review
+found the quality issues above; no broad quality or latency benchmark is claimed.
+Private activation/QA receipts are under
+`output/staging/2026-10-13-openrouter-activation/`.
 
 ## What changed
 
@@ -129,7 +142,7 @@ under `output/playwright/openrouter/`. The packaged candidate is
 `dc69bd2a3e3b512f65005775c9d16da6656d68dbc310e26a74c9381dc447eeee`.
 Earlier packages from this phase are superseded and must not be deployed.
 
-## Current deployment: key refresh verified
+## Earlier key-refresh deployment
 
 The key is configured and deployment `dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe` is Ready
 at [Learnable staging](https://learnable-staging.vercel.app). Vercel confirms the
@@ -140,10 +153,9 @@ package. Eight functions, 216 offline imports and seven direct-provider guards
 passed. Six hosted assets match; health/authentication checks and eight
 signed-in API/access checks passed. The temporary session was revoked.
 
-[Key refresh verification](key-refresh-verification.json) records the current
-result. The four pilot/funding tables remain empty. Model calls, validity of the
-key against OpenRouter, complete-course QA and authenticated browser course flow
-are still untested. Production was not written by this rollout.
+[Key refresh verification](key-refresh-verification.json) records that earlier
+result. At that point, the four pilot/funding tables were empty. Model calls, key
+validity and complete-course acceptance had not yet been tested. Production was not written by this rollout.
 
 Artifact: `output/staging/2026-10-12-openrouter-key-refresh/release-NOtRHg`;
 report SHA256 `76a4e0311519f0e37a9fa84e82ab53aa168106b2c0e9ed5d20403e892b4cd72f`.
@@ -152,7 +164,7 @@ report SHA256 `76a4e0311519f0e37a9fa84e82ab53aa168106b2c0e9ed5d20403e892b4cd72f`
 
 [Hosted verification](hosted-verification.json) records the staging-only migration
 and deployment `dpl_6tWED2eWPe1XRP1t2qLCY4SqirCD`. Existing data and permissions
-are preserved. All four new funding/admission tables are empty, with no grants
+are preserved. At that point, all four new funding/admission tables were empty, with no grants
 or enrollment. Eight authenticated API/access checks passed: managed paused
 readiness, rejection of personal-key setup, preserved owner Admin access and
 private ledger/RPC boundaries. The temporary owner session was revoked.
@@ -171,21 +183,16 @@ Rollout receipts are under `output/staging/2026-10-12-openrouter-closed/`.
 
 ## What's next
 
-1. The key configuration/deployment step is complete. Keep its value server-only.
-   Live key validity and selected-model access still need the bounded course test.
-2. Re-read current staging state, review catalog pricing/access and check for
-   newer accepted runtime work. Migrations 27/28 are installed; do not reapply.
-   Create one explicit pilot enrollment with a whole-run US$5 ceiling. Keep old
-   allowances closed.
-3. Activate a fresh verified candidate on staging. Test a small PDF/source-backed
-   course through plan review, research review, lessons, Designer, images and
-   reopen/resume. Check actual receipts, course quality and mobile behavior.
-4. Record remaining funds/holds, staging results and any required repairs before
-   saying David can test the complete flow. Production release is a later action.
+Complete the same bounded course through research review, lessons, Designer,
+illustrations and saved-course reopening. Inspect actual costs and quality before
+calling the full flow ready for David. Do not reapply migrations, reprovision the
+pilot, renew expired policy or repeat an uncertain paid call. Record any required
+repair and its verification separately. Production release remains a later action.
 
-Current logical QA run `openrouter-staging-20261011`: text, search, images and
-retries each US$0. Cumulative recorded assistant QA baseline is US$19.259934 plus one
-archived unpriced text charge. The US$5 cap includes every stage and retry.
+The logical QA run is `openrouter-staging-20261011`, capped at US$5 including
+text, search, images and retries. The recorded baseline before this run is
+US$19.259934 plus one archived unpriced text charge; current live receipts are
+kept in the QA ledger and activation artifacts.
 
 Protocol references: [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs),
 [OpenRouter provider routing](https://openrouter.ai/docs/guides/routing/provider-selection),
