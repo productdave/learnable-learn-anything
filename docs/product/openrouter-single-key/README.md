@@ -40,6 +40,14 @@ is pending after the earlier one-upload exception. Live acceptance is still open
 
 See [pilot preparation evidence](pilot-preparation-verification.json).
 
+The private QA setup is now saved in staging. Its original three-page PDF passes
+private download/SHA256, anonymous denial and hosted extraction checks. The
+browser source preview and acknowledgement work with all five current creation
+materials. Existing other setup/course/job rows and empty funding tables remain
+unchanged. No activation deployment or model call occurred. See the separate
+[hosted fixture result](hosted-fixture-verification.json); full native-model and
+complete-course acceptance remain open.
+
 ## What changed
 
 | Course work | Candidate route | Role |

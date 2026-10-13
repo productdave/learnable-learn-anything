@@ -1,0 +1,81 @@
+{
+  "status": "Hosted source preflight passed; generation remains paused",
+  "checkedAt": "2026-10-13T01:27:51.668Z",
+  "deploymentId": "dpl_GsMWjKLYyrgHGrcNprWecDkzTaxe",
+  "setup": {
+    "id": "qa-openrouter-photography-20261012",
+    "revision": 2,
+    "content_hash": "b5c3220d5c592b17493c9ce8b6950c194682297d81fcbf07c1884405875c1485",
+    "components": [
+      "checklists",
+      "flashcards",
+      "images",
+      "lessons",
+      "quizzes"
+    ],
+    "files": [
+      {
+        "id": "original-pdf",
+        "name": "photography-source.pdf",
+        "size": 1266,
+        "type": "application/pdf",
+        "sha256": "5144abb922f6c2a981e73feaefca1a83926c84134c4ff651c5f4937c70dafe17"
+      }
+    ]
+  },
+  "url": "https://learnable-staging.vercel.app/?draft=qa-openrouter-photography-20261012&step=create",
+  "checks": {
+    "privateOriginalMatchesSha256": true,
+    "anonymousSourceDownloadDenied": true,
+    "hostedSourceComplete": true,
+    "pages": 3,
+    "pdfTextCharacters": 187,
+    "totalSourceCharacters": 1000,
+    "browserSourceAcknowledged": true,
+    "currentCreationMaterials": [
+      "lessons",
+      "checklists",
+      "quizzes",
+      "flashcards",
+      "images"
+    ],
+    "otherRowsAndFundingPreserved": true,
+    "temporaryQaSessionRevoked": true
+  },
+  "fixtureAlignment": "Normal browser restoration advanced revision 1 to 2 and removed the legacy practice component under existing creationComponents policy. Current new courses include lessons, checklists, quizzes, flashcards and images. No application change.",
+  "notRun": [
+    "Activation deployment",
+    "Native model requests",
+    "Both human reviews",
+    "Full lessons and Designer",
+    "Generated images",
+    "Saved-course completion and reopen/resume"
+  ],
+  "next": "Await pending CLI method decision, then fresh deployment baseline preserving this setup, deploy release-4n5PM6, and provision the single prepared USD 5 pilot. Read current setup revision/hash before model start.",
+  "artifacts": [
+    "output/staging/2026-10-12-openrouter-pilot/fixture-verified.json",
+    "output/staging/2026-10-12-openrouter-pilot/fixture-browser-verified.json",
+    "output/staging/2026-10-12-openrouter-pilot/fixture-session-revoked.json",
+    "/Users/davidwang/Learnable/output/qa/openrouter-pilot-source-preflight-20261012.png"
+  ],
+  "costs": {
+    "logicalRun": "openrouter-staging-20261011",
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "totalUsd": 0,
+    "hardCapUsd": 5,
+    "recordedCumulativeBaselineUsd": 19.259934,
+    "archivedUnpricedTextCharge": true
+  },
+  "scope": {
+    "newStagingSetup": 1,
+    "newPrivateSyntheticPdf": 1,
+    "deploymentWrites": 0,
+    "providerCalls": 0,
+    "fundingRows": 0,
+    "productionWrites": 0
+  },
+  "diagnostics": "Initial readback SELECT used user_id and returned HTTP 400; corrected to schema owner_id. Successful readback and full unrelated-row preservation checks followed. No retry of a write."
+}
