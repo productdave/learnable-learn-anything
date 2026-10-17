@@ -3124,6 +3124,26 @@
   height: auto;
   background: var(--bg-secondary);
 }
+/* Generated course assets are square. Keep their space while fetching/decoding. */
+.private-image-frame { position: relative; aspect-ratio: 1; background: var(--bg-secondary); }
+.private-image-frame > img { height: 100%; object-fit: contain; }
+.topic-image--private [hidden] { display: none; }
+.private-image-placeholder {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: var(--space-3);
+  padding: var(--space-5); text-align: center; color: var(--text-secondary);
+  overflow: auto;
+}
+.private-image-placeholder p { margin: 0; max-width: 44ch; }
+.private-image-placeholder [role="status"] { font-weight: 600; }
+.private-image-placeholder [data-private-image-description] { font-size: var(--font-sm); }
+.private-image-spinner {
+  flex: none; width: 28px; height: 28px; border: 3px solid var(--border-primary);
+  border-top-color: var(--primary); border-radius: 50%; animation: private-image-spin 1s linear infinite;
+}
+.topic-image--private:not([data-image-state="loading"]) .private-image-spinner { display: none; }
+@keyframes private-image-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .private-image-spinner { animation: none; } }
 .topic-image-fallback {
   display: none;
   min-height: 150px;

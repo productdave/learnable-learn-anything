@@ -25,7 +25,11 @@ The dirty primary checkout, parked credit branch and frozen releases are preserv
 
 ## Current staging activation
 
-Deployment `dpl_2Fv5qsGPcvxhu1Qac1wjRQoKSVcy` is READY with the Sensitive key,
+Current deployment `dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W` adds a visible image-loading
+placeholder and same-file retry, preserving all server bytes and saved courses.
+[Loading-state verification](image-loading-verification.json) records desktop,
+phone and live checks. The generation acceptance below used
+`dpl_2Fv5qsGPcvxhu1Qac1wjRQoKSVcy` with the Sensitive key,
 OpenRouter, setup generation and continuation enabled. The final repair preserved
 all staging table counts/full row digests, funding, settings, access and eight
 served assets. The earlier activation changed `user_state` during browser sync;
