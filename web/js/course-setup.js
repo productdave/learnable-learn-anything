@@ -1,7 +1,7 @@
 import { draftExport } from './draft-store.js?v=5';
 import { createSetupSessions } from './setup-session.js?v=8';
 import { createSetupSignIn } from './setup-signin.js?v=14';
-import { createSetupCreation } from './setup-create.js?v=13';
+import { createSetupCreation } from './setup-create.js?v=14';
 import { createSetupGenerationClient } from './setup-generation-client.js?v=9';
 import { createSetupAccountClient, sendSetupSignInLink } from './setup-account-client.js?v=12';
 import { createSetupHandoffs, accountSetupURL } from './setup-handoff.js?v=6';

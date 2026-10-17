@@ -1,0 +1,51 @@
+// Real disposable PostgreSQL; synthetic charges only, no external provider.
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
+import {createOpenRouterPolicy,OPENROUTER_OWNER_POLICY_VERSION} from '../web/api/_lib/openrouter-policy.mjs';
+const db='learnable_owner_test_'+Date.now(),container='supabase_db_learnable-setup-local';
+const command=(database,sql)=>['exec','-i',container,'psql','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1','-At','-c',sql];
+const query=sql=>execFileSync('docker',command(db,sql),{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
+const result=sql=>JSON.parse(query(sql));
+const owner=randomUUID(),other=randomUUID(),pool=randomUUID(),ownerBudget=randomUUID(),run=randomUUID();
+const policy=createOpenRouterPolicy({version:OPENROUTER_OWNER_POLICY_VERSION,reviewedAt:'2026-01-01T00:00:00Z'});
+const inspect=id=>`select public.inspect_learnable_ai_pilot('${id||owner}')`;
+const admit=job=>`select public.admit_learnable_ai_job('${owner}','${job}','${policy.fingerprint}')`;
+let checks=0;const check=(label,fn)=>{fn();checks++;};
+execFileSync('docker',command('postgres',`create database ${db}`),{stdio:'pipe'});
+try{
+ query('create table public.generation_jobs(id text primary key,owner_id uuid,run_id text,status text,lease_expires_at timestamptz)');
+ for(const name of ['27-platform-ai-spend','28-openrouter-pilot-admission','29-owner-funded-generation'])query(readFileSync(new URL('../db/'+name+'.sql',import.meta.url),'utf8'));
+ check('installation grants nobody funding',()=>assert.equal(result(inspect()).reason,'not_enrolled'));
+ for(const role of ['anon','authenticated','service_role'])check(role+' cannot provision owner funding',()=>assert.equal(query(`select has_table_privilege('${role}','public.learnable_ai_pilots','insert'),has_table_privilege('${role}','public.learnable_ai_budgets','update')`),'f|f'));
+ check('capped scopes cannot omit their limit',()=>assert.throws(()=>query("insert into public.learnable_ai_budgets(cap_microusd,max_calls,expires_at) values(null,1,now())")));
+ check('owner mode cannot be a disguised increased test cap',()=>assert.throws(()=>query("insert into public.learnable_ai_budgets(funding_mode,cap_microusd) values('owner_funded',1000000000)")));
+ query(`insert into public.learnable_ai_budgets(id,owner_id,funding_mode,enabled) values('${pool}',null,'owner_funded',true),('${ownerBudget}','${owner}','owner_funded',true);
+ insert into public.learnable_ai_pilots(owner_id,policy,pool_budget_id,owner_budget_id,funding_mode,enabled,approval_note)
+ values('${owner}','${JSON.stringify(policy)}','${pool}','${ownerBudget}','owner_funded',true,'Synthetic explicit owner authorization');`);
+ check('old review date does not require renewing a testing allowance',()=>{const r=result(inspect());assert.equal(r.ok,true);assert.equal(r.fundingMode,'owner_funded');assert.equal(r.remainingMicrousd,null);});
+ check('other owner remains unenrolled',()=>assert.equal(result(inspect(other)).ok,false));
+ const admission=result(admit('job-owner'));
+ check('repeated admission retains the same scopes',()=>assert.deepEqual(result(admit('job-owner')),admission));
+ check('admitted job records no artificial cap or expiry',()=>assert.equal(query(`select funding_mode,cap_microusd is null,max_calls is null,expires_at is null from public.learnable_ai_budgets where job_id='job-owner'`),'owner_funded|t|t|t'));
+ query(`insert into public.generation_jobs values('job-owner','${owner}','${run}','running',now()+interval '1 hour','${JSON.stringify(policy)}',array['${admission.budgetIds.join("','")}']::uuid[],null)`);
+ const reserve=(id,op,{who=owner,lease=run}={})=>`select public.reserve_learnable_ai_spend('${who}','job-owner','${lease}','${id}','${op}','${'a'.repeat(64)}','${policy.fingerprint}',6000000,'${policy.routes.lesson.model}','lesson')`;
+ const settle=(id,n)=>`select public.settle_learnable_ai_spend('${owner}','job-owner','${run}','${id}',6000000,'gen-owner-${n}','{"synthetic":true}')`;
+ const first=randomUUID();check('request exceeding old whole-run cap can reserve',()=>assert.equal(result(reserve(first,'lesson-one')).ok,true));
+ check('actual cost is still settled',()=>assert.equal(result(settle(first,1)).ok,true));
+ const second=randomUUID();check('same run can continue above old cap',()=>assert.equal(result(reserve(second,'lesson-two')).ok,true));
+ result(settle(second,2));
+ check('both charges retained in all scopes',()=>assert.equal(query('select min(committed_microusd),max(committed_microusd),min(calls),max(calls) from public.learnable_ai_budgets'),'12000000|12000000|2|2'));
+ check('duplicate operation still rejected',()=>assert.equal(result(reserve(randomUUID(),'lesson-one')).reason,'duplicate'));
+ check('wrong owner cannot reserve',()=>assert.equal(result(reserve(randomUUID(),'wrong',{who:other})).reason,'job'));
+ check('wrong runner cannot reserve',()=>assert.equal(result(reserve(randomUUID(),'wrong',{lease:randomUUID()})).reason,'job'));
+ check('binding remains immutable',()=>assert.throws(()=>query("update public.generation_jobs set ai_policy=null")));
+ const pending=randomUUID();result(reserve(pending,'pending'));
+ const nextRun=randomUUID();query(`update public.generation_jobs set run_id='${nextRun}'`);
+ check('unknown previous request still blocks another runner',()=>assert.equal(result(reserve(randomUUID(),'next',{lease:nextRun})).reason,'pending'));
+ query(`select public.halt_learnable_ai_spend('${owner}','job-owner','${run}','${pending}')`);
+ check('uncertain charges stop new courses too',()=>assert.equal(result(inspect()).reason,'paused'));
+ check('cannot erase the recorded charge via null cap',()=>assert.equal(query('select min(committed_microusd) from public.learnable_ai_budgets'),'18000000'));
+ console.log(JSON.stringify({passed:true,checks,providerCalls:0,syntheticChargesOnly:true}));
+}finally{execFileSync('docker',command('postgres',`drop database ${db}`),{stdio:'pipe'});}

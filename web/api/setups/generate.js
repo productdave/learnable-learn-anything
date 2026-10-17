@@ -42,7 +42,9 @@ export function createSetupGenerationHandler({ authenticate = userFromRequest, a
       try { platform = await inspectOpenRouterAccess(client, user.id); }
       catch (error) { return res.status(error.statusCode || 409).json({ code: error.code, error: error.message, ready: false }); }
       const sources = await requestBudget.runOperation(() => inspectSetupSources(row, user.id, client), { timeoutMs: 35_000 });
-      const issues = [...setupGenerationIssues(row.payload, platform ? { imagesEnabled: platform.imageConnected } : undefined), ...sources.issues], apiKey = platform ? null : await readProtectedKey(client, user.id);
+      // Managed readiness reports its own connection/funding blocker. Do not
+      // mislabel that blocker as an unavailable legacy image server.
+      const issues = [...setupGenerationIssues(row.payload, platform ? { imagesEnabled: true } : undefined), ...sources.issues], apiKey = platform ? null : await readProtectedKey(client, user.id);
       // New creation includes purposeful visuals. Check both account connections
       // before starting paid work, not after the text course has been generated.
       const imageConnected = platform ? platform.imageConnected : !!await readProtectedKey(client, user.id, 'openai');

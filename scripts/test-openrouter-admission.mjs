@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test,{afterEach} from 'node:test';
 import {randomUUID} from 'node:crypto';
-import {createOpenRouterPolicy} from '../web/api/_lib/openrouter-policy.mjs';
+import {createOpenRouterPolicy,validateOpenRouterPolicy,OPENROUTER_OWNER_POLICY_VERSION} from '../web/api/_lib/openrouter-policy.mjs';
+import {generationProvider} from '../web/api/_lib/generation-provider.mjs';
 import {inspectOpenRouterAccess,admitOpenRouterJob,publicOpenRouterAccess} from '../web/api/_lib/openrouter-admission.mjs';
 import {createSetupGenerationHandler} from '../web/api/setups/generate.js';
 import {createConnectionHandler} from '../web/api/providers/connection.js';
@@ -28,3 +29,36 @@ async function setup(){
 test('actual setup preflight is key-free, exposes source review and makes no admission',async()=>{const f=await setup(),r=await f.call('check');assert.equal(r.code,200);assert.equal(r.body.ready,true);assert.equal(r.body.managed,true);assert.equal(r.body.provider,'openrouter');assert(r.body.sources);assert.equal(r.body.policy,undefined);assert.equal(f.jobs.length,0);assert.equal(f.runs.length,0);assert.equal(f.db.calls.length,1);});
 test('actual setup start persists immutable gateway binding, then duplicates reattach without admission',async()=>{const f=await setup(),check=await f.call('check'),r=await f.call('start',{sourceReview:check.body.sources.digest,ai_policy:{funding:'attacker'}});assert.equal(r.code,200);assert.equal(f.jobs.length,1);assert.equal(f.jobs[0].ai_policy.fingerprint,policy.fingerprint);assert.deepEqual(f.jobs[0].ai_budget_ids,ids);assert.equal(f.runs.length,1);assert.equal(f.runs[0].apiKey,null);const calls=f.db.calls.length,r2=await f.call('start');assert.equal(r2.body.existing,true);assert.equal(f.db.calls.length,calls);assert.equal(f.runs.length,1);});
 test('actual account endpoint returns managed status and rejects user-key replacement before reading it',async()=>{const f=await setup(),handler=createConnectionHandler(f.deps),r=response();await handler({method:'GET',headers:{}},r);assert.equal(r.body.managed,true);assert.equal(r.body.policy,undefined);const r2=response();await handler({method:'POST',headers:{},body:{key:'synthetic-personal-key'}},r2);assert.equal(r2.code,409);assert.equal(f.jobs.length,0);});
+
+const ownerPolicy=createOpenRouterPolicy({version:OPENROUTER_OWNER_POLICY_VERSION,reviewedAt:new Date(now).toISOString(),now});
+const ownerEnv={...env,LEARNABLE_OWNER_FUNDED_ENABLED:'1'};
+test('explicit owner policy stays usable after the old one-day window',()=>{
+ assert.equal(ownerPolicy.validUntil,null);
+ assert.equal(validateOpenRouterPolicy(ownerPolicy,{now:now+86400000*365}).fingerprint,ownerPolicy.fingerprint);
+ assert.throws(()=>validateOpenRouterPolicy(policy,{now:now+86400000*2}));
+ assert.throws(()=>validateOpenRouterPolicy({...ownerPolicy,routes:{}}));
+});
+test('owner-funded readiness needs the server switch and matching database mode, not an allowance',async()=>{
+ const state={ok:true,policy:ownerPolicy,fundingMode:'owner_funded',remainingMicrousd:null};
+ assert.equal((await inspectOpenRouterAccess(rpcFixture(state),'owner',{env:ownerEnv,now})).ready,true);
+ assert.equal((await inspectOpenRouterAccess(rpcFixture(state),'owner',{env,now})).ready,false);
+ assert.equal((await inspectOpenRouterAccess(rpcFixture({...state,fundingMode:'capped'}),'owner',{env:ownerEnv,now})).ready,false);
+});
+test('owner-funded continuation retains provider, owner and pause checks',()=>{
+ const job={id:'owner-course',owner_id:'owner',ai_policy:ownerPolicy,ai_budget_ids:ids};
+ assert.equal(generationProvider(job,'owner',{env:ownerEnv,now:now+86400000*2}).gateway,'openrouter');
+ assert.throws(()=>generationProvider(job,'owner',{env,now}));
+ assert.throws(()=>generationProvider(job,'other',{env:ownerEnv,now}));
+});
+test('managed funding failure does not claim the image server is disabled',async()=>{
+ const f=await setup();f.db.rpc=async()=>({data:{ok:false,reason:'expired'}});
+ const r=await f.call('check');assert.equal(r.code,200);assert.equal(r.body.ready,false);
+ assert.equal(r.body.issues.length,0);assert.match(r.body.message,/allowance/);assert.equal(f.runs.length,0);
+});
+test('owner-funded actual start saves the new mode and a repeated click reattaches',async()=>{
+ const f=await setup();Object.assign(process.env,ownerEnv);
+ f.db.rpc=async name=>({data:name==='inspect_learnable_ai_pilot'?{ok:true,policy:ownerPolicy,fundingMode:'owner_funded',remainingMicrousd:null}:{ok:true,policy:ownerPolicy,budgetIds:ids}});
+ const check=await f.call('check');assert.equal(check.body.ready,true);
+ const start=await f.call('start');assert.equal(start.code,200);assert.equal(f.jobs[0].ai_policy.version,OPENROUTER_OWNER_POLICY_VERSION);
+ assert.equal((await f.call('start')).body.existing,true);assert.equal(f.runs.length,1);
+});

@@ -15,7 +15,7 @@ const admit=(job='job-one',id=owner,hash=policy.fingerprint)=>`select public.adm
 execFileSync('docker',command('postgres',`create database ${db}`),{stdio:'pipe'});
 try{
  query('create table public.generation_jobs(id text primary key,owner_id uuid,run_id text,status text,lease_expires_at timestamptz)');
- for(const name of ['27-platform-ai-spend','28-openrouter-pilot-admission'])query(readFileSync(new URL('../db/'+name+'.sql',import.meta.url),'utf8'));
+ for(const name of ['27-platform-ai-spend','28-openrouter-pilot-admission','29-owner-funded-generation'])query(readFileSync(new URL('../db/'+name+'.sql',import.meta.url),'utf8'));
  check('no enrollment on install',()=>assert.equal(result(inspect()).reason,'not_enrolled'));
  for(const role of ['anon','authenticated','service_role'])check(role+' cannot mint pilot or budgets',()=>assert.equal(query(`select has_table_privilege('${role}','public.learnable_ai_pilots','insert'),has_table_privilege('${role}','public.learnable_ai_budgets','insert'),has_table_privilege('${role}','public.learnable_ai_admissions','update')`),'f|f|f'));
  for(const role of ['anon','authenticated'])check(role+' cannot impersonate admission owner',()=>assert.equal(query(`select has_function_privilege('${role}','public.admit_learnable_ai_job(uuid,text,text)','execute')`),'f'));

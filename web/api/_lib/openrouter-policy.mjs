@@ -1,9 +1,11 @@
-// Server-only candidate policy. Nothing in this module enables hosted generation.
-// Prices/capabilities must be rechecked before an operator activates a pilot.
+// Server-owned pinned routes. Constructing a policy does not authorize dispatch.
+// Capped QA uses a 24-hour window. Explicit owner funding has no testing expiry;
+// per-request limits, provider receipts and operator pause controls still apply.
 import { createHash } from 'node:crypto';
 
 export const OPENROUTER_POLICY_VERSION = 'openrouter-draft-v1';
 export const OPENROUTER_NATIVE_POLICY_VERSION = 'openrouter-native-v2';
+export const OPENROUTER_OWNER_POLICY_VERSION = 'openrouter-owner-v3';
 const MODELS = {
   'anthropic/claude-sonnet-5.5': { provider: 'Anthropic', tag: 'anthropic', input: 2, output: 10, context: 1048576, reasoning: { effort: 'low' } },
   'deepseek/deepseek-v4.1-flash': { provider: 'Parasail', tag: 'parasail/fp8', input: 0.3, output: 1.2, context: 1048576, reasoning: { enabled: false } },
@@ -32,12 +34,13 @@ function canonical(value) {
 export const policyFingerprint = value => createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
 
 export function createOpenRouterPolicy({ lessonModel = DEFAULT_LESSON, reviewedAt, validUntil, now = Date.now(), version = OPENROUTER_POLICY_VERSION } = {}) {
-  if (![OPENROUTER_POLICY_VERSION, OPENROUTER_NATIVE_POLICY_VERSION].includes(version)) refuse('configuration', 'Unsupported policy version.');
-  const native = version === OPENROUTER_NATIVE_POLICY_VERSION;
+  if (![OPENROUTER_POLICY_VERSION, OPENROUTER_NATIVE_POLICY_VERSION, OPENROUTER_OWNER_POLICY_VERSION].includes(version)) refuse('configuration', 'Unsupported policy version.');
+  const ownerFunded = version === OPENROUTER_OWNER_POLICY_VERSION;
+  const native = version !== OPENROUTER_POLICY_VERSION;
   if (![DEFAULT_LESSON, 'qwen/qwen3.6-35b-a3b', FRONTIER].includes(lessonModel)) refuse('configuration', 'Unreviewed lesson model.');
   const start = Date.parse(reviewedAt), end = Date.parse(validUntil);
-  if (!Number.isFinite(start) || !Number.isFinite(end) || start > now || end <= now || end <= start || end - start > 86400000)
-    refuse('configuration', 'A current, explicitly reviewed price window of at most 24 hours is required.');
+  if (!Number.isFinite(start) || start > now || (ownerFunded ? validUntil != null : (!Number.isFinite(end) || end <= now || end <= start || end - start > 86400000)))
+    refuse('configuration', ownerFunded ? 'Owner-funded routes require a valid review date and no testing expiry.' : 'A current, explicitly reviewed price window of at most 24 hours is required.');
   const routes = Object.fromEntries(Object.keys(OPENROUTER_TASK_TOOLS).map(task => {
     const model = task === 'lesson' ? lessonModel : FRONTIER, definition = MODELS[model];
     return [task, { model, provider: definition.provider, adapter: 'chat-json-schema',
@@ -53,7 +56,7 @@ export function createOpenRouterPolicy({ lessonModel = DEFAULT_LESSON, reviewedA
     routes.research = { ...routes.research, adapter: 'native-messages-schema', maxInputBytes: 20 * 1024 * 1024, maxSearches: 1, searchDollarsPerUse: 0.01, maxModelTurns: 2 };
   }
   const body = { version, gateway: 'openrouter', funding: 'platform',
-    reviewedAt: new Date(start).toISOString(), validUntil: new Date(end).toISOString(),
+    reviewedAt: new Date(start).toISOString(), validUntil: ownerFunded ? null : new Date(end).toISOString(),
     routes, maxLessonAttempts: 2, nativeResearchAccepted: native, imagesAccepted: native };
   return freeze({ ...body, fingerprint: policyFingerprint(body) });
 }
@@ -61,7 +64,7 @@ export function createOpenRouterPolicy({ lessonModel = DEFAULT_LESSON, reviewedA
 export function validateOpenRouterPolicy(snapshot, { now = Date.now(), allowExpired = false } = {}) {
   let copy;
   try { copy = JSON.parse(JSON.stringify(snapshot)); } catch { refuse('configuration', 'Invalid saved AI policy.'); }
-  if (!copy || ![OPENROUTER_POLICY_VERSION, OPENROUTER_NATIVE_POLICY_VERSION].includes(copy.version) || copy.gateway !== 'openrouter' || copy.funding !== 'platform')
+  if (!copy || ![OPENROUTER_POLICY_VERSION, OPENROUTER_NATIVE_POLICY_VERSION, OPENROUTER_OWNER_POLICY_VERSION].includes(copy.version) || copy.gateway !== 'openrouter' || copy.funding !== 'platform')
     refuse('configuration', 'Unsupported saved AI policy.');
   const { fingerprint, ...body } = copy;
   if (fingerprint !== policyFingerprint(body)) refuse('configuration', 'Saved AI policy fingerprint does not match.');

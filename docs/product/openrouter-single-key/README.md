@@ -25,8 +25,27 @@ The dirty primary checkout, parked credit branch and frozen releases are preserv
 
 ## Current staging activation
 
-Current deployment `dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W` adds a visible image-loading
-placeholder and same-file retry, preserving all server bytes and saved courses.
+Current deployment `dpl_BYRtrYVoUL4NREUT1D7ZhCRnoSze` removes the testing-allowance
+requirement for David's staging account, following his explicit 17 October request.
+The saved Subway draft shows **Ready to create** and an enabled **Create course →**;
+the final paid action is left for David. [Owner-funded verification](owner-funded-verification.json)
+records 143 packaged cases, 85 real local PostgreSQL checks, 15 UI/recovery cases,
+218 offline imports, the 86-module graph and hosted/browser checks. No new model
+request was made. Package: `output/staging/2026-10-17-owner-funded/release-2Ig0u6`,
+5,157 files, eight Hobby functions, SHA256
+`953e377a522b3e39055a95ac12bbbe4eee1ea97bfa33850ddb68708b88a897f7`.
+
+Migration 29 adds explicit `owner_funded` accounting scopes with no app test-dollar
+limit, call-count allowance or expiry. Only operator provisioning can enable an
+account; the server also requires `LEARNABLE_OWNER_FUNDED_ENABLED=1`. The new policy
+`openrouter-owner-v3` pins the accepted routes without a daily testing renewal.
+Per-request limits, immutable owned jobs, receipts, duplicate protection, unknown
+charge holds and pause controls remain. Provider billing/credit availability still
+applies; auto-top-up is off. Other accounts remain unenrolled. The migration alone
+enables nobody, and existing capped policies retain every limit.
+
+This deployment preserves the visible image-loading placeholder and same-file
+retry from `dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W`.
 [Loading-state verification](image-loading-verification.json) records desktop,
 phone and live checks. The generation acceptance below used
 `dpl_2Fv5qsGPcvxhu1Qac1wjRQoKSVcy` with the Sensitive key,
@@ -36,11 +55,12 @@ served assets. The earlier activation changed `user_state` during browser sync;
 its full pre-upload payload was not retained, so exact preservation of that
 particular earlier row is not claimed. This rollout made no production writes.
 
-The owner pilot retains the original shared USD 5 ceiling, 40 dispatches including
-retries, and expiry `2026-10-14T01:10:14.222Z` (6:10pm Pacific, 13 October). Pool,
-owner and job rows enforce the same spend. Auto-top-up is off. Remaining headroom
-USD 3.983128 cannot cover another full conservative research reservation. Do not
-renew the allowance automatically. Reviewing the saved draft makes no AI calls.
+The earlier USD 5 / 40-call pilot expired `2026-10-14T01:10:14.222Z` and is now
+retired. Its original capped budgets, 31 settled receipts and USD 1.016872 total
+remain unchanged. A separate owner-funded enrollment supports David's new manual
+staging courses; it does not reset or reopen that old test run. Routine assistant
+QA outside this authorization retains the standing budget. Reviewing saved content
+still makes no AI calls. This change made no production writes.
 
 Original PDF bytes reach the model through owned storage, with size and SHA256
 checks. The browser retains the five selected materials and both review gates.

@@ -1,7 +1,7 @@
 // Server-owned provider selection. A saved job, never a request-body switch,
 // determines its credential and policy throughout review and recovery.
 import { readApiKey } from './supabase-server.mjs';
-import { validateOpenRouterPolicy, OpenRouterError } from './openrouter-policy.mjs';
+import { validateOpenRouterPolicy, OpenRouterError, OPENROUTER_OWNER_POLICY_VERSION } from './openrouter-policy.mjs';
 import { missingResearchModules } from './gen-research-checkpoint.mjs';
 import { usesIntegratedVisuals } from './generation-materials-policy.mjs';
 import { getAiModelRegistry } from './ai-models.mjs';
@@ -25,6 +25,8 @@ export function generationProvider(job, ownerId, { env = process.env, now = Date
   try { policy = validateOpenRouterPolicy(job.ai_policy, { now }); }
   catch { stop('approval', 'This course needs a current reviewed OpenRouter authorization. Its saved work is retained.'); }
   if (env.LEARNABLE_OPENROUTER_ENABLED !== '1') stop('disabled', 'OpenRouter generation is paused. Its saved work is retained.');
+  if (policy.version === OPENROUTER_OWNER_POLICY_VERSION && env.LEARNABLE_OWNER_FUNDED_ENABLED !== '1')
+    stop('disabled', 'Owner-funded course creation is paused. Its saved work is retained.');
   const key = env.OPENROUTER_API_KEY;
   if (typeof key !== 'string' || !key.trim()) stop('configuration', 'The Learnable OpenRouter connection is unavailable. Contact the operator; no personal provider key is needed.');
   return { gateway: 'openrouter', policy, apiKey: key.trim() };
