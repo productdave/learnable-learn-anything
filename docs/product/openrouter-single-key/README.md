@@ -2,9 +2,22 @@
 
 The one-key course build is active on [Learnable staging](https://learnable-staging.vercel.app).
 It uses a server-owned OpenRouter key for the plan, source research, lessons,
-Designer review and illustrations. The staging integration passed; content quality
-still needs work. Customer credits and payments remain parked. This phase makes
-no production writes.
+Designer review and illustrations. The implementation, image-loading states and
+owner-funded mode are committed on `codex/openrouter-single-key`. Customer credits
+and payments remain parked.
+
+**Production rollout is pending.** The latest recorded check, at
+2026-10-23 02:02 UTC (22 October Pacific), found no saved `OPENROUTER_API_KEY` in
+the production Vercel project `learnable`. The combined production package is
+prepared locally, but has not been uploaded or promoted. The redesigned public
+Meta course is already live in a separate production release.
+[Release status](release-status.json) records the observed deployments, prepared
+artifact and remaining gates without credentials or private account data.
+
+This Git branch contains the OpenRouter implementation. The combined production
+package also preserves later course and recovery work prepared in the primary
+checkout; it is not a build of this branch alone. Do not deploy an old staging
+package over the current production app.
 
 The funded four-lesson staging course is complete and reopens with all four
 illustrations, 14 quiz questions, four checklists and 24 flashcards. Native PDF,
@@ -23,9 +36,9 @@ Work is isolated on `codex/openrouter-single-key`, in
 [draft PR #6](https://github.com/productdave/learnable-learn-anything/pull/6).
 The dirty primary checkout, parked credit branch and frozen releases are preserved.
 
-## Current staging activation
+## Verified staging activation on 17 October
 
-Current deployment `dpl_BYRtrYVoUL4NREUT1D7ZhCRnoSze` removes the testing-allowance
+Deployment `dpl_BYRtrYVoUL4NREUT1D7ZhCRnoSze` removed the testing-allowance
 requirement for David's staging account, following his explicit 17 October request.
 The saved Subway draft shows **Ready to create** and an enabled **Create course →**;
 the final paid action is left for David. [Owner-funded verification](owner-funded-verification.json)
@@ -127,20 +140,26 @@ private pilot admission and the research evidence checkpoint. Installation
 creates no enrollment or spending allowance. Service-only RPCs authorize owned
 jobs against pool, owner and job limits; the runner re-reads the immutable binding.
 
-Required server settings for an explicitly activated trial:
+Required server settings for an explicitly activated environment:
 
-- `OPENROUTER_API_KEY`: Sensitive server variable in the **learnable-staging**
-  Vercel project. Never put it in browser config, source control or chat.
+- `OPENROUTER_API_KEY`: Sensitive server variable in the intended Vercel project
+  and environment. Staging uses **learnable-staging**; production uses
+  **learnable**, with the **Production** environment selected. A key saved in
+  staging does not configure production. Never put it in browser config, source
+  control or chat.
 - `LEARNABLE_GENERATION_PROVIDER=openrouter` and `LEARNABLE_OPENROUTER_ENABLED=1`.
-- Existing setup-generation and continuation settings, plus one operator-created
-  reviewed policy and bounded pilot allowance.
+- Existing setup-generation and continuation settings, plus an operator-created
+  reviewed policy and enrollment.
+- Owner-funded enrollment additionally requires migration 29 and
+  `LEARNABLE_OWNER_FUNDED_ENABLED=1`. Capped trials retain their bounded allowance.
 
 The fresh package sets the public `MANAGED_COURSE_GENERATION` display flag. It
 confers no server permission. All actual model work still requires an owned job,
 current policy and atomic dollar reservation. Explicit Restart and review
 revision use the persisted `run_id` to authorize a new operation scope; a new
-lease or Resume does not. Policies expire after at most 24 hours. Long-review
-renewal remains an operator gate; there is no automatic renewal or reload.
+lease or Resume does not. Capped pilot policies expire after at most 24 hours;
+their renewal remains an operator gate. The separately provisioned owner-funded
+mode has no app testing expiry. There is no automatic renewal or credit reload.
 
 ## What has been checked
 
@@ -207,16 +226,26 @@ Rollout receipts are under `output/staging/2026-10-12-openrouter-closed/`.
 
 ## What's next
 
-Complete the same bounded course through research review, lessons, Designer,
-illustrations and saved-course reopening. Inspect actual costs and quality before
-calling the full flow ready for David. Do not reapply migrations, reprovision the
-pilot, renew expired policy or repeat an uncertain paid call. Record any required
-repair and its verification separately. Production release remains a later action.
+Complete the production credential handoff, then follow the current after-course
+rollout README in the primary checkout at
+`output/diagnostics/2026-10-22-openrouter-after-course/README.md`. The approved
+sequence is final baseline, candidate upload without moving the public domain,
+exact uploaded-file verification, candidate course/access checks, signed-in owner
+readiness with unchanged spending records, promotion and canonical verification.
+Candidate Account → Check status uses `GET /api/providers/connection` without
+starting generation. Configuration readiness does not prove provider credential
+acceptance; a paid production generation test has not run.
 
-The logical QA run is `openrouter-staging-20261011`, capped at US$5 including
-text, search, images and retries. The recorded baseline before this run is
-US$19.259934 plus one archived unpriced text charge; current live receipts are
-kept in the QA ledger and activation artifacts.
+The original bounded course is complete. Its logical QA run,
+`openrouter-staging-20261011`, is closed at US$1.016872 across 31 settled requests.
+Do not reopen the pilot, reapply migrations or repeat an uncertain paid call.
+The photography sample's teaching and labelled-image quality issues remain open;
+they are separate from the revised public Meta course's acceptance.
+
+This documentation update makes no provider calls. Recorded cumulative provider
+QA is US$22.665710 plus historical unpriced items. Routine assistant QA still has
+a US$5 cap across each whole logical run, including text, search, images and
+retries. The requested US$250 provider-key limit does not expand that permission.
 
 Protocol references: [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs),
 [OpenRouter provider routing](https://openrouter.ai/docs/guides/routing/provider-selection),
