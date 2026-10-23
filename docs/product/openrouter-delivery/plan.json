@@ -1,11 +1,11 @@
 {
   "title": "Learnable funded course creation",
   "subtitle": "PRD, experience design and feature-by-feature delivery plan",
-  "version": "Draft 1 • 9 October 2026",
-  "summary": "Build a complete course-creation experience that people can use without managing AI accounts. Keep the current setup and two review points, make costs understandable, preserve work when generation stops, and deliver a useful private draft. Finish the product definition and experience before extending the technical foundation.",
-  "status": "Product and experience proposal for review. Existing OpenRouter adapter: offline acceptance only. No new product feature, live model, wallet or release acceptance is claimed by this document.",
-  "next": "Use F-01, funded access and account status, as the first product feature. Implement it behind a server-controlled cohort flag, QA its normal and failure states, record the evidence, then move to F-02.",
-  "decision": "Working assumption: defer the in-course tutor and AI editing for the first platform-funded pilot, with clear unavailable states and server enforcement. A tutor-scope question is pending. Paid bundles, prices and margin are later decisions.",
+  "version": "Updated 11 October 2026 • OpenRouter first",
+  "summary": "The next milestone is one OpenRouter connection for course creation. Finish text, cited research and illustrations before expanding learner credits. Keep the current setup and review steps, use frontier models for planning and review, and compare open-weight models for lesson drafting.",
+  "status": "Provider lifecycle routing is built locally on codex/openrouter-single-key. The actual runner reaches outline review and saves three lessons with synthetic OpenRouter responses. Public OpenRouter starts remain gated; live research, PDFs, images and hosted acceptance are still open. F-01 credit work is preserved separately in draft PR #5.",
+  "next": "OR-02 lifecycle routing has passed its local checks. Next: OR-03 research/PDF/citation compatibility, OR-04 mixed-model quality comparison, and OR-05 illustrations through the same key. Complete operator admission and a bounded end-to-end staging course before activation. Return to learner credits and payments afterwards.",
+  "decision": "David explicitly reprioritized one-key OpenRouter integration before deeper credits. Retain internal provider-dollar caps and receipts; learner quotes, debits, bundles, history and checkout are later product work. Tutor and funded AI editing remain deferred.",
   "principles": [
     "Product definition → experience and acceptance criteria → one feature → feature QA → evidence and fixes → next feature → integrated release candidate → release later.",
     "The existing PR is an engineering foundation. It is not proof that a person can create a course without keys.",
@@ -658,7 +658,7 @@
         "OR-02",
         "OR-06"
       ],
-      "status": "Next — not implemented",
+      "status": "Built locally on separate credit branch; acceptance incomplete; parked while OpenRouter is integrated",
       "qa": "Owner isolation, denied/missing/expired grants, zero versus unknown balance, sign-out/account switch, two devices, legacy job unaffected, key-free UI, keyboard/mobile and zero provider calls.",
       "exit": "A real signed-in local account and a second adversarial account exercise every readiness state. The server, not UI flags, denies unauthorized use. Record exact DB/API/UI evidence."
     },
@@ -675,7 +675,7 @@
         "OR-02",
         "OR-06"
       ],
-      "status": "Planned",
+      "status": "Later — after one-key provider integration",
       "qa": "Expired/changed quote, insufficient credit, concurrent confirmation, rounding at boundaries, grants/quote tampering, source limits, no AI on check/save, accessible confirmation and duplicate request behavior.",
       "exit": "One confirmed action atomically creates one authorization/hold; failed or duplicate actions do not buy work. Credit policy is explicit and versioned."
     },
@@ -693,7 +693,7 @@
         "OR-02",
         "OR-03"
       ],
-      "status": "Planned; OR-01 adapter already tested offline",
+      "status": "Underlying OR-02 outline routing verified locally; funded learner feature remains planned",
       "qa": "All entry points share the same funding owner, policy and limits; duplicate/lost starts, missing key, provider outage/refusal, strict schema, late receipt, failed checkpoint, changed outline and stale approval.",
       "exit": "A local real-job harness reaches outline review with durable cost evidence and no legacy key read for a platform job. Live route/schema check is required before hosted acceptance."
     },
@@ -709,7 +709,7 @@
       "or": [
         "OR-03"
       ],
-      "status": "Planned",
+      "status": "Later — after one-key provider integration",
       "qa": "Unusable files/URLs, changed sources, unsupported native parameters, bounded tool turns and search cost, cited versus inferred claims, missing citation, long pause, two tabs and rerun authorization.",
       "exit": "Source fixtures round-trip to the review UI; a bounded live compatibility check proves the selected route and billing. Unsupported paths stay disabled."
     },
@@ -725,7 +725,7 @@
       "or": [
         "OR-04"
       ],
-      "status": "Planned; synthetic stage integration exists",
+      "status": "Underlying saved-policy lesson runner verified with synthetic responses; live quality/cost comparison pending",
       "qa": "Valid schema is insufficient: score accuracy, sources, coverage, teaching usefulness, answers, selected components, two-attempt maximum, budget stop and loss of the second response.",
       "exit": "Paired evaluation meets the agreed rubric and complete-course cost envelope; choose a default from evidence. No automatic promotion of the cheapest model."
     },
@@ -742,7 +742,7 @@
         "OR-05",
         "OR-04"
       ],
-      "status": "Planned",
+      "status": "Later — after one-key provider integration",
       "qa": "Protected wording/answers, long safe rationale, source attribution, image omission, format/size limits, price bound, download/store/attach failure, existing PNG assets, duplicate receipt and uncertain image recovery.",
       "exit": "A small saved draft retains text and images across refresh and same-job recovery; every Designer/image attempt is accounted for. Image quality and cost are live gates."
     },
@@ -759,7 +759,7 @@
         "OR-02",
         "OR-06"
       ],
-      "status": "Planned",
+      "status": "Later — after one-key provider integration",
       "qa": "Refresh/close browser, offline network, lost lease, missed handoff, Cancel race, late receipt, price expiry, known versus unknown failure, partial images, duplicate Resume and unchanged saved work.",
       "exit": "Fault-injection journeys preserve all accepted work and never cross the approved limits or re-buy an uncertain operation. All user messages have one safe primary action."
     },
@@ -776,7 +776,7 @@
         "OR-02",
         "OR-06"
       ],
-      "status": "Planned",
+      "status": "Later — after one-key provider integration",
       "qa": "Double settlement/refund, shared receipt reuse, missing receipt, concurrent grants, negative balance prevention, rounding, deletion, no secret/source leakage and operator audit authorization.",
       "exit": "Provider ledger and learner credit ledger reconcile on known fixtures, remain distinct for absorbed failures, and preserve unresolved holds. Manual corrections are explicit entries."
     },
@@ -792,7 +792,7 @@
       "or": [
         "OR-06"
       ],
-      "status": "Planned — release later",
+      "status": "Later — after one-key provider integration",
       "qa": "Happy path plus all E-01–E-38; new and legacy accounts; warm/cold/browser restart; no unexplained debit, unresolved critical defect or leaked key; accessibility and real-device/browser checks; bounded live course.",
       "exit": "Evidence-backed go/no-go review, all feature gates closed, open risks visible, rollback preserves jobs and balances. Production release needs separate explicit authorization."
     },
@@ -958,5 +958,6 @@
       "Continuity and acceptance",
       "docs/APP-UPGRADE-PLAN.md; docs/upgrade/SESSION-HANDOFF.md; RELEASE-ACCEPTANCE-AUDIT.md; QA-COST-LEDGER.md"
     ]
-  ]
+  ],
+  "deliverySequence": "Current technical priority: OR-02 saved provider and recovery → OR-03 research/PDF/citations → OR-04 measured model mix → OR-05 images → operator admission and bounded staging acceptance. F-01 remains preserved in PR #5; the funded product features below follow provider consolidation. Customer wallet features are not prerequisites for the private provider integration."
 }

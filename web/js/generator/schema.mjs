@@ -207,7 +207,7 @@ const ImageSectionSchema = z.object({
   type: z.literal('image'),
   asset_id: z.string().uuid().optional(),
   image_slot: z.literal('instruction').optional(),
-  generated_by: z.literal('openai').optional(),
+  generated_by: z.enum(['openai', 'openrouter']).optional(),
   src: z.string().min(1).optional(),
   ref_kind: z.enum(['web', 'pdf']).optional(),
   url: z.string().optional(),
@@ -218,7 +218,7 @@ const ImageSectionSchema = z.object({
   source_title: z.string().optional(),
   source_url: z.string().optional()
 }).refine(
-  s => s.asset_id ? s.generated_by === 'openai' && s.image_slot === 'instruction' && !s.src && !s.url : s.src || s.url || (s.file_index !== undefined && s.page !== undefined),
+  s => s.asset_id ? ['openai', 'openrouter'].includes(s.generated_by) && s.image_slot === 'instruction' && !s.src && !s.url : s.src || s.url || (s.file_index !== undefined && s.page !== undefined),
   'image section needs src, url, or a pdf {file_index, page} ref'
 );
 
@@ -297,7 +297,7 @@ export function topicContentSchemaFor(brief, topicMeta = {}, { allowGeneratedAss
     if (!allowGeneratedAssets && topic.sections.some(s => s.type === 'image' && (s.asset_id || s.generated_by))) issue('Do not invent generated assets. Return a visual plan; the server creates the image.');
     if (policy.integratedVisuals && topic.visual?.decision === 'generate') {
       // Indices refer to the authored lesson before generated assets are inserted.
-      const authored = topic.sections.filter(s => !(s.type === 'image' && s.generated_by === 'openai'));
+      const authored = topic.sections.filter(s => !(s.type === 'image' && ['openai', 'openrouter'].includes(s.generated_by)));
       if (authored[topic.visual.afterSectionIndex]?.type !== 'concept') {
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['visual', 'afterSectionIndex'], message: 'Place the illustration immediately after a concept section it teaches.' });
       }

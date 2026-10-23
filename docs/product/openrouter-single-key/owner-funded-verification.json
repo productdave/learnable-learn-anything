@@ -1,0 +1,118 @@
+{
+  "at": "2026-10-17T17:52:21.225Z",
+  "scope": "David’s staging account: remove the artificial testing allowance; manual course creation remains explicit.",
+  "authorization": "17 October direct user request removes the app testing cap and expiry for this account. Existing capped QA runs are not reopened.",
+  "prepared": {
+    "at": "2026-10-17T17:49:02.661Z",
+    "artifact": "/Users/davidwang/.codex/worktrees/openrouter-generation/Learnable/output/staging/2026-10-17-owner-funded/release-2Ig0u6",
+    "reportSha256": "953e377a522b3e39055a95ac12bbbe4eee1ea97bfa33850ddb68708b88a897f7",
+    "sourceDeployment": "dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W",
+    "namespace": "js-owner-funded-20261017",
+    "changed": [
+      "functions/_functions/generation.func/api/_lib/openrouter-policy.mjs",
+      "functions/_functions/sources.func/api/_lib/openrouter-policy.mjs",
+      "functions/_functions/images.func/api/_lib/openrouter-policy.mjs",
+      "functions/_functions/providers.func/api/_lib/openrouter-policy.mjs",
+      "functions/_functions/generation.func/api/_lib/openrouter-admission.mjs",
+      "functions/_functions/sources.func/api/_lib/openrouter-admission.mjs",
+      "functions/_functions/providers.func/api/_lib/openrouter-admission.mjs",
+      "functions/_functions/generation.func/api/_lib/generation-provider.mjs",
+      "functions/_functions/sources.func/api/_lib/generation-provider.mjs",
+      "functions/_functions/providers.func/api/_lib/generation-provider.mjs",
+      "functions/_functions/sources.func/api/setups/generate.js",
+      "static/connect-openai.html",
+      "static/index.html"
+    ],
+    "functions": 8,
+    "files": 5157,
+    "actualPackageTests": 143,
+    "imports": 218,
+    "browserModules": 86,
+    "providerCalls": 0
+  },
+  "verified": {
+    "at": "2026-10-17T17:51:50.718Z",
+    "deploymentId": "dpl_BYRtrYVoUL4NREUT1D7ZhCRnoSze",
+    "ready": true,
+    "site": "https://learnable-staging.vercel.app",
+    "ownerOnly": true,
+    "allowanceRequirementRemoved": true,
+    "cap": null,
+    "expiry": null,
+    "served": [
+      "index.html",
+      "js-owner-funded-20261017/setup-create.js",
+      "js-owner-funded-20261017/private-course-images.js",
+      "js-owner-funded-20261017/config.js",
+      "js-owner-funded-20261017/admin-dashboard.js"
+    ],
+    "routes": [
+      {
+        "path": "/api/health/cloud",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/providers/connection",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/api/setups/generate",
+        "method": "POST",
+        "status": 401
+      }
+    ],
+    "changedFunctions": [
+      "admit_learnable_ai_job",
+      "inspect_learnable_ai_pilot",
+      "reserve_learnable_ai_spend"
+    ],
+    "existingCourseAndRequestDataPreserved": true,
+    "oldBudgetsAndReceiptsPreserved": true,
+    "expiredEnrollmentRetired": true,
+    "accessPreserved": true,
+    "productionUnchanged": true,
+    "productionWrites": 0,
+    "providerCalls": 0,
+    "spend": {
+      "requests": 31,
+      "actualMicrousd": 1016872,
+      "hash": "733b9da4c347900bf051e1d8a4e3ccd0d5021e54e7fe936c68fe6a7a7b893196"
+    }
+  },
+  "tests": {
+    "sourceAdmission": 18,
+    "localOwnerDatabase": 21,
+    "localExistingAdmissionDatabase": 23,
+    "localExistingSpendDatabase": 41,
+    "existingManagedUI": 15,
+    "actualPackage": 143,
+    "offlineImports": 218,
+    "browserGraph": 86
+  },
+  "browser": {
+    "url": "https://learnable-staging.vercel.app/?draft=setup-57e57424-d47b-4841-98b3-85e12a2c19a7&step=create",
+    "result": "Ready to create; enabled Create course arrow button; allowance and false image warnings absent; consent names connected OpenRouter account.",
+    "paidCreateClicked": false,
+    "screenshot": "/Users/davidwang/Learnable/output/qa/owner-funded-20261017/staging-ready.png"
+  },
+  "cost": {
+    "newText": 0,
+    "newSearch": 0,
+    "newImages": 0,
+    "newRetries": 0,
+    "priorOpenRouterRun": 1.016872,
+    "cumulativeRecordedQa": 22.66571,
+    "unpriced": [
+      "archived text charge",
+      "separate production image charge",
+      "three earlier built-in creative images"
+    ]
+  },
+  "limitations": [
+    "No new paid end-to-end course run; existing course-generation acceptance remains separate.",
+    "Original sample content and image quality gates remain open.",
+    "Existing source Admin auth cache mismatch and course-cache quota warning were not repaired in this change."
+  ]
+}

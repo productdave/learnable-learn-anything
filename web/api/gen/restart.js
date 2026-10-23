@@ -5,9 +5,10 @@
 // resume is not enough. Keeps user_brief, PDF refs, source URLs, and extracted
 // URL text so the restart does not throw away all context or re-fetch sources.
 
+import { hasGenerationBinding, readGenerationApiKey } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
-import { readJsonBody, requirePdfRefsBelongToJob, requireSafeJobId, userFromRequest, readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
+import { readJsonBody, requirePdfRefsBelongToJob, requireSafeJobId, userFromRequest, serviceClient } from '../_lib/supabase-server.mjs';
 import { runGeneration as defaultRunGeneration } from '../_lib/gen-runner.mjs';
 import { createGenerationRequestBudget, bindGenerationClient, withGenerationSignal, isGenerationBudgetStop } from '../_lib/gen-request-budget.mjs';
 import { RECOVERABLE_STATUSES } from '../_lib/gen-recovery.mjs';
@@ -79,9 +80,10 @@ return async function handler(req, res) {
   });
 
   let apiKey;
-  try { apiKey = await readApiKey(supabase, user.id); }
+  try { apiKey = await readGenerationApiKey(supabase, user.id, job, { mode: 'curriculum', checkpoint, userBrief }); }
   catch (e) {
     if (isGenerationBudgetStop(e)) throw e;
+    if (hasGenerationBinding(job)) return res.status(e.statusCode || 409).json({ code: e.code, error: e.message });
     let marked;
     try {
       marked = await markRestartWaitingForApiKey(supabase, jobId, user.id, job.status, job.run_id, e.message || String(e), {

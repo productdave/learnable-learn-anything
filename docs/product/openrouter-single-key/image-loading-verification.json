@@ -1,0 +1,89 @@
+{
+  "at": "2026-10-17T17:31:48.133Z",
+  "deploymentId": "dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W",
+  "artifact": "output/staging/2026-10-17-image-loading/release-j8EUkv",
+  "reportSha256": "8cc59c01befb377d9e4106658559579ec7bf220b29f3b457f6b716eb79a3db77",
+  "scope": "Private saved image loading UI only",
+  "features": [
+    "Square reserved image area",
+    "Spinner and Loading image\u2026 until browser load completes",
+    "Same-asset Retry image after network/decode failure",
+    "Account/navigation cleanup",
+    "Reduced-motion CSS"
+  ],
+  "localChecks": {
+    "loaderCases": 5,
+    "failingBefore": 4,
+    "imageClientAssertions": 23,
+    "mediaFallback": "passed",
+    "syntax": "passed",
+    "sourceCacheCheck": "fails on pre-existing auth v35/v33 mismatch, reproduced at HEAD ae9ac9a",
+    "packagedBrowserModules": 86,
+    "packagedImportConsistency": "passed",
+    "actualPackageCases": 5
+  },
+  "browser": {
+    "desktopDelayedAndLoaded": true,
+    "failureRetry": true,
+    "mobileWidth": 390,
+    "desktopFollowingContentTopBeforeAfter": [
+      807,
+      807
+    ],
+    "mobileFollowingContentTopBeforeAfter": [
+      659,
+      659
+    ],
+    "horizontalOverflow": false,
+    "lightAndDarkReviewed": true,
+    "liveLoadingCaptured": true,
+    "liveImageDecodedWidth": 1024,
+    "liveWarning": "COURSE_CACHE_WRITE_FAILED QuotaExceededError; existing course-cache issue, not repaired or cleared in this scope",
+    "proof": "output/qa/image-loading-20261017/staging-loading.png"
+  },
+  "rollout": {
+    "at": "2026-10-17T17:31:48.133Z",
+    "deploymentId": "dpl_6sHVyzoakQRKZN2PvT4GCVmN2j4W",
+    "ready": true,
+    "site": "https://learnable-staging.vercel.app",
+    "served": [
+      "index.html",
+      "styles-image-loading-20261017.css",
+      "js-image-loading-20261017/components/topic-view.js",
+      "js-image-loading-20261017/private-course-images.js",
+      "js-image-loading-20261017/config.js",
+      "js-image-loading-20261017/admin-dashboard.js"
+    ],
+    "routes": [
+      {
+        "path": "/api/health/cloud",
+        "status": 200
+      },
+      {
+        "path": "/api/courses/images",
+        "status": 401
+      }
+    ],
+    "stagingDataPreserved": true,
+    "settingsAndAccessPreserved": true,
+    "serverBytesUnchanged": true,
+    "spend": {
+      "requests": 31,
+      "actualMicrousd": 1016872,
+      "digest": "96e57f55f0566188149dc4fcda6e08f35f1530313ff2452450463e1d804a2031",
+      "expired": true
+    },
+    "productionUnchanged": true,
+    "productionWrites": 0,
+    "providerCalls": 0
+  },
+  "paidQa": {
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "cumulativeRecordedUsd": 22.66571,
+    "priorUnpricedUsage": "one archived text charge, one unknown production image charge and three built-in creative images",
+    "expiredAllowanceUnchanged": true
+  }
+}

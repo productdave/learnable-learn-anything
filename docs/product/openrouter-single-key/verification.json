@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/openrouter-single-key",
+  "scope": "OR-02 saved-provider lifecycle routing; provider consolidation ahead of learner credits",
+  "environment": "local, synthetic provider and database I/O",
+  "newTests": 32,
+  "combinedCoreTests": {
+    "passed": 240,
+    "failed": 0,
+    "command": "node --test scripts/test-openrouter-generation.mjs scripts/test-openrouter-client.mjs scripts/test-openrouter-stages.mjs scripts/test-integrated-generation-runner.mjs scripts/test-generation-request-deadline.mjs scripts/test-generation-entry-deadline.mjs scripts/test-generation-continuation.mjs",
+    "log": "output/qa/2026-10-11-openrouter-single-key/core-tests.log",
+    "sha256": "8e9849a7a9037548a1c63e4c8a74cd101b876f1842e8805733d557946f06ead4"
+  },
+  "supportingRegressionScripts": [
+    {
+      "name": "test-gen-start-idempotency",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-start-idempotency.log"
+    },
+    {
+      "name": "test-gen-restart",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-restart.log"
+    },
+    {
+      "name": "test-gen-review-transitions",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-review-transitions.log"
+    },
+    {
+      "name": "test-gen-runner-lazy-pdf",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-runner-lazy-pdf.log"
+    },
+    {
+      "name": "test-gen-runner-pdf-failure",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-runner-pdf-failure.log"
+    },
+    {
+      "name": "test-gen-runner-heartbeat",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-gen-runner-heartbeat.log"
+    },
+    {
+      "name": "test-api-key-saved-unblocks-cloud-jobs",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-api-key-saved-unblocks-cloud-jobs.log"
+    },
+    {
+      "name": "test-cloud-review-api-key-recovery",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-cloud-review-api-key-recovery.log"
+    },
+    {
+      "name": "test-cloud-review-feedback-durable-on-key-missing",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-cloud-review-feedback-durable-on-key-missing.log"
+    },
+    {
+      "name": "test-cloud-auto-recovery-retry",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-cloud-auto-recovery-retry.log"
+    },
+    {
+      "name": "test-setup-generation",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-setup-generation.log"
+    },
+    {
+      "name": "test-grouped-functions",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-grouped-functions.log"
+    },
+    {
+      "name": "test-module-syntax",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-module-syntax.log"
+    },
+    {
+      "name": "test-visual-designer-spend-guard",
+      "exitCode": 0,
+      "log": "output/qa/2026-10-11-openrouter-single-key/test-visual-designer-spend-guard.log"
+    }
+  ],
+  "applicationBrowserQa": "not run; no application UI changes",
+  "databaseMigrations": "none applied; no database schema changed",
+  "liveModelQa": "not run",
+  "hostedAcceptance": "not run",
+  "publicNewOpenRouterStarts": "gated",
+  "knownRemaining": [
+    "native research/PDF/citations",
+    "Designer gateway routing",
+    "image route/cost bound/assets",
+    "operator new-job admission",
+    "append-only authorization renewal after long review",
+    "explicit regeneration operation identity",
+    "newer-runtime integration and migration numbering",
+    "bounded live quality/cost evaluation",
+    "fresh staging package and separate release decision"
+  ],
+  "cost": {
+    "logicalRun": "openrouter-single-key-20261011",
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "totalUsd": 0,
+    "cumulativeRecordedUsd": 14.355246,
+    "unpricedHistoricalTextCharges": 1
+  }
+}

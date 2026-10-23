@@ -18,7 +18,7 @@ export async function checkOpenAIKey(key, model, fetcher = fetch) {
   if (!response.ok) throw new ImageGenerationError(imageFailureCode(response.status));
 }
 
-async function readResponse(response, limit, signal) {
+export async function readImageResponse(response, limit, signal) {
   const reader = response.body?.getReader();
   if (!reader) throw new ImageGenerationError('response');
   const chunks = []; let size = 0;
@@ -140,7 +140,7 @@ export async function generateCreatorImage({ client, ownerId, funding, prompt, a
     const id = response.headers.get('x-request-id');
     requestId = /^req_[A-Za-z0-9_-]{1,100}$/.test(id || '') ? id : null;
     let result;
-    try { result = await readResponse(response, response.ok ? policy.maxResponseBytes : 16384, combined); }
+    try { result = await readImageResponse(response, response.ok ? policy.maxResponseBytes : 16384, combined); }
     catch (error) { if (response.ok || combined.aborted) throw error; }
     if (!response.ok) throw new ImageGenerationError(imageFailureCode(response.status, result?.error?.code));
     usage = imageUsage(result?.usage);

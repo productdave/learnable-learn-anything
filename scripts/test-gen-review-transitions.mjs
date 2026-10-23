@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildReviewTransition, latestReviewFeedback, updateJobFromStatus } from '../web/api/gen/review.js';
+import test from 'node:test';
+import { runGeneration } from '../web/api/_lib/gen-runner.mjs';
+import { checkpointForJob } from '../web/api/_lib/gen-recovery.mjs';
+import { historyModel, adminHistoryHTML } from '../web/js/admin-history.js';
 
 const lease = {
   heartbeat_at: '2026-06-27T00:00:00.000Z',
@@ -101,7 +105,7 @@ const userBrief = {
   assert.equal(transition.patch.topics_total, 0);
   assert.ok(transition.patch.user_brief.source_text.includes('Avoid vague theory.'));
   assert.equal(transition.runnerRow.user_brief, transition.patch.user_brief);
-  assert.deepEqual(transition.checkpoint, { extracted_urls: sourceUrls });
+  assert.deepEqual(transition.checkpoint, { stage: 'intake', extracted_urls: sourceUrls });
   assert.equal(transition.patch.review_history.at(-1).action, 'revise_curriculum');
 }
 
@@ -257,7 +261,7 @@ assert.throws(
 {
   const reviewSource = readFileSync(join(process.cwd(), 'web/api/gen/review.js'), 'utf8');
   const transitionIndex = reviewSource.indexOf('transition = buildReviewTransition');
-  const apiKeyIndex = reviewSource.indexOf('apiKey = await readApiKey');
+  const apiKeyIndex = reviewSource.indexOf('apiKey = await readGenerationApiKey');
   const claimIndex = reviewSource.indexOf('updateJobFromStatus');
   assert.ok(transitionIndex > -1, 'review handler should build/validate the transition.');
   assert.ok(apiKeyIndex > -1, 'review handler should read the API key.');
@@ -354,5 +358,64 @@ function supabaseUpdateMock({ data = { id: 'job-1' }, error = null } = {}) {
     { type: 'is', field: 'run_id', value: null }
   ]);
 }
+
+// Exercise the real runner's trace boundary with synthetic storage and an
+// inactive row. No provider dispatch is needed to verify entry attribution.
+async function entryTrace(checkpoint, mode) {
+  const logs = process.env.LEARNABLE_GENERATION_LOGS, info = console.info, fetcher = globalThis.fetch;
+  process.env.LEARNABLE_GENERATION_LOGS = '1'; console.info = () => {};
+  globalThis.fetch = () => assert.fail('No network permitted in entry-trace tests');
+  const events = [];
+  const supabase = { from(table) {
+    if (table === 'generation_events') return { upsert(rows) { events.push(...rows); return Promise.resolve({ error: null }); } };
+    assert.equal(table, 'generation_jobs');
+    const query = { select() { return query; }, eq() { return query; }, abortSignal() { return query; },
+      maybeSingle() { return query; }, then(resolve, reject) { return Promise.resolve({ data: { status: 'review_research', run_id: 'trace-run' } }).then(resolve, reject); } };
+    return query;
+  } };
+  try {
+    await runGeneration({ supabase, jobId: 'trace-job', ownerId: 'trace-owner', runId: 'trace-run',
+      userBrief: {}, checkpoint, mode, pdfRefs: [], apiKey: null });
+    assert.deepEqual(events.map(event => event.event), ['run.started', 'run.stopped']);
+    return events[0];
+  } finally {
+    console.info = info; globalThis.fetch = fetcher;
+    if (logs === undefined) delete process.env.LEARNABLE_GENERATION_LOGS;
+    else process.env.LEARNABLE_GENERATION_LOGS = logs;
+  }
+}
+
+for (const [action, status, stage, role] of [
+  ['approve_curriculum', 'review_curriculum', 'research', 'Researcher'],
+  ['rerun_research', 'review_research', 'research', 'Researcher'],
+  ['approve_research', 'review_research', 'topics', 'Lesson / Learning Designer'],
+  ['revise_curriculum', 'review_curriculum', 'intake', 'Curriculum Designer'],
+]) test(`${action}: job-update stage, actual start event and history filter agree`, async () => {
+  const job = { status, stage: status === 'review_curriculum' ? 'intake' : 'research', brief,
+    user_brief: userBrief, research: { m1: { key_concepts: ['agents'] }, m2: { key_concepts: ['workflow'] } } };
+  const before = structuredClone(job);
+  const transition = buildReviewTransition({ action, job, feedback: 'Keep the examples clear.', runId: 'trace-run' });
+  const event = await entryTrace(transition.checkpoint, transition.runnerMode);
+  assert.equal(event.details.stage, stage);
+  assert.equal(transition.patch.stage, event.details.stage);
+  assert.equal(transition.checkpoint.stage, stage);
+  assert.deepEqual(job, before, 'Building a transition does not mutate the prior checkpoint');
+  const detail = { job: { stage, status: 'running' }, currentExecutionId: 'trace-run',
+    events: [{ id: event.id, event: event.event, details: event.details, runId: event.run_id, at: event.created_at }] };
+  assert.equal(historyModel(detail, { stage }).filtered.length, 1);
+  if (stage !== 'intake') assert.equal(historyModel(detail, { stage: 'intake' }).filtered.length, 0);
+  assert.ok(adminHistoryHTML(detail, {}, { stage }).includes(role + ' · Execution 1'));
+});
+
+for (const stage of ['research', 'topics', 'design', 'images', 'assemble']) test(`Recovery checkpoint retains ${stage} entry attribution`, async () => {
+  const checkpoint = checkpointForJob({ stage, brief, saved_course_id: 'saved-course' });
+  const before = structuredClone(checkpoint);
+  assert.equal((await entryTrace(checkpoint, stage === 'research' ? 'research' : 'complete')).details.stage, stage);
+  assert.deepEqual(checkpoint, before);
+});
+
+test('a fresh curriculum start still logs intake', async () => {
+  assert.equal((await entryTrace(undefined, 'curriculum')).details.stage, 'intake');
+});
 
 console.log('gen review transition tests passed');

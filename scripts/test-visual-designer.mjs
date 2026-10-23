@@ -7,6 +7,8 @@ import { assembleCourse } from '../web/js/generator/assemble-course.js';
 import { creationBrief, retainComponentChoices } from '../web/js/generator/component-policy.mjs';
 import { runVisualDesigner, designContentHash, assertDesignComplete } from '../web/api/_lib/visual-designer.mjs';
 import { GENERATION_PAUSE as GENERATION_TIME_SLICE_COMPLETE } from '../web/api/_lib/gen-request-budget.mjs';
+import { createClient } from '../web/js/generator/anthropic-fetch.js';
+import { visualDesignFailureDiagnostic } from '../web/js/generator/stages/visual-design.mjs';
 
 const clone = value => structuredClone(value);
 function fixture() {
@@ -272,6 +274,55 @@ test('provider errors retain only allowlisted metadata, never arbitrary messages
   assert.equal(d.responseReceived, false); assert.doesNotMatch(JSON.stringify(d), /SECRET/);
 });
 
+test('Claude credit rejection explains the next action and preserves the same course for Resume', async () => {
+  const f = fixture();
+  f.args.requestBudget.assertCanStart = () => { if (++f.state.budgetChecks === 3) throw Object.assign(new Error('pause'), { code: GENERATION_TIME_SLICE_COMPLETE }); };
+  await assert.rejects(f.run(), { code: GENERATION_TIME_SLICE_COMPLETE });
+  f.args.requestBudget.assertCanStart = () => {};
+  const before = clone(f.state.row.payload);
+  let requests = 0;
+  const client = createClient({ apiKey: 'synthetic-key', fetcher: async () => {
+    requests++;
+    return new Response(JSON.stringify({ error: { type: 'invalid_request_error',
+      message: 'Your credit balance is too low to access the Anthropic API. SECRET_PROVIDER_DETAIL' } }), { status: 400 });
+  } });
+  await assert.rejects(f.run({ client, refine: undefined }), error => {
+    assert.equal(error.code, 'VISUAL_DESIGN_FAILED');
+    assert.match(error.message, /Claude API credit.*Add credit.*resume/i);
+    assert.doesNotMatch(error.message, /SECRET|synthetic-key|Reference:/);
+    return true;
+  });
+  assert.equal(requests, 1, 'a billing rejection is not automatically retried');
+  const after = f.state.row.payload;
+  assert.deepEqual(after.modules, before.modules);
+  assert.deepEqual(after._visualDesign.items, before._visualDesign.items);
+  assert.deepEqual(after._visualDesign.review, before._visualDesign.review);
+  assert.deepEqual(after._visualDesign.usage, before._visualDesign.usage);
+  assert.equal(after._visualDesign.pending.status, 'failed');
+  assert.equal(after._visualDesign.lastFailure.code, 'PROVIDER_CREDIT_BALANCE');
+  assert.equal(after._visualDesign.lastFailure.httpStatus, 400);
+  assert.equal(after._visualDesign.lastFailure.responseReceived, false);
+  assert.doesNotMatch(JSON.stringify(after._visualDesign), /SECRET|synthetic-key/);
+  await assert.rejects(f.run({ client, refine: undefined }), { code: 'VISUAL_DESIGN_UNCERTAIN' });
+  assert.equal(requests, 1);
+  const result = await f.run({ retryFailedDesign: true });
+  assert.equal(result.progress.completed, 3);
+  assert.equal(f.state.row.payload.config.id, before.config.id);
+  assert.equal(f.state.row.payload._generationJobId, before._generationJobId);
+  assert.deepEqual(f.state.calls, ['course', 'lesson-1', 'lesson-2', 'lesson-3']);
+});
+
+test('only the specific Claude billing rejection is classified as a credit issue', () => {
+  const message = 'Your credit balance is too low to access the Anthropic API.';
+  for (const error of [
+    { status: 400, type: 'invalid_request_error', message: 'Unexpected request parameter credit_balance.' },
+    { status: 400, type: 'invalid_request_error', code: 'PROVIDER_CREDIT_BALANCE', message: 'Other rejection' },
+    { status: 400, type: 'unknown_type', message },
+    { status: 401, type: 'invalid_request_error', message },
+    { status: 500, type: 'invalid_request_error', message },
+  ]) assert.equal(visualDesignFailureDiagnostic(error).code, 'PROVIDER_HTTP_ERROR');
+});
+
 test('a request deadline is diagnosed but remains unknown and cannot be resumed automatically', async () => {
   const f=fixture();let calls=0;
   const review=async()=>{calls++;throw Object.assign(Error('private transport'),{code:'GENERATION_REQUEST_UNCERTAIN'});};
@@ -324,4 +375,14 @@ test('diagnostic paths and issue codes are bounded and arbitrary provider data i
   assert.equal(d.issues[0].path[2], '[field]'); assert.equal(d.issues[0].code, 'validation');
   assert.doesNotMatch(JSON.stringify(d), /SECRET/);
   assert.ok(Buffer.byteLength(JSON.stringify(d)) < 2000);
+});
+
+test('task-specific clients and models retain Designer stage attribution',async()=>{
+ const f=fixture(),calls=[];
+ await f.run({models:{visual_review:{model:'frontier-review',provider:'Anthropic'},visual_refinement:{model:'frontier-refinement',provider:'Anthropic'}},
+  clientFor(task,context){calls.push({task,course:context.course,target:context.target});return {task};},
+  review(client,course,opts){assert.equal(client.task,'visual_review');assert.equal(opts.model,'frontier-review');return f.args.review(client,course,opts);},
+  refine(client,course,target,review,opts){assert.equal(client.task,'visual_refinement');assert.equal(opts.model,'frontier-refinement');return f.args.refine(client,course,target,review,opts);}});
+ assert.equal(calls.length,4);assert.equal(calls[0].target,undefined);assert.equal(calls[1].target.topicId,'lesson-1');
+ assert.deepEqual(f.state.row.payload._visualDesign.usage.calls.map(c=>c.model),['frontier-review','frontier-refinement','frontier-refinement','frontier-refinement']);
 });

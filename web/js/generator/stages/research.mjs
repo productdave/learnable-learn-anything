@@ -160,7 +160,7 @@ export async function runResearch(client, courseBrief, mod, opts = {}) {
       pdfBlock
     : '';
 
-  const userText = `Today's date: ${new Date().toISOString().slice(0, 10)}
+  const userText = `Today's date: ${opts.today || new Date().toISOString().slice(0, 10)}
 
 Research material for this module so it can be turned into learning content.
 
@@ -199,13 +199,18 @@ Use web_search for additional material only where needed and available. Do not r
   // Loop: call → handle tool_use → feed back tool_result → continue. Stop when
   // the model submits the research bundle tool.
   for (let turn = 0; turn < 10; turn++) {
-    const resp = await client.messages.create({
+    let resp;
+    try { resp = await client.messages.create({
       model: opts.model || modelForTask('research'),
       max_tokens: 4096,
       system: SYSTEM,
       tools,
       messages
-    });
+    }); }
+    catch (error) {
+      if (error.paidOutput?.usage) opts.onUsage?.(error.paidOutput.usage, { task: 'research', moduleId: mod.id, invalidOutput: true });
+      throw error;
+    }
     opts.onUsage?.(resp.usage, { task: 'research', moduleId: mod.id });
 
     messages.push({ role: 'assistant', content: resp.content });
@@ -213,7 +218,7 @@ Use web_search for additional material only where needed and available. Do not r
     const submitBlock = resp.content.find(b => b.type === 'tool_use' && b.name === TOOL_NAME);
     if (submitBlock) {
       const parsed = ResearchBundleSchema.parse(submitBlock.input);
-      return parsed;
+      return resp.evidence ? { ...parsed, _evidence: resp.evidence } : parsed;
     }
 
     // For any web_search calls the server-side tool already filled in results.

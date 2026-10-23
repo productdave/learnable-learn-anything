@@ -11,6 +11,8 @@
 // Reuses the stage modules from web/js/generator/stages/*.mjs as pure
 // generation steps. The browser no longer orchestrates course generation.
 
+import { randomUUID } from 'node:crypto';
+import { createGenerationTrace, safeDiagnostic } from './generation-observability.mjs';
 import { runIntake } from '../../js/generator/stages/intake.mjs';
 import { runResearch } from '../../js/generator/stages/research.mjs';
 import { runTopic } from '../../js/generator/stages/topic.mjs';
@@ -18,8 +20,9 @@ import { getTone } from '../../js/generator/tones/conversational.mjs';
 import { createClient as createAnthropic } from '../../js/generator/anthropic-fetch.js';
 import { assembleCourse } from '../../js/generator/assemble-course.js';
 import { retainComponentChoices } from '../../js/generator/component-policy.mjs';
-import { compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
+import { ResearchBundleSchema, courseBriefSchemaFor, compatibleTopicCheckpoint } from '../../js/generator/schema.mjs';
 import { signedPdfUrl } from './supabase-server.mjs';
+import { setupPdfSources, resolveSetupPdfs } from './gen-setup-pdfs.mjs';
 import { agentMessage, agentNameForStage } from '../../js/generator/agents.mjs';
 import { clearSavedCourseIdForJob, reconcileGeneratedCourseRun, rollbackGeneratedCourseSave, saveGeneratedCourse } from './course-save.mjs';
 import { clearResearchFailure, clearTopicFailure, pruneResolvedFailures, replaceResearchFailure, replaceTopicFailure } from './gen-failures.mjs';
@@ -36,6 +39,12 @@ import { publicFetch } from './public-fetch.mjs';
 import { pauseForContinuation } from './gen-continuation.mjs';
 import { runIntegratedCourseImages, usesIntegratedVisuals } from './integrated-course-images.mjs';
 import { runVisualDesigner, usesVisualDesigner, assertDesignComplete } from './visual-designer.mjs';
+
+import { generationProvider, generationModels, generationOperationScope, requireGenerationCapabilities } from './generation-provider.mjs';
+import { createOpenRouterClient } from './openrouter-client.mjs';
+import { createOpenRouterNativeClient } from './openrouter-native.mjs';
+import { createOpenRouterImageGenerator } from './openrouter-image.mjs';
+import { createAiSpendLedger } from './ai-spend-ledger.mjs';
 
 const STAGE2_CONCURRENCY = 3;
 const STAGE3_CONCURRENCY = 4;
@@ -103,7 +112,7 @@ function hasObjectKeys(value) {
 function isProgressCheckpoint(fields = {}) {
   if (Object.prototype.hasOwnProperty.call(fields, 'brief') && fields.brief) return true;
   if (Array.isArray(fields.extracted_urls) && fields.extracted_urls.length > 0) return true;
-  if (hasObjectKeys(fields.research)) return true;
+  if (hasObjectKeys(fields.research) || hasObjectKeys(fields.research_evidence)) return true;
   if (hasObjectKeys(fields.topics_by_key)) return true;
   if (fields.saved_course_id) return true;
   if (hasObjectKeys(fields.image_progress)) return true;
@@ -147,9 +156,13 @@ function isRunnerWritableStatus(status) {
  *  - complete: run Stage 3/4 and save the course. */
 export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmail = null, apiKey, userBrief, checkpoint, pdfRefs, mode = 'complete', requestBudget = createGenerationRequestBudget(), retryFailedImages = false, retryFailedDesign = false }) {
   if (!runId) throw new Error('runGeneration requires runId so stale cloud runners cannot write checkpoints.');
-  supabase = bindGenerationClient(supabase, requestBudget);
+  const trace = createGenerationTrace({ client: supabase, jobId, ownerId, runId });
+  supabase = bindGenerationClient(supabase, requestBudget, { trace });
+  trace.emit('run.started', { stage: checkpoint?.stage || 'intake', remainingMs: requestBudget.remainingMs() });
 
   let client = null;
+  let provider = { gateway: 'anthropic' }, operationScope = '';
+  let spendLedger = null;
   let tone = null;
   let pdfsForApi = [];
   let pdfThumbs = pdfThumbsFromRefs(pdfRefs);
@@ -159,13 +172,14 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
 
   function onUsage(task, usage, meta = {}, aiModels = {}) {
     const config = aiModels[task] || {};
-    recordTokenUsage(tokenUsage, {
+    const recorded = recordTokenUsage(tokenUsage, {
       task,
       provider: config.provider || 'anthropic',
       model: config.model || null,
       usage,
-      meta
+      meta: { ...meta, callId: randomUUID() }
     });
+    if (recorded) trace.emit('provider.response', { usage: tokenUsage.calls.at(-1), dispatched: 'yes' });
   }
 
   async function currentJobState() {
@@ -227,6 +241,7 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         await assertRunnerWritable();
         throw checkpointWriteError('Could not persist generation checkpoint even though the job is still active.');
       }
+      await trace.flush();
     });
     return patchQueue;
   }
@@ -272,14 +287,19 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
   }
 
   async function ensurePdfsForApi(label = 'PDF source resolution') {
-    if (pdfsForApi.length || !pdfRefs?.length) return pdfsForApi;
+    // Setup sources previously reached models only as extracted text. Retain
+    // native pages for OpenRouter while preserving the legacy upload path.
+    const setupSources = provider.gateway === 'openrouter' ? setupPdfSources(userBrief) : [];
+    if (pdfsForApi.length || (!pdfRefs?.length && !setupSources.length)) return pdfsForApi;
     if (!pdfResolutionPromise) {
       pdfResolutionPromise = withLeaseHeartbeat(label, async () => {
         const pdfs = await resolvePdfs(supabase, pdfRefs, { ownerId, jobId, requestBudget });
-        return pdfs.map(p => ({
+        const legacy = pdfs.map(p => ({
           file_index: p.file_index, name: p.name, base64: p.base64,
           pageCount: (p.pageThumbs || []).length
         }));
+        const offset = legacy.length ? Math.max(...legacy.map(p => p.file_index)) + 1 : 0;
+        return [...legacy, ...await resolveSetupPdfs(supabase, setupSources, { ownerId, requestBudget, offset })];
       });
     }
     pdfsForApi = await pdfResolutionPromise;
@@ -351,31 +371,52 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
       if (saved.payload._visualDesign?.status === 'complete') {
         await patch({ design_progress: assertDesignComplete(saved.payload) });
       } else {
-        const models = getAiModelRegistry();
-        assertCloudGenerationModelSupport(models);
-        ensureTextClient();
+        const models = generationModels(provider);
+        if (provider.gateway !== 'openrouter') { assertCloudGenerationModelSupport(models); ensureTextClient(); }
         await runVisualDesigner({ supabase, ownerId, jobId, runId, courseId, client,
-          model: models.lesson.model, requestBudget, assertRunnerWritable, patch,
-          withHeartbeat: withLeaseHeartbeat, retryFailedDesign });
+          model: models.lesson.model, models,
+          // Designer owns protected-content validation and its one bounded correction.
+          clientFor: provider.gateway === 'openrouter' ? task => textClientFor(task, value => value) : null, requestBudget, assertRunnerWritable, patch,
+          withHeartbeat: withLeaseHeartbeat, retryFailedDesign, trace });
       }
       await patch({ stage: 'images', message: 'Visual Designer is creating illustrations from the refined lessons…' });
     }
     await runIntegratedCourseImages({ supabase, ownerId, jobId, runId, courseId, requestBudget,
+      ...(provider.gateway === 'openrouter' ? { gatewayPolicy: provider.policy,
+        generate: createOpenRouterImageGenerator({ apiKey: provider.apiKey, policy: provider.policy,
+          ledger: spendLedger, beforeDispatch: assertRunnerWritable }) } : {}),
       assertRunnerWritable, checkpoint: checkpoint?.image_progress || {}, patch,
-      withHeartbeat: withLeaseHeartbeat, retryFailedImages });
+      withHeartbeat: withLeaseHeartbeat, retryFailedImages, trace });
     await patch({ stage: 'assemble', message: agentMessage('assemble') });
   }
 
   // Keep a single lazy factory site: staging packaging injects the same guarded
   // creator-funded client here for both lesson writing and learner refinement.
   function ensureTextClient() {
+    if (provider.gateway === 'openrouter') throw new Error('OpenRouter requires a task-specific validated client.');
     if (!client) client = createAnthropic({ apiKey, requestBudget, beforeDispatch: assertRunnerWritable });
     return client;
   }
 
+  function textClientFor(task, validateResult, options = {}) {
+    if (provider.gateway !== 'openrouter') return ensureTextClient();
+    const factory = provider.policy.routes[task]?.adapter === 'native-messages-schema' ? createOpenRouterNativeClient : createOpenRouterClient;
+    return factory({ apiKey: provider.apiKey, policy: provider.policy, task,
+      ledger: spendLedger, validateResult, operationScope, requestBudget, beforeDispatch: assertRunnerWritable, ...options });
+  }
+
   try {
-    const aiModels = getAiModelRegistry();
     if (await bailIfInactive()) return;
+    // Re-read the owned, persisted binding even if an entry point passed a key.
+    // Never infer a job's provider from today's model environment or a checkpoint.
+    const { data: providerJob, error: providerError } = await supabase.from('generation_jobs').select('*')
+      .eq('id', jobId).eq('owner_id', ownerId).maybeSingle();
+    if (providerError || !providerJob) throw checkpointWriteError('Could not confirm the saved course provider.');
+    provider = generationProvider(providerJob, ownerId);
+    if (provider.gateway === 'openrouter') operationScope = generationOperationScope(providerJob);
+    requireGenerationCapabilities(provider, { mode, userBrief, checkpoint, pdfRefs });
+    const aiModels = generationModels(provider);
+    if (provider.gateway === 'openrouter') spendLedger = createAiSpendLedger({ supabase, ownerId, jobId, runId, policyHash: provider.policy.fingerprint });
     // A saved complete text draft is now the source of truth. Image continuation
     // must never reassemble it from old topic checkpoints or overwrite assets
     // already attached by a previous time slice.
@@ -397,8 +438,7 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         throw checkpointWriteError('The saved course no longer matches its refinement checkpoint. Your retained draft was not overwritten.');
       }
     }
-    assertCloudGenerationModelSupport(aiModels);
-    ensureTextClient();
+    if (provider.gateway !== 'openrouter') { assertCloudGenerationModelSupport(aiModels); ensureTextClient(); }
     tone = getTone(userBrief?.tone || 'conversational');
     if (await bailIfInactive()) return;
 
@@ -426,7 +466,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
     let brief = checkpoint?.brief ? retainComponentChoices(checkpoint.brief, userBrief) : null;
     if (!brief) {
       await patch({ stage: 'intake', status: 'running', message: agentMessage('intake') });
-      brief = await withLeaseHeartbeat('curriculum design', async () => runIntake(client, enrichedBrief, {
+      const curriculumClient = textClientFor('curriculum', value => courseBriefSchemaFor(enrichedBrief).parse(value));
+      brief = await withLeaseHeartbeat('curriculum design', async () => runIntake(curriculumClient, enrichedBrief, {
         model: aiModels.curriculum.model,
         onUsage: (usage, meta) => onUsage('curriculum', usage, meta, aiModels),
         pdfs: await ensurePdfsForApi('PDF source resolution for curriculum design')
@@ -467,10 +508,11 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
 
     // Stage 2 — research per module.
     const researchByModule = checkpoint?.research || {};
+    const researchEvidence = providerJob.research_evidence || {};
     let failures = checkpoint?.failures || [];
     const researchResults = new Array(brief.modules.length);
     let researchCursor = 0;
-    const researchWorkers = Array.from({ length: Math.min(STAGE2_CONCURRENCY, brief.modules.length) }, async () => {
+    const researchWorkers = Array.from({ length: Math.min(provider.gateway === 'openrouter' ? 1 : STAGE2_CONCURRENCY, brief.modules.length) }, async () => {
       while (true) {
         const i = researchCursor++;
         if (i >= brief.modules.length) return;
@@ -481,8 +523,19 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
           continue;
         }
         try {
-          const bundle = await withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(client, brief, mod, {
+          const researchClient = textClientFor('research', value => {
+            const bundle = ResearchBundleSchema.parse(value);
+            if (bundle.module_id !== mod.id) throw new Error('Research belongs to another module.');
+            return bundle;
+          }, { savedEvidence: researchEvidence[mod.id] || null, saveEvidence: async evidence => {
+            onUsage('research', evidence.usage, { moduleId: mod.id, phase: 'evidence' }, aiModels);
+            researchEvidence[mod.id] = evidence;
+            await patch({ research_evidence: researchEvidence, stage: 'research',
+              message: `${agentNameForStage('research')} saved evidence for “${mod.title}”…` });
+          } });
+          const bundle = await withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(researchClient, brief, mod, {
             model: aiModels.research.model,
+            today: provider.gateway === 'openrouter' ? provider.policy.reviewedAt.slice(0, 10) : undefined,
             searchTool: anthropicWebSearchTool(),
             onUsage: (usage, meta) => onUsage('research', usage, meta, aiModels),
             pdfs: await ensurePdfsForApi(`PDF source resolution for research ${mod.id}`),
@@ -561,7 +614,12 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
         const { mod, topic, bundle } = work[i];
         const key = `${mod.id}/${topic.id}`;
         try {
-          const content = await withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(client, brief, mod, topic, bundle, tone, {
+          // runTopic owns normalization and the full course contract. Validating
+          // here first would reject recoverable encodings and erase the field
+          // diagnostics needed by its one bounded corrective attempt. The
+          // gateway still settles usage before returning a paid response.
+          const lessonClient = textClientFor('lesson', value => value);
+          const content = await withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(lessonClient, brief, mod, topic, bundle, tone, {
             model: aiModels.lesson.model,
             onUsage: (usage, meta) => onUsage('lesson', usage, meta, aiModels)
           }));
@@ -658,7 +716,8 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
     await finishCourseJob({ status, message: status === 'completed' && usesIntegratedVisuals(userBrief)
       ? 'Your course draft is ready to review.' : message, courseRowId, done });
   } catch (err) {
-    console.error(`[gen ${jobId}] FAILED:`, err);
+    trace.emit('operation.failed', { error: err?.diagnostic || err, remainingMs: requestBudget.remainingMs() });
+    console.error(`[gen ${jobId}] FAILED:`, safeDiagnostic(err?.diagnostic || err));
     // A remote save/finalization can commit before its acknowledgement is lost.
     // Do not delete a confirmed course to compensate for an unknown outcome.
     if (courseSaveAttempt && err?.code !== GENERATION_IO_UNCERTAIN) {
@@ -715,6 +774,10 @@ export async function runGeneration({ supabase, jobId, ownerId, runId, ownerEmai
       failurePatch(err)
     ).eq('id', jobId).eq('owner_id', ownerId).eq('run_id', runId).in('status', RUNNER_WRITABLE_STATUSES);
     throw err;
+  } finally {
+    // Invocation completion is not course completion. The checkpoint is authority.
+    trace.emit('run.stopped', { remainingMs: requestBudget.remainingMs() });
+    await trace.flush();
   }
 }
 

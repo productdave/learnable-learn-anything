@@ -24,9 +24,9 @@ assert.ok(runBody.includes('clearInterval(timer);'), 'heartbeat timer should sto
 const wrappers = [
   'pdfResolutionPromise = withLeaseHeartbeat(label, async () => {',
   "withLeaseHeartbeat('source URL extraction', () => serverFetchUrls(pendingSourceUrls, {",
-  "withLeaseHeartbeat('curriculum design', async () => runIntake(client, enrichedBrief, {",
-  'withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(client, brief, mod, {',
-  'withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(client, brief, mod, topic, bundle, tone, {'
+  "withLeaseHeartbeat('curriculum design', async () => runIntake(curriculumClient, enrichedBrief, {",
+  'withLeaseHeartbeat(`research for ${mod.id}`, async () => runResearch(researchClient, brief, mod, {',
+  'withLeaseHeartbeat(`lesson writing for ${key}`, () => runTopic(lessonClient, brief, mod, topic, bundle, tone, {'
 ];
 for (const snippet of wrappers) {
   assert.ok(runBody.includes(snippet), `long runner work should be heartbeat-wrapped: ${snippet}`);

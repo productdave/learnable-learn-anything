@@ -20,7 +20,7 @@ const settle = (n, amount = 10, extra = {}) => `select public.settle_learnable_a
   '${rid(n)}',${amount},'${extra.generation || 'gen-local-' + n}','{"input_tokens":1}'::jsonb)`;
 const result = sql => JSON.parse(query(sql));
 function reset({ budgetIds = ids, expiredPolicy = false } = {}) {
-  query(`truncate public.learnable_ai_requests,public.learnable_ai_budgets,public.generation_jobs;
+  query(`truncate public.learnable_ai_admissions,public.learnable_ai_pilots,public.learnable_ai_requests,public.learnable_ai_budgets,public.generation_jobs;
     insert into public.learnable_ai_budgets(id,owner_id,job_id,cap_microusd,max_calls,expires_at,enabled) values
     ('${ids[0]}',null,null,100,10,now()+interval '1 hour',true),
     ('${ids[1]}','${owner}',null,100,10,now()+interval '1 hour',true),
@@ -33,7 +33,7 @@ execFileSync('docker', command('postgres', `create database ${db}`), { stdio: 'p
 try {
   query(`create table public.generation_jobs(id text primary key,owner_id uuid,run_id text,status text,lease_expires_at timestamptz);
     insert into public.generation_jobs values('${job}','${owner}','${lease}','running',now()+interval '1 hour');`);
-  query(readFileSync(new URL('../db/25-platform-ai-spend.sql', import.meta.url), 'utf8'));
+  for(const name of ['27-platform-ai-spend','28-openrouter-pilot-admission','29-owner-funded-generation']) query(readFileSync(new URL('../db/'+name+'.sql', import.meta.url), 'utf8'));
   check('migration creates no grants', () => assert.equal(query('select count(*) from public.learnable_ai_budgets'), '0'));
   check('no policy/grants cannot reserve', () => assert.equal(result(reserve(1)).ok, false));
   for (const role of ['anon', 'authenticated']) check(`${role} cannot read budgets or invoke reserve`, () => {

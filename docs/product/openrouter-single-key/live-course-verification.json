@@ -1,0 +1,91 @@
+{
+  "at": "2026-10-13T23:42:43.356Z",
+  "status": "staging-integration-passed-content-quality-gate-open",
+  "stagingUrl": "https://learnable-staging.vercel.app",
+  "workspaceUrl": "https://learnable-staging.vercel.app/?workspace=job-setup-98421fa8c3344168973f5e4872c31f20a34e6ae266a5873c",
+  "deploymentId": "dpl_2Fv5qsGPcvxhu1Qac1wjRQoKSVcy",
+  "branch": "codex/openrouter-single-key",
+  "productionWritesByThisRun": 0,
+  "artifact": "output/staging/2026-10-13-openrouter-image-repair/release-2yNIvR",
+  "reportSha256": "b961b167613da862ebd75143a6dceb8b0cda5f1fd7b600a307330a876832415c",
+  "package": {
+    "files": 4964,
+    "functions": 8,
+    "imports": 218,
+    "directProviderGuards": 7,
+    "actualPackageCases": 59,
+    "temporaryDiagnosticRemoved": true
+  },
+  "sourceTests": {
+    "command": "npm run test:openrouter",
+    "passed": 177,
+    "failed": 0,
+    "additionalUiAssertions": 127
+  },
+  "course": {
+    "id": "clearer-phone-photos-window-light",
+    "payloadSha256": "0c0aa54cff75ab8cdf3802516a27369bdf312f87b55b109e56f669fa768d8298",
+    "lessons": 4,
+    "images": 4,
+    "quizzes": 14,
+    "checklists": 4,
+    "flashcards": 24,
+    "checks": {
+      "allFourLessonsValid": true,
+      "selectedMaterialsPreserved": true,
+      "designComplete": true,
+      "generatedAssetsHaveReceiptsAndStoredBytes": true,
+      "allRequestsSettled": true
+    }
+  },
+  "browser": {
+    "reopenedAfterReload": true,
+    "allFourImagesLoadedAt1024Square": true,
+    "flashcardReviewCount": 24,
+    "managedAccountReadyWithoutPersonalKeys": true,
+    "adminEntryPreserved": true,
+    "noFurtherDispatchOnReopen": true,
+    "screenshots": [
+      "output/qa/openrouter-staging-complete-20261013.png",
+      "output/qa/openrouter-staging-account-20261013.png",
+      "output/qa/openrouter-lighting-quality-issue-20261013.png"
+    ]
+  },
+  "qaCost": {
+    "logicalRun": "openrouter-staging-20261011",
+    "capUsd": 5,
+    "dispatches": 31,
+    "maxDispatches": 40,
+    "textUsd": 0.926872,
+    "searchUsd": 0.02,
+    "imagesUsd": 0.07,
+    "totalUsd": 1.016872,
+    "unknownHolds": 0,
+    "allRetriesIncluded": true,
+    "imageCharges": 5,
+    "savedImages": 4,
+    "reconciledLostImageUsd": 0.014,
+    "unfunded402Usd": 0,
+    "remainingUsd": 3.983128,
+    "expiresAt": "2026-10-14T01:10:14.222Z",
+    "autoTopUp": false,
+    "cumulativeRecordedUsd": 22.66571,
+    "cumulativeBasis": "Latest separate production-run snapshot excluding this run: 21.648838; adds this run 1.016872. Supersedes stale 19.259934 baseline.",
+    "unpricedHistoricalCharges": [
+      "one archived text charge",
+      "one production image with unknown outcome"
+    ]
+  },
+  "openGates": [
+    "Lighting lesson and visual confuse apparent shadow position in the frame with physical movement of a fixed shadow; first illustration has garbled labels and fails instructional quality. Do not publish this QA fixture or approve FLUX for labelled diagrams.",
+    "No broad mixed-model quality/latency comparison completed; one synthetic four-lesson course only.",
+    "No production promotion or customer credit sales.",
+    "Existing allowance expires at 18:10 Pacific on 13 October; do not renew automatically. Remaining headroom is below the full conservative research reservation for another course.",
+    "Exact preservation of the earlier activation user_state row is unproven because its full pre-upload payload was not retained. Later repair baselines passed full row digests."
+  ],
+  "privateEvidence": [
+    "output/staging/2026-10-13-openrouter-activation/course-verified.json",
+    "output/staging/2026-10-13-openrouter-activation/reconcile-image-verified.json",
+    "output/staging/2026-10-13-openrouter-image-repair/verified.json"
+  ]
+}

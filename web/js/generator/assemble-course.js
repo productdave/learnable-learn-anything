@@ -23,7 +23,7 @@ export function assembleCourse(brief, topicResults, opts = {}) {
     let authoredIndex = 0, resolvedAuthoredIndex = 0, visual = r.content.visual;
     for (const section of r.content.sections || []) {
       const resolved = resolveImageSection(section, pdfThumbs);
-      const generated = section.type === 'image' && section.generated_by === 'openai';
+      const generated = section.type === 'image' && ['openai', 'openrouter'].includes(section.generated_by);
       // A source image may disappear when its PDF page cannot be resolved.
       // Keep the planned illustration anchored to its original concept, not
       // the next section that happens to occupy its former numeric position.
@@ -51,7 +51,7 @@ function resolveImageSection(section, pdfThumbs) {
   if (!section || section.type !== 'image') return section;
   // Generated private assets use a stable, authenticated identity, never an
   // expiring URL. Preserve accepted draft assets when assembling a preview.
-  if (section.asset_id && section.generated_by === 'openai' && section.image_slot === 'instruction') return section;
+  if (section.asset_id && ['openai', 'openrouter'].includes(section.generated_by) && section.image_slot === 'instruction') return section;
   // Already-resolved (assemble re-run scenario): pass through.
   if (section.src && !section.ref_kind) return section;
   // Web ref — copy url verbatim into src.

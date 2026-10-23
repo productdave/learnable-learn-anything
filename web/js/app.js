@@ -1,7 +1,7 @@
 import { store } from './store.js?v=5';
 import { loadCourse, loadModule, loadLibrary, getCourseConfig, getCurriculum, getCurrentCourseId, invalidateCourseCache } from './course-loader.js?v=8';
 import { renderSidebar } from './components/sidebar.js?v=6';
-import { renderTopicView, refreshLearningControls } from './components/topic-view.js?v=45';
+import { renderTopicView, refreshLearningControls } from './components/topic-view.js?v=46';
 import { renderLearningStatus } from './components/learning-status.js?v=7';
 import { initSearch } from './search.js?v=7';
 import { initFlashcards } from './flashcards.js?v=29';
@@ -19,7 +19,7 @@ import { createHomeController,homeAuthorHTML } from './home.js?v=29';
 import { createCommunityCatalog } from './community-catalog.js?v=1';
 import { mountModeration,REPORTS_URL } from './moderation.js?v=3';
 import { createModerationClient } from './moderation-client.js?v=3';
-import { createSetupController } from './course-setup.js?v=25';
+import { createSetupController } from './course-setup.js?v=26';
 import { HOME_URL, homeURL, workspaceExperience } from './home-model.js?v=7';
 import { openCourseEditor } from './course-editor.js?v=7';
 import { openCourseImages } from './course-images.js?v=5';
@@ -27,7 +27,7 @@ import { openPublicCoursePreview } from './public-course-preview.js?v=7';
 import { openCourseReport,openCoursePublishing } from './course-publishing.js?v=6';
 import { createPublicationStatusClient } from './publication-status-client.js?v=4';
 import * as appConfig from './config.js?v=1';
-import { disposePrivateCourseImages } from './private-course-images.js?v=5';
+import { disposePrivateCourseImages } from './private-course-images.js?v=6';
 import { disposeSharedCourseImages } from './shared-course-images.js?v=3';
 
 let cloudGenerationRefresh = null;

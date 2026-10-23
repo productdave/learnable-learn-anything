@@ -12,6 +12,7 @@ import { canAutoRecover, timeoutPatch, autoRecoveryFailurePatch } from '../web/a
 import { bindGenerationClient, GENERATION_IO_UNCERTAIN } from '../web/api/_lib/gen-request-budget.mjs';
 import { setImmediate as tick } from 'node:timers/promises';
 import { markExpiredLiveJobsTimedOut, watchdogResponse } from '../web/api/gen/watchdog.js';
+import * as watchdog from '../web/api/gen/watchdog.js';
 import { createClient } from '@supabase/supabase-js';
 import { needsApiKeyForRow } from '../web/js/cloud-gen-client.js';
 import { jobPresentation } from '../web/js/home-model.js';
@@ -334,6 +335,71 @@ test('the daily sweep can recover an unclaimed handoff but cannot revive a crash
   const f = fixture([pending, crashed]); const res = await f.call({ method: 'GET', headers: { authorization: `Bearer ${SECRET}` } });
   assert.equal(res.code, 200); assert.deepEqual(f.runs.map(run => run.jobId), [pending.id]);
   assert.equal(crashed.status, 'failed'); assert.match(crashed.error, /uncertain/);
+});
+
+test('the browser watchdog recovers a lost pending handoff before calling it a timeout', async () => {
+  const pending = row({ lease_expires_at: '2000-01-01T00:00:00Z' });
+  const f = fixture([pending]); let deliveries = 0;
+  const options = { admin: () => f.client, authenticate: async () => ({ user: { id: OWNER } }),
+    fetchImpl: async (_url, request) => {
+      deliveries++;
+      const res = await f.call({ body: JSON.parse(request.body), headers: request.headers });
+      return { ok: true, json: async () => res.body };
+    } };
+  // The old endpoint's recovery path only expired the job. Keep that real path
+  // as the red replay, rather than making a missing export the failure reason.
+  const handler = watchdog.createWatchdogHandler?.(options) || (async (_req, res) =>
+    res.status(200).json(watchdogResponse(await markExpiredLiveJobsTimedOut(f.client, { ownerId: OWNER }))));
+  const res = response(); await handler({ method: 'POST', headers: {} }, res);
+  assert.equal(res.code, 200); assert.equal(deliveries, 1); assert.equal(f.runs.length, 1);
+  assert.equal(pending.status, 'running'); assert.deepEqual(res.body.timedOut, []);
+  assert.deepEqual(f.runs[0].checkpoint.topics_by_key, pending.topics_by_key);
+});
+
+test('watchdog delivery is owner-scoped and skips fresh, uncertain, held and manually stopped work', async () => {
+  const base = row(), jobs = [base,
+    row({ id: 'another-owner', owner_id: '99999999-9999-4999-8999-999999999999' }),
+    row({ id: 'fresh', updated_at: new Date().toISOString() }),
+    ...['running', 'failed', 'timed_out', 'cancelling', 'cancelled', 'completed', 'review_research'].map(status => row({ id: status, status })),
+    row({ id: 'unknown', continuation: { ...base.continuation, phase: 'running' } }),
+    row({ id: 'held', continuation: { ...base.continuation, phase: 'held' } }),
+    row({ id: 'stale-run', continuation: { ...base.continuation, runId: '99999999-9999-4999-8999-999999999999' } })];
+  // Put invalid candidates after the real row. Query-level limit remains bounded.
+  const f = fixture(jobs), sent = [];
+  await watchdog.retryPendingHandoffs(f.client, { ownerId: OWNER, fetchImpl: async (_url, req) => {
+    sent.push(JSON.parse(req.body)); assert.equal(req.redirect, 'error'); assert.ok(req.signal instanceof AbortSignal);
+    return { ok: true, json: async () => ({ ok: true, accepted: false }) };
+  } });
+  assert.deepEqual(sent.map(s => s.jobId), [base.id]); assert.equal(f.runs.length, 0);
+  const select = f.calls.find(c => c.table === 'generation_jobs');
+  assert.ok(select.filters.some(([k, v]) => k === 'owner_id' && v === OWNER));
+});
+
+test('watchdog lost ACK cannot overwrite or replay the child that already claimed', async () => {
+  const job = row({ lease_expires_at: '2000-01-01T00:00:00Z' }), f = fixture([job]); let sent = 0;
+  const handler = watchdog.createWatchdogHandler({ admin: () => f.client, authenticate: async () => ({ user: { id: OWNER } }),
+    fetchImpl: async (_url, req) => { sent++; await f.call({ body: JSON.parse(req.body), headers: req.headers }); throw Error('lost ack'); } });
+  for (let i = 0; i < 2; i++) { const res = response(); await handler({ method: 'POST', headers: {} }, res); assert.deepEqual(res.body.timedOut, []); }
+  assert.equal(sent, 1); assert.equal(f.runs.length, 1); assert.equal(job.status, 'running');
+});
+
+test('watchdog disabled configuration and unauthenticated requests cannot start generation', async () => {
+  const f = fixture();
+  assert.deepEqual(await watchdog.retryPendingHandoffs(f.client, { config: null }), []);
+  assert.equal(f.calls.length, 0);
+  const handler = watchdog.createWatchdogHandler({ admin: () => { throw Error('must not read'); },
+    authenticate: async () => { throw Object.assign(Error('Sign in'), { statusCode: 401 }); } });
+  const res = response(); await handler({ method: 'POST', headers: {} }, res);
+  assert.equal(res.code, 401); assert.equal(f.runs.length, 0);
+});
+
+test('watchdog HTTP failure retains checkpoint and at most three deliveries are attempted', async () => {
+  const f = fixture(Array.from({ length: 5 }, (_, i) => row({ id: 'pending-' + i }))); let sent = 0;
+  const before = structuredClone(f.tables.generation_jobs);
+  assert.deepEqual(await watchdog.retryPendingHandoffs(f.client, { ownerId: OWNER, fetchImpl: async () => {
+    sent++; return { ok: false, status: 508 };
+  } }), []);
+  assert.equal(sent, 3); assert.deepEqual(f.tables.generation_jobs, before);
 });
 
 test('runner errors during automatic continuation remain failures, not automatic retry candidates', async () => {

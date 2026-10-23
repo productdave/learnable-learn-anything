@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-23T02:02:05.316Z",
+  "sourceCommit": "acd31c94dd1841ffaf93b4ecad94a69e4a374a6f",
+  "branch": "codex/openrouter-single-key",
+  "pullRequest": "https://github.com/productdave/learnable-learn-anything/pull/6",
+  "scope": "OpenRouter implementation and release-status documentation; the combined production artifact also includes separately prepared course and recovery work.",
+  "staging": {
+    "url": "https://learnable-staging.vercel.app",
+    "observedDeploymentId": "dpl_4w1kCtz27UVubWGZZGHgFYeELwWY",
+    "observation": "Alias metadata only; no new paid generation or hosted acceptance run in this checkpoint.",
+    "ownerFundingAcceptance": "owner-funded-verification.json",
+    "imageLoadingAcceptance": "image-loading-verification.json",
+    "originalCourseAcceptance": "live-course-verification.json"
+  },
+  "production": {
+    "url": "https://learnable-tau.vercel.app",
+    "observedDeploymentId": "dpl_5Fp76kQKdVCvP7WcbRKi5VYfvNLg",
+    "publicMetaCourse": "Already published separately; the existing course release remains canonical.",
+    "openRouterStatus": "prepared-not-deployed",
+    "keyMetadataPresent": false,
+    "candidateUploaded": false,
+    "candidateOwnerReadinessVerified": false,
+    "providerCredentialAcceptanceVerified": false,
+    "paidGenerationTestRun": false,
+    "preparedArtifact": {
+      "pathInPrimaryCheckout": "output/production/2026-10-22-openrouter-after-course/release-AUk0Eh",
+      "reportSha256": "b712a6d3d835fec42cc3d288407bc81a87b63131f3dc05c521139f7bf8c5bcc2",
+      "files": 4461,
+      "functions": 8,
+      "currentPublicCourseBytesPreserved": true,
+      "isBuildOfThisBranchAlone": false
+    },
+    "remainingGates": [
+      "Save a sensitive OPENROUTER_API_KEY in Vercel project learnable, Production environment.",
+      "Capture the guarded final baseline and upload the exact prepared candidate without moving the canonical domain.",
+      "Verify the uploaded artifact and actual candidate course/access behavior.",
+      "Verify signed-in owner readiness with unchanged request, admission and budget counts, costs and row digests.",
+      "Promote the verified candidate and verify canonical production."
+    ]
+  },
+  "localEvidenceInPrimaryCheckout": [
+    "output/diagnostics/2026-10-22-openrouter-after-course/prepared.json",
+    "output/diagnostics/2026-10-22-openrouter-after-course/key-metadata-1792720857297.json",
+    "output/diagnostics/2026-10-22-openrouter-after-course/inspection-1792720925337.json",
+    "output/diagnostics/2026-10-22-openrouter-after-course/retry-20261023-0202.json"
+  ],
+  "evidenceLimits": [
+    "This record is a sanitized projection of existing local receipts, not a new deployment or acceptance result.",
+    "Raw operator receipts, account records, credentials and generated deployment artifacts are not included.",
+    "The original photography sample has unresolved teaching and labelled-image quality issues."
+  ],
+  "newProviderCostsUsd": {
+    "text": 0,
+    "search": 0,
+    "images": 0,
+    "retries": 0,
+    "total": 0
+  },
+  "recordedCumulativeQaUsd": 22.665710,
+  "cumulativeExclusions": "Historical unpriced items remain recorded separately in the local QA ledger."
+}

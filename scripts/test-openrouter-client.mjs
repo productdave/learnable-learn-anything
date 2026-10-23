@@ -27,7 +27,7 @@ function fixture({ value = result(), response, reserve, settle, beforeDispatch, 
     fetcher: async (url, request) => { fetches++; events.push('fetch');
       assert.equal(url, 'https://openrouter.ai/api/v1/chat/completions'); assert.equal(request.redirect, 'error');
       const body = JSON.parse(request.body); assert.equal(body.provider.allow_fallbacks, false);
-      assert.deepEqual(body.provider.only, ['Parasail']); assert.equal(body.provider.require_parameters, true);
+      assert.deepEqual(body.provider.only, ['parasail/fp8']); assert.equal(body.provider.require_parameters, true);
       assert.equal(body.response_format.json_schema.name, 'submit_topic');
       assert.equal(body.tool_choice, undefined); assert.equal(body.temperature, undefined);
       if (response) return response(); return new Response(JSON.stringify(value), { status: 200 });

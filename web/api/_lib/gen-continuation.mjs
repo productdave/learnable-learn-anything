@@ -55,7 +55,7 @@ export function continuationProgress(job) {
   // Stable completed identities, not timestamps/messages/token counters. Rewriting
   // the same checkpoint is not new progress and cannot reset the stall limit.
   const keys = object => Object.keys(object || {}).filter(key => object[key]).sort();
-  const completed = { brief: !!job.brief, research: keys(job.research), topics: keys(job.topics_by_key),
+  const completed = { brief: !!job.brief, research: keys(job.research), evidence: Object.entries(job.research_evidence || {}).map(([id,e])=>`${id}/${e.evidence?.requestId || ''}`).sort(), topics: keys(job.topics_by_key),
     sources: [...new Set((job.extracted_urls || []).map(source => source?.requestedUrl || source?.url).filter(Boolean))].sort(),
     course: job.saved_course_id || null,
     design: { reviewed: !!job.design_progress?.reviewed,
@@ -128,7 +128,12 @@ export async function pauseForContinuation({ supabase, jobId, ownerId, runId, re
         headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.secret}`, 'x-learnable-continuation': '1' },
         body: JSON.stringify({ jobId, ownerId, runId })
       });
-      if (!result.ok) throw new Error('Continuation acknowledgement unavailable');
+      if (!result.ok) {
+        // Status only, never credentials/response bodies. Distinguish hosting
+        // handoff failures from an AI/provider timeout in later diagnostics.
+        console.warn(`[gen ${jobId}] continuation delivery HTTP ${result.status}; checkpoint retained`);
+        throw new Error('Continuation acknowledgement unavailable');
+      }
       const ack = await result.json();
       if (ack?.ok !== true || typeof ack.accepted !== 'boolean') throw new Error('Invalid continuation acknowledgement');
     }, { phase: 'finish', timeoutMs: CONTINUATION_DELIVERY_MS });

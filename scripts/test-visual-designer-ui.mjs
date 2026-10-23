@@ -20,7 +20,7 @@ const now = Date.parse('2026-10-02T12:00:00Z');
 class Clock extends Date { static now() { return now; } }
 const { document, window } = parseHTML('<html><body><main></main></body></html>');
 const calls = [], jobs = new Map(), timers = new Set();
-const ui = vm.createContext({ document, window, Date: Clock, navigator: { onLine: true }, console,
+const ui = vm.createContext({ config: { MANAGED_COURSE_GENERATION: false }, document, window, Date: Clock, navigator: { onLine: true }, console,
   COURSE_AGENT_SEQUENCE, agentNameForStage, agentMessage, briefTitle,
   getJob: id => jobs.get(id), getUser: () => ({ id: 'owner' }), onUserChange() {}, onJobsChange() {},
   hasSavedRequestRestartIntent: () => false, cloudGenAvailable: () => true,

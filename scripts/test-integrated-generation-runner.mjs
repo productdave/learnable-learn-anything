@@ -40,13 +40,14 @@ function fixture(decisions = ['generate', 'omit', 'generate'], { visualDesigner 
     user_brief: { goal: 'Photography', components: brief.components, materials_policy: brief.materials_policy,
       ...(visualDesigner ? { visual_designer_policy: brief.visual_designer_policy } : {}) },
     research: { foundations: bundle }, topics_by_key: {}, failures: [], topics_done: 0, topics_total: 3 };
-  const state = { row, courses: new Map(), receipts: new Map(), objects: new Map(), events: [], textCalls: [], designCalls: [], imageCalls: [],
+  const state = { row, courses: new Map(), receipts: new Map(), objects: new Map(), events: [], traces: [], textCalls: [], designCalls: [], imageCalls: [],
     imageFailure: null, designFailure: null, designUncertain: false, designCommits: 0,
     commits: 0, deletes: 0, cleanup: 0, lostFinalAck: false, afterTextDispatch: null };
   let tick = Date.now();
   const timestamp = () => new Date(++tick).toISOString();
   const supabase = {
     from(table) {
+      if (table === 'generation_events') return { upsert(rows) { state.traces.push(...clone(rows)); return Promise.resolve({ error: null }); } };
       assert.ok(['generation_jobs', 'user_courses'].includes(table), 'Unexpected table: ' + table);
       const filters = []; let fields = null;
       const finish = async () => {
@@ -326,6 +327,24 @@ test('missing lesson in a saved draft cannot be silently reported as a complete 
   });
 });
 
+test('enabled diagnostics persist the same usage call IDs as the actual runner ledger without changing generation', async () => {
+  const previous = process.env.LEARNABLE_GENERATION_LOGS, info = console.info;
+  process.env.LEARNABLE_GENERATION_LOGS = '1'; console.info = (...args) => { if (args[0] !== 'GENERATION_EVENT') info(...args); };
+  try {
+    const f = fixture(undefined, { visualDesigner: true });
+    await usingFixture(f, async run => { await run(f.args()); });
+    assert.equal(f.state.row.status, 'completed');
+    assert.equal(f.state.traces[0].event, 'run.started');
+    assert.equal(f.state.traces.at(-1).event, 'run.stopped');
+    const calls = f.state.courses.get(f.state.row.saved_course_id).payload._tokenUsage.calls;
+    const events = f.state.traces.filter(e => e.event === 'provider.response');
+    assert.equal(events.length, calls.length);
+    assert.deepEqual(new Set(events.map(e => e.details.usage.callId)), new Set(calls.map(c => c.callId)));
+    assert.ok(events.some(e => e.details.usage.task === 'visual_refinement'));
+    assert.doesNotMatch(JSON.stringify(f.state.traces), /apiKey|sourceFiles|human_feedback|Explain light direction/);
+  } finally { console.info = info; if (previous === undefined) delete process.env.LEARNABLE_GENERATION_LOGS; else process.env.LEARNABLE_GENERATION_LOGS = previous; }
+});
+
 test('new-cohort real runner reviews the whole saved draft, saves every refinement, then generates images', async () => {
   const f = fixture(undefined, { visualDesigner: true });
   await usingFixture(f, async run => { await run(f.args()); });
@@ -435,4 +454,31 @@ for (const scenario of [
     assert.equal(s.commits, counters.commits); assert.equal(s.designCommits, counters.designCommits);
     assert.equal(s.deletes, 0); assert.equal(s.cleanup, 0); assert.equal(s.row.status, 'failed');
   });
+});
+
+for(const correction of [false,true])test('actual OpenRouter runner completes one-key lessons, Designer and images; correction='+correction, async()=>{
+ const {createOpenRouterPolicy}=await import('../web/api/_lib/openrouter-policy.mjs');
+ const now=Date.now(),policy=createOpenRouterPolicy({version:'openrouter-native-v2',reviewedAt:new Date(now).toISOString(),validUntil:new Date(now+3600000).toISOString(),now});
+ const f=fixture(['generate','omit','generate'],{visualDesigner:true}),savedEnv={...process.env};
+ Object.assign(process.env,{LEARNABLE_OPENROUTER_ENABLED:'1',OPENROUTER_API_KEY:'synthetic-one-key'});
+ Object.assign(f.state.row,{ai_policy:policy,ai_budget_ids:[randomUUID(),randomUUID(),randomUUID()]});
+ const db=f.args().supabase,originalRpc=db.rpc.bind(db),reservations=[],settlements=[],gateway=[];
+ db.rpc=async(name,args)=>{if(name==='reserve_learnable_ai_spend'){reservations.push(args);return {data:{ok:true}};}if(name==='settle_learnable_ai_spend'){settlements.push(args);return {data:{ok:true}};}if(name==='halt_learnable_ai_spend')assert.fail('No ambiguous provider receipt expected');return originalRpc(name,args);};
+ const text=f.fetcher;let corrected=false;
+ f.fetcher=async(url,options)=>{
+  assert.equal(new URL(url).origin,'https://openrouter.ai','Only the single gateway may be contacted');assert.equal(options.headers.authorization,'Bearer synthetic-one-key');
+  if(options.method==='GET')return Response.json({data:{id:new URL(url).searchParams.get('id'),model:policy.routes.image.model,provider_name:policy.routes.image.provider,total_cost:.014,is_byok:false}});
+  const body=JSON.parse(options.body);gateway.push(body);const id='gen-full-'+gateway.length;
+  if(url.endsWith('/images')){assert.equal(f.state.row.stage,'images');assert.equal(f.state.courses.get(f.state.row.saved_course_id).payload._visualDesign.status,'complete');f.state.imageCalls.push(body.prompt);return Response.json({created:1,data:syntheticImageResponse().data,usage:{cost:.014,prompt_tokens:0,completion_tokens:0,total_tokens:0}},{headers:{'x-generation-id':id}});}
+  assert(url.endsWith('/chat/completions'));const tool=body.response_format.json_schema.name;
+  const original=await text('https://api.anthropic.com/v1/messages',{body:JSON.stringify({model:body.model,tool_choice:{type:'tool',name:tool},messages:body.messages.slice(1)})});const value=await original.json();
+  if(correction&&!corrected&&tool==='submit_course_visual_review'){value.content[0].input.lessons=[];corrected=true;}
+  return Response.json({id,model:body.model,provider:body.model.startsWith('anthropic/')?'Anthropic':'Parasail',usage:{prompt_tokens:120,completion_tokens:40,cost:.001},choices:[{finish_reason:'stop',message:{content:JSON.stringify(value.content[0].input)}}]});
+ };
+ try{await usingFixture(f,async run=>{await run(f.args());const count=gateway.length;f.resume();f.state.row.stage='images';await run(f.args());assert.equal(gateway.length,count,'completed checkpoints must not repeat paid work');});
+  assert.equal(f.state.row.status,'completed');assert.equal(f.state.imageCalls.length,2);assert.equal(gateway.length,correction?10:9);assert.equal(reservations.length,gateway.length);assert.equal(settlements.length,gateway.length);
+  assert.equal(gateway.filter(b=>b.model===policy.routes.lesson.model).length,3);assert.equal(gateway.filter(b=>b.model===policy.routes.visual_review.model).length,correction?5:4);
+  const course=f.state.courses.get(f.state.row.saved_course_id).payload;assert.equal(course._visualDesign.status,'complete');assert.equal(f.state.objects.size,2);
+  for(const id of ['lesson-1','lesson-3']){const image=course.modules[1][id].sections.find(s=>s.type==='image');assert.equal(image.generated_by,'openrouter');assert(f.state.objects.has(image.asset_id));}
+ }finally{for(const k of Object.keys(process.env))if(!(k in savedEnv))delete process.env[k];Object.assign(process.env,savedEnv);}
 });

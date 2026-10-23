@@ -1,9 +1,29 @@
 # OpenRouter implementation status
 
+## 11 October — return to one-key provider integration
+
+David has moved API consolidation ahead of further learner-credit work.
+`codex/openrouter-single-key` now connects the saved OpenRouter policy to the
+actual curriculum/lesson runner and the review, Resume, restart, sweep and
+continuation entry points. The server key is resolved from `OPENROUTER_API_KEY`;
+platform jobs never read an owner’s Claude key. New starts, research/PDF and
+illustration work remain explicitly gated pending their acceptance.
+
+32 new offline checks pass, including the actual runner saving an outline for
+human review and three lessons using synthetic gateway receipts. The existing
+provider/runner/deadline/continuation regression suite and 14 supporting scripts
+also pass. See [this slice’s evidence and remaining gates](product/openrouter-single-key/README.md).
+
+Credit F-01 is preserved on `codex/openrouter-credits` in draft PR #5. Customer
+credit quotes, debits, bundles and payments are deferred. Internal provider-dollar
+reservations remain required; no hosted activation or paid acceptance is implied.
+
+## Historical foundation — 9 October
+
 The first implementation slice adds a server adapter, fixed task routes, a durable
-spending ledger and tests against the actual curriculum and lesson stages. It is
-development infrastructure: the hosted job runner still uses the existing creator
-connections. No setting in this slice switches a hosted job to OpenRouter.
+spending ledger and tests against the actual curriculum and lesson stages. That
+foundation was development infrastructure. The 11 October routing slice above now connects the adapter to the actual runner for approved saved jobs;
+public new-job activation is still gated.
 
 Work is isolated on `codex/openrouter-generation`. The branch includes the deployed
 Designer rationale repair as a separate baseline commit, so later packaging does
@@ -80,54 +100,24 @@ database. It does not prove a full migration replay or hosted acceptance.
 
 ## Next implementation work
 
-The [product delivery plan](product/openrouter-delivery/index.html) now governs
-the sequence. It includes the PRD, experience and credit rules, 38 initial edge
-cases, app-wide impact and per-feature QA. The adjacent
-[interactive prototype](product/openrouter-delivery/prototype.html) is a state
-explorer with synthetic data and no provider calls. Open either HTML file locally,
-or serve that directory. Rebuild the plan with
-`python3 docs/product/openrouter-delivery/render.py`.
+1. OR-03: preserve native PDF content and cited, bounded search through OpenRouter.
+2. OR-04: compare the candidate open-weight lesson route against the frontier baseline, including selected tools, factual accuracy, source fidelity and cost of corrections.
+3. OR-05: use the same key for illustrations; prove pricing bounds, gateway receipts, raster output, durable storage and uncertain-outcome recovery. Preserve existing OpenAI assets.
+4. Finish operator admission for new jobs and renewal after a long review. Reconcile newer runtime changes and migration numbering, then use a fresh staging package for one small complete course.
+5. Resume the funded learner experience and credit features after single-key course creation works. Keep the existing product definition and design; revise sequencing rather than rebuilding them.
 
-1. F-01: funded access and account status, with default-off eligibility, distinct
-   available/held/used credits and owner isolation. No paid dispatch.
-2. F-02: revision-bound quotes, explicit consent and atomic credit holds. The
-   customer credit ledger is separate from the existing provider-dollar ledger.
-   Separate immutable job funding from append-only authorization renewals, so a
-   multi-day human review can resume without rewriting an expired policy.
-3. F-03: funded outline and review. Complete the OR-02 resolver across
-   `/api/setups/generate`, `/api/gen/start`, review, resume, restart,
-   credentials-ready, sweep/continuation and image recovery before enabling paid
-   dispatch. Preserve legacy job funding and run actual endpoint tests.
-4. F-04: cited research and the second review. Verify native PDF/search/schema
-   compatibility and all request costs under OR-03 before accepting the route.
-5. F-05: mixed-model lesson generation and selected learning tools. Run the OR-04
-   paired quality/cost evaluation; the cheapest model is not automatically accepted.
-6. F-06: protected Designer refinement and durable useful illustrations, including
-   OR-05 pricing, receipts, storage and uncertain-result recovery.
-7. F-07: complete progress, partial drafts, cancellation and same-job recovery
-   across the app. Safety invariants already apply from F-03.
-8. F-08: learner usage receipts and service-only operator reconciliation.
-9. F-09: integrated pilot acceptance, fresh staging package and release candidate.
-   Release comes later. Optional funded tutor F-10 precedes F-09 only if included.
+The customer credit ledger is separate from provider-dollar spending controls.
+The current routing slice deliberately does not need migration 26 or the Account
+credit UI. No new OpenRouter job can be created through public endpoints yet.
+An operator-seeded job needs migration 25, an immutable policy and three approved
+budget scopes; this phase has not applied those to shared or hosted databases.
 
-Implement, QA, fix and record evidence for one feature before the next. Keep local,
-live and hosted acceptance separate. F-01 is next and not yet implemented. Tutor
-and AI edits are deferred for platform accounts by recommendation; both visible
-key prompts and backend access need an explicit scope guard. Paid bundles and
-prices remain later. OR-01–OR-06 are underlying engineering workstreams, not
-additional scope to count again on top of F-01–F-10.
+The [product delivery plan](product/openrouter-delivery/index.html) now leads with
+this provider-first sequence. Existing credit work and tests remain in
+[draft PR #5](https://github.com/productdave/learnable-learn-anything/pull/5).
+OR-01–OR-06 remain the gateway engineering workstreams in the existing
+[Learnable roadmap](https://app.notion.com/p/3f471b32838481cb8c69fd30cafd18a7).
 
-Reconcile newer reviewed continuation/watchdog and provider-error changes from the
-other workstream before relevant integration or packaging. Do not overwrite the
-dirty checkout or reuse a frozen release artifact for new packaging.
-
-An OpenRouter key alone is not an activation switch. No live model, research,
-image, end-to-end platform funding or hosted acceptance is claimed here. Future
-assistant QA shares one US$5 cap across a logical run, including all parallel
-requests and retries. Real purchases and credit pricing remain separate work.
-
-The canonical tracker is the existing
-[Learnable roadmap](https://app.notion.com/p/3f471b32838481cb8c69fd30cafd18a7),
-with OR-01–OR-06 and F-01–F-10 under platform-funding task AD-08. The
-[funded-creation PRD](https://app.notion.com/p/3f471b32838481e59768fdedcd9a615b)
-records the product contract and links the native feature tasks.
+No live quality, price, research, image or hosted acceptance is claimed. Future
+assistant QA shares one US$5 cap across a whole logical run including text,
+search, images, retries and parallel calls. Production release remains later.

@@ -3,7 +3,7 @@ import { store } from '../store.js?v=5';
 import { getCurriculum, getCourseConfig, getCurrentCourseId, invalidateCourseCache } from '../course-loader.js?v=8';
 import { logEvent } from '../sync.js?v=27';
 import { getUserCourse, saveUserCourse } from '../user-courses.js?v=4';
-import { mountPrivateCourseImages } from '../private-course-images.js?v=5';
+import { mountPrivateCourseImages } from '../private-course-images.js?v=6';
 import { sharedImageHTML,mountSharedCourseImages } from '../shared-course-images.js?v=3';
 
 // Module-level context for the topic currently being rendered — used by
@@ -54,7 +54,18 @@ function escapeAttr(s) {
 
 function renderImageSection(section, index) {
   if (section?.shared_image) return sharedImageHTML(section,section.src);
-  if (section?.asset_id) return `<figure class="topic-image topic-image--private" data-private-image="${escapeAttr(section.asset_id)}"><img alt="${escapeAttr(section.alt)}" hidden><p data-private-image-description>${escapeAttr(section.alt)}</p><p role="status" aria-live="polite">Loading your saved image…</p><button type="button" class="home-button home-button--secondary" hidden>Retry image</button><figcaption>${section.caption ? `${escapeAttr(section.caption)} · ` : ''}AI-generated illustration</figcaption></figure>`;
+  if (section?.asset_id) return `<figure class="topic-image topic-image--private" data-private-image="${escapeAttr(section.asset_id)}" data-image-state="loading">
+    <div class="private-image-frame" aria-busy="true">
+      <img alt="${escapeAttr(section.alt)}" hidden>
+      <div class="private-image-placeholder" data-private-image-placeholder>
+        <span class="private-image-spinner" aria-hidden="true"></span>
+        <p role="status" aria-live="polite">Loading image…</p>
+        <p data-private-image-description>${escapeAttr(section.alt)}</p>
+        <button type="button" class="home-button home-button--secondary" hidden>Retry image</button>
+      </div>
+    </div>
+    <figcaption>${section.caption ? `${escapeAttr(section.caption)} · ` : ''}AI-generated illustration</figcaption>
+  </figure>`;
   const src = section?.src || section?.url;
   if (!section || !src) return '';
   const alt = escapeAttr(section.alt || section.caption || 'Figure');

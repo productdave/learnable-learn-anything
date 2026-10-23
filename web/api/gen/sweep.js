@@ -5,9 +5,10 @@
 // 2. Claims a small batch of timed_out jobs.
 // 3. Resumes each from its latest checkpoint using the same runner as /resume.
 
+import { hasGenerationBinding, readGenerationApiKey } from '../_lib/generation-provider.mjs';
 import { waitUntil } from '@vercel/functions';
 import { randomUUID } from 'node:crypto';
-import { readApiKey, serviceClient } from '../_lib/supabase-server.mjs';
+import { serviceClient } from '../_lib/supabase-server.mjs';
 import { runGeneration as defaultRunGeneration } from '../_lib/gen-runner.mjs';
 import { createGenerationRequestBudget, bindGenerationClient, isGenerationBudgetStop } from '../_lib/gen-request-budget.mjs';
 import { AUTO_RECOVERY_EXHAUSTED_ERROR, autoRecoveryExhaustedPatch, autoRecoveryFailurePatch, canAutoRecover, hasPendingRestartIntent, isImageOnlyRecovery, MAX_AUTO_RECOVERY_ATTEMPTS, recoveryAttemptsFor, recoveryCheckpointForJob, recoveryModeFor, recoveryStageFor, timeoutPatch } from '../_lib/gen-recovery.mjs';
@@ -97,7 +98,7 @@ return async function handler(req, res) {
       requestBudget.assertCanStart();
       const preflight = await preflightRecoveryCredentials(supabase, job, requestBudget);
       if (!preflight.ok) {
-        await holdContinuation(supabase, job, 'credential_unavailable', 'Automatic continuation is waiting for an Anthropic API key. Add one to your account, then resume. Your saved progress is retained.');
+        await holdContinuation(supabase, job, 'credential_unavailable', hasGenerationBinding(job) ? preflight.error : 'Automatic continuation is waiting for an Anthropic API key. Add one to your account, then resume. Your saved progress is retained.');
         return false;
       }
       requestBudget.assertCanStart();
@@ -291,8 +292,9 @@ async function preflightRecoveryCredentials(supabase, job, requestBudget) {
   try {
     // The image primitive resolves the owner's protected OpenAI connection.
     // Completed text does not need an unrelated Anthropic credential again.
-    if (isImageOnlyRecovery(job)) return { ok: true, apiKey: null, ownerEmail: null };
-    const apiKey = await readApiKey(supabase, job.owner_id);
+    const apiKey = await readGenerationApiKey(supabase, job.owner_id, job, {
+      mode: recoveryModeFor(job), checkpoint: recoveryCheckpointForJob(job), skipLegacyKey: isImageOnlyRecovery(job) });
+    if (isImageOnlyRecovery(job)) return { ok: true, apiKey, ownerEmail: null };
     const ownerEmail = await requestBudget.runOperation(() => getOwnerEmail(supabase, job.owner_id), { timeoutMs: 10_000 });
     return { ok: true, apiKey, ownerEmail };
   } catch (err) {
@@ -303,7 +305,7 @@ async function preflightRecoveryCredentials(supabase, job, requestBudget) {
 
 export async function markRecoveryWaitingForApiKey(supabase, job, error) {
   const now = new Date().toISOString();
-  const message = hasPendingRestartIntent(job)
+  const message = hasGenerationBinding(job) ? 'OpenRouter recovery is paused. The operator must resolve the saved authorization or capability check; your progress is retained.' : hasPendingRestartIntent(job)
     ? 'Automatic recovery is waiting for an Anthropic API key. Add one, then restart from the saved request.'
     : 'Automatic recovery is waiting for an Anthropic API key. Add one, then resume from the saved checkpoint.';
   let query = supabase

@@ -1,0 +1,161 @@
+{
+  "at": "2026-10-12T04:43:35.630Z",
+  "status": "paused-staging-verified-live-course-pending",
+  "sourceCommit": "42430ae6aad6bedbd212e5c0ac9a63be4f1bbd96",
+  "branch": "codex/openrouter-single-key",
+  "stagingUrl": "https://learnable-staging.vercel.app",
+  "deploymentId": "dpl_6tWED2eWPe1XRP1t2qLCY4SqirCD",
+  "productionDeploymentId": "dpl_3LnG79hjdqd56ToZobDxg8PWFj74",
+  "artifact": "/Users/davidwang/.codex/worktrees/openrouter-generation/Learnable/output/staging/2026-10-11-openrouter/release-Kk1xFu",
+  "reportSha256": "64a13cf8db9b729a96f9c648e87711da9824adb63a16375916e10d91c9edcacd",
+  "hostedMigrations": [
+    {
+      "name": "db/27-platform-ai-spend.sql",
+      "sha256": "139a3c3a70a6ac041ae2d6f9aa828231e059eb07fe006cb872caf51c589a0341"
+    },
+    {
+      "name": "db/28-openrouter-pilot-admission.sql",
+      "sha256": "41f67e94f4c87544fc144d65a07e5f8487aa09234e459fb1d5f5945457fe8b17"
+    }
+  ],
+  "checks": {
+    "localTransactionAssertions": 6,
+    "packageImports": 216,
+    "directProviderGuards": 7,
+    "hostedApiAccessAssertions": [
+      {
+        "name": "authenticated managed connection is paused and discloses no funding policy",
+        "passed": true
+      },
+      {
+        "name": "personal key setup rejected before validation or storage",
+        "passed": true
+      },
+      {
+        "name": "existing owner Admin entry preserved",
+        "passed": true
+      },
+      {
+        "name": "service RPC available; no implicit enrollment",
+        "passed": true
+      },
+      {
+        "name": "anonymous cannot invoke private pilot inspector",
+        "passed": true
+      },
+      {
+        "name": "anonymous cannot read private funding ledger",
+        "passed": true
+      },
+      {
+        "name": "authenticated cannot invoke private pilot inspector",
+        "passed": true
+      },
+      {
+        "name": "authenticated cannot read private funding ledger",
+        "passed": true
+      }
+    ],
+    "exactServedAssets": [
+      "index.html",
+      "js-openrouter-staging-20261011/config.js",
+      "js-openrouter-staging-20261011/workspace-account.js",
+      "js-openrouter-staging-20261011/setup-create.js",
+      "js-openrouter-staging-20261011/setup-components.js",
+      "js-openrouter-staging-20261011/admin.js"
+    ],
+    "healthAndUnauthenticatedRoutes": [
+      {
+        "path": "/api/health/cloud",
+        "status": 200
+      },
+      {
+        "path": "/api/providers/connection",
+        "status": 401
+      },
+      {
+        "path": "/api/admin/generation",
+        "status": 401
+      }
+    ],
+    "temporarySessionRevoked": true,
+    "existingDataPreserved": true,
+    "projectEnvironmentPreserved": true,
+    "browser": {
+      "scope": "Hosted signed-out Home and Account sign-in only; authenticated Account/Create component checks were local with synthetic readiness",
+      "namespace": "js-openrouter-staging-20261011",
+      "desktopScreenshot": "output/playwright/openrouter/hosted-signin-current-20261012.png",
+      "mobileScreenshot": "output/playwright/openrouter/hosted-signin-mobile-20261012.png",
+      "mobileViewport": [
+        390,
+        844
+      ],
+      "horizontalOverflow": false,
+      "consoleErrors": 0
+    }
+  },
+  "closedState": {
+    "live_jobs": 0,
+    "old_text_grants": 0,
+    "old_image_grants": 0,
+    "learnable_ai_budgets": 0,
+    "learnable_ai_requests": 0,
+    "learnable_ai_pilots": 0,
+    "learnable_ai_admissions": 0
+  },
+  "openRouterKeyPresent": false,
+  "unrun": [
+    "Live model compatibility, cost and quality",
+    "Complete hosted course through both reviews, lessons, Designer and images",
+    "Authenticated hosted browser course flow"
+  ],
+  "qa": {
+    "logicalRun": "openrouter-staging-20261011",
+    "textUsd": 0,
+    "searchUsd": 0,
+    "imagesUsd": 0,
+    "retriesUsd": 0,
+    "totalUsd": 0,
+    "wholeRunCapUsd": 5,
+    "cumulativeRecordedUsd": 14.592942,
+    "additionalHistoricalCost": "one archived unpriced text charge"
+  },
+  "evidence": [
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/migration-intent.json",
+      "sha256": "3455e79224c8061bcc4fcc831752c278b9e1371bd619d3a6dc523917a86b8075"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/migration-verified.json",
+      "sha256": "0915cf5ac80fa6998da698d71ef46bedb1f7a7ab733fb8e37aaddddc704b2701"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/prepared.json",
+      "sha256": "190b78e61d618ba77c162c9148bf8a370f7328eb1ff3df71985b673bfd710f9a"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/deployment-intent.json",
+      "sha256": "786527f24faec8be928ae472e4294fe984b5ce819c026ef718a0b449b392284a"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/deployment.json",
+      "sha256": "4a2e64bdd30b5df13bf78361937acbcedae107c1263ab805928c819908728bd5"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/deployment-verified.json",
+      "sha256": "6194d0c1233473d6626865106a1cf505515609dd724c5fad1763b547c8f45d45"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/access-verified.json",
+      "sha256": "d9baa6afcbdee62eea2d333f39b98df147ea3767eee4d1d380f368e6680b0545"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/temporary-session-revoked.json",
+      "sha256": "d5c8a8a92986052251553cca73599faecefe929a202d8accbce761ed460b0d04"
+    },
+    {
+      "path": "output/staging/2026-10-12-openrouter-closed/final-state.json",
+      "sha256": "7787f4d7927c010c23b3ffa3fa0a826da707d3076cb747762e063cbb3447c6bb"
+    }
+  ]
+}

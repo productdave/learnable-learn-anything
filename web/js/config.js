@@ -8,3 +8,6 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_SFcaKyoKzKsW92DHvap8Ng_vycfznUI
 export const CREATION_IMAGES_ENABLED = true;
 export const SELF_PUBLISH_ENABLED = false;
 export const MODERATION_ENABLED = false;
+
+// Display mode only; the server independently authorizes every paid request.
+export const MANAGED_COURSE_GENERATION = false;

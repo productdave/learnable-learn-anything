@@ -183,15 +183,15 @@ assert.deepEqual(
 );
 
 assert.ok(
-  restartEndpoint.indexOf('if (!RECOVERABLE_STATUSES.includes(job.status))') < restartEndpoint.indexOf('apiKey = await readApiKey'),
+  restartEndpoint.indexOf('if (!RECOVERABLE_STATUSES.includes(job.status))') < restartEndpoint.indexOf('apiKey = await readGenerationApiKey'),
   'restart should reject non-recoverable jobs before reading the API key.'
 );
 assert.ok(
-  restartEndpoint.indexOf('userBrief = appendRestartFeedback') < restartEndpoint.indexOf('apiKey = await readApiKey'),
+  restartEndpoint.indexOf('userBrief = appendRestartFeedback') < restartEndpoint.indexOf('apiKey = await readGenerationApiKey'),
   'restart should build the restart intent before reading the API key so missing-key feedback can be saved.'
 );
 assert.ok(
-  restartEndpoint.indexOf('apiKey = await readApiKey') < restartEndpoint.indexOf("status: 'running'"),
+  restartEndpoint.indexOf('apiKey = await readGenerationApiKey') < restartEndpoint.indexOf("status: 'running'"),
   'restart should verify API key availability before claiming a running lease.'
 );
 assert.ok(
